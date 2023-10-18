@@ -4,14 +4,17 @@
 #include <iostream>
 #include <memory>
 #include <vector>
+#include <renderengine/Renderer.h>
 #include "GameObject.h"
 #include "Component.h"
-#include "Renderer.h"
 
 namespace Mimic
 {
 	struct GameObject;
 
+	// #############################################################################
+	// mimic core struct:
+	// #############################################################################
 	struct MimicCore 
 	{
 		explicit MimicCore();

@@ -3,7 +3,7 @@ project(DMTK VERSION 0.1)
 
 
 include_directories(
-    src
+    src/mimic
     SDKs/sdl2/include
     SDKs/glew/include
     SDKs/glm
@@ -16,20 +16,25 @@ link_directories(
     SDKs/assimp/lib/x64
 )
 
-#############################################################################
+################################################################i##############
 # DMTK engine
 #############################################################################
 add_library(mimic
-    src/mimic/Core.cpp
-    src/mimic/Core.h
-    src/mimic/GameObject.cpp
-    src/mimic/GameObject.h
-    src/mimic/Component.cpp
-    src/mimic/Component.h
-    src/mimic/Renderer.cpp
-    src/mimic/Renderer.h
-    src/mimic/VertexShader.txt
-    src/mimic/FragmentShader.txt
+    src/mimic/lowlevelsystems/Core.cpp
+    src/mimic/lowlevelsystems/Core.h
+    src/mimic/lowlevelsystems/GameObject.cpp
+    src/mimic/lowlevelsystems/GameObject.h
+    src/mimic/lowlevelsystems/Component.cpp
+    src/mimic/lowlevelsystems/Component.h
+
+    src/mimic/renderengine/Renderer.cpp
+    src/mimic/renderengine/Renderer.h
+    src/mimic/renderengine/Mesh.cpp
+    src/mimic/renderengine/Mesh.h
+    src/mimic/renderengine/Shader.cpp
+    src/mimic/renderengine/Shader.h
+  #  src/mimic/VertexShader.txt
+  #  src/mimic/FragmentShader.txt
 )
 
 target_link_libraries(mimic

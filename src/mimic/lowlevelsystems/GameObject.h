@@ -13,7 +13,6 @@ namespace Mimic
 		{
 			std::shared_ptr<T> newComponent = std::make_shared<T>();
 			newComponent->GameObject = Self;
-			newComponent->Initialise();
 
 			_components.push_back(newComponent);
 			return newComponent;

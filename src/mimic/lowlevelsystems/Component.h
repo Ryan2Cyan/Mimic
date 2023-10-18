@@ -9,8 +9,6 @@ namespace Mimic
 {
 	struct Component
 	{
-		std::shared_ptr<Component> Initialize() noexcept;
-
 		std::weak_ptr<GameObject> GameObject;
 	};
 }

@@ -1,4 +1,4 @@
-#include <mimic/Core.h>
+#include <lowlevelsystems/Core.h>
 #include <iostream>
 #define SDL_MAIN_HANDLED
 
@@ -13,7 +13,8 @@ int main(int argc, char* argv[])
 		std::shared_ptr<MimicCore> dmtkCore = MimicCore::Initialize();
 		std::shared_ptr<GameObject> newGameObject = dmtkCore->AddEmptyGameObject();
 		std::shared_ptr<Renderer> newRenderer = newGameObject->AddComponent<Renderer>();
-		const aiScene* scene = newRenderer->AssimpModelImport("../src/dmtk/additional-files/models/Mushrooms1_Obj/Mushrooms1.obj");
+		newRenderer->Initialise(Mimic::Triangle);
+		/*const aiScene* scene = newRenderer->AssimpModelImport("../src/dmtk/additional-files/models/Mushrooms1_Obj/Mushrooms1.obj");*/
 
 		// handle human interface devices:
 		while (dmtkCore->ApplicationRunning)
