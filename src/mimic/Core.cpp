@@ -47,12 +47,18 @@ namespace Mimic
 		 return _deltaTime;
 	 }
 
-	std::shared_ptr<Entity> MimicCore::AddEntity()
+	std::shared_ptr<GameObject> MimicCore::AddEmptyGameObject()
 	{
-		std::shared_ptr<Entity> newEntity = std::make_shared<Entity>();
-		newEntity->Self = newEntity;
+		std::shared_ptr<GameObject> emptyGameObject = std::make_shared<GameObject>();
+		emptyGameObject->Self = emptyGameObject;
 
-		Entities.push_back(newEntity);
-		return newEntity;
+		GameObjects.push_back(emptyGameObject);
+		return emptyGameObject;
+	}
+
+	void MimicCore::AddGameObject(std::shared_ptr<GameObject> gameObject)
+	{
+		gameObject->Self = gameObject;
+		GameObjects.push_back(gameObject);
 	}
 }

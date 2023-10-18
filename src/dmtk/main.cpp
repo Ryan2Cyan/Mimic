@@ -11,9 +11,9 @@ int main(int argc, char* argv[])
 		// initialise:
 		std::cout << "Hello Worldddd!" << std::endl;
 		std::shared_ptr<MimicCore> dmtkCore = MimicCore::Initialize();
-		std::shared_ptr<Entity> newEntity = dmtkCore->AddEntity();
-		std::shared_ptr<TriangleRenderer> newTriangleRenderer = newEntity->AddComponent<TriangleRenderer>();
-
+		std::shared_ptr<GameObject> newGameObject = dmtkCore->AddEmptyGameObject();
+		std::shared_ptr<Renderer> newRenderer = newGameObject->AddComponent<Renderer>();
+		const aiScene* scene = newRenderer->AssimpModelImport("../src/dmtk/additional-files/models/Mushrooms1_Obj/Mushrooms1.obj");
 
 		// handle human interface devices:
 		while (dmtkCore->ApplicationRunning)
@@ -39,7 +39,7 @@ int main(int argc, char* argv[])
 			glClear(GL_COLOR_BUFFER_BIT);
 
 			// render triangle:
-			newTriangleRenderer->Render();
+			newRenderer->Render();
 
 			// display to window:
 			SDL_GL_SwapWindow(dmtkCore->Window);

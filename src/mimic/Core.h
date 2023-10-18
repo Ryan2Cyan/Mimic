@@ -4,12 +4,13 @@
 #include <iostream>
 #include <memory>
 #include <vector>
-#include "Entity.h"
+#include "GameObject.h"
 #include "Component.h"
+#include "Renderer.h"
 
 namespace Mimic
 {
-	struct Entity;
+	struct GameObject;
 
 	struct MimicCore 
 	{
@@ -19,9 +20,10 @@ namespace Mimic
 		static std::shared_ptr<MimicCore> Initialize();
 		void Update();
 		float DeltaTime() const noexcept;
-		std::shared_ptr<Entity> AddEntity();
+		std::shared_ptr<GameObject> AddEmptyGameObject();
+		void AddGameObject(std::shared_ptr<GameObject> gameObject);
 
-		std::vector<std::shared_ptr<Entity>> Entities;
+		std::vector<std::shared_ptr<GameObject>> GameObjects;
 		SDL_Window* Window;
 		SDL_Renderer* Renderer;
 		SDL_GLContext GLContext;
