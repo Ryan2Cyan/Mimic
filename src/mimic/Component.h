@@ -22,7 +22,9 @@ namespace Mimic
 		int VertexCount;
 		GLuint PositionsVertexBufferId;
 		GLuint VertexArrayId;
-		GLuint Shader;
+		GLuint ShaderProgramId;
+		GLuint VertexShaderId;
+		GLuint FragmentShaderId;
 		GLuint ProjectionLocation;
 		GLuint ViewLocation;
 		GLuint ModelLocation;
@@ -30,5 +32,9 @@ namespace Mimic
 		void Initialise();
 		void Render();
 		void Display();
+
+	private:
+		const char* ReadShaderFile(const char* const fileName);
+		void CompileShaderText(const char* fileText, const GLenum shaderType, GLuint& shaderId);
 	};
 }

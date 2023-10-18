@@ -15,7 +15,7 @@ namespace Mimic
 			newComponent->Initialise();
 
 			_components.push_back(newComponent);
-			return newEntity;
+			return newComponent;
 		}
 
 		std::weak_ptr<Entity> Self;

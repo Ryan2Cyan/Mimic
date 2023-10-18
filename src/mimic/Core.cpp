@@ -20,7 +20,9 @@ namespace Mimic
 		 GLenum err = glewInit();
 		 if (GLEW_OK != err) std::cerr << "Error: GLEW failed to initialise with message: " << glewGetErrorString(err) << std::endl;
 		
-		 glEnable(GL_DEPTH_TEST);
+		 ApplicationRunning = true;
+		 _deltaTime = 0.0f;
+		 /*glEnable(GL_DEPTH_TEST);*/
 	}
 
 	MimicCore::~MimicCore()
@@ -40,10 +42,10 @@ namespace Mimic
 
 	}
 
-	float MimicCore::DeltaTime() const 
-	{
-		return _deltaTime;
-	}
+	 float MimicCore::DeltaTime() const noexcept
+	 {
+		 return _deltaTime;
+	 }
 
 	std::shared_ptr<Entity> MimicCore::AddEntity()
 	{

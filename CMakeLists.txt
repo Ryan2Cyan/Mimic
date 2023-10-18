@@ -24,6 +24,8 @@ add_library(mimic
     src/mimic/Entity.h
     src/mimic/Component.cpp
     src/mimic/Component.h
+    src/mimic/VertexShader.txt
+    src/mimic/FragmentShader.txt
 )
 
 target_link_libraries(mimic
