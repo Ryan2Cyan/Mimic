@@ -1,4 +1,4 @@
-E:/BU - Year 3/Game Engine/DungeonMastersToolKit/CMakeFiles/DMTKCore.dir
-E:/BU - Year 3/Game Engine/DungeonMastersToolKit/CMakeFiles/DungeonMastersToolKit.dir
-E:/BU - Year 3/Game Engine/DungeonMastersToolKit/CMakeFiles/ALL_BUILD.dir
-E:/BU - Year 3/Game Engine/DungeonMastersToolKit/CMakeFiles/ZERO_CHECK.dir
+H:/Mimic/CMakeFiles/mimic.dir
+H:/Mimic/CMakeFiles/dmtk.dir
+H:/Mimic/CMakeFiles/ALL_BUILD.dir
+H:/Mimic/CMakeFiles/ZERO_CHECK.dir
