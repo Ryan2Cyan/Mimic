@@ -9,6 +9,7 @@
 namespace Mimic
 {
 	struct GameObject;
+	struct Window;
 
 	// #############################################################################
 	// mimic core struct:
@@ -18,16 +19,15 @@ namespace Mimic
 		explicit MimicCore();
 		~MimicCore();
 
-		static std::shared_ptr<MimicCore> Initialize();
+		static std::shared_ptr<MimicCore> Initialise();
 		void Update();
 		float DeltaTime() const noexcept;
 		std::shared_ptr<GameObject> AddEmptyGameObject();
 		void AddGameObject(std::shared_ptr<GameObject> gameObject);
+		void Run() const;
 
 		std::vector<std::shared_ptr<GameObject>> GameObjects;
-		SDL_Window* Window;
-		SDL_Renderer* Renderer;
-		SDL_GLContext GLContext;
+		std::shared_ptr<Window> Window;
 		bool ApplicationRunning;
 
 	private:

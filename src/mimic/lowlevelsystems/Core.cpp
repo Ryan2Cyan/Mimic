@@ -4,35 +4,25 @@ namespace Mimic
 {
 	MimicCore::MimicCore()
 	{
-		 if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) < 0) throw std::runtime_error("Failed to initialize SDL");
-		 SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
-		 SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
-		 SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+		// initialise SDL_Window, SDL_Renderer, & GL_Context:
+		Window = Window->Initialise("DMTK");
 
-		 Window = SDL_CreateWindow("DMTK", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 800, 600, SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL);
-		 SDL_assert(Window != NULL);
-
-		 Renderer = SDL_CreateRenderer(Window, -1, SDL_RENDERER_ACCELERATED);
-		 SDL_assert(Renderer != NULL);
-
-		 GLContext = SDL_GL_CreateContext(Window);
-		 glewExperimental = GL_TRUE;
-		 GLenum err = glewInit();
-		 if (GLEW_OK != err) std::cerr << "Error: GLEW failed to initialise with message: " << glewGetErrorString(err) << std::endl;
+		// init glew:
+		glewExperimental = GL_TRUE;
+		GLenum err = glewInit();
+		if (GLEW_OK != err) std::cerr << "Error: GLEW failed to initialise with message: " << glewGetErrorString(err) << std::endl;
 		
-		 ApplicationRunning = true;
-		 _deltaTime = 0.0f;
-		 /*glEnable(GL_DEPTH_TEST);*/
+		ApplicationRunning = true;
+		_deltaTime = 0.0f;
+		/*glEnable(GL_DEPTH_TEST);*/
 	}
 
 	MimicCore::~MimicCore()
 	{
-		SDL_GL_DeleteContext(GLContext);
-		SDL_DestroyWindow(Window);
-		SDL_Quit();
+		
 	}
 
-	std::shared_ptr<MimicCore> MimicCore::Initialize() 
+	std::shared_ptr<MimicCore> MimicCore::Initialise() 
 	{ 
 		return std::make_shared<MimicCore>(); 
 	}
@@ -47,6 +37,7 @@ namespace Mimic
 		 return _deltaTime;
 	 }
 
+
 	std::shared_ptr<GameObject> MimicCore::AddEmptyGameObject()
 	{
 		std::shared_ptr<GameObject> emptyGameObject = std::make_shared<GameObject>();
@@ -60,5 +51,10 @@ namespace Mimic
 	{
 		gameObject->Self = gameObject;
 		GameObjects.push_back(gameObject);
+	}
+
+	void MimicCore::Run() const
+	{
+		SDL_GL_SwapWindow(Window->_window);
 	}
 }

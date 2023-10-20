@@ -28,6 +28,8 @@ add_library(mimic
     src/mimic/lowlevelsystems/GameObject.h
     src/mimic/lowlevelsystems/Component.cpp
     src/mimic/lowlevelsystems/Component.h
+    src/mimic/lowlevelsystems/Window.cpp
+    src/mimic/lowlevelsystems/Window.h
 
     src/mimic/renderengine/Renderer.cpp
     src/mimic/renderengine/Renderer.h

@@ -11,7 +11,7 @@ int main(int argc, char* argv[])
 	{
 		// initialise:
 		std::cout << "Hello Worldddd!" << std::endl;
-		std::shared_ptr<MimicCore> dmtkCore = MimicCore::Initialize();
+		std::shared_ptr<MimicCore> dmtkCore = MimicCore::Initialise();
 		std::shared_ptr<GameObject> newGameObject = dmtkCore->AddEmptyGameObject();
 		std::shared_ptr<Renderer> newRenderer = newGameObject->AddComponent<Renderer>();
 		newRenderer->Initialise(Mimic::Triangle);
@@ -44,7 +44,7 @@ int main(int argc, char* argv[])
 			newRenderer->Render();
 
 			// display to window:
-			SDL_GL_SwapWindow(dmtkCore->Window);
+			dmtkCore->Run();
 		}
 	}
 	return 0;
