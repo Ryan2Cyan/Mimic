@@ -44,7 +44,8 @@ int main(int argc, char* argv[])
 			newRenderer->Render();
 
 			// display to window:
-			dmtkCore->Run();
+			dmtkCore->Update();
+			std::cout << DeltaTime() << std::endl;
 		}
 	}
 	return 0;

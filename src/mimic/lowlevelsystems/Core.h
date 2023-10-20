@@ -8,8 +8,10 @@
 
 namespace Mimic
 {
+	// forward-declarations:
 	struct GameObject;
 	struct Window;
+	struct Environment;
 
 	// #############################################################################
 	// mimic core struct:
@@ -20,17 +22,14 @@ namespace Mimic
 		~MimicCore();
 
 		static std::shared_ptr<MimicCore> Initialise();
+
 		void Update();
-		float DeltaTime() const noexcept;
 		std::shared_ptr<GameObject> AddEmptyGameObject();
 		void AddGameObject(std::shared_ptr<GameObject> gameObject);
-		void Run() const;
 
 		std::vector<std::shared_ptr<GameObject>> GameObjects;
 		std::shared_ptr<Window> Window;
+		std::shared_ptr<Environment> Environment;
 		bool ApplicationRunning;
-
-	private:
-		float _deltaTime;
 	};
 }
