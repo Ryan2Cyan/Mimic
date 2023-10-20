@@ -1,12 +1,10 @@
 #pragma once
+#include <lowlevelsystems/Mimic.h>
 #include <SDL/SDL.h>
 #include <GL/glew.h>
 #include <iostream>
 #include <memory>
 #include <vector>
-#include <renderengine/Renderer.h>
-#include "GameObject.h"
-#include "Component.h"
 
 namespace Mimic
 {

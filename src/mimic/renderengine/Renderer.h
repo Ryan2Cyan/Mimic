@@ -1,12 +1,10 @@
 #pragma once
+#include <lowlevelsystems/Mimic.h>
 #include <GL/glew.h>
 #include <string>
 #include <assimp/Importer.hpp>      
 #include <assimp/scene.h>           
 #include <assimp/postprocess.h>    
-#include <lowlevelsystems/Component.h>
-#include "Mesh.h"
-#include "Shader.h"
 
 namespace Mimic
 {
@@ -18,6 +16,9 @@ namespace Mimic
 	// #############################################################################
 	// renderer stuct:
 	// #############################################################################
+
+	struct Shader;
+	struct Mesh;
 
 	struct Renderer : Component
 	{

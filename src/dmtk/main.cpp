@@ -1,5 +1,6 @@
-#include <lowlevelsystems/Core.h>
+#include <lowlevelsystems/Mimic.h>
 #include <iostream>
+#include "imgui.h"
 #define SDL_MAIN_HANDLED
 
 using namespace Mimic;
