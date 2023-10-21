@@ -5,7 +5,7 @@
 
 namespace Mimic
 {
-	void Renderer::Initialise(RendererType type)
+	void Renderer::Initialise(const RendererType type)
 	{
 		Type = type;
 
@@ -58,6 +58,6 @@ namespace Mimic
 	void Renderer::Render()
 	{
 		_shader->Activate();
-		_mesh->Draw();
+		_mesh->Draw(_shader);
 	}
 }

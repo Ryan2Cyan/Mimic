@@ -31,7 +31,7 @@ namespace Mimic
 		GLuint FragmentShaderId;
 		std::shared_ptr<int> Number;
 
-		void Initialise(RendererType type);
+		void Initialise(const RendererType type);
 		void Render();
 		/*const aiScene* AssimpModelImport(const std::string& pFile);*/
 

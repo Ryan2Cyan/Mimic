@@ -3,6 +3,7 @@
 #include <fstream>
 #include <cassert>
 #include <iostream>
+#include <memory>
 #include <GL/glew.h>
 
 // Source: https://learnopengl.com/Getting-started/Shaders
@@ -14,10 +15,11 @@ namespace Mimic
 	// #############################################################################
 	struct Shader
 	{
-		explicit Shader(const char* vertexShaderPath, const char* fragmentShaderPath);
+		explicit Shader(const std::string vertexShaderPath, const std::string fragmentShaderPath);
 
 		unsigned int ShaderProgramId;
-	
+		
+		std::shared_ptr<Shader> Initialise(const std::string vertexShaderPath, const std::string fragmentShaderPath) const;
 		void Activate();
 		void SetBool(const char* name, const bool value) const;
 		void SetInt(const char* name, const int value) const;

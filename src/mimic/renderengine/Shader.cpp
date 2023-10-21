@@ -2,11 +2,11 @@
 
 namespace Mimic
 {
-	Shader::Shader(const char* vertexShaderPath, const char* fragmentShaderPath)
+	Shader::Shader(const std::string vertexShaderPath, const std::string fragmentShaderPath)
 	{
 		// read shaders:
-		const char* vertexShaderText = ReadShaderFile("../src/mimic/shaders/VertexShader.txt");
-		const char* fragmentShaderText = ReadShaderFile("../src/mimic/shaders/FragmentShader.txt");
+		const char* vertexShaderText = ReadShaderFile(vertexShaderPath.c_str());
+		const char* fragmentShaderText = ReadShaderFile(fragmentShaderPath.c_str());
 		assert(vertexShaderText != nullptr);
 		assert(fragmentShaderText != nullptr);
 
@@ -36,7 +36,7 @@ namespace Mimic
 
 	const unsigned int Shader::CompileShaderText(const char* const fileText, const unsigned int shaderType)
 	{
-		unsigned int shaderId = glCreateShader(shaderType);
+		const unsigned int shaderId = glCreateShader(shaderType);
 		glShaderSource(shaderId, 1, &fileText, NULL);
 		glCompileShader(shaderId);
 		int success;
@@ -78,6 +78,11 @@ namespace Mimic
 			std::cerr << "WARNING: could not open shader from file: " << fileName << std::endl;
 			return nullptr;
 		}
+	}
+
+	std::shared_ptr<Shader> Shader::Initialise(const std::string vertexShaderPath, const std::string fragmentShaderPath) const
+	{
+		return std::make_shared<Shader>(vertexShaderPath, fragmentShaderPath);
 	}
 
 	void Shader::Activate()

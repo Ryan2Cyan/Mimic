@@ -1,8 +1,10 @@
 #pragma once
 #include <vector>
 #include <string>
+#include <lowlevelsystems/Mimic.h>
 #include <GL/glew.h>
 #include <GLM/glm.hpp>
+#include <memory>
 
 namespace Mimic
 {
@@ -30,17 +32,21 @@ namespace Mimic
 	// #############################################################################
 	// mesh stuct:
 	// #############################################################################
+	struct Shader;
+
 	struct Mesh
 	{
 		explicit Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures);
 
-		std::vector<Vertex> Vertices;
-		std::vector<unsigned int> Indices;
-		std::vector<Texture> Textures;
-
-		void Draw();
+		void Draw(std::shared_ptr<Shader> shader);
 
 	private:
+		friend struct Renderer;
+
+		std::shared_ptr<Shader> _shader;
+		std::vector<Vertex> _vertices;
+		std::vector<unsigned int> _indices;
+		std::vector<Texture> _textures;
 		unsigned int _vertexArrayId;
 		unsigned int _vertexBufferId;
 		unsigned int _elementBufferId;
