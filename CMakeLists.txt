@@ -33,6 +33,8 @@ add_library(mimic
     src/mimic/lowlevelsystems/Environment.cpp
     src/mimic/lowlevelsystems/Environment.h
 
+    src/mimic/renderengine/Model.cpp
+    src/mimic/renderengine/Model.h
     src/mimic/renderengine/Renderer.cpp
     src/mimic/renderengine/Renderer.h
     src/mimic/renderengine/Mesh.cpp

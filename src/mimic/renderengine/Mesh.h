@@ -1,7 +1,7 @@
 #pragma once
+#include <lowlevelsystems/Mimic.h>
 #include <vector>
 #include <string>
-#include <lowlevelsystems/Mimic.h>
 #include <GL/glew.h>
 #include <GLM/glm.hpp>
 #include <memory>
@@ -43,7 +43,6 @@ namespace Mimic
 	private:
 		friend struct Renderer;
 
-		std::shared_ptr<Shader> _shader;
 		std::vector<Vertex> _vertices;
 		std::vector<unsigned int> _indices;
 		std::vector<Texture> _textures;
