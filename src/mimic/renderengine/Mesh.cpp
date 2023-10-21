@@ -10,6 +10,12 @@ namespace Mimic
 
 
 	// #############################################################################
+	// vertex defintions:
+	// #############################################################################
+	Texture::Texture(const unsigned int id, std::string type, std::string path) : Id(id), Type(type), Path(path) {}
+
+
+	// #############################################################################
 	// mesh defintions:
 	// #############################################################################
 	// Source: https://learnopengl.com/Model-Loading/Mesh

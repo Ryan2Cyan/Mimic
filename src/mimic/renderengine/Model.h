@@ -15,7 +15,6 @@ namespace Mimic
 	// #############################################################################
 	struct Shader;
 	struct Texture;
-	struct Mesh;
 
 	struct Model
 	{
@@ -24,12 +23,12 @@ namespace Mimic
 		void Draw(std::shared_ptr<Shader> shader);
 
 	private:
-		std::vector<std::shared_ptr<Mesh>> _meshes;
+		std::vector<Mesh> _meshes;
 		std::string _directory;
 
-		/*void LoadModel(const std::string path);
+		void LoadModel(const std::string path);
 		void ProcessNode(aiNode* node, const aiScene* scene);
 		Mesh ProcessMesh(aiMesh* mesh, const aiScene* scene);
-		std::vector<Texture> LoadMaterialTextures(aiMaterial* material, aiTextureType type, std::string typeName);*/
+		std::vector<Texture> LoadMaterialTextures(aiMaterial* material, aiTextureType type, std::string typeName);
 	};
 }

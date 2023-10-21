@@ -25,8 +25,10 @@ namespace Mimic
 	// #############################################################################
 	struct Texture
 	{
+		explicit Texture(const unsigned int id, std::string type, std::string path);
 		unsigned int Id;
 		std::string Type;
+		std::string Path;
 	};
 
 	// #############################################################################

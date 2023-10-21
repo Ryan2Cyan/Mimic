@@ -11,6 +11,7 @@ include_directories(
     SDKs/glm
     SDKs/assimp/include
     SDKs/imgui/include
+    SDKs/stbi/include
 )
 
 link_directories(
@@ -41,6 +42,8 @@ add_library(mimic
     src/mimic/renderengine/Mesh.h
     src/mimic/renderengine/Shader.cpp
     src/mimic/renderengine/Shader.h
+
+    SDKs/stbi/include/stb_image.h
 )
 
 # Implement static IMGUI:
