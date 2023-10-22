@@ -40,10 +40,10 @@ namespace Mimic
 	{
 		explicit Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures);
 
-		void Draw(std::shared_ptr<Shader> shader);
+		void Draw(Shader& shader);
 
 	private:
-		friend struct Renderer;
+		friend struct ModelRenderer;
 
 		std::vector<Vertex> _vertices;
 		std::vector<unsigned int> _indices;

@@ -13,8 +13,9 @@ int main(int argc, char* argv[])
 		std::cout << "Hello Worldddd!" << std::endl;
 		std::shared_ptr<MimicCore> dmtkCore = MimicCore::Initialise();
 		std::shared_ptr<GameObject> newGameObject = dmtkCore->AddEmptyGameObject();
-		std::shared_ptr<Renderer> newRenderer = newGameObject->AddComponent<Renderer>();
-		newRenderer->Initialise(Mimic::Triangle);
+		std::shared_ptr<ModelRenderer> modelRenderer = newGameObject->AddComponent<ModelRenderer>();
+
+		/*newRenderer->Initialise();*/
 		/*const aiScene* scene = newRenderer->AssimpModelImport("../src/dmtk/additional-files/models/Mushrooms1_Obj/Mushrooms1.obj");*/
 
 		// handle human interface devices:
@@ -41,7 +42,7 @@ int main(int argc, char* argv[])
 			glClear(GL_COLOR_BUFFER_BIT);
 
 			// render triangle:
-			newRenderer->Render();
+			/*newRenderer->Draw();*/
 
 			// display to window:
 			dmtkCore->Update();

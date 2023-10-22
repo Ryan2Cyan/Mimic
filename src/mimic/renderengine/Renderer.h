@@ -1,42 +1,26 @@
 #pragma once
 #include <lowlevelsystems/Mimic.h>
 #include <GL/glew.h>
+#include <memory>
 #include <string>
-#include <assimp/Importer.hpp>      
-#include <assimp/scene.h>           
-#include <assimp/postprocess.h>    
 
 namespace Mimic
-{
-	enum RendererType
-	{
-		Triangle
-	};
-	
+{	
 	// #############################################################################
 	// renderer stuct:
 	// #############################################################################
-
+	struct Model;
 	struct Shader;
-	struct Mesh;
 
-	struct Renderer : Component
+	struct ModelRenderer : Component
 	{
-		RendererType Type;
-		int VertexCount;
-		GLuint PositionsVertexBufferId;
-		GLuint VertexArrayId;
-		GLuint ShaderProgramId;
-		GLuint VertexShaderId;
-		GLuint FragmentShaderId;
-		std::shared_ptr<int> Number;
+		explicit ModelRenderer();
 
-		void Initialise(const RendererType type);
-		void Render();
-		/*const aiScene* AssimpModelImport(const std::string& pFile);*/
+		std::shared_ptr<ModelRenderer> Initialise(const char* modelPath, const std::string vertexShaderPath, const std::string fragmentShaderPath);
+		void Draw();
 
 		private:
 		std::shared_ptr<Shader> _shader;
-		std::shared_ptr<Mesh> _mesh;
+		std::shared_ptr<Model>_model;
 	};
 }
