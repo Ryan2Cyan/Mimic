@@ -15,27 +15,13 @@ int main(int argc, char* argv[])
 	{
 		// initialise:
 		std::cout << "Hello Worldddd!" << std::endl;
+		// core & model renderer are initialised:
 		std::shared_ptr<MimicCore> dmtkCore = MimicCore::Initialise();
 		std::shared_ptr<Camera> dmtkCamera = dmtkCore->AddNewCamera();
 		std::shared_ptr<GameObject> newGameObject = dmtkCore->AddEmptyGameObject();
 		std::shared_ptr<ModelRenderer> modelRenderer = newGameObject->AddComponent<ModelRenderer>();
 
-		/*std::vector <Vertex> triangleVertices {
-			Vertex(glm::vec3(-0.5f, -0.5f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec2(1.0f)),
-			Vertex(glm::vec3(0.5f, -0.5f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec2(1.0f)),
-			Vertex(glm::vec3(0.0f,  0.5f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec2(1.0f))
-		};
-
-		std::vector <unsigned int> triangleIndices {0, 1, 2};
-		std::vector<Texture> triangleTextures{};
-
-		Mesh triangleMesh = Mesh(triangleVertices, triangleIndices, triangleTextures);
-		glm::mat4 triangleModelMatrix = glm::scale(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f)), glm::vec3(1.0f, 1.0f, 1.0f));
-		std::shared_ptr<Shader> triangleShader = std::make_shared<Shader>("../src/mimic/shaders/VertexShader.txt", "../src/mimic/shaders/FragmentShader.txt");
-
-		glm::mat4 viewMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, -10.5f));
-		glm::mat4 projMatrix = glm::perspective(45.0f, 1.0f, 0.1f, 100.0f);*/
-
+		// initialisation goes correctly for the model, vertex, & fragment shaders:
 		modelRenderer->Initialise(
 			"../src/dmtk/additional-files/models/Mushrooms1_Obj/Mushrooms1_Obj/Mushrooms1.obj",
 			"../src/mimic/shaders/VertexShader.txt",
