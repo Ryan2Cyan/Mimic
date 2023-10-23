@@ -5,7 +5,7 @@ namespace Mimic
 {
 	GameObject::GameObject() : Position(glm::vec3(0.0f)), Rotation(glm::vec3(1.0f)), Scale(glm::vec3(1.0f)), _modelMatrix(glm::mat4(1.0f)), _componentsCount(0) 
 	{
-		_modelMatrix = glm::scale(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f)), glm::vec3(1.0f));
+		_modelMatrix = glm::scale(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f)), glm::vec3(10.0f));
 	}
 
 	std::shared_ptr<MimicCore> GameObject::GetMimicCore() const

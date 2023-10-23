@@ -30,8 +30,10 @@ namespace Mimic
 
 	void MimicCore::Update()
 	{
-		// Update all GameObject model matrices:
-		unsigned int length = GameObjects.size();
+		unsigned int length = Cameras.size();
+		for (unsigned int i = 0; i < length; i++) Cameras[i]->Update();
+
+		length = GameObjects.size();
 		for (unsigned int i = 0; i < length; i++) GameObjects[i]->Update();
 
 		SDL_GL_SwapWindow(Window->_window);

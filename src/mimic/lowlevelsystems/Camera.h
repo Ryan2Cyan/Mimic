@@ -20,7 +20,9 @@ namespace Mimic
 		glm::vec3 Up;
 		glm::vec3 Direction; // needs to be reversed.
 		glm::vec3 Target;
+		glm::vec2 AspectRatio;
 		glm::vec2 ClippingPlane;
+		float LookX;
 		float Fov;
 		bool MainCamera;
 

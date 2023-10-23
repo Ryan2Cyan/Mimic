@@ -23,7 +23,7 @@ int main(int argc, char* argv[])
 
 		// initialisation goes correctly for the model, vertex, & fragment shaders:
 		modelRenderer->Initialise(
-			"../src/dmtk/additional-files/models/Mushrooms1_Obj/Mushrooms1_Obj/Mushrooms1.obj",
+			"../src/dmtk/additional-files/models/curuthers/curuthers.obj",
 			"../src/mimic/shaders/VertexShader.txt",
 			"../src/mimic/shaders/FragmentShader.txt");
 		
