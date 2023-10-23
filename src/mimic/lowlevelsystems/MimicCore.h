@@ -1,5 +1,6 @@
 #pragma once
 #include <lowlevelsystems/Mimic.h>
+#include <GLM/glm.hpp>
 #include <SDL/SDL.h>
 #include <GL/glew.h>
 #include <iostream>
@@ -25,6 +26,7 @@ namespace Mimic
 		static std::shared_ptr<MimicCore> Initialise();
 
 		void Update();
+		glm::vec2 GetAspectRatio() const;
 		std::shared_ptr<GameObject> AddEmptyGameObject();
 		void AddGameObject(const std::shared_ptr<GameObject> gameObject);
 		std::shared_ptr<Camera> AddNewCamera();
@@ -36,5 +38,7 @@ namespace Mimic
 		std::shared_ptr<Environment> Environment;
 		bool ApplicationRunning;
 
+	private:
+		std::weak_ptr<MimicCore> _self;
 	};
 }

@@ -14,5 +14,9 @@ namespace Mimic
 		std::shared_ptr<GameObject> GetGameObject() const;
 
 		std::weak_ptr<GameObject> GameObject;
+
+	private:
+		friend struct GameObject;
+		std::weak_ptr<Component> _self;
 	};
 }

@@ -9,9 +9,11 @@ namespace Mimic
 	// #############################################################################
 	// camera stuct:
 	// #############################################################################
+	struct MimicCore;
 	struct Camera
 	{
-		explicit Camera();
+		explicit Camera(const glm::vec2 aspectRatio);
+		std::shared_ptr<MimicCore> GetMimicCore() const;
 
 		glm::vec3 Position;
 		glm::vec3 Right;
@@ -24,10 +26,13 @@ namespace Mimic
 
 	private:
 		friend struct MimicCore;
+		friend struct ModelRenderer;
 
 		glm::mat4 _projectionMatrix;
 		glm::mat4 _viewMatrix;
-		std::weak_ptr<Camera> Self;
+
+		std::weak_ptr<Camera> _self;
+		std::weak_ptr<MimicCore> _mimicCore;
 
 		void Update();
 	};

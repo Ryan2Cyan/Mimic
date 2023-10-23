@@ -72,7 +72,7 @@ namespace Mimic
 			else if (textureName == "texture_height")  textureNumber = std::to_string(heightN++);
 
 			// Set sampler to correct texture unit:
-			shader->SetInt(("material." + textureName + textureNumber).c_str(), i);
+			shader->SetInt((textureName + textureNumber).c_str(), i);
 			glBindTexture(GL_TEXTURE_2D, _textures[i].Id);
 		}
 

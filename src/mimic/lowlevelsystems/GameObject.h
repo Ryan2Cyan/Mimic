@@ -17,7 +17,8 @@ namespace Mimic
 		template <typename T> std::shared_ptr<T> AddComponent()
 		{
 			std::shared_ptr<T> newComponent = std::make_shared<T>();
-			/*newComponent->GameObject = this;*/
+			newComponent->_self = newComponent;
+			newComponent->GameObject = _self;
 
 			_components.push_back(newComponent);
 			_componentsCount++;
@@ -39,6 +40,7 @@ namespace Mimic
 		std::vector<std::shared_ptr<Component>> _components;
 		glm::mat4 _modelMatrix;
 		std::weak_ptr<MimicCore> _mimicCore;
+		std::weak_ptr<GameObject> _self;
 		unsigned int _componentsCount;
 	};
 }

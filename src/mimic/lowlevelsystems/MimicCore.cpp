@@ -6,7 +6,8 @@ namespace Mimic
 	MimicCore::MimicCore()
 	{
 		// initialise SDL_Window, SDL_Renderer, & GL_Context:
-		Window = Window->Initialise("DMTK");
+		glm::vec2 aspectRatio = glm::vec2(1260.0f, 720.0f);
+		Window = Window->Initialise("DMTK", aspectRatio);
 		Environment = Environment->Initialise(70.0f);
 
 		// init glew:
@@ -15,30 +16,39 @@ namespace Mimic
 		if (GLEW_OK != err) std::cerr << "Error: GLEW failed to initialise with message: " << glewGetErrorString(err) << std::endl;
 		
 		ApplicationRunning = true;
-		/*glEnable(GL_DEPTH_TEST);*/
+		glEnable(GL_DEPTH_TEST);
 	}
 
 	MimicCore::~MimicCore() { }
 
 	std::shared_ptr<MimicCore> MimicCore::Initialise() 
 	{ 
-		return std::make_shared<MimicCore>(); 
+		std::shared_ptr<MimicCore> newMimicCore =  std::make_shared<MimicCore>();
+		newMimicCore->_self = newMimicCore;
+		return newMimicCore;
 	}
 
 	void MimicCore::Update()
 	{
-		SDL_GL_SwapWindow(Window->_window);
 		Environment->CalculateDeltaTime();
 
 		// Update all GameObject model matrices:
 		unsigned int length = GameObjects.size();
 		for (unsigned int i = 0; i < length; i++) GameObjects[i]->Update();
+
+		SDL_GL_SwapWindow(Window->_window);
+	}
+
+	glm::vec2 MimicCore::GetAspectRatio() const
+	{
+		return Window->AspectRatio;
 	}
 
 	std::shared_ptr<GameObject> MimicCore::AddEmptyGameObject()
 	{
 		std::shared_ptr<GameObject> emptyGameObject = std::make_shared<GameObject>();
-		/*emptyGameObject->_mimicCore = this;*/
+		emptyGameObject->_self = emptyGameObject;
+		emptyGameObject->_mimicCore = _self;
 
 		GameObjects.push_back(emptyGameObject);
 		return emptyGameObject;
@@ -52,8 +62,9 @@ namespace Mimic
 
 	std::shared_ptr<Camera> MimicCore::AddNewCamera()
 	{
-		std::shared_ptr<Camera> newCamera = std::make_shared<Camera>();
-		newCamera->Self = newCamera;
+		std::shared_ptr<Camera> newCamera = std::make_shared<Camera>(Window->AspectRatio);
+		newCamera->_self = newCamera;
+		newCamera->_mimicCore = _self;
 
 		if (Cameras.size() < 1)
 		{

@@ -19,7 +19,11 @@ namespace Mimic
 	void ModelRenderer::Update()
 	{
 		// assign uniforms:
-		/*_shader->SetMat4("u_Model", GetGameObject()->_modelMatrix);*/
-		/*_model->Draw(_shader);*/
+		glUseProgram(_shader->ShaderProgramId);
+		_shader->SetMat4("u_Model", GetGameObject()->_modelMatrix);
+		_shader->SetMat4("u_View", GetGameObject()->GetMimicCore()->MainCamera->_viewMatrix);
+		_shader->SetMat4("u_Projection", GetGameObject()->GetMimicCore()->MainCamera->_projectionMatrix);
+		_model->Draw(_shader);
+		glUseProgram(0);
 	}
 }

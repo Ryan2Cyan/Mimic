@@ -3,7 +3,7 @@
 
 namespace Mimic
 {
-	Window::Window(std::string windowName) : WindowName(windowName)
+	Window::Window(std::string windowName, const glm::vec2 aspectRatio) : WindowName(windowName), AspectRatio(aspectRatio)
 	{
 		if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) < 0) throw std::runtime_error("Failed to initialize SDL");
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
@@ -26,8 +26,8 @@ namespace Mimic
 		if(_window) SDL_DestroyWindow(_window);
 	}
 
-	std::shared_ptr<Window> Window::Initialise(std::string windowName)
+	std::shared_ptr<Window> Window::Initialise(std::string windowName, const glm::vec2 aspectRatio)
 	{
-		return std::make_shared<Window>(windowName);
+		return std::make_shared<Window>(windowName, aspectRatio);
 	}
 }
