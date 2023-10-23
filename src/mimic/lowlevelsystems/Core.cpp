@@ -40,7 +40,7 @@ namespace Mimic
 		return emptyGameObject;
 	}
 
-	void MimicCore::AddGameObject(std::shared_ptr<GameObject> gameObject)
+	void MimicCore::AddGameObject(const std::shared_ptr<GameObject> gameObject)
 	{
 		gameObject->Self = gameObject;
 		GameObjects.push_back(gameObject);

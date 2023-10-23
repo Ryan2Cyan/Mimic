@@ -25,7 +25,7 @@ namespace Mimic
 
 		void Update();
 		std::shared_ptr<GameObject> AddEmptyGameObject();
-		void AddGameObject(std::shared_ptr<GameObject> gameObject);
+		void AddGameObject(const std::shared_ptr<GameObject> gameObject);
 
 		std::vector<std::shared_ptr<GameObject>> GameObjects;
 		std::shared_ptr<Window> Window;

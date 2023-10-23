@@ -15,8 +15,10 @@ int main(int argc, char* argv[])
 		std::shared_ptr<GameObject> newGameObject = dmtkCore->AddEmptyGameObject();
 		std::shared_ptr<ModelRenderer> modelRenderer = newGameObject->AddComponent<ModelRenderer>();
 
-		/*newRenderer->Initialise();*/
-		/*const aiScene* scene = newRenderer->AssimpModelImport("../src/dmtk/additional-files/models/Mushrooms1_Obj/Mushrooms1.obj");*/
+		modelRenderer->Initialise(
+			"../src/dmtk/additional-files/models/survival-guitar-backpack/source/Survival_BackPack_2/Survival_BackPack_2.fbx",
+			"../src/mimic/shaders/VertexShader.txt",
+			"../src/mimic/shaders/FragmentShader.txt");
 
 		// handle human interface devices:
 		while (dmtkCore->ApplicationRunning)
@@ -41,8 +43,8 @@ int main(int argc, char* argv[])
 			glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT);
 
-			// render triangle:
-			/*newRenderer->Draw();*/
+			// render model:
+			modelRenderer->Draw();
 
 			// display to window:
 			dmtkCore->Update();

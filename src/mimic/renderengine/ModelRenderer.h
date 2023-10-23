@@ -18,7 +18,7 @@ namespace Mimic
 
 		std::shared_ptr<ModelRenderer> Initialise(const char* modelPath, const std::string vertexShaderPath, const std::string fragmentShaderPath);
 		void Draw();
-
+		
 		private:
 		std::shared_ptr<Shader> _shader;
 		std::shared_ptr<Model>_model;

@@ -22,7 +22,7 @@ namespace Mimic
 		explicit Model(const char* modelPath);
 
 		std::shared_ptr<Model> Initialise(const char* modelPath);
-		void Draw(Shader& shader);
+		void Draw(std::shared_ptr<Shader> shader);
 
 	private:
 		std::vector<Mesh> _meshes;

@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION ${CMAKE_VERSION})
 project(DMTK VERSION 0.1)
 
 add_definitions(-DGLEW_STATIC)
+add_definitions(-DBUILD_SHARED_LIBS=OFF)
 
 include_directories(
     src/mimic
@@ -36,8 +37,8 @@ add_library(mimic
 
     src/mimic/renderengine/Model.cpp
     src/mimic/renderengine/Model.h
-    src/mimic/renderengine/Renderer.cpp
-    src/mimic/renderengine/Renderer.h
+    src/mimic/renderengine/ModelRenderer.cpp
+    src/mimic/renderengine/ModelRenderer.h
     src/mimic/renderengine/Mesh.cpp
     src/mimic/renderengine/Mesh.h
     src/mimic/renderengine/Shader.cpp

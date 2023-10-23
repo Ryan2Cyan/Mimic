@@ -6,7 +6,7 @@
 #include "Window.h"
 #include "Environment.h"
 
-#include <renderengine/Renderer.h>
+#include <renderengine/ModelRenderer.h>
 #include <renderengine/Mesh.h>
 #include <renderengine/Shader.h>
 #include <renderengine/Model.h>

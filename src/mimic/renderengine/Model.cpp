@@ -13,7 +13,7 @@ namespace Mimic
 		LoadModel(modelPath);
 	}
 
-	void Model::Draw(Shader& shader)
+	void Model::Draw(std::shared_ptr<Shader> shader)
 	{
 		const unsigned int length = _meshes.size();
 		for (unsigned int i = 0; i < length; i++) _meshes[i].Draw(shader);
