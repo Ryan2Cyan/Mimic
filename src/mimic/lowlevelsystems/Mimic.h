@@ -1,10 +1,11 @@
 #pragma once
 
-#include "Core.h"
+#include "MimicCore.h"
 #include "GameObject.h"
 #include "Component.h"
 #include "Window.h"
 #include "Environment.h"
+#include "Camera.h"
 
 #include <renderengine/ModelRenderer.h>
 #include <renderengine/Mesh.h>

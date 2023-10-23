@@ -16,8 +16,10 @@ namespace Mimic
 		return modelRenderer;
 	}
 
-	void ModelRenderer::Draw()
+	void ModelRenderer::Update()
 	{
-		_model->Draw(_shader);
+		// assign uniforms:
+		/*_shader->SetMat4("u_Model", GetGameObject()->_modelMatrix);*/
+		/*_model->Draw(_shader);*/
 	}
 }

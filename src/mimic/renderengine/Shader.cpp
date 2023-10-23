@@ -1,4 +1,7 @@
 #include "Shader.h"
+#include <cassert>
+#include <iostream>
+#include <glm/gtc/type_ptr.hpp>
 
 namespace Mimic
 {
@@ -45,7 +48,7 @@ namespace Mimic
 		if (!success)
 		{
 			glGetShaderInfoLog(shaderId, 512, NULL, infoLog);
-			std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
+			std::cout << "ERROR::SHADER::COMPILATION_FAILED\n" << infoLog << std::endl;
 			return 0;
 		}
 		return shaderId;
@@ -92,17 +95,30 @@ namespace Mimic
 	
 	void Shader::SetBool(const char* name, const bool value) const
 	{
-		glUniform1i(glGetUniformLocation(ShaderProgramId, name), (int)value);
+		GLint location = glGetUniformLocation(ShaderProgramId, name);
+		assert(location != -1);
+		glUniform1i(location, (int)value);
 	}
 
 	void Shader::SetInt(const char* name, const int value) const
 	{
-		glUniform1i(glGetUniformLocation(ShaderProgramId, name), value);
+		GLint location = glGetUniformLocation(ShaderProgramId, name);
+		assert(location != -1);
+		glUniform1i(location, value);
 	}
 
 	void Shader::SetFloat(const char* name, const float value) const
 	{
-		glUniform1f(glGetUniformLocation(ShaderProgramId, name), value);
+		GLint location = glGetUniformLocation(ShaderProgramId, name);
+		assert(location != -1);
+		glUniform1f(location, value);
+	}
+
+	void Shader::SetMat4(const char* name, const glm::mat4 value) const
+	{
+		GLint location = glGetUniformLocation(ShaderProgramId, name);
+		assert(location != -1);
+		glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(value));
 	}
 	
 }

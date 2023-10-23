@@ -24,8 +24,8 @@ link_directories(
 #############################################################################
 add_library(mimic
     src/mimic/lowlevelsystems/Mimic.h
-    src/mimic/lowlevelsystems/Core.cpp
-    src/mimic/lowlevelsystems/Core.h
+    src/mimic/lowlevelsystems/MimicCore.cpp
+    src/mimic/lowlevelsystems/MimicCore.h
     src/mimic/lowlevelsystems/GameObject.cpp
     src/mimic/lowlevelsystems/GameObject.h
     src/mimic/lowlevelsystems/Component.cpp
@@ -34,6 +34,8 @@ add_library(mimic
     src/mimic/lowlevelsystems/Window.h
     src/mimic/lowlevelsystems/Environment.cpp
     src/mimic/lowlevelsystems/Environment.h
+    src/mimic/lowlevelsystems/Camera.cpp
+    src/mimic/lowlevelsystems/Camera.h
 
     src/mimic/renderengine/Model.cpp
     src/mimic/renderengine/Model.h

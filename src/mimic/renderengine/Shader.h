@@ -1,10 +1,9 @@
 #pragma once
 #include <string>
 #include <fstream>
-#include <cassert>
-#include <iostream>
 #include <memory>
 #include <GL/glew.h>
+#include <GLM/glm.hpp>
 
 // Source: https://learnopengl.com/Getting-started/Shaders
 
@@ -24,6 +23,7 @@ namespace Mimic
 		void SetBool(const char* name, const bool value) const;
 		void SetInt(const char* name, const int value) const;
 		void SetFloat(const char* name, const float value) const;
+		void SetMat4(const char* name, const glm::mat4 value) const;
 
 	private:
 		const char* ReadShaderFile(const char* const fileName);

@@ -12,6 +12,7 @@ int main(int argc, char* argv[])
 		// initialise:
 		std::cout << "Hello Worldddd!" << std::endl;
 		std::shared_ptr<MimicCore> dmtkCore = MimicCore::Initialise();
+		std::shared_ptr<Camera> dmtkCamera = dmtkCore->AddNewCamera();
 		std::shared_ptr<GameObject> newGameObject = dmtkCore->AddEmptyGameObject();
 		std::shared_ptr<ModelRenderer> modelRenderer = newGameObject->AddComponent<ModelRenderer>();
 
@@ -44,7 +45,7 @@ int main(int argc, char* argv[])
 			glClear(GL_COLOR_BUFFER_BIT);
 
 			// render model:
-			modelRenderer->Draw();
+			/*modelRenderer->Update();*/
 
 			// display to window:
 			dmtkCore->Update();
