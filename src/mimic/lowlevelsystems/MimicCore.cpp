@@ -30,13 +30,12 @@ namespace Mimic
 
 	void MimicCore::Update()
 	{
-		Environment->CalculateDeltaTime();
-
 		// Update all GameObject model matrices:
 		unsigned int length = GameObjects.size();
 		for (unsigned int i = 0; i < length; i++) GameObjects[i]->Update();
 
 		SDL_GL_SwapWindow(Window->_window);
+		Environment->CalculateDeltaTime();
 	}
 
 	glm::vec2 MimicCore::GetAspectRatio() const

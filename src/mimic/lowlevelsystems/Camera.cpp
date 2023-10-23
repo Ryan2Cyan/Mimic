@@ -21,9 +21,10 @@ namespace Mimic
 		Up = glm::cross(Direction, Right);
 
 		// create view matrix via glm::lookAt:
-		_viewMatrix = glm::mat4(1.0f);
-		_viewMatrix = glm::lookAt(Position, Target, Up);
+		/*_viewMatrix = glm::mat4(1.0f);
+		_viewMatrix = glm::lookAt(Position, Target, Up);*/
 		// create projection matrix:
+		_viewMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -3.5f));
 		_projectionMatrix = glm::perspective(45.0f, aspectRatio.x / aspectRatio.y, 0.1f, 100.0f);
 
 		/*_viewMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, .5f));

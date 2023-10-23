@@ -26,7 +26,16 @@ namespace Mimic
 		void SetMat4(const char* name, const glm::mat4 value) const;
 
 	private:
+		friend struct ModelRenderer;
+
 		const char* ReadShaderFile(const char* const fileName);
 		const unsigned int CompileShaderText(const char* fileText, const unsigned int shaderType);
+		void SetModelMatrix(const glm::mat4 value);
+		void SetViewMatrix(const glm::mat4 value);
+		void SetProjectionMatrix(const glm::mat4 value);
+
+		int _modelMatrixUniformLocation;
+		int _viewMatrixUniformLocation;
+		int _projectionMatrixUniformLocation;
 	};
 }

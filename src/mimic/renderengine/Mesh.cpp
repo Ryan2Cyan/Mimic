@@ -78,7 +78,7 @@ namespace Mimic
 
 		// draw mesh:
 		glBindVertexArray(_vertexArrayId);
-		glDrawElements(GL_TRIANGLES, _indices.size(), GL_UNSIGNED_INT, 0);
+		glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(_indices.size()), GL_UNSIGNED_INT, 0);
 		glBindVertexArray(0);
 		glActiveTexture(GL_TEXTURE0);
 	}

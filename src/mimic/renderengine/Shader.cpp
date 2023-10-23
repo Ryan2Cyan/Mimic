@@ -33,6 +33,10 @@ namespace Mimic
 			std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
 		}
 
+		_modelMatrixUniformLocation = glGetUniformLocation(ShaderProgramId, "u_Model");
+		_viewMatrixUniformLocation = glGetUniformLocation(ShaderProgramId, "u_View");
+		_projectionMatrixUniformLocation = glGetUniformLocation(ShaderProgramId, "u_Projection");
+
 		glDeleteShader(vertexShaderId);
 		glDeleteShader(fragmentShaderId);
 	}
@@ -119,6 +123,21 @@ namespace Mimic
 		GLint location = glGetUniformLocation(ShaderProgramId, name);
 		assert(location != -1);
 		glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(value));
+	}
+
+	void Shader::SetModelMatrix(const glm::mat4 value)
+	{
+		glUniformMatrix4fv(_modelMatrixUniformLocation, 1, GL_FALSE, glm::value_ptr(value));
+	}
+
+	void Shader::SetViewMatrix(const glm::mat4 value)
+	{
+		glUniformMatrix4fv(_viewMatrixUniformLocation, 1, GL_FALSE, glm::value_ptr(value));
+	}
+
+	void Shader::SetProjectionMatrix(const glm::mat4 value)
+	{
+		glUniformMatrix4fv(_projectionMatrixUniformLocation, 1, GL_FALSE, glm::value_ptr(value));
 	}
 	
 }

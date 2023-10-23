@@ -19,8 +19,19 @@ uniform sampler2D texture_specular1;
 // uniform sampler2D texture_height2;
 // uniform sampler2D texture_height3;
 
-void main() 
-{ 
-    FragColor = mix(texture(texture_diffuse1, TexCoord), texture(texture_specular1, TexCoord), 0.1f); 
-    //FragColor = vec4(1.0f, 0.0f, 0.0f, 1.0f);
-} 
+void main()
+{
+  vec4 texA = texture2D(texture_diffuse1, TexCoord);
+  vec4 texB = texture2D(texture_specular1, TexCoord);
+
+  // Specify intensity of the postprocessing:
+  texA = texA *= 0.7;
+
+  vec4 rtn = vec4(
+    min(texA.x + texB.x, 1.0),
+    min(texA.y + texB.y, 1.0),
+    min(texA.z + texB.z, 1.0),
+    min(texA.w, texB.w));
+
+  FragColor = rtn;
+}
