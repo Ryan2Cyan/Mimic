@@ -4,7 +4,7 @@
 
 namespace Mimic
 {
-	GameObject::GameObject() : Position(glm::vec3(0.0f)), Rotation(glm::vec3(0.0f)), Scale(glm::vec3(0.01f)), _modelMatrix(glm::mat4(1.0f)), _componentsCount(0) 
+	GameObject::GameObject() : Position(glm::vec3(0.0f)), Rotation(glm::vec3(0.0f)), Scale(glm::vec3(0.01f)), Name(""), _modelMatrix(glm::mat4(1.0f)), _componentsCount(0)
 	{
 		_modelMatrix = glm::scale(glm::translate(glm::mat4(1.0f), Position), Scale);
 	}

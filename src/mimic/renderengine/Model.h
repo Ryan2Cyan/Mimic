@@ -26,6 +26,8 @@ namespace Mimic
 		void Draw(std::shared_ptr<Shader> shader);
 
 	private:
+		friend struct ModelRenderer; 
+
 		std::vector<Mesh> _meshes;
 		std::vector<Texture> _loadedTextures;
 		std::string _directory;

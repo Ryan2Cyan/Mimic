@@ -30,7 +30,7 @@ namespace Mimic
 		if (!success)
 		{
 			glGetProgramInfoLog(ShaderProgramId, 512, NULL, infoLog);
-			std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
+			std::cout << "ERROR: Shader(s) have failed to link to the ShaderProgram.\n" << infoLog << std::endl;
 		}
 
 		_modelMatrixUniformLocation = glGetUniformLocation(ShaderProgramId, "u_Model");
@@ -52,7 +52,7 @@ namespace Mimic
 		if (!success)
 		{
 			glGetShaderInfoLog(shaderId, 512, NULL, infoLog);
-			std::cout << "ERROR::SHADER::COMPILATION_FAILED\n" << infoLog << std::endl;
+			std::cout << "ERROR: Shader has failed to compile.\n" << infoLog << std::endl;
 			return 0;
 		}
 		return shaderId;
@@ -72,7 +72,7 @@ namespace Mimic
 			if (!shaderFile.eof())
 			{
 				shaderFile.close();
-				std::cerr << "WARNING: could not read shader from file: " << fileName << std::endl;
+				std::cerr << "WARNING: Could not read shader from file: " << fileName << "." << std::endl;
 				return nullptr;
 			}
 			length = (int)shaderFile.gcount();
@@ -82,7 +82,7 @@ namespace Mimic
 		}
 		else
 		{
-			std::cerr << "WARNING: could not open shader from file: " << fileName << std::endl;
+			std::cerr << "WARNING: could not open shader from file: " << fileName << "." << std::endl;
 			return nullptr;
 		}
 	}

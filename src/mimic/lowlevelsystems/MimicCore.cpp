@@ -1,4 +1,5 @@
 #include "MimicCore.h"
+#include <string>
 
 
 namespace Mimic
@@ -59,6 +60,19 @@ namespace Mimic
 		std::shared_ptr<GameObject> emptyGameObject = std::make_shared<GameObject>();
 		emptyGameObject->_self = emptyGameObject;
 		emptyGameObject->_mimicCore = _self;
+		emptyGameObject->Name = "EmptyGameObject_" + std::to_string(GameObjects.size());
+
+		GameObjects.push_back(emptyGameObject);
+
+		return emptyGameObject;
+	}
+
+	std::shared_ptr<GameObject> MimicCore::AddEmptyGameObject(const char* name)
+	{
+		std::shared_ptr<GameObject> emptyGameObject = std::make_shared<GameObject>();
+		emptyGameObject->_self = emptyGameObject;
+		emptyGameObject->_mimicCore = _self;
+		emptyGameObject->Name = name;
 
 		GameObjects.push_back(emptyGameObject);
 		return emptyGameObject;

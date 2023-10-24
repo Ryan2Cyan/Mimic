@@ -28,6 +28,7 @@ namespace Mimic
 		void Update();
 		glm::vec2 GetAspectRatio() const;
 		std::shared_ptr<GameObject> AddEmptyGameObject();
+		std::shared_ptr<GameObject> AddEmptyGameObject(const char* name);
 		void AddGameObject(const std::shared_ptr<GameObject> gameObject);
 		std::shared_ptr<Camera> AddNewCamera();
 

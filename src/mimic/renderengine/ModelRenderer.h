@@ -16,7 +16,7 @@ namespace Mimic
 	{
 		explicit ModelRenderer();
 
-		std::shared_ptr<ModelRenderer> Initialise(const char* modelPath, const std::string vertexShaderPath, const std::string fragmentShaderPath);
+		void Initialise(const char* modelPath, const std::string vertexShaderPath, const std::string fragmentShaderPath);
 		void Update() override;
 		
 		private:

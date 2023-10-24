@@ -18,12 +18,19 @@ int main(int argc, char* argv[])
 		// core & model renderer are initialised:
 		std::shared_ptr<MimicCore> dmtkCore = MimicCore::Initialise();
 		std::shared_ptr<Camera> dmtkCamera = dmtkCore->AddNewCamera();
-		std::shared_ptr<GameObject> newGameObject = dmtkCore->AddEmptyGameObject();
-		std::shared_ptr<ModelRenderer> modelRenderer = newGameObject->AddComponent<ModelRenderer>();
 
-		// initialisation goes correctly for the model, vertex, & fragment shaders:
-		modelRenderer->Initialise(
-			"../src/dmtk/additional-files/models/Mushrooms1_Obj/Mushrooms1_Obj/Mushrooms1.obj",
+		std::shared_ptr<GameObject> paladinGameObject = dmtkCore->AddEmptyGameObject();
+		std::shared_ptr<ModelRenderer> paladinModelRenderer = paladinGameObject->AddComponent<ModelRenderer>();
+		paladinModelRenderer->Initialise(
+			"../src/dmtk/additional-files/models/Hero_Forge_Paladin_Demo/Hero_Forge_Paladin_Demo.stl",
+			"../src/dmtk/additional-files/shaders/VertexShader.txt",
+			"../src/dmtk/additional-files/shaders/FragmentShader.txt");
+
+		std::shared_ptr<GameObject> explorerGameObject = dmtkCore->AddEmptyGameObject();
+		explorerGameObject->Position = glm::vec3(0.5f, 0.0f, 0.0f);
+		std::shared_ptr<ModelRenderer> explorerModelRenderer = explorerGameObject->AddComponent<ModelRenderer>();
+		explorerModelRenderer->Initialise(
+			"../src/dmtk/additional-files/models/Hero_Forge_Explorer_Demo/Hero_Forge_Explorer_Demo.stl",
 			"../src/dmtk/additional-files/shaders/VertexShader.txt",
 			"../src/dmtk/additional-files/shaders/FragmentShader.txt");
 		
@@ -56,10 +63,11 @@ int main(int argc, char* argv[])
 			glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-			float cubeYRotation = newGameObject->Rotation.y;
+			float cubeYRotation = explorerGameObject->Rotation.y;
 			cubeYRotation += DeltaTime() * 1.8f;
 			while (cubeYRotation > (maxRotAngle)) cubeYRotation -= maxRotAngle;
-			newGameObject->Rotation.y = cubeYRotation;
+			explorerGameObject->Rotation.y = cubeYRotation;
+			paladinGameObject->Rotation.y = cubeYRotation;
 
 			dmtkCore->Update();
 		}
