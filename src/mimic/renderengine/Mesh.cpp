@@ -46,7 +46,6 @@ namespace Mimic
 		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeOfVertex, (void*)offsetof(Vertex, Normal));
 		glEnableVertexAttribArray(2);
 		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeOfVertex, (void*)offsetof(Vertex, TextureCoordinates));
-		glDisableVertexAttribArray(0);
 
 		glBindVertexArray(0);
 	}

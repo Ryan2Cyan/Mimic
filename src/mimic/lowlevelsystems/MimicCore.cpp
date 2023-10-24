@@ -30,14 +30,23 @@ namespace Mimic
 
 	void MimicCore::Update()
 	{
+		Environment->CalculateDeltaTime();
 		unsigned int length = Cameras.size();
 		for (unsigned int i = 0; i < length; i++) Cameras[i]->Update();
 
 		length = GameObjects.size();
 		for (unsigned int i = 0; i < length; i++) GameObjects[i]->Update();
 
+		// KARSTEN ADVICE:
+		// Potentially add raytracer component:
+		/*length = GameObjects.size();
+		for (unsigned int i = 0; i < _cameras.length; i++)
+		{
+			MainCamera = _currentCamera;
+			for (unsigned int j = 0; j < length; j++) GameObjects[i]->Display();
+		}*/
+
 		SDL_GL_SwapWindow(Window->_window);
-		Environment->CalculateDeltaTime();
 	}
 
 	glm::vec2 MimicCore::GetAspectRatio() const

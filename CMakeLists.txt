@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION ${CMAKE_VERSION})
 project(DMTK VERSION 0.1)
 
 add_definitions(-DGLEW_STATIC)
-add_definitions(-DBUILD_SHARED_LIBS=OFF)
+# add_definitions(-DBUILD_SHARED_LIBS=OFF)
 
 include_directories(
     src/mimic
@@ -15,6 +15,7 @@ include_directories(
     SDKs/stbi/include
 )
 
+# Molebox: For combining .dll files - free & open-source:
 link_directories(
     ${CMAKE_SOURCE_DIR}/SDKs/x64/lib
 )

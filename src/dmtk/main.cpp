@@ -23,13 +23,19 @@ int main(int argc, char* argv[])
 
 		// initialisation goes correctly for the model, vertex, & fragment shaders:
 		modelRenderer->Initialise(
-			"../src/dmtk/additional-files/models/curuthers/curuthers.obj",
-			"../src/mimic/shaders/VertexShader.txt",
-			"../src/mimic/shaders/FragmentShader.txt");
+			"../src/dmtk/additional-files/models/Mushrooms1_Obj/Mushrooms1_Obj/Mushrooms1.obj",
+			"../src/dmtk/additional-files/shaders/VertexShader.txt",
+			"../src/dmtk/additional-files/shaders/FragmentShader.txt");
 		
-		// handle human interface devices:
+		constexpr float maxRotAngle = 2.0f * 3.141592653589793238462643383f;
+
+
+		// #############################################################################
+		// game loop:
+	    // #############################################################################
 		while (dmtkCore->ApplicationRunning)
 		{
+			// handle human interface devices:
 			SDL_Event event;
 			while (SDL_PollEvent(&event))
 			{
@@ -50,14 +56,12 @@ int main(int argc, char* argv[])
 			glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+			float cubeYRotation = newGameObject->Rotation.y;
+			cubeYRotation += DeltaTime() * 1.8f;
+			while (cubeYRotation > (maxRotAngle)) cubeYRotation -= maxRotAngle;
+			newGameObject->Rotation.y = cubeYRotation;
+
 			dmtkCore->Update();
-
-		/*	triangleShader->SetMat4("u_Model", triangleModelMatrix);
-			triangleShader->SetMat4("u_View", viewMatrix);
-			triangleShader->SetMat4("u_Projection", projMatrix);
-			triangleMesh.Draw(triangleShader);*/
-
-			// render loop:
 		}
 	}
 	return 0;

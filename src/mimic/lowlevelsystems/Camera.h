@@ -9,6 +9,7 @@ namespace Mimic
 	// #############################################################################
 	// camera stuct:
 	// #############################################################################
+	// KARSTEN ADVICE: make this a component:
 	struct MimicCore;
 	struct Camera
 	{

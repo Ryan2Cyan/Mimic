@@ -21,6 +21,7 @@ namespace Mimic
 	{
 		explicit Model(const char* modelPath);
 
+		// KARSTEN ADVICE: Load model, store in list of paths:
 		std::shared_ptr<Model> Initialise(const char* modelPath);
 		void Draw(std::shared_ptr<Shader> shader);
 

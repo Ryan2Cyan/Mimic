@@ -22,6 +22,7 @@ namespace Mimic
 		glUseProgram(_shader->ShaderProgramId);
 
 		_shader->SetModelMatrix(GetGameObject()->_modelMatrix);
+		// KARSTEN ADVICE: Grab current camera here:
 		_shader->SetViewMatrix(GetGameObject()->GetMimicCore()->MainCamera->_viewMatrix);
 		_shader->SetProjectionMatrix(GetGameObject()->GetMimicCore()->MainCamera->_projectionMatrix);
 
