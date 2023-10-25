@@ -2,42 +2,30 @@
 out vec4 FragColor;
 
 in vec4 vertexColour;
-out vec2 TexCoord;
+in vec2 TexCoord;
 
-//struct material
-//{
-//    sampler2D texture;
-//    bool enabled;
-// }
+// bool as uniform passed for diffuse:
+// different shader for each:
+struct material
+{
+    sampler2D texture;
+    bool enabled;
+};
 
-// uniform material materials[20]; 
-// uniform sampler2D texture_diffuse1;
-// uniform sampler2D texture_specular1;
-// uniform sampler2D texture_diffuse2;
-// uniform sampler2D texture_diffuse3;
-// uniform sampler2D texture_specular2;
-// uniform sampler2D texture_specular3;
-// uniform sampler2D texture_normal1;
-// uniform sampler2D texture_normal2;
-// uniform sampler2D texture_normal3;
-// uniform sampler2D texture_height1;
-// uniform sampler2D texture_height2;
-// uniform sampler2D texture_height3;
+uniform material materials[20]; 
+uniform uint materialsCount;
 
 void main()
 {
-  // for each texture in materials, check if enabled, if it is mix it into the result frag colour.
-  // vec4 texA = texture2D(texture_diffuse1, TexCoord);
-  // vec4 texB = texture2D(texture_specular1, TexCoord);
+    // for each texture in materials, check if enabled, if it is mix it into the result frag colour.
+    vec4 resultTexture;
+    for(uint i = 0; i < materialsCount; i++)
+    {
+        if(materials[i].enabled)
+        {
+            resultTexture = resultTexture + texture2D(materials[i].texture, TexCoord);
+        }
+    }
 
-  // Specify intensity of the postprocessing:
-  // texA = texA *= 0.7;
-
-  // vec4 rtn = vec4(
-    // min(texA.x + texB.x, 1.0),
-    // min(texA.y + texB.y, 1.0),
-    // min(texA.z + texB.z, 1.0),
-    // min(texA.w, texB.w));
-
-  FragColor = vec4(0.5f, 0.5f, 0.5f, 1.0f);
+    FragColor = clamp(resultTexture, 0.0f, 1.0f);
 }

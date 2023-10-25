@@ -31,12 +31,12 @@ int main(int argc, char* argv[])
 
 		std::shared_ptr<GameObject> paladinGameObject = dmtkCore->AddEmptyGameObject();
 		std::shared_ptr<ModelRenderer> paladinModelRenderer = paladinGameObject->AddComponent<ModelRenderer>();
-		paladinModelRenderer->Initialise( "../src/dmtk/additional-files/models/Hero_Forge_Paladin_Demo/Hero_Forge_Paladin_Demo.stl", basicShader );
+		paladinModelRenderer->Initialise( "../src/dmtk/additional-files/models/Mushrooms1_Obj/Mushrooms1_Obj/Mushrooms1.obj", basicShader );
 
-		std::shared_ptr<GameObject> explorerGameObject = dmtkCore->AddEmptyGameObject();
+		/*std::shared_ptr<GameObject> explorerGameObject = dmtkCore->AddEmptyGameObject();
 		explorerGameObject->Position = glm::vec3(0.5f, 0.0f, 0.0f);
 		std::shared_ptr<ModelRenderer> explorerModelRenderer = explorerGameObject->AddComponent<ModelRenderer>();
-		explorerModelRenderer->Initialise( "../src/dmtk/additional-files/models/Hero_Forge_Explorer_Demo/Hero_Forge_Explorer_Demo.stl", basicShader );
+		explorerModelRenderer->Initialise( "../src/dmtk/additional-files/models/Hero_Forge_Explorer_Demo/Hero_Forge_Explorer_Demo.stl", basicShader );*/
 		
 		constexpr float maxRotAngle = 2.0f * 3.141592653589793238462643383f;
 
@@ -67,10 +67,10 @@ int main(int argc, char* argv[])
 			glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-			float cubeYRotation = explorerGameObject->Rotation.y;
+			float cubeYRotation = paladinGameObject->Rotation.y;
 			cubeYRotation += DeltaTime() * 1.8f;
 			while (cubeYRotation > (maxRotAngle)) cubeYRotation -= maxRotAngle;
-			explorerGameObject->Rotation.y = cubeYRotation;
+			/*explorerGameObject->Rotation.y = cubeYRotation;*/
 			paladinGameObject->Rotation.y = cubeYRotation;
 
 			dmtkCore->Update();
