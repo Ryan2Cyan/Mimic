@@ -10,14 +10,27 @@ namespace Mimic
 	{
 		std::shared_ptr<Model> model = std::make_shared<Model>(modelPath);
 		_model = model;
-
 		std::shared_ptr<Shader> shader = std::make_shared<Shader>(vertexShaderPath, fragmentShaderPath);
 		_shader = shader;
 
 		_initialised = true;
 	}
 
+	void ModelRenderer::Initialise(const char* modelPath, std::shared_ptr<Shader> shader)
+	{
+		std::shared_ptr<Model> model = std::make_shared<Model>(modelPath);
+		_model = model;;
+		_shader = shader;
+
+		_initialised = true;
+	}
+
 	void ModelRenderer::Update()
+	{
+	
+	}
+
+	void ModelRenderer::Draw()
 	{
 		if (!_initialised)
 		{
@@ -30,9 +43,8 @@ namespace Mimic
 		glUseProgram(_shader->ShaderProgramId);
 
 		_shader->SetModelMatrix(GetGameObject()->_modelMatrix);
-		// KARSTEN ADVICE: Grab current camera here:
-		_shader->SetViewMatrix(GetGameObject()->GetMimicCore()->MainCamera->_viewMatrix);
-		_shader->SetProjectionMatrix(GetGameObject()->GetMimicCore()->MainCamera->_projectionMatrix);
+		_shader->SetViewMatrix(GetGameObject()->GetMimicCore()->CurrentCamera->_viewMatrix);
+		_shader->SetProjectionMatrix(GetGameObject()->GetMimicCore()->CurrentCamera->_projectionMatrix);
 
 		_model->Draw(_shader);
 		glUseProgram(0);

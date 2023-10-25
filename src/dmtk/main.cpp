@@ -13,26 +13,30 @@ using namespace Mimic;
 int main(int argc, char* argv[])
 {
 	{
-		// initialise:
 		std::cout << "Hello Worldddd!" << std::endl;
-		// core & model renderer are initialised:
+		
+		// game engine code:
 		std::shared_ptr<MimicCore> dmtkCore = MimicCore::Initialise();
-		std::shared_ptr<Camera> dmtkCamera = dmtkCore->AddNewCamera();
+		const std::shared_ptr<Shader> basicShader = std::shared_ptr<Shader>()->Initialise(
+			"../src/dmtk/additional-files/shaders/VertexShader.txt",
+			"../src/dmtk/additional-files/shaders/FragmentShader.txt"
+		);
+
+		std::shared_ptr<GameObject> cameraObject = dmtkCore->AddEmptyGameObject();
+		cameraObject->Position = glm::vec3(0.0f, 0.0f, 3.0f);
+		std::shared_ptr<Camera> mainCamera = cameraObject->AddComponent<Camera>();
+		mainCamera->Initialise(dmtkCore->Window->AspectRatio, 45.0f);
+		dmtkCore->AddCamera(mainCamera, true);
+
 
 		std::shared_ptr<GameObject> paladinGameObject = dmtkCore->AddEmptyGameObject();
 		std::shared_ptr<ModelRenderer> paladinModelRenderer = paladinGameObject->AddComponent<ModelRenderer>();
-		paladinModelRenderer->Initialise(
-			"../src/dmtk/additional-files/models/Hero_Forge_Paladin_Demo/Hero_Forge_Paladin_Demo.stl",
-			"../src/dmtk/additional-files/shaders/VertexShader.txt",
-			"../src/dmtk/additional-files/shaders/FragmentShader.txt");
+		paladinModelRenderer->Initialise( "../src/dmtk/additional-files/models/Hero_Forge_Paladin_Demo/Hero_Forge_Paladin_Demo.stl", basicShader );
 
 		std::shared_ptr<GameObject> explorerGameObject = dmtkCore->AddEmptyGameObject();
 		explorerGameObject->Position = glm::vec3(0.5f, 0.0f, 0.0f);
 		std::shared_ptr<ModelRenderer> explorerModelRenderer = explorerGameObject->AddComponent<ModelRenderer>();
-		explorerModelRenderer->Initialise(
-			"../src/dmtk/additional-files/models/Hero_Forge_Explorer_Demo/Hero_Forge_Explorer_Demo.stl",
-			"../src/dmtk/additional-files/shaders/VertexShader.txt",
-			"../src/dmtk/additional-files/shaders/FragmentShader.txt");
+		explorerModelRenderer->Initialise( "../src/dmtk/additional-files/models/Hero_Forge_Explorer_Demo/Hero_Forge_Explorer_Demo.stl", basicShader );
 		
 		constexpr float maxRotAngle = 2.0f * 3.141592653589793238462643383f;
 
@@ -70,6 +74,7 @@ int main(int argc, char* argv[])
 			paladinGameObject->Rotation.y = cubeYRotation;
 
 			dmtkCore->Update();
+			dmtkCore->Draw();
 		}
 	}
 	return 0;

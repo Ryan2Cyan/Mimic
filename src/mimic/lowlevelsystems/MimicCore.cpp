@@ -4,7 +4,7 @@
 
 namespace Mimic
 {
-	MimicCore::MimicCore()
+	MimicCore::MimicCore() : _gameObjectsCount(0)
 	{
 		// initialise SDL_Window, SDL_Renderer, & GL_Context:
 		glm::vec2 aspectRatio = glm::vec2(1260.0f, 720.0f);
@@ -14,7 +14,11 @@ namespace Mimic
 		// init glew:
 		glewExperimental = GL_TRUE;
 		GLenum err = glewInit();
-		if (GLEW_OK != err) std::cerr << "Error: GLEW failed to initialise with message: " << glewGetErrorString(err) << std::endl;
+		if (GLEW_OK != err)
+		{
+			std::cerr << "Error: GLEW failed to initialise with message: " << glewGetErrorString(err) << std::endl;
+			throw;
+		}
 		
 		ApplicationRunning = true;
 		glEnable(GL_DEPTH_TEST);
@@ -31,12 +35,11 @@ namespace Mimic
 
 	void MimicCore::Update()
 	{
+		// other updates:
 		Environment->CalculateDeltaTime();
-		unsigned int length = Cameras.size();
-		for (unsigned int i = 0; i < length; i++) Cameras[i]->Update();
 
-		length = GameObjects.size();
-		for (unsigned int i = 0; i < length; i++) GameObjects[i]->Update();
+		// update game objects:
+		for (unsigned int i = 0; i < _gameObjectsCount; i++) GameObjects[i]->Update();
 
 		// KARSTEN ADVICE:
 		// Potentially add raytracer component:
@@ -46,6 +49,12 @@ namespace Mimic
 			MainCamera = _currentCamera;
 			for (unsigned int j = 0; j < length; j++) GameObjects[i]->Display();
 		}*/
+	}
+
+	void MimicCore::Draw()
+	{
+		// draw game objects:
+		for (unsigned int i = 0; i < _gameObjectsCount; i++) GameObjects[i]->Draw();
 
 		SDL_GL_SwapWindow(Window->_window);
 	}
@@ -63,7 +72,7 @@ namespace Mimic
 		emptyGameObject->Name = "EmptyGameObject_" + std::to_string(GameObjects.size());
 
 		GameObjects.push_back(emptyGameObject);
-
+		_gameObjectsCount++;
 		return emptyGameObject;
 	}
 
@@ -75,27 +84,31 @@ namespace Mimic
 		emptyGameObject->Name = name;
 
 		GameObjects.push_back(emptyGameObject);
+		_gameObjectsCount++;
 		return emptyGameObject;
 	}
 
 	void MimicCore::AddGameObject(const std::shared_ptr<GameObject> gameObject)
 	{
-		/*gameObject->_mimicCore = this;*/
+		gameObject->_mimicCore = _self;
+
 		GameObjects.push_back(gameObject);
+		_gameObjectsCount++;
 	}
 
-	std::shared_ptr<Camera> MimicCore::AddNewCamera()
+	/*void MimicCore::AddCamera(const std::shared_ptr<Camera> camera, const bool setToCurrent = false)
 	{
-		std::shared_ptr<Camera> newCamera = std::make_shared<Camera>(Window->AspectRatio);
-		newCamera->_self = newCamera;
-		newCamera->_mimicCore = _self;
+		Cameras.push_back(camera);
 
-		if (Cameras.size() < 1)
-		{
-			MainCamera = newCamera;
-			newCamera->MainCamera = true;
-		}
-		Cameras.push_back(newCamera);
-		return newCamera;
+		if (!setToCurrent) return;
+		CurrentCamera = camera;
+	}*/
+
+	void MimicCore::AddCamera(const std::shared_ptr<Camera> camera, const bool setToCurrent)
+	{
+		Cameras.push_back(camera);
+
+		if (!setToCurrent) return;
+		CurrentCamera = camera;
 	}
 }

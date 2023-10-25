@@ -38,6 +38,7 @@ namespace Mimic
 		friend struct ModelRenderer;
 
 		void Update();
+		void Draw();
 
 		std::vector<std::shared_ptr<Component>> _components;
 		glm::mat4 _modelMatrix;

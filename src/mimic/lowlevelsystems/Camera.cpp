@@ -5,16 +5,20 @@
 
 namespace Mimic
 {
-	Camera::Camera(const glm::vec2 aspectRatio) 
+	Camera::Camera() 
 	{
-		Fov = 45.0f;
+	}
+
+	void Camera::Initialise(const glm::vec2 aspectRatio, const float fov)
+	{
+		Fov = fov;
 		ClippingPlane = glm::vec2(0.1f, 100.0f);
-		AspectRatio = aspectRatio;
-		Position = glm::vec3(0.0f, 0.0f, -3.0f);
-		
+		AspectRatio = glm::vec2(0.0f);
+		glm::vec3 position = GetGameObject()->Position;
+
 		// Gram-Schmidt to create LookAt matrix:
 		Target = glm::vec3(0.0f);
-		Direction = glm::normalize(Position - Target); 
+		Direction = glm::normalize(position - Target);
 
 		Up = glm::vec3(0.0f, 1.0f, 0.0f);
 		Right = glm::normalize(glm::cross(Up, Direction));
@@ -23,24 +27,19 @@ namespace Mimic
 
 		// create view matrix via glm::lookAt:
 		_viewMatrix = glm::mat4(1.0f);
-		_viewMatrix = glm::lookAt(Position, Target, Up);
-
-
-		_projectionMatrix = glm::perspective(45.0f, aspectRatio.x / aspectRatio.y, ClippingPlane.x, ClippingPlane.y);
-
-		MainCamera = false;
-		LookX = 0.0f;
+		_viewMatrix = glm::lookAt(position, Target, Up);
+		
+		// create projection matrix:
+		_projectionMatrix = glm::perspective(Fov, aspectRatio.x / aspectRatio.y, ClippingPlane.x, ClippingPlane.y);
 	}
 
 	void Camera::Update()
 	{
-		/*_viewMatrix = glm::mat4(1.0f);
-		_viewMatrix = glm::lookAt(Position, -Target, Up);
-		_projectionMatrix = glm::perspective(45.0f, AspectRatio.x / AspectRatio.y, ClippingPlane.x, ClippingPlane.y);*/
+
 	}
 
-	std::shared_ptr<MimicCore> Camera::GetMimicCore() const
+	void Camera::Draw()
 	{
-		return _mimicCore.lock();
+
 	}
 }

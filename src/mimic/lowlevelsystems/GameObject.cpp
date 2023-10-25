@@ -18,7 +18,13 @@ namespace Mimic
 	{
 		_modelMatrix = glm::translate(glm::mat4(1.0f), Position) * glm::mat4_cast(glm::quat(Rotation)) * glm::scale(glm::mat4(1.0f), Scale);
 
-		// update all gameobject's components:
+		// component updates:
 		for (unsigned int i = 0; i < _componentsCount; i++) _components[i]->Update();
+	}
+
+	void GameObject::Draw()
+	{
+		// component draws:
+		for (unsigned int i = 0; i < _componentsCount; i++) _components[i]->Draw();
 	}
 }

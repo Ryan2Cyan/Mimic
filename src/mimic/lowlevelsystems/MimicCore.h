@@ -26,20 +26,23 @@ namespace Mimic
 		static std::shared_ptr<MimicCore> Initialise();
 
 		void Update();
+		void Draw();
 		glm::vec2 GetAspectRatio() const;
 		std::shared_ptr<GameObject> AddEmptyGameObject();
 		std::shared_ptr<GameObject> AddEmptyGameObject(const char* name);
+		/*template <typename T> std::shared_ptr<GameObject> AddEmptyGameObject(const char* name);*/
 		void AddGameObject(const std::shared_ptr<GameObject> gameObject);
-		std::shared_ptr<Camera> AddNewCamera();
+		void AddCamera(const std::shared_ptr<Camera> camera, const bool setToCurrent);
 
 		std::vector<std::shared_ptr<GameObject>> GameObjects;
 		std::vector<std::shared_ptr<Camera>> Cameras;
-		std::shared_ptr<Camera> MainCamera;
+		std::shared_ptr<Camera> CurrentCamera;
 		std::shared_ptr<Window> Window;
 		std::shared_ptr<Environment> Environment;
 		bool ApplicationRunning;
 
 	private:
 		std::weak_ptr<MimicCore> _self;
+		unsigned int _gameObjectsCount;
 	};
 }
