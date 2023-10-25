@@ -46,6 +46,8 @@ add_library(mimic
     src/mimic/renderengine/Mesh.h
     src/mimic/renderengine/Shader.cpp
     src/mimic/renderengine/Shader.h
+    src/mimic/renderengine/RayTracer.cpp
+    src/mimic/renderengine/RayTracer.h
 
     SDKs/stbi/include/stb_image.h
 )

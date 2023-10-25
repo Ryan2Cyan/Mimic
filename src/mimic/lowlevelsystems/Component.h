@@ -8,6 +8,9 @@
 namespace Mimic
 {
 	struct GameObject; 
+	// #############################################################################
+    // component stuct:
+    // #############################################################################
 	struct Component
 	{
 		std::shared_ptr<GameObject> GetGameObject() const;
