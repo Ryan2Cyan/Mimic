@@ -56,14 +56,15 @@ namespace Mimic
 
 		const unsigned int length = _textures.size();
 		shader->SetInt("materialsCount", length);
+		/*if(length < 1) "WARNING: Mesh on: " << << std::endl;*/
 		for (unsigned int i = 0; i < length; i++)
 		{
 			// activate texture unit before binding:
 			glActiveTexture(GL_TEXTURE0 + i);
 			std::string textureNumber = std::to_string(i);
 			shader->SetInt(("materials[" + textureNumber + "].texture").c_str(), i);
-			shader->SetInt(("materials[" + textureNumber + "].enabled").c_str(), 1);
 			glBindTexture(GL_TEXTURE_2D, _textures[i].Id);
+			/*shader->SetInt(("materials[" + textureNumber + "].enabled").c_str(), 1);*/
 			/*std::string textureName = _textures[i].Type;
 
 			if (textureName == "texture_diffuse") textureNumber = std::to_string(diffuseN++);

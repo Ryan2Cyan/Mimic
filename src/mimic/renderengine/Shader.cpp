@@ -100,28 +100,28 @@ namespace Mimic
 	void Shader::SetBool(const char* name, const bool value) const
 	{
 		GLint location = glGetUniformLocation(ShaderProgramId, name);
-		assert(location != -1);
+		if (location == -1) std::cerr << "WARNING: Could not find location of shader uniform [bool]: " << name << std::endl;
 		glUniform1i(location, (int)value);
 	}
 
 	void Shader::SetInt(const char* name, const int value) const
 	{
 		GLint location = glGetUniformLocation(ShaderProgramId, name);
-		assert(location != -1);
+		if (location == -1) std::cerr << "WARNING: Could not find location of shader uniform [integer]: " << name << std::endl;
 		glUniform1i(location, value);
 	}
 
 	void Shader::SetFloat(const char* name, const float value) const
 	{
 		GLint location = glGetUniformLocation(ShaderProgramId, name);
-		assert(location != -1);
+		if (location == -1) std::cerr << "WARNING: Could not find location of shader uniform [float]: " << name << std::endl;
 		glUniform1f(location, value);
 	}
 
 	void Shader::SetMat4(const char* name, const glm::mat4 value) const
 	{
 		GLint location = glGetUniformLocation(ShaderProgramId, name);
-		assert(location != -1);
+		if(location == -1) std::cerr << "WARNING: Could not find location of shader uniform [mat4]: " << name << std::endl;
 		glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(value));
 	}
 

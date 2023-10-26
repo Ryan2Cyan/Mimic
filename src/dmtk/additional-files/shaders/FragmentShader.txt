@@ -13,19 +13,20 @@ struct material
 };
 
 uniform material materials[20]; 
-uniform uint materialsCount;
+uniform int materialsCount;
 
 void main()
 {
     // for each texture in materials, check if enabled, if it is mix it into the result frag colour.
     vec4 resultTexture;
-    for(uint i = 0; i < materialsCount; i++)
+    for (int i = 0; i < materialsCount; i++)
     {
+        resultTexture = resultTexture + texture2D(materials[i].texture, TexCoord);
         if(materials[i].enabled)
         {
             resultTexture = resultTexture + texture2D(materials[i].texture, TexCoord);
         }
     }
-
+    
     FragColor = clamp(resultTexture, 0.0f, 1.0f);
 }
