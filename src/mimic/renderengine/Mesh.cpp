@@ -50,13 +50,18 @@ namespace Mimic
 		glBindVertexArray(0);
 	}
 
+	std::shared_ptr<Model> Mesh::GetModel() const
+	{
+		return Model.lock();
+	}
+
 	void Mesh::Draw(std::shared_ptr<Shader> shader)
 	{
 		unsigned int textureIndex = 1;
 
 		const unsigned int length = _textures.size();
 		shader->SetInt("materialsCount", length);
-		/*if(length < 1) "WARNING: Mesh on: " << << std::endl;*/
+
 		for (unsigned int i = 0; i < length; i++)
 		{
 			// activate texture unit before binding:
@@ -64,17 +69,6 @@ namespace Mimic
 			std::string textureNumber = std::to_string(i);
 			shader->SetInt(("materials[" + textureNumber + "].texture").c_str(), i);
 			glBindTexture(GL_TEXTURE_2D, _textures[i].Id);
-			/*shader->SetInt(("materials[" + textureNumber + "].enabled").c_str(), 1);*/
-			/*std::string textureName = _textures[i].Type;
-
-			if (textureName == "texture_diffuse") textureNumber = std::to_string(diffuseN++);
-			else if(textureName == "texture_specular") textureNumber = std::to_string(specularN++);
-			else if(textureName == "texture_normal")  textureNumber = std::to_string(normalN++);
-			else if (textureName == "texture_height")  textureNumber = std::to_string(heightN++);*/
-
-			// Set sampler to correct texture unit:
-			/*shader->SetInt(("materials." + textureName + textureNumber + ".texture").c_str(), i);
-			glBindTexture(GL_TEXTURE_2D, _textures[i].Id);*/
 		}
 		glActiveTexture(GL_TEXTURE0);
 

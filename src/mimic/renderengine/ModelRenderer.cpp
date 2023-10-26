@@ -10,8 +10,13 @@ namespace Mimic
 	{
 		std::shared_ptr<Model> model = std::make_shared<Model>(modelPath);
 		_model = model;
+		_model->_self = _model;
+		_model->Component = _self;
+
 		std::shared_ptr<Shader> shader = std::make_shared<Shader>(vertexShaderPath, fragmentShaderPath);
 		_shader = shader;
+
+		_model->LoadModel(modelPath);
 
 		_initialised = true;
 	}
@@ -19,8 +24,13 @@ namespace Mimic
 	void ModelRenderer::Initialise(const char* modelPath, std::shared_ptr<Shader> shader)
 	{
 		std::shared_ptr<Model> model = std::make_shared<Model>(modelPath);
-		_model = model;;
+		_model = model;
+		_model->_self = _model;
+		_model->Component = _self;
+
 		_shader = shader;
+
+		_model->LoadModel(modelPath);
 
 		_initialised = true;
 	}

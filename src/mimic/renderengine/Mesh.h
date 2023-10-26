@@ -35,12 +35,16 @@ namespace Mimic
 	// mesh stuct:
 	// #############################################################################
 	struct Shader;
+	struct Model;
 
 	struct Mesh
 	{
 		explicit Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures);
 
 		void Draw(std::shared_ptr<Shader> shader);
+		std::shared_ptr<Model> GetModel() const;
+
+		std::weak_ptr<Model> Model;
 
 	private:
 		friend struct ModelRenderer;

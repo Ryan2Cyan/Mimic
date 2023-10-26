@@ -8,15 +8,17 @@
 
 namespace Mimic
 {
-	Model::Model(const char* modelPath) : _directory(modelPath) 
-	{
-		LoadModel(modelPath);
-	}
+	Model::Model(const char* modelPath) : _directory(modelPath) {}
 
 	void Model::Draw(std::shared_ptr<Shader> shader)
 	{
 		const unsigned int length = _meshes.size();
 		for (unsigned int i = 0; i < length; i++) _meshes[i].Draw(shader);
+	}
+
+	std::shared_ptr<Component> Model::GetComponent() const
+	{
+		return Component.lock();
 	}
 
 	std::shared_ptr<Model> Model::Initialise(const char* modelPath)
@@ -164,7 +166,11 @@ namespace Mimic
 			const std::vector<Texture> heightMaps = LoadMaterialTextures(material, aiTextureType_AMBIENT, "texture_height");
 			textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
 		}
-		return Mesh(vertices, indices, textures);
+
+		Mesh newMesh = Mesh(vertices, indices, textures);
+		if (textures.size() < 1) std::cout << "WARNING: Mesh on [" << GetComponent()->GetGameObject()->Name << "] has no textures." << std::endl;
+		newMesh.Model = _self;
+		return newMesh;
 	}
 	
 	std::vector<Texture> Model::LoadMaterialTextures(aiMaterial* material, aiTextureType type, std::string typeName)

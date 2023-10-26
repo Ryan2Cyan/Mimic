@@ -23,7 +23,7 @@ namespace Mimic
 		
 		bool _initialised = false;
 
-	private:
+	protected:
 		friend struct GameObject;
 
 		std::weak_ptr<Component> _self;
