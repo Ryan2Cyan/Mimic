@@ -3,12 +3,13 @@
 #define STBI_ASSERT(x)
 #include <stb_image.h>
 #include <GL/glew.h>
+#include <iostream>
 
 // Source: https://learnopengl.com/Model-Loading/Model
 
 namespace Mimic
 {
-	Model::Model(const char* modelPath) : _directory(modelPath) {}
+	Model::Model(const char* modelPath) {}
 
 	void Model::Draw(std::shared_ptr<Shader> shader)
 	{
@@ -169,7 +170,6 @@ namespace Mimic
 
 		Mesh newMesh = Mesh(vertices, indices, textures);
 		if (textures.size() < 1) std::cout << "WARNING: Mesh on [" << GetComponent()->GetGameObject()->Name << "] has no textures." << std::endl;
-		newMesh.Model = _self;
 		return newMesh;
 	}
 	

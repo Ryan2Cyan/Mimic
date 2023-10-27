@@ -1,14 +1,23 @@
 #include "MimicCore.h"
+#include <lowlevelsystems/Window.h>
+#include <lowlevelsystems/Resources.h>
+#include <lowlevelsystems/GameObject.h>
+#include <lowlevelsystems/Environment.h>
 #include <string>
 
 
 namespace Mimic
 {
-	MimicCore::MimicCore() : _gameObjectsCount(0)
+	MimicCore::MimicCore()
 	{
 		// initialise SDL_Window, SDL_Renderer, & GL_Context:
 		glm::vec2 aspectRatio = glm::vec2(1260.0f, 720.0f);
+
 		Window = Window->Initialise("DMTK", aspectRatio);
+		ResourceManager = ResourceManager->Initialise();
+		ResourceManager->_mimicCore = _self;
+		ResourceManager->_self = ResourceManager;
+
 		Environment = Environment->Initialise(70.0f);
 
 		// init glew:
@@ -39,22 +48,19 @@ namespace Mimic
 		Environment->CalculateDeltaTime();
 
 		// update game objects:
-		for (unsigned int i = 0; i < _gameObjectsCount; i++) GameObjects[i]->Update();
-
-		// KARSTEN ADVICE:
-		// Potentially add raytracer component:
-		/*length = GameObjects.size();
-		for (unsigned int i = 0; i < _cameras.length; i++)
-		{
-			MainCamera = _currentCamera;
-			for (unsigned int j = 0; j < length; j++) GameObjects[i]->Display();
-		}*/
+		for (unsigned int i = 0; i < GameObjects.size(); i++) GameObjects[i]->Update();
 	}
 
 	void MimicCore::Draw()
 	{
 		// draw game objects:
-		for (unsigned int i = 0; i < _gameObjectsCount; i++) GameObjects[i]->Draw();
+		for (unsigned int i = 0; i < Cameras.size(); i++)
+		{
+			for (unsigned int i = 0; i < GameObjects.size(); i++)
+			{
+				GameObjects[i]->Draw();
+			}
+		}
 
 		SDL_GL_SwapWindow(Window->_window);
 	}
@@ -72,7 +78,6 @@ namespace Mimic
 		emptyGameObject->Name = "EmptyGameObject_" + std::to_string(GameObjects.size());
 
 		GameObjects.push_back(emptyGameObject);
-		_gameObjectsCount++;
 		return emptyGameObject;
 	}
 
@@ -84,7 +89,6 @@ namespace Mimic
 		emptyGameObject->Name = name;
 
 		GameObjects.push_back(emptyGameObject);
-		_gameObjectsCount++;
 		return emptyGameObject;
 	}
 
@@ -93,7 +97,6 @@ namespace Mimic
 		gameObject->_mimicCore = _self;
 
 		GameObjects.push_back(gameObject);
-		_gameObjectsCount++;
 	}
 
 	/*void MimicCore::AddCamera(const std::shared_ptr<Camera> camera, const bool setToCurrent = false)

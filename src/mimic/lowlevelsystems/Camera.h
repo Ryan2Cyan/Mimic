@@ -1,5 +1,5 @@
 #pragma once
-#include <lowlevelsystems/Mimic.h>
+#include <lowlevelsystems/Component.h>
 #include <GLM/glm.hpp>
 #include <memory>
 

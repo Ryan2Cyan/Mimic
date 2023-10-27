@@ -6,9 +6,9 @@
 #include "Window.h"
 #include "Environment.h"
 #include "Camera.h"
+#include "Resources.h"
 
 #include <renderengine/ModelRenderer.h>
 #include <renderengine/Mesh.h>
 #include <renderengine/Shader.h>
 #include <renderengine/Model.h>
-#include <renderengine/Resources.h>

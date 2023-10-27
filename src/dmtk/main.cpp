@@ -31,7 +31,7 @@ int main(int argc, char* argv[])
 
 		std::shared_ptr<GameObject> paladinGameObject = dmtkCore->AddEmptyGameObject();
 		std::shared_ptr<ModelRenderer> paladinModelRenderer = paladinGameObject->AddComponent<ModelRenderer>();
-		paladinModelRenderer->Initialise( "../src/dmtk/additional-files/models/Hero_Forge_Explorer_Demo/Hero_Forge_Explorer_Demo.stl", basicShader );
+		paladinModelRenderer->Initialise( "../src/dmtk/additional-files/models/Mushrooms1_Obj/Mushrooms1_Obj/Mushrooms1.obj", basicShader );
 
 		/*std::shared_ptr<GameObject> explorerGameObject = dmtkCore->AddEmptyGameObject();
 		explorerGameObject->Position = glm::vec3(0.5f, 0.0f, 0.0f);

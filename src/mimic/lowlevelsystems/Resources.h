@@ -2,7 +2,6 @@
 #include <string>
 #include <memory>
 #include <unordered_map>
-#include <vector>
 
 namespace Mimic
 {
@@ -17,6 +16,9 @@ namespace Mimic
 		template<typename T> std::shared_ptr<T> LoadResource(const std::string& path) const;
 
 	private:
+		friend struct MimicCore;
+
+		std::shared_ptr<ResourceManager> Initialise();
 		std::unordered_map<std::string, std::shared_ptr<Resource>> _loadedResources;
 		std::weak_ptr<MimicCore> _mimicCore;
 		std::weak_ptr<ResourceManager> _self;

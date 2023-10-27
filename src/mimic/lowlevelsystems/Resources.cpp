@@ -1,5 +1,4 @@
 #include "Resources.h"
-#include <lowlevelsystems/Mimic.h>
 #include <utility>
 
 namespace Mimic
@@ -7,6 +6,11 @@ namespace Mimic
 	// #############################################################################
 	// resource manager functions:
 	// #############################################################################
+	std::shared_ptr<ResourceManager> ResourceManager::Initialise()
+	{
+		return std::make_shared<ResourceManager>();
+	}
+
 	template<typename T> std::shared_ptr<T> ResourceManager::LoadResource(const std::string& path) const
 	{
 		// check if the resource is already loaded:

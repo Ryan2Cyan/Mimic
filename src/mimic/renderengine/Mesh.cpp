@@ -1,4 +1,5 @@
 #include "Mesh.h"
+#include <renderengine/Shader.h>
 
 namespace Mimic
 {
@@ -48,11 +49,6 @@ namespace Mimic
 		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeOfVertex, (void*)offsetof(Vertex, TextureCoordinates));
 
 		glBindVertexArray(0);
-	}
-
-	std::shared_ptr<Model> Mesh::GetModel() const
-	{
-		return Model.lock();
 	}
 
 	void Mesh::Draw(std::shared_ptr<Shader> shader)

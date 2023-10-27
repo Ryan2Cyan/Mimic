@@ -1,5 +1,4 @@
 #include "Component.h"
-#include <lowlevelsystems/Mimic.h>
 #include <fstream>
 #include <iostream>
 

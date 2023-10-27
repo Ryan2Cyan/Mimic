@@ -37,7 +37,8 @@ add_library(mimic
     src/mimic/lowlevelsystems/Environment.h
     src/mimic/lowlevelsystems/Camera.cpp
     src/mimic/lowlevelsystems/Camera.h
-
+    src/mimic/lowlevelsystems/Resources.cpp
+    src/mimic/lowlevelsystems/Resources.h
     src/mimic/renderengine/Model.cpp
     src/mimic/renderengine/Model.h
     src/mimic/renderengine/ModelRenderer.cpp
@@ -46,11 +47,21 @@ add_library(mimic
     src/mimic/renderengine/Mesh.h
     src/mimic/renderengine/Shader.cpp
     src/mimic/renderengine/Shader.h
-    src/mimic/renderengine/Resources.cpp
-    src/mimic/renderengine/Resources.h
 
     SDKs/stbi/include/stb_image.h
 )
+
+# PERCY ADVICE: Make the renderer a separate library that's attached to the mimic engine.
+#add_library(mimicrenderer
+#    src/mimic/renderengine/Model.cpp
+#    src/mimic/renderengine/Model.h
+#    src/mimic/renderengine/Mesh.cpp
+#    src/mimic/renderengine/Mesh.h
+#    src/mimic/renderengine/Shader.cpp
+#    src/mimic/renderengine/Shader.h
+
+#    SDKs/stbi/include/stb_image.h
+#)
 
 # Implement static IMGUI:
 set(IMGUI_PATH ${CMAKE_CURRENT_LIST_DIR}/SDKs/imgui/include)
@@ -84,7 +95,17 @@ target_link_libraries(mimic
     assimp-vc143-mt
     glew32s
     ${IMGUI_LIB}
+    #mimicrenderer
 )
+
+#target_link_libraries(mimicrenderer
+#    SDL2    
+#    OpenGL::GL
+#    assimp-vc143-mt
+#    glew32s
+#)
+
+
 
 #############################################################################
 # DMTK program

@@ -1,4 +1,7 @@
 #include "ModelRenderer.h"
+#include <lowlevelsystems/MimicCore.h>
+#include <renderengine/Model.h>
+#include <renderengine/Shader.h>
 #include <iostream>
 #include <stdexcept>
 

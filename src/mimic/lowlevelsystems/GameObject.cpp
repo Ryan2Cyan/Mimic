@@ -1,5 +1,5 @@
 #include "GameObject.h"
-#include <lowlevelsystems/Mimic.h>
+#include <lowlevelsystems/Component.h>
 #include <iostream>
 
 namespace Mimic

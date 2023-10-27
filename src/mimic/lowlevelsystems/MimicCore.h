@@ -1,5 +1,5 @@
 #pragma once
-#include <lowlevelsystems/Mimic.h>
+#include <lowlevelsystems/Camera.h>
 #include <GLM/glm.hpp>
 #include <SDL/SDL.h>
 #include <GL/glew.h>
@@ -12,6 +12,7 @@ namespace Mimic
 	// forward-declarations:
 	struct GameObject;
 	struct Window;
+	struct ResourceManager;
 	struct Environment;
 	struct Camera;
 
@@ -30,7 +31,6 @@ namespace Mimic
 		glm::vec2 GetAspectRatio() const;
 		std::shared_ptr<GameObject> AddEmptyGameObject();
 		std::shared_ptr<GameObject> AddEmptyGameObject(const char* name);
-		/*template <typename T> std::shared_ptr<GameObject> AddEmptyGameObject(const char* name);*/
 		void AddGameObject(const std::shared_ptr<GameObject> gameObject);
 		void AddCamera(const std::shared_ptr<Camera> camera, const bool setToCurrent);
 
@@ -38,11 +38,12 @@ namespace Mimic
 		std::vector<std::shared_ptr<Camera>> Cameras;
 		std::shared_ptr<Camera> CurrentCamera;
 		std::shared_ptr<Window> Window;
+		std::shared_ptr<ResourceManager> ResourceManager;
 		std::shared_ptr<Environment> Environment;
 		bool ApplicationRunning;
 
 	private:
 		std::weak_ptr<MimicCore> _self;
-		unsigned int _gameObjectsCount;
+		
 	};
 }

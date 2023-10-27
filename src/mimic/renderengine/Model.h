@@ -1,6 +1,8 @@
 #pragma once
 
-#include <lowlevelsystems/Mimic.h>
+#include <lowlevelsystems/Resources.h>
+#include <lowlevelsystems/Component.h>
+#include <renderengine/Mesh.h>
 #include <memory>
 #include <vector>
 #include <string>
@@ -17,7 +19,7 @@ namespace Mimic
 	struct Texture;
 	struct Mesh;
 
-	struct Model
+	struct Model : Resource
 	{
 		explicit Model(const char* modelPath);
 
