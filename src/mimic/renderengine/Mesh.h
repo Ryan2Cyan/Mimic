@@ -1,5 +1,7 @@
 #pragma once
-#include <lowlevelsystems/Resources.h>
+#include <lowlevelsystems/Resource.h>
+#include <renderengine/Texture.h>
+#include <renderengine/Vertex.h>
 #include <vector>
 #include <string>
 #include <GL/glew.h>
@@ -8,29 +10,6 @@
 
 namespace Mimic
 {
-	// #############################################################################
-	// vertex stuct:
-	// #############################################################################
-	struct Vertex
-	{
-		explicit Vertex(glm::vec3 position, glm::vec3 normal, glm::vec2 textureCoordinates);
-
-		glm::vec3 Position;
-		glm::vec3 Normal;
-		glm::vec2 TextureCoordinates;
-	};
-
-	// #############################################################################
-	// texture stuct:
-	// #############################################################################
-	struct Texture : Resource
-	{
-		explicit Texture(const unsigned int id, std::string type, std::string path);
-		unsigned int Id;
-		std::string Type;
-		std::string Path;
-	};
-
 	// #############################################################################
 	// mesh stuct:
 	// #############################################################################

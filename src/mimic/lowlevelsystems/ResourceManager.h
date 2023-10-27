@@ -23,13 +23,4 @@ namespace Mimic
 		std::weak_ptr<MimicCore> _mimicCore;
 		std::weak_ptr<ResourceManager> _self;
 	};
-	 
-	// #############################################################################
-	// resource stuct:
-	// #############################################################################
-	struct Resource
-	{
-		std::string Path;
-		std::weak_ptr<ResourceManager> ResourceManager;
-	};
 }

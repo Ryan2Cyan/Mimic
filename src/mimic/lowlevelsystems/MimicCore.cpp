@@ -1,6 +1,6 @@
 #include "MimicCore.h"
 #include <lowlevelsystems/Window.h>
-#include <lowlevelsystems/Resources.h>
+#include <lowlevelsystems/ResourceManager.h>
 #include <lowlevelsystems/GameObject.h>
 #include <lowlevelsystems/Environment.h>
 #include <string>

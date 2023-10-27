@@ -1,6 +1,6 @@
 #pragma once
 
-#include <lowlevelsystems/Resources.h>
+#include <lowlevelsystems/Resource.h>
 #include <lowlevelsystems/Component.h>
 #include <renderengine/Mesh.h>
 #include <memory>

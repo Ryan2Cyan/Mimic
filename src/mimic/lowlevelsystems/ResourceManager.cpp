@@ -1,4 +1,5 @@
-#include "Resources.h"
+#include "ResourceManager.h"
+#include <lowlevelsystems/Resource.h>
 #include <utility>
 
 namespace Mimic

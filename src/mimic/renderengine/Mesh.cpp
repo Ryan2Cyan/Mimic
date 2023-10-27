@@ -1,5 +1,7 @@
 #include "Mesh.h"
 #include <renderengine/Shader.h>
+#include <renderengine/Vertex.h>
+#include <renderengine/Texture.h>
 
 namespace Mimic
 {
