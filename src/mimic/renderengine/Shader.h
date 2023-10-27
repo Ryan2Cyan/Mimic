@@ -37,5 +37,7 @@ namespace Mimic
 		int _modelMatrixUniformLocation;
 		int _viewMatrixUniformLocation;
 		int _projectionMatrixUniformLocation;
+
+		bool checkShaderCompiled(GLint value);
 	};
 }

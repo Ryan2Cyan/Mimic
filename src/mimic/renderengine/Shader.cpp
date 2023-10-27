@@ -141,3 +141,8 @@ namespace Mimic
 	}
 	
 }
+
+bool Mimic::Shader::checkShaderCompiled(GLint value)
+{
+	return false;
+}

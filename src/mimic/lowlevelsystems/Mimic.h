@@ -11,4 +11,4 @@
 #include <renderengine/Mesh.h>
 #include <renderengine/Shader.h>
 #include <renderengine/Model.h>
-#include <renderengine/RayTracer.h>
+#include <renderengine/Resources.h>
