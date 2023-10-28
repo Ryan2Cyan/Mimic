@@ -1,4 +1,5 @@
 #pragma once
+#include <lowlevelsystems/Component.h>
 #include <string>
 #include <memory>
 #include <unordered_map>
@@ -11,9 +12,30 @@ namespace Mimic
 	struct MimicCore;
 	struct Resource;
 
-	struct ResourceManager 
+	struct ResourceManager
 	{
-		template<typename T> std::shared_ptr<T> LoadResource(const std::string& path) const;
+		explicit ResourceManager();
+
+		// is resource loaded? yes: return, no: create new, store, then return:
+		template<typename T> std::shared_ptr<T> LoadResource(const std::string& path)
+		{
+			// check if the resource is already loaded:
+			auto iterator = _loadedResources.find(path);
+			if (iterator != _loadedResources.end())
+			{
+				auto resultPair = *iterator; 
+				std::shared_ptr<T> loadedResource = std::dynamic_pointer_cast<T>(resultPair.second);
+				if (loadedResource != nullptr) return loadedResource;
+			}
+
+			// load from disk:
+			std::shared_ptr<T> newResource = std::make_shared<T>();
+			newResource->_resourceManager = _self; // just incase a Resouce needs to load Resources itself.
+			newResource->Load(path);
+			newResource->Path = path;
+			_loadedResources[path] = newResource;
+			return newResource;
+		}
 
 	private:
 		friend struct MimicCore;

@@ -11,7 +11,18 @@ namespace Mimic
 
 	struct Resource
 	{
+		virtual ~Resource() = default;
+
+		std::shared_ptr<ResourceManager> GetResourceManager() const
+		{
+			return _resourceManager.lock();
+		}
 		std::string Path;
-		std::weak_ptr<ResourceManager> ResourceManager;
+
+	protected:
+		friend struct ResourceManager;
+
+		std::weak_ptr<ResourceManager> _resourceManager;
+		virtual void Load(const std::string& path) = 0;
 	};
 }

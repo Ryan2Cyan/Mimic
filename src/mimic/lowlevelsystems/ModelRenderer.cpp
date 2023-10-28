@@ -1,4 +1,5 @@
 #include "ModelRenderer.h"
+#include <lowlevelsystems/ResourceManager.h>
 #include <lowlevelsystems/MimicCore.h>
 #include <renderengine/Model.h>
 #include <renderengine/Shader.h>
@@ -11,29 +12,23 @@ namespace Mimic
 
 	void ModelRenderer::Initialise(const char* modelPath, const std::string vertexShaderPath, const std::string fragmentShaderPath)
 	{
-		std::shared_ptr<Model> model = std::make_shared<Model>(modelPath);
-		_model = model;
-		_model->_self = _model;
+		// initialise model:
+		_model = GetGameObject()->GetMimicCore()->ResourceManager->LoadResource<Model>(std::string(modelPath));
 		_model->Component = _self;
 
 		std::shared_ptr<Shader> shader = std::make_shared<Shader>(vertexShaderPath, fragmentShaderPath);
 		_shader = shader;
-
-		_model->LoadModel(modelPath);
 
 		_initialised = true;
 	}
 
 	void ModelRenderer::Initialise(const char* modelPath, std::shared_ptr<Shader> shader)
 	{
-		std::shared_ptr<Model> model = std::make_shared<Model>(modelPath);
-		_model = model;
-		_model->_self = _model;
+		// initialise model:
+		_model = GetGameObject()->GetMimicCore()->ResourceManager->LoadResource<Model>(std::string(modelPath));
 		_model->Component = _self;
 
 		_shader = shader;
-
-		_model->LoadModel(modelPath);
 
 		_initialised = true;
 	}

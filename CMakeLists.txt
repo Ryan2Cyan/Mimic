@@ -52,7 +52,9 @@ add_library(mimicrenderer
     src/mimic/renderengine/Mesh.h
     src/mimic/renderengine/Shader.cpp
     src/mimic/renderengine/Shader.h
+    src/mimic/renderengine/Vertex.cpp
     src/mimic/renderengine/Vertex.h
+    src/mimic/renderengine/Texture.cpp
     src/mimic/renderengine/Texture.h
 
     SDKs/stbi/include/stb_image.h

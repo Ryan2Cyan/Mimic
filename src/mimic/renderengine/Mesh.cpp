@@ -5,25 +5,13 @@
 
 namespace Mimic
 {
-	// #############################################################################
-	// vertex defintions:
-	// #############################################################################
-	Vertex::Vertex(glm::vec3 position, glm::vec3 normal, glm::vec2 textureCoordinates) 
-		: Position(position), Normal(normal), TextureCoordinates(textureCoordinates) { }
-
-
-	// #############################################################################
-	// vertex defintions:
-	// #############################################################################
-	Texture::Texture(const unsigned int id, std::string type, std::string path) : Id(id), Type(type), Path(path) {}
-
 
 	// #############################################################################
 	// mesh defintions:
 	// #############################################################################
 	// Source: https://learnopengl.com/Model-Loading/Mesh
 
-	Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures)
+	Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<std::shared_ptr<Texture>> textures)
 		: _vertices(vertices), _indices(indices), _textures(textures) 
 	{
 		constexpr size_t sizeOfVertex = sizeof(Vertex);
@@ -66,7 +54,7 @@ namespace Mimic
 			glActiveTexture(GL_TEXTURE0 + i);
 			std::string textureNumber = std::to_string(i);
 			shader->SetInt(("materials[" + textureNumber + "].texture").c_str(), i);
-			glBindTexture(GL_TEXTURE_2D, _textures[i].Id);
+			glBindTexture(GL_TEXTURE_2D, _textures[i]->Id);
 		}
 		glActiveTexture(GL_TEXTURE0);
 
@@ -74,5 +62,10 @@ namespace Mimic
 		glBindVertexArray(_vertexArrayId);
 		glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(_indices.size()), GL_UNSIGNED_INT, 0);
 		glBindVertexArray(0);
+	}
+
+	void Mesh::Load(const std::string& path)
+	{
+
 	}
 }

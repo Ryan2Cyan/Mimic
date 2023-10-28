@@ -17,15 +17,12 @@ namespace Mimic
 		std::shared_ptr<GameObject> GetGameObject() const;
 
 	protected:
+		friend struct GameObject;
 		virtual void Update() = 0;
 		virtual void Draw() = 0;
-		
-		bool _initialised = false;
-
-	protected:
-		friend struct GameObject;
 
 		std::weak_ptr<GameObject> GameObject;
 		std::weak_ptr<Component> _self;
+		bool _initialised = false;
 	};
 }

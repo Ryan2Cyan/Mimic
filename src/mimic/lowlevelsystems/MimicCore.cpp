@@ -12,13 +12,7 @@ namespace Mimic
 	{
 		// initialise SDL_Window, SDL_Renderer, & GL_Context:
 		glm::vec2 aspectRatio = glm::vec2(1260.0f, 720.0f);
-
 		Window = Window->Initialise("DMTK", aspectRatio);
-		ResourceManager = ResourceManager->Initialise();
-		ResourceManager->_mimicCore = _self;
-		ResourceManager->_self = ResourceManager;
-
-		Environment = Environment->Initialise(70.0f);
 
 		// init glew:
 		glewExperimental = GL_TRUE;
@@ -39,6 +33,15 @@ namespace Mimic
 	{ 
 		std::shared_ptr<MimicCore> newMimicCore =  std::make_shared<MimicCore>();
 		newMimicCore->_self = newMimicCore;
+
+		// init resource manager:
+		newMimicCore->ResourceManager = newMimicCore->ResourceManager->Initialise();
+		newMimicCore->ResourceManager->_mimicCore = newMimicCore->_self;
+		newMimicCore->ResourceManager->_self = newMimicCore->ResourceManager;
+
+		// init environment:
+		newMimicCore->Environment = newMimicCore->Environment->Initialise(70.0f);
+
 		return newMimicCore;
 	}
 
