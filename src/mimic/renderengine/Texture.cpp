@@ -7,24 +7,14 @@
 
 namespace Mimic
 {
-	Texture::Texture() : Id(-1), Type(""), Path("") {}
-	Texture::Texture(const unsigned int id, const std::string type, const std::string path) : Id(id), Type(type), Path(path) {}
-
 	void Texture::Load(const std::string& path)
 	{
-	
-	}
-
-	unsigned int Texture::LoadTextureFromFile(const char* path, const std::string& directory, bool gamma)
-	{
-		const std::string fileName = directory + '/' + std::string(path);
-
 		glGenTextures(1, &Id);
 
 		int width;
 		int height;
 		int componentsN;
-		unsigned char* data = stbi_load(fileName.c_str(), &width, &height, &componentsN, 0);
+		unsigned char* data = stbi_load(path.c_str(), &width, &height, &componentsN, 0);
 		if (data)
 		{
 			GLenum format;
@@ -61,6 +51,5 @@ namespace Mimic
 		else std::cout << "Texture failed to load at path: " << path << std::endl;
 
 		stbi_image_free(data);
-		return Id;
 	}
 }

@@ -35,7 +35,6 @@ namespace Mimic
 		friend struct ResourceManager;
 
 		std::vector<std::shared_ptr<Mesh>> _meshes;
-		std::vector<Texture> _loadedTextures;
 		std::string _directory;
 		std::weak_ptr<Model> _self;
 

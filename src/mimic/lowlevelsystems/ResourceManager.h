@@ -4,6 +4,41 @@
 #include <memory>
 #include <unordered_map>
 
+// Source: https://www.gameenginebook.com/ : Chapter 7: Resource and File System
+
+// File System:
+// 1.) manipulate file names and paths.
+// 2.) open, close, read, or write to individual files.
+// 3.) scan contents of a directory.
+// 4.) handle asynchronous file I/O requests (for streaming).
+
+// OS Differences:
+//     OS          PathComponentSeparator    CaseSensitive?     VolumeSeparator     CurrentWorkingDirectory     CurrentWorkingVolume
+//     UNIX:                 /					    N                 None                     Y                          N
+//     Old Windows:          \						Y          [Single_Letter] + :             Y                          Y
+//     Recent Windows:     / or \					Y		   [Single_Letter] + :   		   Y                          Y
+//     MS-DOS                /                      Y          [Single_Letter] + :             Y                          Y
+//     Mac OS 8 & 9:         :						N			      None                     Y                          N
+//     Mac OS X:             /						N                 None                     Y                          N
+// The final dot '.' in any path denotes the file extension (e.g. ".exe" or ".pdf").
+
+// Search Paths: 
+// a string containing a list of paths, each separated by a special character (e.g. ':' or ';'). A list of
+// directories that should be searched to find an asset.
+
+// Basic File I/O:
+// C standard library provides a buffered & unbuffered API ('stream I/O'): 
+// Buffered: https://learn.microsoft.com/en-us/cpp/c-runtime-library/stream-i-o?view=msvc-170&redirectedfrom=MSDN
+// Unbuffered: https://learn.microsoft.com/en-us/cpp/c-runtime-library/low-level-i-o?view=msvc-170&redirectedfrom=MSDN
+
+// Wrapping I/O:
+// Can guarantee identical behaviour across all target platforms.
+// Can simplify down to only the functions needed by the engine.
+// Can extend functionality.
+// Synchronous File I/O: The program making the I/O request must wait until the data has been transferred before continuing.
+// Asynchronous File I/O:
+
+
 namespace Mimic
 {
 	// #############################################################################

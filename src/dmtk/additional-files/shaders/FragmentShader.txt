@@ -4,8 +4,7 @@ out vec4 FragColor;
 in vec4 vertexColour;
 in vec2 TexCoord;
 
-// bool as uniform passed for diffuse:
-// different shader for each:
+// should probably use count or enabled, not both?
 struct material
 {
     sampler2D texture;

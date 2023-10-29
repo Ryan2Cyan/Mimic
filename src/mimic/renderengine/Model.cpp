@@ -117,7 +117,7 @@ namespace Mimic
 		return newMesh;
 	}
 
-	const std::vector<std::shared_ptr<Texture>> Model::LoadMaterialTextures(aiMaterial* material, aiTextureType type, std::string typeName)
+	const std::vector<std::shared_ptr<Texture>> Model::LoadMaterialTextures(aiMaterial* material, const aiTextureType type, const std::string typeName)
 	{
 		std::vector<std::shared_ptr<Texture>> loadedTextures;
 
@@ -126,10 +126,8 @@ namespace Mimic
 		{
 			aiString aiPath;
 			material->GetTexture(type, i, &aiPath);
-			std::string stringPath = aiPath.C_Str();
-			std::shared_ptr<Texture> loadedTexture = GetResourceManager()->LoadResource<Texture>(stringPath);
-			loadedTexture->LoadTextureFromFile(aiPath.C_Str(), _directory, false);
-			loadedTexture->Type = type;
+			std::shared_ptr<Texture> loadedTexture = GetResourceManager()->LoadResource<Texture>(_directory + '/' + aiPath.C_Str());
+			/*loadedTexture->Type = type;*/
 			loadedTextures.push_back(loadedTexture);
 		}
 		return loadedTextures;

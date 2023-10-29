@@ -53,6 +53,7 @@ namespace Mimic
 			// activate texture unit before binding:
 			glActiveTexture(GL_TEXTURE0 + i);
 			std::string textureNumber = std::to_string(i);
+			// will probably need to insert the type eventually:
 			shader->SetInt(("materials[" + textureNumber + "].texture").c_str(), i);
 			glBindTexture(GL_TEXTURE_2D, _textures[i]->Id);
 		}
