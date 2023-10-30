@@ -1,102 +1,128 @@
 #include "Shader.h"
 #include <cassert>
 #include <iostream>
+#include <fstream>
 #include <glm/gtc/type_ptr.hpp>
+
+// Source: https://www.youtube.com/watch?v=8wFEzIYRZXg
 
 namespace Mimic
 {
-	Shader::Shader(const std::string vertexShaderPath, const std::string fragmentShaderPath)
+	void Shader::Load(const std::string& path)
 	{
-		// read shaders:
-		const char* vertexShaderText = ReadShaderFile(vertexShaderPath.c_str());
-		const char* fragmentShaderText = ReadShaderFile(fragmentShaderPath.c_str());
-		assert(vertexShaderText != nullptr);
-		assert(fragmentShaderText != nullptr);
+		const std::string sourceCode = ReadShaderFile(path);
+		auto shaderSources = PreProcess(sourceCode);
+		CompileShaderText(shaderSources);
+	}
 
-		// compile shaders:
-		const unsigned int vertexShaderId = CompileShaderText(vertexShaderText, GL_VERTEX_SHADER);
-		const unsigned int fragmentShaderId = CompileShaderText(fragmentShaderText, GL_FRAGMENT_SHADER);
-		assert(vertexShaderId != 0);
-		assert(fragmentShaderId != 0);
-
-		// link shaders to program:
-		ShaderProgramId = glCreateProgram();
-		glAttachShader(ShaderProgramId, vertexShaderId);
-		glAttachShader(ShaderProgramId, fragmentShaderId);
-		glLinkProgram(ShaderProgramId);
-		int success;
-		char infoLog[512];
-		glGetProgramiv(ShaderProgramId, GL_LINK_STATUS, &success);
-		if (!success)
+	const std::string Shader::ReadShaderFile(const std::string& path)
+	{
+		std::string result;
+		std::ifstream in(path, std::ios::in, std::ios::binary);
+		if (in)
 		{
-			glGetProgramInfoLog(ShaderProgramId, 512, NULL, infoLog);
-			std::cout << "ERROR: Shader(s) have failed to link to the ShaderProgram.\n" << infoLog << std::endl;
+			in.seekg(0, std::ios::end);
+			result.resize(in.tellg());
+			in.seekg(0, std::ios::beg);
+			in.read(&result[0], result.size());
+			in.close();
+		}
+		else
+		{
+			// error, could not read shader file:
+			std::cerr << "WARNING: could not open shader from file: " << path << "." << std::endl;
+			return nullptr;
+		}
+		return result;
+	}
+
+	GLenum Shader::ShaderTypeFromString(const std::string& type)
+	{
+		if (type == "vertex") return GL_VERTEX_SHADER;
+		if (type == "fragment" || type == "pixel") return GL_FRAGMENT_SHADER;
+
+		std::cerr << "Unknown shader type: " << type << std::endl;
+		return 0;	
+	}
+
+	std::unordered_map<GLuint, std::string> Shader::PreProcess(const std::string& source)
+	{
+		// load all different shader types from one source file:
+		std::unordered_map<GLenum, std::string> shaderSources;
+
+		const char* typeToken = "#type";
+		size_t typeTokenLength = strlen(typeToken);
+		size_t currentPosition = source.find(typeToken, 0);
+		while (currentPosition != std::string::npos)
+		{
+			// find current type specifier and store it:
+			size_t endOfLinePosition = source.find_first_of("\r\n", currentPosition);
+			assert(endOfLinePosition != std::string::npos);
+			size_t begin = currentPosition + typeTokenLength + 1;
+			std::string type = source.substr(begin, endOfLinePosition - begin);
+			assert(type == "vertex" || type == "fragment" || type == "pixel");
+
+			// store source code associated with the shader type:
+			size_t nextLinePosition = source.find_first_not_of("\r\n", endOfLinePosition);
+			currentPosition = source.find(typeToken, nextLinePosition);
+			shaderSources[ShaderTypeFromString(type)] = source.substr(nextLinePosition, currentPosition - (nextLinePosition == std::string::npos ? source.size() - 1 : nextLinePosition));
+		}
+		return shaderSources;
+	}
+	
+	void Shader::CompileShaderText(const std::unordered_map<GLenum, std::string>& shaderSources)
+	{
+		GLuint programId = glCreateProgram();
+
+		// generate & attach each shader to the program:
+		std::vector<GLenum> glShaderIds(shaderSources.size());
+		for (auto& shader : shaderSources)
+		{
+			GLenum shaderType = shader.first;
+			const std::string& shaderSource = shader.second;
+
+			const unsigned int shaderId = glCreateShader(shaderType);
+			const char* const shaderSourceCStr = shaderSource.c_str();
+			glShaderSource(shaderId, 1, &shaderSourceCStr, NULL);
+			glCompileShader(shaderId);
+			int success;
+			char infoLog[512];
+			glGetShaderiv(shaderId, GL_COMPILE_STATUS, &success);
+			if (!success)
+			{
+				glGetShaderInfoLog(shaderId, 512, NULL, infoLog);
+				std::cout << "ERROR: Shader has failed to compile.\n" << infoLog << std::endl;
+				assert(false);
+			}
+
+			glAttachShader(programId, shaderId);
+			glShaderIds.push_back(shaderId);
 		}
 
+		// link shaders to program:
+		glLinkProgram(programId);
+		int success;
+		char infoLog[512];
+		glGetProgramiv(programId, GL_LINK_STATUS, &success);
+		if (!success)
+		{
+			glGetProgramInfoLog(programId, 512, NULL, infoLog);
+			std::cout << "ERROR: Shader(s) have failed to link to the ShaderProgram.\n" << infoLog << std::endl;
+
+			glDeleteProgram(programId);
+			for (auto shaderId : glShaderIds) glDeleteShader(shaderId);
+			return;
+		}
+
+		ShaderProgramId = programId;
+		// assign uniforms:
 		_modelMatrixUniformLocation = glGetUniformLocation(ShaderProgramId, "u_Model");
 		_viewMatrixUniformLocation = glGetUniformLocation(ShaderProgramId, "u_View");
 		_projectionMatrixUniformLocation = glGetUniformLocation(ShaderProgramId, "u_Projection");
 
-		glDeleteShader(vertexShaderId);
-		glDeleteShader(fragmentShaderId);
+		for (auto shaderId : glShaderIds) glDetachShader(ShaderProgramId, shaderId);
 	}
 
-	const unsigned int Shader::CompileShaderText(const char* const fileText, const unsigned int shaderType)
-	{
-		const unsigned int shaderId = glCreateShader(shaderType);
-		glShaderSource(shaderId, 1, &fileText, NULL);
-		glCompileShader(shaderId);
-		int success;
-		char infoLog[512];
-		glGetShaderiv(shaderId, GL_COMPILE_STATUS, &success);
-		if (!success)
-		{
-			glGetShaderInfoLog(shaderId, 512, NULL, infoLog);
-			std::cout << "ERROR: Shader has failed to compile.\n" << infoLog << std::endl;
-			return 0;
-		}
-		return shaderId;
-	}
-
-	const char* Shader::ReadShaderFile(const char* const fileName)
-	{
-		std::ifstream shaderFile(fileName);
-		char* shaderText = nullptr;
-		if (shaderFile.is_open())
-		{
-			shaderFile.seekg(0, shaderFile.end);
-			int length = (int)shaderFile.tellg();
-			shaderFile.seekg(0, shaderFile.beg);
-			shaderText = new char[length];
-			shaderFile.read(shaderText, length);
-			if (!shaderFile.eof())
-			{
-				shaderFile.close();
-				std::cerr << "WARNING: Could not read shader from file: " << fileName << "." << std::endl;
-				return nullptr;
-			}
-			length = (int)shaderFile.gcount();
-			shaderText[length - 1] = 0;
-			shaderFile.close();
-			return shaderText;
-		}
-		else
-		{
-			std::cerr << "WARNING: could not open shader from file: " << fileName << "." << std::endl;
-			return nullptr;
-		}
-	}
-
-	std::shared_ptr<Shader> Shader::Initialise(const std::string vertexShaderPath, const std::string fragmentShaderPath) const
-	{
-		return std::make_shared<Shader>(vertexShaderPath, fragmentShaderPath);
-	}
-
-	void Shader::Activate()
-	{
-		glUseProgram(ShaderProgramId);
-	}
-	
 	void Shader::SetBool(const char* name, const bool value) const
 	{
 		GLint location = glGetUniformLocation(ShaderProgramId, name);
@@ -140,9 +166,4 @@ namespace Mimic
 		glUniformMatrix4fv(_projectionMatrixUniformLocation, 1, GL_FALSE, glm::value_ptr(value));
 	}
 	
-}
-
-bool Mimic::Shader::checkShaderCompiled(GLint value)
-{
-	return false;
 }

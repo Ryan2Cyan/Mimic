@@ -10,18 +10,6 @@ namespace Mimic
 {
 	ModelRenderer::ModelRenderer() {}
 
-	void ModelRenderer::Initialise(const std::string modelPath, const std::string vertexShaderPath, const std::string fragmentShaderPath)
-	{
-		// initialise model:
-		_model = GetGameObject()->GetMimicCore()->ResourceManager->LoadResource<Model>(modelPath);
-		_model->Component = _self;
-
-		std::shared_ptr<Shader> shader = std::make_shared<Shader>(vertexShaderPath, fragmentShaderPath);
-		_shader = shader;
-
-		_initialised = true;
-	}
-
 	void ModelRenderer::Initialise(const char* modelPath, std::shared_ptr<Shader> shader)
 	{
 		// initialise model:
