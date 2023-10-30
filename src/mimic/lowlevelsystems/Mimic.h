@@ -11,6 +11,7 @@
 #include "ResourceManager.h"
 #include "Resource.h"
 #include "ModelRenderer.h"
+#include "Logger.h"
 
 #include <renderengine/Mesh.h>
 #include <renderengine/Shader.h>

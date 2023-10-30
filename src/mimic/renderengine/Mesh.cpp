@@ -14,7 +14,7 @@ namespace Mimic
 	Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<std::shared_ptr<Texture>> textures)
 		: _vertices(vertices), _indices(indices), _textures(textures) 
 	{
-		constexpr size_t sizeOfVertex = sizeof(Vertex);
+		constexpr size_t VERTEX_SIZE = sizeof(Vertex);
 
 		// generate & bind vertex array object:
 		glGenVertexArrays(1, &_vertexArrayId);
@@ -23,7 +23,7 @@ namespace Mimic
 		// generate & bind vertex position buffer object:
 		glGenBuffers(1, &_vertexBufferId);
 		glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferId);
-		glBufferData(GL_ARRAY_BUFFER, _vertices.size() * sizeOfVertex, &_vertices[0], GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, _vertices.size() * VERTEX_SIZE, &_vertices[0], GL_STATIC_DRAW);
 
 		// generate & bind element buffer object (indices):
 		glGenBuffers(1, &_elementBufferId);
@@ -32,11 +32,11 @@ namespace Mimic
 
 		// pass buffer data into GPU - specify how openGL should read the buffers:
 		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeOfVertex, (void*)0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, VERTEX_SIZE, (void*)0);
 		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeOfVertex, (void*)offsetof(Vertex, Normal));
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, VERTEX_SIZE, (void*)offsetof(Vertex, Normal));
 		glEnableVertexAttribArray(2);
-		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeOfVertex, (void*)offsetof(Vertex, TextureCoordinates));
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, VERTEX_SIZE, (void*)offsetof(Vertex, TextureCoordinates));
 
 		glBindVertexArray(0);
 	}
