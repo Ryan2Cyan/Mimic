@@ -41,6 +41,7 @@ add_library(mimic
     src/mimic/lowlevelsystems/ResourceManager.h
     src/mimic/lowlevelsystems/ModelRenderer.cpp
     src/mimic/lowlevelsystems/ModelRenderer.h
+    src/mimic/lowlevelsystems/Resource.cpp
     src/mimic/lowlevelsystems/Resource.h
 )
 
@@ -62,6 +63,29 @@ add_library(mimicrenderer
 
 # Implement static IMGUI:
 set(IMGUI_PATH ${CMAKE_CURRENT_LIST_DIR}/SDKs/imgui/include)
+file(GLOB IMGUI_GLOB
+    ${IMGUI_PATH}/imgui.h
+    ${IMGUI_PATH}/imgui.cpp
+    ${IMGUI_PATH}/imconfig.h
+    ${IMGUI_PATH}/imgui_demo.cpp
+    ${IMGUI_PATH}/imgui_draw.cpp
+    ${IMGUI_PATH}/imgui_internal.h
+    ${IMGUI_PATH}/imstb_rectpack.h
+    ${IMGUI_PATH}/imstb_textedit.h
+    ${IMGUI_PATH}/imstb_truetype.h
+    ${IMGUI_PATH}/imgui_tables.cpp
+    ${IMGUI_PATH}/imgui_widgets.cpp
+
+    ${IMGUI_PATH}/imgui_impl_sdl2.cpp
+    ${IMGUI_PATH}/imgui_impl_sdl2.h
+    ${IMGUI_PATH}/imgui_impl_sdl2renderer.cpp
+    ${IMGUI_PATH}/imgui_impl_sdl2renderer.h
+    ${IMGUI_PATH}/imgui_impl_opengl3.cpp
+    ${IMGUI_PATH}/imgui_impl_opengl3.h
+    ${IMGUI_PATH}/imgui_impl_opengl3_loader.cpp
+)
+
+set(SPDLOG_PATH ${CMAKE_CURRENT_LIST_DIR}/SDKs/imgui/include)
 file(GLOB IMGUI_GLOB
     ${IMGUI_PATH}/imgui.h
     ${IMGUI_PATH}/imgui.cpp

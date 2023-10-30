@@ -64,9 +64,4 @@ namespace Mimic
 		glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(_indices.size()), GL_UNSIGNED_INT, 0);
 		glBindVertexArray(0);
 	}
-
-	void Mesh::Load(const std::string& path)
-	{
-
-	}
 }

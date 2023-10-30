@@ -16,7 +16,7 @@ namespace Mimic
 	struct Shader;
 	struct Model;
 
-	struct Mesh : Resource
+	struct Mesh
 	{
 		explicit Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<std::shared_ptr<Texture>> textures);
 
@@ -24,8 +24,6 @@ namespace Mimic
 
 	private:
 		friend struct ModelRenderer;
-
-		void Load(const std::string& path) override;
 
 		std::vector<Vertex> _vertices;
 		std::vector<unsigned int> _indices;

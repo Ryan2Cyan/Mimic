@@ -17,7 +17,9 @@ int main(int argc, char* argv[])
 		
 		// game engine code:
 		std::shared_ptr<MimicCore> dmtkCore = MimicCore::Initialise();
-		const std::shared_ptr<Shader> basicShader = dmtkCore->ResourceManager->LoadResource<Shader>("../src/dmtk/assets/shaders/Texture.glsl");
+		std::shared_ptr<Shader> basicShader = dmtkCore->ResourceManager->LoadResource<Shader>("shaders/Texture.glsl");
+		basicShader->Name = "Basic_Shader";
+
 
 		std::shared_ptr<GameObject> cameraObject = dmtkCore->AddEmptyGameObject();
 		cameraObject->Position = glm::vec3(0.0f, 0.0f, 3.0f);
@@ -28,7 +30,7 @@ int main(int argc, char* argv[])
 
 		std::shared_ptr<GameObject> paladinGameObject = dmtkCore->AddEmptyGameObject();
 		std::shared_ptr<ModelRenderer> paladinModelRenderer = paladinGameObject->AddComponent<ModelRenderer>();
-		paladinModelRenderer->Initialise( "../src/dmtk/assets/models/Mushrooms1_Obj/Mushrooms1_Obj/Mushrooms1.obj", basicShader );
+		paladinModelRenderer->Initialise( "models/Mushrooms1_Obj/Mushrooms1_Obj/Mushrooms1.obj", basicShader );
 
 		/*std::shared_ptr<GameObject> explorerGameObject = dmtkCore->AddEmptyGameObject();
 		explorerGameObject->Position = glm::vec3(0.5f, 0.0f, 0.0f);

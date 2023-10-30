@@ -42,9 +42,13 @@ namespace Mimic
 			return;
 		}
 
-		_directory = path.substr(0, path.find_last_of('/'));
+		// assign model directory for texture loading:
+		auto lastSlash = Path.find_last_of("/\\");
+		_directory = Path.substr(0, lastSlash + 1);
+
 		ProcessNode(scene->mRootNode, scene);
 	}
+
 
 	void Model::ProcessNode(aiNode* node, const aiScene* scene)
 	{
@@ -126,7 +130,8 @@ namespace Mimic
 		{
 			aiString aiPath;
 			material->GetTexture(type, i, &aiPath);
-			std::shared_ptr<Texture> loadedTexture = GetResourceManager()->LoadResource<Texture>(_directory + '/' + aiPath.C_Str());
+			std::string texturePath = _directory + aiPath.C_Str();
+			std::shared_ptr<Texture> loadedTexture = GetResourceManager()->LoadResource<Texture>(texturePath);
 			/*loadedTexture->Type = type;*/
 			loadedTextures.push_back(loadedTexture);
 		}

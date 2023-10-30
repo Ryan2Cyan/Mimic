@@ -2,6 +2,7 @@
 #include <cassert>
 #include <iostream>
 #include <fstream>
+#include <array>
 #include <glm/gtc/type_ptr.hpp>
 
 // Source: https://www.youtube.com/watch?v=8wFEzIYRZXg
@@ -18,7 +19,7 @@ namespace Mimic
 	const std::string Shader::ReadShaderFile(const std::string& path)
 	{
 		std::string result;
-		std::ifstream in(path, std::ios::in, std::ios::binary);
+		std::ifstream in(path, std::ios::in | std::ios::binary); // in = readonly, binary = reading bytes mode
 		if (in)
 		{
 			in.seekg(0, std::ios::end);
@@ -74,8 +75,13 @@ namespace Mimic
 	{
 		GLuint programId = glCreateProgram();
 
+		const int numberOfShaders = shaderSources.size();
+		constexpr int maxShadersSupported = 2;
+		assert(shaderSources.size() <= maxShadersSupported);
+		std::array<GLenum, maxShadersSupported> glShaderIds;
+		int glShaderIdIndex = 0;
+		
 		// generate & attach each shader to the program:
-		std::vector<GLenum> glShaderIds(shaderSources.size());
 		for (auto& shader : shaderSources)
 		{
 			GLenum shaderType = shader.first;
@@ -96,7 +102,8 @@ namespace Mimic
 			}
 
 			glAttachShader(programId, shaderId);
-			glShaderIds.push_back(shaderId);
+			glShaderIds[glShaderIdIndex] = shaderId;
+			glShaderIdIndex++;
 		}
 
 		// link shaders to program:

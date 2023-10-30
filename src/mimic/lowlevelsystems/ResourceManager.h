@@ -52,10 +52,11 @@ namespace Mimic
 		explicit ResourceManager();
 
 		// is resource loaded? yes: return, no: create new, store, then return:
-		template<typename T> std::shared_ptr<T> LoadResource(const std::string& path)
+		template<typename T> std::shared_ptr<T> LoadResource(const std::string& localPath)
 		{
 			// check if the resource is already loaded:
-			auto iterator = _loadedResources.find(path);
+			std::string fullPath = AssetsDirectoryPath + localPath;
+			auto iterator = _loadedResources.find(fullPath);
 			if (iterator != _loadedResources.end())
 			{
 				auto resultPair = *iterator; 
@@ -66,16 +67,21 @@ namespace Mimic
 			// load from disk:
 			std::shared_ptr<T> newResource = std::make_shared<T>();
 			newResource->_resourceManager = _self; // just incase a Resouce needs to load Resources itself.
-			newResource->Load(path);
-			newResource->Path = path;
-			_loadedResources[path] = newResource;
+			newResource->Path = localPath;
+			newResource->Load(fullPath);
+			if(newResource->Name.empty()) newResource->Name = GetNameFromFilePath(fullPath);
+			_loadedResources[fullPath] = newResource;
 			return newResource;
 		}
+
+		const std::string AssetsDirectoryPath;
 
 	private:
 		friend struct MimicCore;
 
 		std::shared_ptr<ResourceManager> Initialise();
+		const std::string GetNameFromFilePath(const std::string& path);
+
 		std::unordered_map<std::string, std::shared_ptr<Resource>> _loadedResources;
 		std::weak_ptr<MimicCore> _mimicCore;
 		std::weak_ptr<ResourceManager> _self;

@@ -34,8 +34,8 @@ namespace Mimic
 	private:
 		friend struct ResourceManager;
 
-		std::vector<std::shared_ptr<Mesh>> _meshes;
 		std::string _directory;
+		std::vector<std::shared_ptr<Mesh>> _meshes;
 		std::weak_ptr<Model> _self;
 
 		void Load(const std::string& path) override;
