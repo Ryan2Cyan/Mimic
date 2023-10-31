@@ -12,6 +12,9 @@ using namespace Mimic;
 #undef main
 int main(int argc, char* argv[])
 {
+	Mimic::Logger::Init();
+	MIMIC_DEBUG_LOG("Bootie");
+
 	{
 		std::cout << "Hello Worldddd!" << std::endl;
 		
