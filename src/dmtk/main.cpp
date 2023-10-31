@@ -3,7 +3,8 @@
 #include <vector>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp> 
-#include <glm/gtc/type_ptr.hpp> 
+#include <glm/gtc/type_ptr.hpp>
+#include <cstdio>
 #include "imgui.h"
 #define SDL_MAIN_HANDLED
 
@@ -13,10 +14,13 @@ using namespace Mimic;
 int main(int argc, char* argv[])
 {
 	Mimic::Logger::Init();
-	MIMIC_DEBUG_LOG("Bootie");
+	MIMIC_LOG("Bootie");
+	/*MIMIC_DEBUG_LOGF("\033[33m");*/
+	MIMIC_LOG_WARNING("Number: %i", 0);
+	MIMIC_LOG("Bootie");
 
 	{
-		std::cout << "Hello Worldddd!" << std::endl;
+		/*std::cout << "Hello Worldddd!" << std::endl;*/
 		
 		// game engine code:
 		std::shared_ptr<MimicCore> dmtkCore = MimicCore::Initialise();
