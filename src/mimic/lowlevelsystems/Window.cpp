@@ -1,22 +1,39 @@
 #include "Window.h"
-#include <iostream>
+#include <utility/Logger.h>
 
 namespace Mimic
 {
 	Window::Window(std::string windowName, const glm::vec2 aspectRatio) : WindowName(windowName), AspectRatio(aspectRatio)
 	{
-		if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) < 0) throw std::runtime_error("Failed to initialize SDL");
+		if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) < 0)
+		{
+			MIMIC_LOG_FATAL("Failed to initialize SDL: %", SDL_GetError());
+			throw;
+		}
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 
 		_window = SDL_CreateWindow(windowName.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, aspectRatio.x, aspectRatio.y, SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL);
-		SDL_assert(_window != NULL);
+		if (_window == nullptr)
+		{
+			MIMIC_LOG_FATAL("Failed to initialize SDL_Window: %", SDL_GetError());
+			throw;
+		}
 
 		_renderer = SDL_CreateRenderer(_window, -1, SDL_RENDERER_ACCELERATED);
-		SDL_assert(_renderer != NULL);
+		if (_renderer == nullptr)
+		{
+			MIMIC_LOG_FATAL("Failed to initialize SDL_Renderer: %", SDL_GetError());
+			throw;
+		}
 
 		_glContext = SDL_GL_CreateContext(_window);
+		if (_glContext == nullptr)
+		{
+			MIMIC_LOG_FATAL("Failed to initialize SDL_GL_Context: %", SDL_GetError());
+			throw;
+		}
 	}
 
 	Window::~Window() 
@@ -26,7 +43,7 @@ namespace Mimic
 		if(_window) SDL_DestroyWindow(_window);
 	}
 
-	std::shared_ptr<Window> Window::Initialise(std::string windowName, const glm::vec2 aspectRatio)
+	std::shared_ptr<Window> Window::Initialise(const std::string& windowName, const glm::vec2 aspectRatio)
 	{
 		return std::make_shared<Window>(windowName, aspectRatio);
 	}

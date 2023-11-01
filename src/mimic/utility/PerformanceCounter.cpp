@@ -1,0 +1,32 @@
+#include "PerformanceCounter.h"
+#include <SDL/SDL.h>
+
+namespace Mimic
+{
+	PerformanceCounter::PerformanceCounter() : _startTime(0.0f), _elapsedTime(0.0f) {}
+
+	std::shared_ptr<PerformanceCounter> PerformanceCounter::Initialise()
+	{
+		return std::make_shared<PerformanceCounter>();
+	}
+
+	void PerformanceCounter::StartPerformanceCounter() noexcept
+	{
+		_startTime = SDL_GetPerformanceCounter();
+	}
+
+	const long long PerformanceCounter::EndPerformanceCounter() noexcept
+	{
+		const long long elapsed = SDL_GetPerformanceCounter() - _startTime;
+		_elapsedTime = elapsed;
+		return elapsed;
+	}
+
+	const long PerformanceCounter::GetFPS() const noexcept
+	{
+		long performanceCountFrequency = SDL_GetPerformanceFrequency();
+		long elapsedTimeLong = (long)_elapsedTime;
+		long millisecondsPerFrame = (1000.0f * elapsedTimeLong) / performanceCountFrequency;
+		return performanceCountFrequency / elapsedTimeLong;
+	}
+}

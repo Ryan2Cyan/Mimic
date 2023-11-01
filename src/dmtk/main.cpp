@@ -13,17 +13,10 @@ using namespace Mimic;
 #undef main
 int main(int argc, char* argv[])
 {
-	Mimic::Logger::Init();
-	MIMIC_LOG("Bootie");
-	/*MIMIC_DEBUG_LOGF("\033[33m");*/
-	MIMIC_LOG_WARNING("Number: %i", 0);
-	MIMIC_LOG("Bootie");
-
 	{
-		/*std::cout << "Hello Worldddd!" << std::endl;*/
-		
 		// game engine code:
 		std::shared_ptr<MimicCore> dmtkCore = MimicCore::Initialise();
+		MIMIC_LOG_INFO("Hello World!");
 		std::shared_ptr<Shader> basicShader = dmtkCore->ResourceManager->LoadResource<Shader>("shaders/Texture.glsl");
 		basicShader->Name = "Basic_Shader";
 
@@ -33,7 +26,6 @@ int main(int argc, char* argv[])
 		std::shared_ptr<Camera> mainCamera = cameraObject->AddComponent<Camera>();
 		mainCamera->Initialise(dmtkCore->Window->AspectRatio, 45.0f);
 		dmtkCore->AddCamera(mainCamera, true);
-
 
 		std::shared_ptr<GameObject> paladinGameObject = dmtkCore->AddEmptyGameObject();
 		std::shared_ptr<ModelRenderer> paladinModelRenderer = paladinGameObject->AddComponent<ModelRenderer>();
@@ -46,12 +38,14 @@ int main(int argc, char* argv[])
 		
 		constexpr float maxRotAngle = 2.0f * 3.141592653589793238462643383f;
 
+		std::shared_ptr<PerformanceCounter> performanceCounter = PerformanceCounter::Initialise();
 
 		// #############################################################################
 		// game loop:
 	    // #############################################################################
 		while (dmtkCore->ApplicationRunning)
 		{
+			performanceCounter->StartPerformanceCounter();
 			// handle human interface devices:
 			SDL_Event event;
 			while (SDL_PollEvent(&event))
@@ -81,6 +75,9 @@ int main(int argc, char* argv[])
 
 			dmtkCore->Update();
 			dmtkCore->Draw();
+
+			performanceCounter->EndPerformanceCounter();
+			/*MIMIC_LOG_INFO("FPS: %", performanceCounter->GetFPS());*/
 		}
 	}
 	return 0;

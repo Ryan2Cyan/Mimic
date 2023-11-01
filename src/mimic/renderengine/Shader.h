@@ -18,7 +18,7 @@ namespace Mimic
 		unsigned int ShaderProgramId;
 		
 
-		void Load(const std::string& path) override;
+		const int Load(const std::string& path) override;
 
 		void SetBool(const char* name, const bool value) const;
 		void SetInt(const char* name, const int value) const;
@@ -40,5 +40,7 @@ namespace Mimic
 		int _modelMatrixUniformLocation;
 		int _viewMatrixUniformLocation;
 		int _projectionMatrixUniformLocation;
+
+		bool _initialised;
 	};
 }

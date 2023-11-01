@@ -1,10 +1,9 @@
 #include "ModelRenderer.h"
+#include <utility/Logger.h>
 #include <lowlevelsystems/ResourceManager.h>
 #include <lowlevelsystems/MimicCore.h>
 #include <renderengine/Model.h>
 #include <renderengine/Shader.h>
-#include <iostream>
-#include <stdexcept>
 
 namespace Mimic
 {
@@ -12,13 +11,23 @@ namespace Mimic
 
 	void ModelRenderer::Initialise(const char* modelPath, std::shared_ptr<Shader> shader)
 	{
+		_initialised = true;
+
 		// initialise model:
 		_model = GetGameObject()->GetMimicCore()->ResourceManager->LoadResource<Model>(std::string(modelPath));
-		_model->Component = _self;
+		if (_model == nullptr)
+		{
+			MIMIC_LOG_WARNING("[%] Model Renderer could not load model from model path \"%\".", GetGameObject()->Name, modelPath);
+			_initialised = false;
+		}
+		else _model->Component = _self;
 
-		_shader = shader;
-
-		_initialised = true;
+		if (shader == nullptr)
+		{
+			MIMIC_LOG_WARNING("[%] Model Renderer passed invalid shader.", GetGameObject()->Name);
+			_initialised = false;
+		}
+		else _shader = shader;
 	}
 
 	void ModelRenderer::Update()
@@ -28,10 +37,11 @@ namespace Mimic
 
 	void ModelRenderer::Draw()
 	{
+		if (_skipDraw) return;
 		if (!_initialised)
 		{
-			std::cerr << "ERROR: GameObject [" << GetGameObject()->Name << "] ModelRenderer component is uninitialised" << std::endl;
-			throw;
+			MIMIC_LOG_WARNING("[%] Unable to draw, Model Renderer is uninitialised.", GetGameObject()->Name);
+			_skipDraw = true;
 			return;
 		}
 

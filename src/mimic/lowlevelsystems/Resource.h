@@ -13,7 +13,7 @@ namespace Mimic
 	{
 		virtual ~Resource() = default;
 
-		std::shared_ptr<ResourceManager> GetResourceManager() const
+		std::shared_ptr<ResourceManager> GetResourceManager() const noexcept
 		{
 			return _resourceManager.lock();
 		}
@@ -26,6 +26,7 @@ namespace Mimic
 
 		std::weak_ptr<ResourceManager> _resourceManager;
 
-		virtual void Load(const std::string& path) = 0;
+		// Return -1 on failure, 0 on success:
+		virtual const int Load(const std::string& path) = 0;
 	};
 }

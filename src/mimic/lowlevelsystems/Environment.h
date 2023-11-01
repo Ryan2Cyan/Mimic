@@ -13,14 +13,15 @@ namespace Mimic
 	{
 		explicit Environment(const float idealTime);
 
-		static float GetDeltaTime();
+		static const float GetDeltaTime() noexcept;
 		void CalculateDeltaTime();
+
 	private:
 		friend struct MimicCore;
 
 		std::shared_ptr<Environment> Initialise(const float idealFramerate);
-		static float _deltaTime;
-		float _lastTime;
 		const float _idealFramerate;
+		static float _deltaTime;
+		float _lastTimeDelta;
 	};
 }

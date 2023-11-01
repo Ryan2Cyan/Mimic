@@ -2,7 +2,6 @@
 #include <lowlevelsystems/Component.h>
 #include <GL/glew.h>
 #include <memory>
-#include <string>
 
 namespace Mimic
 {	

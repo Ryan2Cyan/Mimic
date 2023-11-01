@@ -1,4 +1,5 @@
 #include "Shader.h"
+#include <utility/Logger.h>
 #include <cassert>
 #include <iostream>
 #include <fstream>
@@ -9,11 +10,15 @@
 
 namespace Mimic
 {
-	void Shader::Load(const std::string& path)
+	const int Shader::Load(const std::string& path)
 	{
 		const std::string sourceCode = ReadShaderFile(path);
+		if (sourceCode.empty()) return -1;
+
 		auto shaderSources = PreProcess(sourceCode);
 		CompileShaderText(shaderSources);
+		
+		return _initialised ? 0 : -1;
 	}
 
 	const std::string Shader::ReadShaderFile(const std::string& path)
@@ -28,12 +33,8 @@ namespace Mimic
 			in.read(&result[0], result.size());
 			in.close();
 		}
-		else
-		{
-			// error, could not read shader file:
-			std::cerr << "WARNING: could not open shader from file: " << path << "." << std::endl;
-			return nullptr;
-		}
+		else MIMIC_LOG_WARNING("[Shader] Could not open shader from filepath: %", path);
+	
 		return result;
 	}
 
@@ -42,7 +43,6 @@ namespace Mimic
 		if (type == "vertex") return GL_VERTEX_SHADER;
 		if (type == "fragment" || type == "pixel") return GL_FRAGMENT_SHADER;
 
-		std::cerr << "Unknown shader type: " << type << std::endl;
 		return 0;	
 	}
 
@@ -61,11 +61,16 @@ namespace Mimic
 			assert(endOfLinePosition != std::string::npos);
 			size_t begin = currentPosition + typeTokenLength + 1;
 			std::string type = source.substr(begin, endOfLinePosition - begin);
-			assert(type == "vertex" || type == "fragment" || type == "pixel");
-
+			
 			// store source code associated with the shader type:
 			size_t nextLinePosition = source.find_first_not_of("\r\n", endOfLinePosition);
 			currentPosition = source.find(typeToken, nextLinePosition);
+			const GLenum glEnumType = ShaderTypeFromString(type);
+			if (glEnumType == 0)
+			{
+				MIMIC_LOG_WARNING("[Shader] Shader source type token \"%\" is invalid", type);
+				return shaderSources;
+			}
 			shaderSources[ShaderTypeFromString(type)] = source.substr(nextLinePosition, currentPosition - (nextLinePosition == std::string::npos ? source.size() - 1 : nextLinePosition));
 		}
 		return shaderSources;
@@ -97,8 +102,8 @@ namespace Mimic
 			if (!success)
 			{
 				glGetShaderInfoLog(shaderId, 512, NULL, infoLog);
-				std::cout << "ERROR: Shader has failed to compile.\n" << infoLog << std::endl;
-				assert(false);
+				MIMIC_LOG_WARNING("[Shader] Shader(s) have failed to compile: %", infoLog);
+				return;
 			}
 
 			glAttachShader(programId, shaderId);
@@ -114,7 +119,7 @@ namespace Mimic
 		if (!success)
 		{
 			glGetProgramInfoLog(programId, 512, NULL, infoLog);
-			std::cout << "ERROR: Shader(s) have failed to link to the ShaderProgram.\n" << infoLog << std::endl;
+			MIMIC_LOG_WARNING("[Shader] Shader(s) have failed to link to the ShaderProgram: %", infoLog);
 
 			glDeleteProgram(programId);
 			for (auto shaderId : glShaderIds) glDeleteShader(shaderId);
@@ -122,10 +127,27 @@ namespace Mimic
 		}
 
 		ShaderProgramId = programId;
+		_initialised = true;
+
 		// assign uniforms:
 		_modelMatrixUniformLocation = glGetUniformLocation(ShaderProgramId, "u_Model");
+		if (_modelMatrixUniformLocation == -1)
+		{
+			MIMIC_LOG_WARNING("[Shader] Unable to locate model matrix uniform location.");
+			_initialised = false;
+		}
 		_viewMatrixUniformLocation = glGetUniformLocation(ShaderProgramId, "u_View");
+		if (_viewMatrixUniformLocation == -1)
+		{
+			MIMIC_LOG_WARNING("[Shader] Unable to locate view matrix uniform location.");
+			_initialised = false;
+		}
 		_projectionMatrixUniformLocation = glGetUniformLocation(ShaderProgramId, "u_Projection");
+		if (_projectionMatrixUniformLocation == -1)
+		{
+			MIMIC_LOG_WARNING("[Shader] Unable to locate projection matrix uniform location.");
+			_initialised = false;
+		}
 
 		for (auto shaderId : glShaderIds) glDetachShader(ShaderProgramId, shaderId);
 	}
@@ -133,28 +155,44 @@ namespace Mimic
 	void Shader::SetBool(const char* name, const bool value) const
 	{
 		GLint location = glGetUniformLocation(ShaderProgramId, name);
-		if (location == -1) std::cerr << "WARNING: Could not find location of shader uniform [bool]: " << name << std::endl;
+		if (location == -1)
+		{
+			MIMIC_LOG_WARNING("[Shader] Could not find location of shader uniform [bool] named \"%\"", name);
+			return;
+		}
 		glUniform1i(location, (int)value);
 	}
 
 	void Shader::SetInt(const char* name, const int value) const
 	{
 		GLint location = glGetUniformLocation(ShaderProgramId, name);
-		if (location == -1) std::cerr << "WARNING: Could not find location of shader uniform [integer]: " << name << std::endl;
+		if (location == -1)
+		{
+			MIMIC_LOG_WARNING("[Shader] Could not find location of shader uniform [integer] named \"%\"", name);
+			return;
+		}
 		glUniform1i(location, value);
 	}
 
 	void Shader::SetFloat(const char* name, const float value) const
 	{
 		GLint location = glGetUniformLocation(ShaderProgramId, name);
-		if (location == -1) std::cerr << "WARNING: Could not find location of shader uniform [float]: " << name << std::endl;
+		if (location == -1)
+		{
+			MIMIC_LOG_WARNING("[Shader] Could not find location of shader uniform [float] named \"%\"", name);
+			return;
+		}
 		glUniform1f(location, value);
 	}
 
 	void Shader::SetMat4(const char* name, const glm::mat4 value) const
 	{
 		GLint location = glGetUniformLocation(ShaderProgramId, name);
-		if(location == -1) std::cerr << "WARNING: Could not find location of shader uniform [mat4]: " << name << std::endl;
+		if (location == -1)
+		{
+			MIMIC_LOG_WARNING("[Shader] Could not find location of shader uniform [matrix 4x4] named \"%\"", name);
+			return;
+		}
 		glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(value));
 	}
 

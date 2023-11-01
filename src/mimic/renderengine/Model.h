@@ -38,7 +38,7 @@ namespace Mimic
 		std::vector<std::shared_ptr<Mesh>> _meshes;
 		std::weak_ptr<Model> _self;
 
-		void Load(const std::string& path) override;
+		const int Load(const std::string& path) override;
 		void ProcessNode(aiNode* node, const aiScene* scene);
 		std::shared_ptr<Mesh> ProcessMesh(aiMesh* mesh, const aiScene* scene);
 		const std::vector<std::shared_ptr<Texture>> LoadMaterialTextures(aiMaterial* material, aiTextureType type, std::string typeName);

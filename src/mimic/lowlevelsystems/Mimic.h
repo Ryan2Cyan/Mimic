@@ -11,10 +11,12 @@
 #include "ResourceManager.h"
 #include "Resource.h"
 #include "ModelRenderer.h"
-#include "Logger.h"
 
 #include <renderengine/Mesh.h>
 #include <renderengine/Shader.h>
 #include <renderengine/Model.h>
 #include <renderengine/Vertex.h>
 #include <renderengine/Texture.h>
+
+#include <utility/PerformanceCounter.h>
+#include <utility/Logger.h>

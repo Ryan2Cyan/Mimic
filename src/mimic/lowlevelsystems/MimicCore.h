@@ -3,7 +3,6 @@
 #include <GLM/glm.hpp>
 #include <SDL/SDL.h>
 #include <GL/glew.h>
-#include <iostream>
 #include <memory>
 #include <vector>
 
@@ -28,11 +27,11 @@ namespace Mimic
 
 		void Update();
 		void Draw();
-		glm::vec2 GetAspectRatio() const;
-		std::shared_ptr<GameObject> AddEmptyGameObject();
-		std::shared_ptr<GameObject> AddEmptyGameObject(const char* name);
-		void AddGameObject(const std::shared_ptr<GameObject> gameObject);
-		void AddCamera(const std::shared_ptr<Camera> camera, const bool setToCurrent);
+		glm::vec2 GetAspectRatio() const noexcept;
+		std::shared_ptr<GameObject> AddEmptyGameObject() noexcept;
+		std::shared_ptr<GameObject> AddEmptyGameObject(const char* name) noexcept;
+		void AddGameObject(const std::shared_ptr<GameObject> gameObject) noexcept;
+		void AddCamera(const std::shared_ptr<Camera> camera, const bool setToCurrent) noexcept;
 
 		std::vector<std::shared_ptr<GameObject>> GameObjects;
 		std::vector<std::shared_ptr<Camera>> Cameras;

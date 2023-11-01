@@ -1,6 +1,6 @@
 #include "ResourceManager.h"
 #include <lowlevelsystems/Resource.h>
-#include <utility>
+#include <utility/Logger.h>
 
 namespace Mimic
 {
@@ -15,7 +15,7 @@ namespace Mimic
 	}
 
 	// Source https://www.youtube.com/watch?v=Z9LE3ksHEQQ
-	const std::string ResourceManager::GetNameFromFilePath(const std::string& path)
+	const std::string ResourceManager::GetNameFromFilePath(const std::string& path) const noexcept
 	{
 		auto lastSlash = path.find_last_of("/\\");
 		lastSlash = lastSlash == std::string::npos ? 0 : lastSlash + 1;

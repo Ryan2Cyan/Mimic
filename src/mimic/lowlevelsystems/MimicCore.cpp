@@ -1,4 +1,5 @@
 #include "MimicCore.h"
+#include <utility/Logger.h>
 #include <lowlevelsystems/Window.h>
 #include <lowlevelsystems/ResourceManager.h>
 #include <lowlevelsystems/GameObject.h>
@@ -10,6 +11,8 @@ namespace Mimic
 {
 	MimicCore::MimicCore()
 	{
+		Mimic::Logger::Init();
+
 		// initialise SDL_Window, SDL_Renderer, & GL_Context:
 		glm::vec2 aspectRatio = glm::vec2(1260.0f, 720.0f);
 		Window = Window->Initialise("DMTK", aspectRatio);
@@ -19,7 +22,7 @@ namespace Mimic
 		GLenum err = glewInit();
 		if (GLEW_OK != err)
 		{
-			std::cerr << "Error: GLEW failed to initialise with message: " << glewGetErrorString(err) << std::endl;
+			MIMIC_LOG_FATAL("Error: GLEW failed to initialise with message: %", glewGetErrorString(err));
 			throw;
 		}
 		
@@ -31,7 +34,7 @@ namespace Mimic
 
 	std::shared_ptr<MimicCore> MimicCore::Initialise() 
 	{ 
-		std::shared_ptr<MimicCore> newMimicCore =  std::make_shared<MimicCore>();
+		std::shared_ptr<MimicCore> newMimicCore = std::make_shared<MimicCore>();
 		newMimicCore->_self = newMimicCore;
 
 		// init resource manager:
@@ -68,12 +71,12 @@ namespace Mimic
 		SDL_GL_SwapWindow(Window->_window);
 	}
 
-	glm::vec2 MimicCore::GetAspectRatio() const
+	glm::vec2 MimicCore::GetAspectRatio() const noexcept
 	{
 		return Window->AspectRatio;
 	}
 
-	std::shared_ptr<GameObject> MimicCore::AddEmptyGameObject()
+	std::shared_ptr<GameObject> MimicCore::AddEmptyGameObject() noexcept
 	{
 		std::shared_ptr<GameObject> emptyGameObject = std::make_shared<GameObject>();
 		emptyGameObject->_self = emptyGameObject;
@@ -84,7 +87,7 @@ namespace Mimic
 		return emptyGameObject;
 	}
 
-	std::shared_ptr<GameObject> MimicCore::AddEmptyGameObject(const char* name)
+	std::shared_ptr<GameObject> MimicCore::AddEmptyGameObject(const char* name) noexcept
 	{
 		std::shared_ptr<GameObject> emptyGameObject = std::make_shared<GameObject>();
 		emptyGameObject->_self = emptyGameObject;
@@ -95,11 +98,29 @@ namespace Mimic
 		return emptyGameObject;
 	}
 
-	void MimicCore::AddGameObject(const std::shared_ptr<GameObject> gameObject)
+	void MimicCore::AddGameObject(const std::shared_ptr<GameObject> gameObject) noexcept
 	{
+		if (gameObject == nullptr)
+		{
+			MIMIC_LOG_WARNING("Attempted to add null game object to hierarchy.");
+			return;
+		}
 		gameObject->_mimicCore = _self;
 
 		GameObjects.push_back(gameObject);
+	}
+
+	void MimicCore::AddCamera(const std::shared_ptr<Camera> camera, const bool setToCurrent) noexcept
+	{
+		if (camera == nullptr)
+		{
+			MIMIC_LOG_WARNING("Attempted to add null camera to hierarchy.");
+			return;
+		}
+		Cameras.push_back(camera);
+
+		if (!setToCurrent) return;
+		CurrentCamera = camera;
 	}
 
 	/*void MimicCore::AddCamera(const std::shared_ptr<Camera> camera, const bool setToCurrent = false)
@@ -109,12 +130,4 @@ namespace Mimic
 		if (!setToCurrent) return;
 		CurrentCamera = camera;
 	}*/
-
-	void MimicCore::AddCamera(const std::shared_ptr<Camera> camera, const bool setToCurrent)
-	{
-		Cameras.push_back(camera);
-
-		if (!setToCurrent) return;
-		CurrentCamera = camera;
-	}
 }

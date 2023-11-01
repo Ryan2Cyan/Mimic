@@ -1,4 +1,5 @@
 #include "Model.h"
+#include <utility/Logger.h>
 #include <renderengine/Vertex.h>
 #include <renderengine/Texture.h>
 #include <lowlevelsystems/ResourceManager.h>
@@ -21,25 +22,25 @@ namespace Mimic
 		return Component.lock();
 	}
 
-	void Model::Load(const std::string& path)
+	const int Model::Load(const std::string& path)
 	{
 		Assimp::Importer importer;
 		const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
 
 		if (!scene)
 		{
-			std::cout << "ERROR::ASSIMP::" << importer.GetErrorString() << std::endl;
-			return;
+			MIMIC_LOG_WARNING("[Model] Assimp importer encountered an error: %", importer.GetErrorString());
+			return -1;
 		}
 		if (scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE)
 		{
-			std::cout << "ERROR::ASSIMP::" << importer.GetErrorString() << std::endl;
-			return;
+			MIMIC_LOG_WARNING("[Model] Assimp importer encountered an error: %", importer.GetErrorString());
+			return -1;
 		}
 		if (!scene->mRootNode)
 		{
-			std::cout << "ERROR::ASSIMP::" << importer.GetErrorString() << std::endl;
-			return;
+			MIMIC_LOG_WARNING("[Model] Assimp importer encountered an error: %", importer.GetErrorString());
+			return -1;
 		}
 
 		// assign model directory for texture loading:
@@ -47,6 +48,7 @@ namespace Mimic
 		_directory = Path.substr(0, lastSlash + 1);
 
 		ProcessNode(scene->mRootNode, scene);
+		return 0;
 	}
 
 
@@ -117,7 +119,7 @@ namespace Mimic
 		}
 
 		std::shared_ptr<Mesh> newMesh = std::make_shared<Mesh>(vertices, indices, textures);
-		if (textures.size() < 1) std::cout << "WARNING: Mesh on [" << GetComponent()->GetGameObject()->Name << "] has no textures." << std::endl;
+		if (textures.size() < 1) MIMIC_LOG_WARNING("[Model] Mesh \"%\" loaded with no textures.", mesh->mName.C_Str());
 		return newMesh;
 	}
 
@@ -132,8 +134,12 @@ namespace Mimic
 			material->GetTexture(type, i, &aiPath);
 			std::string texturePath = _directory + aiPath.C_Str();
 			std::shared_ptr<Texture> loadedTexture = GetResourceManager()->LoadResource<Texture>(texturePath);
-			/*loadedTexture->Type = type;*/
-			loadedTextures.push_back(loadedTexture);
+			if (loadedTexture != nullptr)
+			{
+				/*loadedTexture->Type = type;*/
+				loadedTextures.push_back(loadedTexture);
+			}
+			else MIMIC_LOG_WARNING("[Model] Unable to load texture of type: \"%\", from path: \"%\"", typeName, texturePath);
 		}
 		return loadedTextures;
 	}

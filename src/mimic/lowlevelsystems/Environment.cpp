@@ -10,10 +10,7 @@ namespace Mimic
 		return Environment::GetDeltaTime();
 	}
 
-	Environment::Environment(const float idealFramerate) : _lastTime(0.0f), _idealFramerate(idealFramerate) 
-	{
-
-	}
+	Environment::Environment(const float idealFramerate) : _lastTimeDelta(0.0f), _idealFramerate(idealFramerate) { }
 
 	std::shared_ptr<Environment> Environment::Initialise(const float idealFramerate)
 	{
@@ -21,7 +18,7 @@ namespace Mimic
 	}
 
 	// access private static member _deltaTime:
-	float Environment::GetDeltaTime()
+	const float Environment::GetDeltaTime() noexcept
 	{
 		return _deltaTime;
 	}
@@ -29,9 +26,9 @@ namespace Mimic
 	void Environment::CalculateDeltaTime()
 	{
 		const float time = SDL_GetTicks();
-		const float difference = time - _lastTime;
+		const float difference = time - _lastTimeDelta;
 		const float deltaTime = difference / 1000.0f;
-		_lastTime = time;
+		_lastTimeDelta = time;
 
 		// delay program to prevent CPU from doing unnecessary calculations:
 		const float idealTime = 1.0f / _idealFramerate;

@@ -20,7 +20,7 @@ namespace Mimic
 	private:
 		friend struct MimicCore;
 
-		std::shared_ptr<Window> Initialise(std::string windowName, const glm::vec2 aspectRatio);
+		std::shared_ptr<Window> Initialise(const std::string& windowName, const glm::vec2 aspectRatio);
 		SDL_Window* _window;
 		SDL_Renderer* _renderer;
 		SDL_GLContext _glContext;

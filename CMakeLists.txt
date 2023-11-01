@@ -43,8 +43,11 @@ add_library(mimic
     src/mimic/lowlevelsystems/ModelRenderer.h
     src/mimic/lowlevelsystems/Resource.cpp
     src/mimic/lowlevelsystems/Resource.h
-    src/mimic/lowlevelsystems/Logger.cpp
-    src/mimic/lowlevelsystems/Logger.h
+
+    src/mimic/utility/Logger.cpp
+    src/mimic/utility/Logger.h
+    src/mimic/utility/PerformanceCounter.cpp
+    src/mimic/utility/PerformanceCounter.h
 )
 
 # PERCY ADVICE: Make the renderer a separate library that's attached to the mimic engine.

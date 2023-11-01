@@ -1,4 +1,5 @@
 #pragma once
+#include <utility/Logger.h>
 #include <lowlevelsystems/Component.h>
 #include <string>
 #include <memory>
@@ -68,7 +69,12 @@ namespace Mimic
 			std::shared_ptr<T> newResource = std::make_shared<T>();
 			newResource->_resourceManager = _self; // just incase a Resouce needs to load Resources itself.
 			newResource->Path = localPath;
-			newResource->Load(fullPath);
+			const int success = newResource->Load(fullPath);
+			if (success == -1)
+			{
+				MIMIC_LOG_WARNING("[ResourceManager] Invalid resource filepath attempted to load: \"%\"", localPath.c_str());
+				return nullptr;
+			}
 			if(newResource->Name.empty()) newResource->Name = GetNameFromFilePath(fullPath);
 			_loadedResources[fullPath] = newResource;
 			return newResource;
@@ -80,7 +86,7 @@ namespace Mimic
 		friend struct MimicCore;
 
 		std::shared_ptr<ResourceManager> Initialise();
-		const std::string GetNameFromFilePath(const std::string& path);
+		const std::string GetNameFromFilePath(const std::string& path) const noexcept;
 
 		std::unordered_map<std::string, std::shared_ptr<Resource>> _loadedResources;
 		std::weak_ptr<MimicCore> _mimicCore;

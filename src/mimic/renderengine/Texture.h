@@ -12,10 +12,6 @@ namespace Mimic
 	{
 		unsigned int Id;
 		std::string Type;
-		void Load(const std::string& path) override;
-
-	protected:
-
-	private:
+		const int Load(const std::string& path) override;
 	};
 }
