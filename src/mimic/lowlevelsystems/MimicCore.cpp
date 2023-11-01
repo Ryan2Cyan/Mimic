@@ -22,9 +22,11 @@ namespace Mimic
 		GLenum err = glewInit();
 		if (GLEW_OK != err)
 		{
-			MIMIC_LOG_FATAL("Error: GLEW failed to initialise with message: %", glewGetErrorString(err));
+			MIMIC_LOG_FATAL("GLEW failed to initialise with message: %", glewGetErrorString(err));
 			throw;
 		}
+		MIMIC_LOG_INFO("[GLEW] Initialisation successful.");
+
 		
 		ApplicationRunning = true;
 		glEnable(GL_DEPTH_TEST);
@@ -41,10 +43,13 @@ namespace Mimic
 		newMimicCore->ResourceManager = newMimicCore->ResourceManager->Initialise();
 		newMimicCore->ResourceManager->_mimicCore = newMimicCore->_self;
 		newMimicCore->ResourceManager->_self = newMimicCore->ResourceManager;
+		MIMIC_LOG_INFO("[Mimic::ResourceManager] Initialisation successful.");
+
 
 		// init environment:
 		newMimicCore->Environment = newMimicCore->Environment->Initialise(70.0f);
-
+		MIMIC_LOG_INFO("[Mimic::Environment] Initialisation successful.");
+		if(newMimicCore != nullptr) MIMIC_LOG_INFO("[Mimic::MimicCore] Initialisation successful.");
 		return newMimicCore;
 	}
 
@@ -84,6 +89,7 @@ namespace Mimic
 		emptyGameObject->Name = "EmptyGameObject_" + std::to_string(GameObjects.size());
 
 		GameObjects.push_back(emptyGameObject);
+		MIMIC_LOG_INFO("[Mimic::MimicCore] Added Mimic::GameObject: \"%\".", emptyGameObject->Name);
 		return emptyGameObject;
 	}
 
@@ -95,6 +101,7 @@ namespace Mimic
 		emptyGameObject->Name = name;
 
 		GameObjects.push_back(emptyGameObject);
+		MIMIC_LOG_INFO("[Mimic::MimicCore] Added Mimic::GameObject: \"%\".", emptyGameObject->Name);
 		return emptyGameObject;
 	}
 
@@ -106,7 +113,7 @@ namespace Mimic
 			return;
 		}
 		gameObject->_mimicCore = _self;
-
+		MIMIC_LOG_INFO("[Mimic::MimicCore] Added Mimic::GameObject: \"%\".", gameObject->Name);
 		GameObjects.push_back(gameObject);
 	}
 
@@ -119,15 +126,9 @@ namespace Mimic
 		}
 		Cameras.push_back(camera);
 
+
 		if (!setToCurrent) return;
 		CurrentCamera = camera;
+		MIMIC_LOG_INFO("[Mimic::MimicCore] Added Mimic::Camera: \"%\".", camera->GetGameObject()->Name);
 	}
-
-	/*void MimicCore::AddCamera(const std::shared_ptr<Camera> camera, const bool setToCurrent = false)
-	{
-		Cameras.push_back(camera);
-
-		if (!setToCurrent) return;
-		CurrentCamera = camera;
-	}*/
 }

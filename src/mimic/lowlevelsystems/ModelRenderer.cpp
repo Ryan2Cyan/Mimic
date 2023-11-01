@@ -28,6 +28,8 @@ namespace Mimic
 			_initialised = false;
 		}
 		else _shader = shader;
+
+		if (_initialised) MIMIC_LOG_INFO("[Mimic::ModelRenderer] Initialisation successful.");
 	}
 
 	void ModelRenderer::Update()

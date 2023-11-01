@@ -1,5 +1,4 @@
 #include <lowlevelsystems/Mimic.h>
-#include <iostream>
 #include <vector>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp> 
@@ -13,6 +12,7 @@ using namespace Mimic;
 #undef main
 int main(int argc, char* argv[])
 {
+
 	{
 		// game engine code:
 		std::shared_ptr<MimicCore> dmtkCore = MimicCore::Initialise();
@@ -21,7 +21,7 @@ int main(int argc, char* argv[])
 		basicShader->Name = "Basic_Shader";
 
 
-		std::shared_ptr<GameObject> cameraObject = dmtkCore->AddEmptyGameObject();
+		std::shared_ptr<GameObject> cameraObject = dmtkCore->AddEmptyGameObject("Camera_1");
 		cameraObject->Position = glm::vec3(0.0f, 0.0f, 3.0f);
 		std::shared_ptr<Camera> mainCamera = cameraObject->AddComponent<Camera>();
 		mainCamera->Initialise(dmtkCore->Window->AspectRatio, 45.0f);

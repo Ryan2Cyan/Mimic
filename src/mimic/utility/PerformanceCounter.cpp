@@ -17,7 +17,8 @@ namespace Mimic
 
 	const long long PerformanceCounter::EndPerformanceCounter() noexcept
 	{
-		const long long elapsed = SDL_GetPerformanceCounter() - _startTime;
+		const long long endTime = SDL_GetPerformanceCounter();
+		const long long elapsed = endTime - _startTime;
 		_elapsedTime = elapsed;
 		return elapsed;
 	}

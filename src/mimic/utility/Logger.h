@@ -1,5 +1,4 @@
 #pragma once
-
 #include <string>
 #include <memory>
 #include <iostream>
@@ -7,7 +6,7 @@
 
 // Source: https://www.youtube.com/watch?v=dZr-53LAlOw&t=1619s
 
-//#define MIMIC_LOG(...)				::Mimic::Logger::GetCoreLogger()->DebugLog(__VA_ARGS__)
+#define MIMIC_DEBUG_LOG(...)			::Mimic::Logger::GetCoreLogger()->DebugLog(__VA_ARGS__)
 #define MIMIC_LOG_INFO(...)				::Mimic::Logger::GetCoreLogger()->LogInfo(__VA_ARGS__)
 #define MIMIC_LOG_WARNING(...)			::Mimic::Logger::GetCoreLogger()->LogWarning(__VA_ARGS__)
 #define MIMIC_LOG_ERROR(...)			::Mimic::Logger::GetCoreLogger()->LogError(__VA_ARGS__)
@@ -22,17 +21,38 @@ namespace Mimic
 	{
 		static void Init();
 
+		void DebugLog(const char* format)
+		{
+#ifdef MIMIC_DEBUG
+			std::cout << format << std::endl;
+#endif // MIMIC_DEBUG
+		}
+
+		template<typename T, typename... Targs> void DebugLog(const char* format, T value, Targs... Fargs)
+		{
+#ifdef MIMIC_DEBUG
+			Log("\x1b[36m[INFO] ");
+			Log(format, value, Fargs...);
+			Log("\n\x1b[0m");
+#endif
+		}
+
 		void LogInfo(const char* format) 
 		{ 
-			Log("[INFO] ");
+#ifdef MIMIC_DEBUG
+			Log("\x1b[36m[INFO] ");
 			std::cout << format << std::endl; 
+			Log("\x1b[0m");
+#endif
 		}
 
 		template<typename T, typename... Targs> void LogInfo(const char* format, T value, Targs... Fargs)
 		{
-			Log("[INFO] ");
+#ifdef MIMIC_DEBUG
+			Log("\x1b[36m[INFO] ");
 			Log(format, value, Fargs...);
-			std::cout << std::endl;
+			Log("\n\x1b[0m");
+#endif
 		}
 
 		void LogWarning(const char* format) 

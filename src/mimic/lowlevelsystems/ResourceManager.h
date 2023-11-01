@@ -77,6 +77,7 @@ namespace Mimic
 			}
 			if(newResource->Name.empty()) newResource->Name = GetNameFromFilePath(fullPath);
 			_loadedResources[fullPath] = newResource;
+			MIMIC_LOG_INFO("[Mimic::ResourceManager] Successfully loaded resource from path: \"%\".", fullPath);
 			return newResource;
 		}
 

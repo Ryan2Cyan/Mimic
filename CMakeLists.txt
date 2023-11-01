@@ -2,7 +2,15 @@ cmake_minimum_required(VERSION ${CMAKE_VERSION})
 project(DMTK VERSION 0.1)
 
 add_definitions(-DGLEW_STATIC)
-# add_definitions(-DBUILD_SHARED_LIBS=OFF)
+
+# Set Debug/Release mode:
+set(CMAKE_BUILD_TYPE "Debug")
+
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+add_compile_definitions(MIMIC_DEBUG = 1)
+
+else (CMAKE_BUILD_TYPE STREQUAL "Release")
+endif()
 
 include_directories(
     src/mimic

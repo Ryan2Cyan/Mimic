@@ -1,7 +1,7 @@
 #include "Camera.h"
+#include <lowlevelsystems/MimicCore.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <lowlevelsystems/MimicCore.h>
 
 namespace Mimic
 {
@@ -31,6 +31,8 @@ namespace Mimic
 		
 		// create projection matrix:
 		_projectionMatrix = glm::perspective(Fov, aspectRatio.x / aspectRatio.y, ClippingPlane.x, ClippingPlane.y);
+
+		MIMIC_LOG_INFO("[Mimic::Camera] Load successful.");
 	}
 
 	void Camera::Update()

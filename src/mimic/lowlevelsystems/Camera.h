@@ -1,5 +1,6 @@
 #pragma once
 #include <lowlevelsystems/Component.h>
+#include <utility/Logger.h>
 #include <GLM/glm.hpp>
 #include <memory>
 

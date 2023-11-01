@@ -43,6 +43,5 @@ namespace Mimic
 
 	private:
 		std::weak_ptr<MimicCore> _self;
-		
 	};
 }

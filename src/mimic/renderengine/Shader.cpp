@@ -18,6 +18,10 @@ namespace Mimic
 		auto shaderSources = PreProcess(sourceCode);
 		CompileShaderText(shaderSources);
 		
+#ifdef MIMIC_DEBUG
+		if (_initialised != -1) MIMIC_LOG_INFO("[Mimic::Shader] Load successful from path: \"%\".", path);
+#endif
+
 		return _initialised ? 0 : -1;
 	}
 
