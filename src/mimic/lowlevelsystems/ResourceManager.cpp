@@ -7,7 +7,11 @@ namespace Mimic
 	// #############################################################################
 	// resource manager functions:
 	// #############################################################################
-	ResourceManager::ResourceManager() : AssetsDirectoryPath("../src/dmtk/assets/") { }
+	ResourceManager::ResourceManager() : AssetsDirectoryPath("../src/dmtk/assets/") 
+	{
+		_fileLoader = std::make_shared<FileLoader>();
+		_assetsDirectory = _fileLoader->LocateDirectory("assets");
+	}
 
 	std::shared_ptr<ResourceManager> ResourceManager::Initialise()
 	{

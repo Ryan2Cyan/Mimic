@@ -24,6 +24,7 @@ namespace Mimic
 		void DebugLog(const char* format)
 		{
 #ifdef MIMIC_DEBUG
+			Log("[DEBUG] ");
 			std::cout << format << std::endl;
 #endif // MIMIC_DEBUG
 		}
@@ -31,10 +32,10 @@ namespace Mimic
 		template<typename T, typename... Targs> void DebugLog(const char* format, T value, Targs... Fargs)
 		{
 #ifdef MIMIC_DEBUG
-			Log("\x1b[36m[INFO] ");
+			Log("[DEBUG] ");
 			Log(format, value, Fargs...);
-			Log("\n\x1b[0m");
-#endif
+			Log("\n");
+#endif		
 		}
 
 		void LogInfo(const char* format) 

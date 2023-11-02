@@ -42,11 +42,6 @@ namespace Mimic
 			MIMIC_LOG_WARNING("[Model] Assimp importer encountered an error: %", importer.GetErrorString());
 			return -1;
 		}
-
-		// assign model directory for texture loading:
-		auto lastSlash = Path.find_last_of("/\\");
-		_directory = Path.substr(0, lastSlash + 1);
-
 		ProcessNode(scene->mRootNode, scene);
 		return 0;
 	}
@@ -119,7 +114,7 @@ namespace Mimic
 		}
 
 		std::shared_ptr<Mesh> newMesh = std::make_shared<Mesh>(vertices, indices, textures);
-		if (textures.size() < 1) MIMIC_LOG_WARNING("[Model] Mesh \"%\" loaded with no textures.", mesh->mName.C_Str());
+		if (textures.size() < 1) MIMIC_LOG_WARNING("[Model] Mesh \"%\" loaded with no textures.", Name.c_str());
 		return newMesh;
 	}
 
@@ -132,7 +127,7 @@ namespace Mimic
 		{
 			aiString aiPath;
 			material->GetTexture(type, i, &aiPath);
-			std::string texturePath = _directory + aiPath.C_Str();
+			std::string texturePath = aiPath.C_Str();
 			std::shared_ptr<Texture> loadedTexture = GetResourceManager()->LoadResource<Texture>(texturePath);
 			if (loadedTexture != nullptr)
 			{

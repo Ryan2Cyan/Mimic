@@ -3,6 +3,8 @@ project(DMTK VERSION 0.1)
 
 add_definitions(-DGLEW_STATIC)
 
+set(CMAKE_CXX_STANDARD 17)
+
 # Set Debug/Release mode:
 set(CMAKE_BUILD_TYPE "Debug")
 
@@ -56,6 +58,8 @@ add_library(mimic
     src/mimic/utility/Logger.h
     src/mimic/utility/PerformanceCounter.cpp
     src/mimic/utility/PerformanceCounter.h
+    src/mimic/utility/FileLoader.cpp
+    src/mimic/utility/FileLoader.h
 )
 
 # PERCY ADVICE: Make the renderer a separate library that's attached to the mimic engine.
