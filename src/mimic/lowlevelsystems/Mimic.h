@@ -1,6 +1,6 @@
 #pragma once
 
-// mega header-file (for user usage only):
+// mega header-file (for user-usage only):
 
 #include "MimicCore.h"
 #include "GameObject.h"
@@ -17,6 +17,8 @@
 #include <renderengine/Model.h>
 #include <renderengine/Vertex.h>
 #include <renderengine/Texture.h>
+#include <renderengine/Renderer.h>
 
 #include <utility/PerformanceCounter.h>
 #include <utility/Logger.h>
+#include <utility/FileLoader.h>

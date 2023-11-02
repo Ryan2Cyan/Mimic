@@ -26,7 +26,7 @@ namespace Mimic
 		void SetMat4(const char* name, const glm::mat4 value) const;
 
 	private:
-		friend struct ModelRenderer;
+		friend struct Renderer;
 
 		const std::string ReadShaderFile(const std::string& path);
 		static GLenum ShaderTypeFromString(const std::string& type);

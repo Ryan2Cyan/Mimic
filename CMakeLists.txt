@@ -62,7 +62,7 @@ add_library(mimic
     src/mimic/utility/FileLoader.h
 )
 
-# PERCY ADVICE: Make the renderer a separate library that's attached to the mimic engine.
+# Make the renderer a separate library that's attached to the mimic engine.
 add_library(mimicrenderer
     src/mimic/renderengine/Model.cpp
     src/mimic/renderengine/Model.h
@@ -74,6 +74,8 @@ add_library(mimicrenderer
     src/mimic/renderengine/Vertex.h
     src/mimic/renderengine/Texture.cpp
     src/mimic/renderengine/Texture.h
+    src/mimic/renderengine/Renderer.cpp
+    src/mimic/renderengine/Renderer.h
 
     SDKs/stbi/include/stb_image.h
 )

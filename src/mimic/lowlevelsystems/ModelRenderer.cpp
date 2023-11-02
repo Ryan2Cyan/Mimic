@@ -46,15 +46,7 @@ namespace Mimic
 			_skipDraw = true;
 			return;
 		}
-
-		// assign uniforms:
-		glUseProgram(_shader->ShaderProgramId);
-
-		_shader->SetModelMatrix(GetGameObject()->_modelMatrix);
-		_shader->SetViewMatrix(GetGameObject()->GetMimicCore()->CurrentCamera->_viewMatrix);
-		_shader->SetProjectionMatrix(GetGameObject()->GetMimicCore()->CurrentCamera->_projectionMatrix);
-
+		// need to add each mesh in each model to the draw queue here:
 		_model->Draw(_shader);
-		glUseProgram(0);
 	}
 }

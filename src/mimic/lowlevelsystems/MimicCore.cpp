@@ -4,6 +4,7 @@
 #include <lowlevelsystems/ResourceManager.h>
 #include <lowlevelsystems/GameObject.h>
 #include <lowlevelsystems/Environment.h>
+#include <renderengine/Renderer.h>
 #include <string>
 
 
@@ -45,12 +46,15 @@ namespace Mimic
 		newMimicCore->ResourceManager->_self = newMimicCore->ResourceManager;
 		MIMIC_LOG_INFO("[Mimic::ResourceManager] Initialisation successful.");
 
-
 		// init environment:
 		newMimicCore->Environment = newMimicCore->Environment->Initialise(70.0f);
 		MIMIC_LOG_INFO("[Mimic::Environment] Initialisation successful.");
 		if(newMimicCore != nullptr) MIMIC_LOG_INFO("[Mimic::MimicCore] Initialisation successful.");
 		return newMimicCore;
+
+		// init renderer:
+		newMimicCore->Renderer = newMimicCore->Renderer->Initialise();
+		MIMIC_LOG_INFO("[Mimic::Renderer] Initialisation successful.");
 	}
 
 	void MimicCore::Update()
@@ -129,6 +133,8 @@ namespace Mimic
 
 		if (!setToCurrent) return;
 		CurrentCamera = camera;
+		Renderer->_viewMatrix = CurrentCamera->_viewMatrix;
+		Renderer->_projectionMatrix = CurrentCamera->_projectionMatrix;
 		MIMIC_LOG_INFO("[Mimic::MimicCore] Added Mimic::Camera: \"%\".", camera->GetGameObject()->Name);
 	}
 }

@@ -14,6 +14,7 @@ namespace Mimic
 	struct ResourceManager;
 	struct Environment;
 	struct Camera;
+	struct Renderer;
 
 	// #############################################################################
 	// mimic core struct:
@@ -35,6 +36,7 @@ namespace Mimic
 
 		std::vector<std::shared_ptr<GameObject>> GameObjects;
 		std::vector<std::shared_ptr<Camera>> Cameras;
+		std::shared_ptr<Renderer> Renderer;
 		std::shared_ptr<Camera> CurrentCamera;
 		std::shared_ptr<Window> Window;
 		std::shared_ptr<ResourceManager> ResourceManager;
