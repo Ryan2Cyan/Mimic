@@ -28,13 +28,6 @@ int main(int argc, char* argv[])
 		mushroomGameObject->AddComponent<ModelRenderer>()->Initialise("Mushrooms1.obj", "BasicShader.glsl");
 		std::shared_ptr<ModelRenderer> mushroomModelRenderer = mushroomGameObject->GetComponent<ModelRenderer>();
 		mushroomModelRenderer->AddMaterial<BasicMaterial>();
-		/*mushroomGameObject->GetComponent<ModelRenderer>()->Initialise("Mushrooms1.obj", "Texture.glsl");*/
-		/*mushroomModelRenderer->Initialise( "Mushrooms1.obj", "Texture.glsl" );*/
-
-		/*std::shared_ptr<GameObject> explorerGameObject = dmtkCore->AddEmptyGameObject();
-		explorerGameObject->Position = glm::vec3(0.5f, 0.0f, 0.0f);
-		std::shared_ptr<ModelRenderer> explorerModelRenderer = explorerGameObject->AddComponent<ModelRenderer>();
-		explorerModelRenderer->Initialise( "Hero_Forge_Explorer_Demo.stl", basicShader );*/
 		
 		constexpr float maxRotAngle = 2.0f * 3.141592653589793238462643383f;
 
@@ -70,7 +63,6 @@ int main(int argc, char* argv[])
 			float cubeYRotation = mushroomGameObject->Rotation.y;
 			cubeYRotation += DeltaTime() * 1.8f;
 			while (cubeYRotation > (maxRotAngle)) cubeYRotation -= maxRotAngle;
-			/*explorerGameObject->Rotation.y = cubeYRotation;*/
 			mushroomGameObject->Rotation.y = cubeYRotation;
 
 			dmtkCore->Update();

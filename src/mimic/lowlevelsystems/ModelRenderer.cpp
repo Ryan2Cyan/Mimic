@@ -7,6 +7,10 @@
 #include <renderengine/Material.h>
 #include <functional>
 
+// the current material implementation can use some work.
+// 1.) don't store the shader in the model renderer - pass it straight through to the material.
+// 2.) add basicshader by default, also allow the user to specify the material they want to use.
+
 namespace Mimic
 {
 	std::shared_ptr<ModelRenderer> ModelRenderer::Initialise()
@@ -103,12 +107,6 @@ namespace Mimic
 
 		for (auto mesh : _model->_meshes)
 		{
-			// store texture id's in material:
-			if(mesh->_diffuseTexture != nullptr) _material->_diffuseTexture = mesh->_diffuseTexture->_id;
-			if (mesh->_specularTexture != nullptr) _material->_specularTexture = mesh->_specularTexture->_id;
-			if (mesh->_normalTexture != nullptr) _material->_normalTexture = mesh->_normalTexture->_id;
-			if (mesh->_heightTexture != nullptr) _material->_heightTexture = mesh->_heightTexture->_id;
-
 			// send render object to renderer:
 			 RenderObject currentRenderObject = RenderObject(
 				mesh->_vertexArrayId, 
@@ -120,5 +118,42 @@ namespace Mimic
 			);
 			renderer->AddToDrawQue(currentRenderObject);
 		}
+	}
+
+	bool ModelRenderer::SetMaterial()
+	{
+		bool success = true;
+		if (_model == nullptr) 
+		{ 
+			MIMIC_LOG_WARNING("[ModelRenderer] \"%\" attempted to set it's material without a valid model.", GetGameObject()->Name);
+			success = false;
+		}
+		else
+		{
+			if (_model->_materialTextures.size() <= 0)
+			{
+				MIMIC_LOG_WARNING("[ModelRenderer] \"%\" attempted to set it's material with no loaded textures.", GetGameObject()->Name);
+				success = false;
+			}
+		}
+
+		if (_shader == nullptr)
+		{
+			MIMIC_LOG_WARNING("[ModelRenderer] \"%\" attempted to set it's material without a valid shader.", GetGameObject()->Name);
+			success = false;
+		}
+
+		if (!success) return false;
+
+		for (auto texture : _model->_materialTextures)
+		{
+			if (texture->_type == "diffuse") _material->SetDiffuse(texture);
+			if (texture->_type == "specular") _material->SetSpecular(texture);
+			if (texture->_type == "normal") _material->SetNormal(texture);
+			if (texture->_type == "height") _material->SetHeight(texture);
+		}
+
+		_material->SetShader(_shader);
+		return true;
 	}
 }

@@ -30,6 +30,12 @@ namespace Mimic
 			else
 			{
 				_material = newMaterial;
+				if (!SetMaterial())
+				{
+					MIMIC_LOG_WARNING("[ModelRenderer]\"%\" Unable to set material.", GetGameObject()->Name);
+					_material = nullptr;
+					return nullptr;
+				}
 				return newMaterial;
 			}
 		}
@@ -40,6 +46,7 @@ namespace Mimic
 
 		private:
 		void Update() override;
+		bool SetMaterial();
 
 		std::shared_ptr<Shader> _shader;
 		std::shared_ptr<Model>_model;

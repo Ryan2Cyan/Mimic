@@ -17,6 +17,8 @@ namespace Mimic
 		friend struct Renderer;
 		friend struct Mesh;
 		friend struct Model;
+		friend struct Material;
+		friend struct BasicMaterial;
 
 		unsigned int _id;
 		std::string _type;

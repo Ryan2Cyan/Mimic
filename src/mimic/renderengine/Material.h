@@ -20,15 +20,17 @@ namespace Mimic
 	protected:
 		friend struct ModelRenderer;
 
-		void SetDiffuse(const int& diffuse);
-		void SetSpecular(const int& specular);
-		void SetNormal(const int& normal);
-		void SetHeight(const int& height);
-		std::shared_ptr<Shader> _shader;
-		int _diffuseTexture = -1;
-		int _specularTexture = -1;
-		int _normalTexture = -1;
-		int _heightTexture = -1;
+		void SetShader(const std::shared_ptr<Shader>& shader);
+		void SetDiffuse(const std::shared_ptr<Texture>& diffuse);
+		void SetSpecular(const std::shared_ptr<Texture>& specular);
+		void SetNormal(const std::shared_ptr<Texture>& normal);
+		void SetHeight(const std::shared_ptr<Texture>& height);
+
+		std::weak_ptr<Texture> _diffuseTexture;
+		std::weak_ptr<Texture> _specularTexture;
+		std::weak_ptr<Texture> _normalTexture;
+		std::weak_ptr<Texture> _heightTexture;
+		std::weak_ptr<Shader> _shader;
 	};
 
 	// #############################################################################

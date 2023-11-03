@@ -55,6 +55,7 @@ namespace Mimic
 		std::vector<Vertex> vertices;
 		std::vector<unsigned int> indices;
 
+		// get mesh vertices:
 		for (unsigned int i = 0; i < mesh->mNumVertices; i++)
 		{
 			const aiVector3D meshVertices = mesh->mVertices[i];
@@ -71,7 +72,7 @@ namespace Mimic
 			vertices.push_back(newVertex);
 		}
 
-		// store face indices (each face representing a primitive/triangle):
+		// get mesh indices:
 		for (unsigned int i = 0; i < mesh->mNumFaces; i++)
 		{
 			aiFace face = mesh->mFaces[i];
@@ -79,50 +80,40 @@ namespace Mimic
 			for (unsigned int i = 0; i < faceIndicesLength; i++) indices.push_back(face.mIndices[i]);
 		}
 
-		std::shared_ptr<Texture> diffuseMap;
-		std::shared_ptr<Texture> specularMap;
-		std::shared_ptr<Texture> normalMap;
-		std::shared_ptr<Texture> heightMap;
 
 		// mesh contains material index - retrieve material from scene:
 		if (mesh->mMaterialIndex >= 0)
 		{
 			const aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 
-			diffuseMap = LoadMaterialTextures(material, aiTextureType_DIFFUSE, "diffuse");
-			specularMap = LoadMaterialTextures(material, aiTextureType_SPECULAR, "specular");
-			normalMap = LoadMaterialTextures(material, aiTextureType_HEIGHT, "normal");
-			heightMap = LoadMaterialTextures(material, aiTextureType_AMBIENT, "height");
+			LoadMaterialTextures(material, aiTextureType_DIFFUSE, "diffuse");
+			LoadMaterialTextures(material, aiTextureType_SPECULAR, "specular");
+			LoadMaterialTextures(material, aiTextureType_HEIGHT, "normal");
+			LoadMaterialTextures(material, aiTextureType_AMBIENT, "height");
 		}
 
 		std::shared_ptr<Mesh> newMesh = std::make_shared<Mesh>(vertices, indices);
-		newMesh->SetDiffuse(diffuseMap);
-		newMesh->SetSpecular(specularMap);
-		newMesh->SetNormal(normalMap);
-		newMesh->SetHeight(heightMap);
-
 		return newMesh;
 	}
 
-	const std::shared_ptr<Texture> Model::LoadMaterialTextures(const aiMaterial* material, const aiTextureType& type, const std::string&& typeName)
+	const void Model::LoadMaterialTextures(const aiMaterial* material, const aiTextureType& type, const std::string&& typeName)
 	{
 		std::shared_ptr<Texture> loadedTexture;
-
-		const unsigned int length = material->GetTextureCount(type);
-		for (unsigned int i = 0; i < length; i++)
+		
+		aiString aiPath;
+		material->GetTexture(type, 0, &aiPath);
+		std::string texturePath = aiPath.C_Str();
+		if (texturePath == "") return;
+		loadedTexture = GetResourceManager()->LoadResource<Texture>(texturePath);
+		if (loadedTexture != nullptr)
 		{
-			aiString aiPath;
-			material->GetTexture(type, i, &aiPath);
-			std::string texturePath = aiPath.C_Str();
-			loadedTexture = GetResourceManager()->LoadResource<Texture>(texturePath);
-			if (loadedTexture != nullptr)
+			loadedTexture->_type = typeName;
+			// check for repeats:
+			for (auto texture : _materialTextures)
 			{
-				loadedTexture->_type = typeName;
-				return loadedTexture;
+				if (loadedTexture->_type == texture->_type) return;
 			}
-			else MIMIC_LOG_WARNING("[Model] Unable to load texture of type: \"%\", from path: \"%\"", typeName, texturePath);
+			_materialTextures.push_back(loadedTexture);
 		}
-		MIMIC_LOG_WARNING("[Model] Unable to load texture of type: \"%\"", typeName);
-		return loadedTexture;
 	}
 }

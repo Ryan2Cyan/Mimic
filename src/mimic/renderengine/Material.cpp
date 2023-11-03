@@ -1,27 +1,33 @@
 #include "Material.h"
 #include <renderengine/Shader.h>
+#include <renderengine/Texture.h>
 
 namespace Mimic
 {
 	// #############################################################################
 	// basic material functions:
 	// #############################################################################
-	void Material::SetDiffuse(const int& diffuse)
+	void Material::SetShader(const std::shared_ptr<Shader>& shader)
+	{
+		_shader = shader;
+	}
+
+	void Material::SetDiffuse(const std::shared_ptr<Texture>& diffuse)
 	{
 		_diffuseTexture = diffuse;
 	}
 
-	void Material::SetSpecular(const int& specular)
+	void Material::SetSpecular(const std::shared_ptr<Texture>& specular)
 	{
 		_specularTexture = specular;
 	}
 
-	void Material::SetNormal(const int& normal)
+	void Material::SetNormal(const std::shared_ptr<Texture>& normal)
 	{
 		_normalTexture = normal;
 	}
 
-	void Material::SetHeight(const int& height)
+	void Material::SetHeight(const std::shared_ptr<Texture>& height)
 	{
 		_heightTexture = height;
 	}
@@ -31,9 +37,11 @@ namespace Mimic
 	// #############################################################################
 	void BasicMaterial::OnDraw()
 	{
-		_shader->SetTexture("diffuse", _diffuseTexture, 0);
-		_shader->SetTexture("specular", _specularTexture, 1);
-		_shader->SetTexture("normal", _normalTexture, 2);
-		_shader->SetTexture("height", _heightTexture, 3);
+		if (_shader.expired()) return;
+		const std::shared_ptr<Shader> shader = _shader.lock();
+		if (!_diffuseTexture.expired()) shader->SetTexture("diffuse", _diffuseTexture.lock()->_id, 0);
+		if (!_specularTexture.expired()) shader->SetTexture("specular", _specularTexture.lock()->_id, 1);
+		if (!_normalTexture.expired()) shader->SetTexture("normal", _normalTexture.lock()->_id, 2);
+		if (!_heightTexture.expired()) shader->SetTexture("height", _heightTexture.lock()->_id, 3);
 	}
 }
