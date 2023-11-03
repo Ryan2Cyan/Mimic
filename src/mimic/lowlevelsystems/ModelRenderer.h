@@ -15,11 +15,10 @@ namespace Mimic
 	struct ModelRenderer : Component
 	{
 		static std::shared_ptr<ModelRenderer> Initialise();
-		void Initialise(const std::string& modelFileName, const std::string& shaderFileName);
-		void Initialise(const std::shared_ptr<Model>& model, const std::string& shaderFileName);
-		void Initialise(const std::string& modelFileName, const std::shared_ptr<Shader>& shader);
-		void Initialise(const std::shared_ptr<Model>& model, const std::shared_ptr<Shader>& shader);
-		template <typename T> std::shared_ptr<T> AddMaterial()
+		void Initialise(const std::string& modelFileName);
+		void Initialise(const std::shared_ptr<Model>& model);
+
+		template <typename T> std::shared_ptr<T> ReplaceMaterial()
 		{
 			std::shared_ptr<T> newMaterial = std::make_shared<T>();
 			if (newMaterial == nullptr)
@@ -29,27 +28,26 @@ namespace Mimic
 			}
 			else
 			{
-				_material = newMaterial;
-				if (!SetMaterial())
+				Material = newMaterial;
+				if (!AttachMaterial(_model))
 				{
-					MIMIC_LOG_WARNING("[ModelRenderer]\"%\" Unable to set material.", GetGameObject()->Name);
-					_material = nullptr;
+					MIMIC_LOG_WARNING("[ModelRenderer]\"%\" Unable to attach material to model.", GetGameObject()->Name);
+					Material = std::make_shared<BasicMaterial>;
 					return nullptr;
 				}
 				return newMaterial;
 			}
 		}
-		bool SetModel(const std::string& fileName);
-		bool SetModel(const std::shared_ptr<Model>& model);
-		bool SetShader(const std::string& fileName);
-		bool SetShader(const std::shared_ptr<Shader>& shader);
+		void SetModel(const std::string& fileName);
+		void SetModel(const std::shared_ptr<Model>& model);
+
+		std::shared_ptr<Material> Material;
 
 		private:
 		void Update() override;
-		bool SetMaterial();
+		const bool AttachMaterial(const std::shared_ptr<Model>& model);
+		void ProcessModel(const std::shared_ptr<Model>& model);
 
-		std::shared_ptr<Shader> _shader;
 		std::shared_ptr<Model>_model;
-		std::shared_ptr<Material>_material;
 	};
 }

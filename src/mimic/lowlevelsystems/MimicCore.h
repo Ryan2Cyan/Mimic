@@ -24,6 +24,7 @@ namespace Mimic
 
 		static std::shared_ptr<MimicCore> Initialise();
 
+		void Start();
 		void Update();
 		void Draw();
 		const glm::vec2 GetAspectRatio() const noexcept;

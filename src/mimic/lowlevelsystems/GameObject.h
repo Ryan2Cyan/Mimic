@@ -11,6 +11,7 @@ namespace Mimic
 {
 	struct Component;
 	struct MimicCore;
+	typedef std::vector<std::shared_ptr<Component>> components_vector;
 
 	struct GameObject
 	{
@@ -49,9 +50,11 @@ namespace Mimic
 		friend struct MimicCore;
 		friend struct ModelRenderer; // needs the model matrix
 
+		void Start() noexcept;
 		void Update() noexcept;
 
-		std::vector<std::shared_ptr<Component>> _components;
+		components_vector _components;
+		components_vector _initialisedComponents;
 		glm::mat4 _modelMatrix;
 		std::weak_ptr<MimicCore> _mimicCore;
 		std::weak_ptr<GameObject> _self;

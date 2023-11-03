@@ -1,6 +1,5 @@
 #pragma once
 #include <GLM/glm.hpp>
-#include <renderengine/Shader.h>
 #include <vector>
 #include <functional>
 #include <memory>
@@ -12,6 +11,7 @@ namespace Mimic
 	// render object class:
 	// #############################################################################
 	struct Texture;
+	struct Shader;
 
 	class RenderObject
 	{

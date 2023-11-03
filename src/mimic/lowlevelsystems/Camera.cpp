@@ -28,6 +28,7 @@ namespace Mimic
 		// create projection matrix:
 		_projectionMatrix = glm::perspective(Fov, aspectRatio.x / aspectRatio.y, ClippingPlane.x, ClippingPlane.y);
 
+		_initialised = true;
 		MIMIC_LOG_INFO("[Mimic::Camera] Load successful.");
 	}
 

@@ -14,11 +14,20 @@ namespace Mimic
 		return _mimicCore.lock();
 	}
 
+	void GameObject::Start() noexcept
+	{
+		// only update components that are initialised:
+		for (std::shared_ptr<Component> component : _components)
+		{
+			if (component->_initialised) _initialisedComponents.push_back(component);
+		}
+	}
+
 	void GameObject::Update() noexcept
 	{
 		_modelMatrix = glm::translate(glm::mat4(1.0f), Position) * glm::mat4_cast(glm::quat(Rotation)) * glm::scale(glm::mat4(1.0f), Scale);
 
 		// component updates:
-		for (auto component : _components) component->Update();
+		for (std::shared_ptr<Component> component : _initialisedComponents) component->Update();
 	}
 }

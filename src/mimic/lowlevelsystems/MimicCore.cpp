@@ -5,6 +5,7 @@
 #include <lowlevelsystems/GameObject.h>
 #include <lowlevelsystems/Environment.h>
 #include <renderengine/Renderer.h>
+#include <GL/glew.h>
 
 
 namespace Mimic
@@ -62,6 +63,11 @@ namespace Mimic
 		MIMIC_LOG_INFO("[Mimic::Renderer] Initialisation successful.");
 
 		return newMimicCore;
+	}
+
+	void MimicCore::Start()
+	{
+		for (auto gameObject : _gameObjects) gameObject->Start();
 	}
 
 	void MimicCore::Update()

@@ -25,9 +25,8 @@ int main(int argc, char* argv[])
 		dmtkCore->AddCamera(mainCamera, true);
 
 		std::shared_ptr<GameObject> mushroomGameObject = dmtkCore->AddEmptyGameObject();
-		mushroomGameObject->AddComponent<ModelRenderer>()->Initialise("Mushrooms1.obj", "BasicShader.glsl");
-		std::shared_ptr<ModelRenderer> mushroomModelRenderer = mushroomGameObject->GetComponent<ModelRenderer>();
-		mushroomModelRenderer->AddMaterial<BasicMaterial>();
+		std::shared_ptr<ModelRenderer> mushroomRenderer = mushroomGameObject->AddComponent<ModelRenderer>();
+		mushroomRenderer->Initialise("Mushrooms1.obj");
 		
 		constexpr float maxRotAngle = 2.0f * 3.141592653589793238462643383f;
 
@@ -36,6 +35,7 @@ int main(int argc, char* argv[])
 		// #############################################################################
 		// game loop:
 	    // #############################################################################
+		dmtkCore->Start();
 		while (dmtkCore->ApplicationRunning)
 		{
 			performanceCounter->StartPerformanceCounter();

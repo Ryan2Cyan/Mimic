@@ -7,9 +7,7 @@
 #include <renderengine/Material.h>
 #include <functional>
 
-// the current material implementation can use some work.
-// 1.) don't store the shader in the model renderer - pass it straight through to the material.
-// 2.) add basicshader by default, also allow the user to specify the material they want to use.
+// need to provide a way for the user to edit some parameters inside the material (e.g. albedo).
 
 namespace Mimic
 {
@@ -18,75 +16,62 @@ namespace Mimic
 		return std::make_shared<ModelRenderer>();
 	}
 
-	void ModelRenderer::Initialise(const std::string& modelFileName, const std::string& shaderFileName)
+	void ModelRenderer::Initialise(const std::string& modelFileName)
 	{
-		_initialised = SetModel(modelFileName) && SetShader(shaderFileName);
-		_material = AddMaterial<BasicMaterial>();
+		Material = std::make_shared<BasicMaterial>();
+		SetModel(modelFileName);
 		if (_initialised) MIMIC_LOG_INFO("[Mimic::ModelRenderer] Initialisation successful.");
 	}
 
-	void ModelRenderer::Initialise(const std::shared_ptr<Model>& model, const std::string& shaderFileName)
+	void ModelRenderer::Initialise(const std::shared_ptr<Model>& model)
 	{
-		_initialised = SetModel(model) && SetShader(shaderFileName);
-		_material = AddMaterial<BasicMaterial>();
+		Material = std::make_shared<BasicMaterial>();
+		SetModel(model);
 		if (_initialised) MIMIC_LOG_INFO("[Mimic::ModelRenderer] Initialisation successful.");
 	}
 
-	void ModelRenderer::Initialise(const std::string& modelFileName, const std::shared_ptr<Shader>& shader)
+	void ModelRenderer::SetModel(const std::string& fileName)
 	{
-		_initialised = SetModel(modelFileName) && SetShader(shader);
-		_material = AddMaterial<BasicMaterial>();
-		if (_initialised) MIMIC_LOG_INFO("[Mimic::ModelRenderer] Initialisation successful.");
+		ProcessModel(MimicCore::ResourceManager->LoadResource<Model>(std::string(fileName)));
 	}
 
-	void ModelRenderer::Initialise(const std::shared_ptr<Model>& model, const std::shared_ptr<Shader>& shader)
+	void ModelRenderer::SetModel(const std::shared_ptr<Model>& model)
 	{
-		_initialised = SetModel(model) && SetShader(shader);
-		_material = AddMaterial<BasicMaterial>();
-		if (_initialised) MIMIC_LOG_INFO("[Mimic::ModelRenderer] Initialisation successful.");
+		ProcessModel(model);
 	}
 
-	bool ModelRenderer::SetModel(const std::string& fileName)
+	void ModelRenderer::ProcessModel(const std::shared_ptr<Model>& model)
 	{
-		_model = GetGameObject()->GetMimicCore()->ResourceManager->LoadResource<Model>(std::string(fileName));
-		if (_model == nullptr)
+		if (!AttachMaterial(model))
 		{
-			MIMIC_LOG_WARNING("[ModelRenderer] % could not load model from file name \"%\".", GetGameObject()->Name, fileName);
-			return false;
+			MIMIC_LOG_WARNING("[Mimic::ModelRenderer]\"%\" Unable to attach material to model.", GetGameObject()->Name);
+			_initialised = false;
+			return;
 		}
-		return true;
+		_model = model;
+		_initialised = true;
 	}
 
-	bool ModelRenderer::SetModel(const std::shared_ptr<Model>& model)
+	const bool ModelRenderer::AttachMaterial(const std::shared_ptr<Model>& model)
 	{
 		if (model == nullptr)
 		{
-			MIMIC_LOG_WARNING("[ModelRenderer] % was passed a null model.", GetGameObject()->Name);
+			MIMIC_LOG_WARNING("[Mimic::ModelRenderer] \"%\" attempted to set it's material without a valid model.", GetGameObject()->Name);
 			return false;
 		}
-		_model = model;
-		return true;
-	}
 
-	bool ModelRenderer::SetShader(const std::string& fileName)
-	{
-		_shader = GetGameObject()->GetMimicCore()->ResourceManager->LoadResource<Shader>(std::string(fileName));
-		if (_shader == nullptr)
+		if (model->_materialTextures.size() <= 0) MIMIC_LOG_WARNING("[Mimic::ModelRenderer] \"%\" Model has no loaded textures.", GetGameObject()->Name);
+		else
 		{
-			MIMIC_LOG_WARNING("[ModelRenderer] % could not load shader from file name\"%\".", GetGameObject()->Name, fileName);
-			return false;
+			for (auto texture : model->_materialTextures)
+			{
+				if (texture->_type == "diffuse") Material->SetDiffuse(texture);
+				if (texture->_type == "specular") Material->SetSpecular(texture);
+				if (texture->_type == "normal") Material->SetNormal(texture);
+				if (texture->_type == "height") Material->SetHeight(texture);
+			}
 		}
-		return true;
-	}
 
-	bool ModelRenderer::SetShader(const std::shared_ptr<Shader>& shader)
-	{
-		if (shader == nullptr)
-		{
-			MIMIC_LOG_WARNING("[ModelRenderer] % was passed a null shader.", GetGameObject()->Name);
-			return false;
-		}
-		_shader = shader;
 		return true;
 	}
 
@@ -95,65 +80,25 @@ namespace Mimic
 		if (_skipUpdate) return;
 		if (!_initialised)
 		{
-			MIMIC_LOG_WARNING("[%] Unable to draw, Model Renderer is uninitialised.", GetGameObject()->Name);
+			MIMIC_LOG_WARNING("[Mimic::ModelRenderer] \"%\" is unable to draw, model is uninitialised.", GetGameObject()->Name);
 			_skipUpdate = true;
 			return;
 		}
 
 		// add each mesh in the model into the draw queue:
-		const std::shared_ptr<Renderer> renderer = GetGameObject()->GetMimicCore()->_renderer;
-		std::function<void()> materialOnDrawLambda = [&]() { _material->OnDraw(); };
-		_material->_shader = _shader;
+		std::function<void()> materialOnDrawLambda = [&]() { this->Material->OnDraw(); };
 
 		for (auto mesh : _model->_meshes)
 		{
 			// send render object to renderer:
-			 RenderObject currentRenderObject = RenderObject(
-				mesh->_vertexArrayId, 
-				mesh->_textures, 
-				mesh->_indices, 
-				_shader, 
+			MimicCore::_renderer->AddToDrawQue(RenderObject(
+				mesh->_vertexArrayId,
+				mesh->_textures,
+				mesh->_indices,
+				Material->_shader.lock(),
 				GetGameObject()->_modelMatrix,
 				materialOnDrawLambda
-			);
-			renderer->AddToDrawQue(currentRenderObject);
+			));
 		}
-	}
-
-	bool ModelRenderer::SetMaterial()
-	{
-		bool success = true;
-		if (_model == nullptr) 
-		{ 
-			MIMIC_LOG_WARNING("[ModelRenderer] \"%\" attempted to set it's material without a valid model.", GetGameObject()->Name);
-			success = false;
-		}
-		else
-		{
-			if (_model->_materialTextures.size() <= 0)
-			{
-				MIMIC_LOG_WARNING("[ModelRenderer] \"%\" attempted to set it's material with no loaded textures.", GetGameObject()->Name);
-				success = false;
-			}
-		}
-
-		if (_shader == nullptr)
-		{
-			MIMIC_LOG_WARNING("[ModelRenderer] \"%\" attempted to set it's material without a valid shader.", GetGameObject()->Name);
-			success = false;
-		}
-
-		if (!success) return false;
-
-		for (auto texture : _model->_materialTextures)
-		{
-			if (texture->_type == "diffuse") _material->SetDiffuse(texture);
-			if (texture->_type == "specular") _material->SetSpecular(texture);
-			if (texture->_type == "normal") _material->SetNormal(texture);
-			if (texture->_type == "height") _material->SetHeight(texture);
-		}
-
-		_material->SetShader(_shader);
-		return true;
 	}
 }

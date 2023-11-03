@@ -37,9 +37,10 @@ namespace Mimic
 	// basic material stuct:
 	// #############################################################################
 	struct BasicMaterial : Material
-	{
+	{	
+		BasicMaterial();
+
 	private:
 		void OnDraw() override;
-	
 	};
 }

@@ -1,4 +1,6 @@
 #include "Material.h"
+#include <lowlevelsystems/MimicCore.h>
+#include <lowlevelsystems/ResourceManager.h>
 #include <renderengine/Shader.h>
 #include <renderengine/Texture.h>
 
@@ -35,6 +37,12 @@ namespace Mimic
 	// #############################################################################
 	// basic material functions:
 	// #############################################################################
+
+	BasicMaterial::BasicMaterial()
+	{
+		_shader = MimicCore::ResourceManager->LoadResource<Shader>("BasicShader.glsl");
+	}
+
 	void BasicMaterial::OnDraw()
 	{
 		if (_shader.expired()) return;
