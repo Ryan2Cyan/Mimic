@@ -8,10 +8,14 @@ namespace Mimic
 	// #############################################################################
 	struct Vertex
 	{
+	private:
+		friend struct Mesh;
+		friend struct Model;
+
 		explicit Vertex(glm::vec3 position, glm::vec3 normal, glm::vec2 textureCoordinates);
 
-		glm::vec3 Position;
-		glm::vec3 Normal;
-		glm::vec2 TextureCoordinates;
+		glm::vec3 _position;
+		glm::vec3 _normal;
+		glm::vec2 _textureCoordinates;
 	};
 }

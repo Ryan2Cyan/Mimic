@@ -19,7 +19,7 @@ namespace Mimic
 	private:
 		friend struct MimicCore;
 
-		std::shared_ptr<Environment> Initialise(const float idealFramerate);
+		std::shared_ptr<Environment> Initialise(const float& idealFramerate);
 		const float _idealFramerate;
 		static float _deltaTime;
 		float _lastTimeDelta;

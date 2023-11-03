@@ -3,7 +3,7 @@
 
 namespace Mimic
 {
-	Window::Window(std::string windowName, const glm::vec2 aspectRatio) : WindowName(windowName), AspectRatio(aspectRatio)
+	Window::Window(std::string windowName, const glm::vec2 aspectRatio) : _windowName(windowName), _aspectRatio(aspectRatio)
 	{
 		if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) < 0)
 		{

@@ -12,7 +12,7 @@ namespace Mimic
 
 	Environment::Environment(const float idealFramerate) : _lastTimeDelta(0.0f), _idealFramerate(idealFramerate) { }
 
-	std::shared_ptr<Environment> Environment::Initialise(const float idealFramerate)
+	std::shared_ptr<Environment> Environment::Initialise(const float& idealFramerate)
 	{
 		return std::make_shared<Environment>(idealFramerate);
 	}

@@ -1,7 +1,5 @@
 #include "Mesh.h"
-#include <renderengine/Shader.h>
-#include <renderengine/Vertex.h>
-#include <renderengine/Texture.h>
+#include <GL/glew.h>
 
 namespace Mimic
 {
@@ -34,34 +32,10 @@ namespace Mimic
 		glEnableVertexAttribArray(0);
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, VERTEX_SIZE, (void*)0);
 		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, VERTEX_SIZE, (void*)offsetof(Vertex, Normal));
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, VERTEX_SIZE, (void*)offsetof(Vertex, _normal));
 		glEnableVertexAttribArray(2);
-		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, VERTEX_SIZE, (void*)offsetof(Vertex, TextureCoordinates));
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, VERTEX_SIZE, (void*)offsetof(Vertex, _textureCoordinates));
 
-		glBindVertexArray(0);
-	}
-
-	void Mesh::Draw(std::shared_ptr<Shader> shader)
-	{
-		unsigned int textureIndex = 1;
-
-		const unsigned int length = _textures.size();
-		shader->SetInt("materialsCount", length);
-
-		for (unsigned int i = 0; i < length; i++)
-		{
-			// activate texture unit before binding:
-			glActiveTexture(GL_TEXTURE0 + i);
-			std::string textureNumber = std::to_string(i);
-			// will probably need to insert the type eventually:
-			shader->SetInt(("materials[" + textureNumber + "].texture").c_str(), i);
-			glBindTexture(GL_TEXTURE_2D, _textures[i]->Id);
-		}
-		glActiveTexture(GL_TEXTURE0);
-
-		// draw mesh:
-		glBindVertexArray(_vertexArrayId);
-		glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(_indices.size()), GL_UNSIGNED_INT, 0);
 		glBindVertexArray(0);
 	}
 }

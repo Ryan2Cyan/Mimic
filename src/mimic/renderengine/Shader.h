@@ -15,32 +15,28 @@ namespace Mimic
 	// #############################################################################
 	struct Shader : Resource
 	{
-		unsigned int ShaderProgramId;
-		
-
 		const int Load(const std::string& path) override;
-
-		void SetBool(const char* name, const bool value) const;
-		void SetInt(const char* name, const int value) const;
-		void SetFloat(const char* name, const float value) const;
-		void SetMat4(const char* name, const glm::mat4 value) const;
 
 	private:
 		friend struct Renderer;
 
 		const std::string ReadShaderFile(const std::string& path);
 		static GLenum ShaderTypeFromString(const std::string& type);
-		std::unordered_map<GLuint, std::string> PreProcess(const std::string& source);
+		const std::unordered_map<GLuint, std::string> PreProcess(const std::string& source);
 		void CompileShaderText(const std::unordered_map<GLenum, std::string>& shaderSources);
 
-		void SetModelMatrix(const glm::mat4 value);
-		void SetViewMatrix(const glm::mat4 value);
-		void SetProjectionMatrix(const glm::mat4 value);
+		void SetModelMatrix(const glm::mat4& value) noexcept;
+		void SetViewMatrix(const glm::mat4& value) noexcept;
+		void SetProjectionMatrix(const glm::mat4& value) noexcept;
+		void SetBool(const char* name, const bool value) const noexcept;
+		void SetInt(const char* name, const int value) const noexcept;
+		void SetFloat(const char* name, const float value) const noexcept;
+		void SetMat4(const char* name, const glm::mat4 value) const noexcept;
 
 		int _modelMatrixUniformLocation;
 		int _viewMatrixUniformLocation;
 		int _projectionMatrixUniformLocation;
-
+		unsigned int _shaderProgramId;
 		bool _initialised;
 	};
 }

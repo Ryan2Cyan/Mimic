@@ -9,19 +9,6 @@
 
 namespace Mimic
 {
-	Model::Model() {}
-
-	void Model::Draw(std::shared_ptr<Shader> shader)
-	{
-		const unsigned int length = _meshes.size();
-		for (unsigned int i = 0; i < length; i++) _meshes[i]->Draw(shader);
-	}
-
-	std::shared_ptr<Component> Model::GetComponent() const
-	{
-		return Component.lock();
-	}
-
 	const int Model::Load(const std::string& path)
 	{
 		Assimp::Importer importer;
@@ -50,27 +37,24 @@ namespace Mimic
 	void Model::ProcessNode(aiNode* node, const aiScene* scene)
 	{
 		// process all node's meshes:
-		unsigned int length = node->mNumMeshes;
-		for (unsigned int i = 0; i < length; i++)
+		for (unsigned int i = 0; i < node->mNumMeshes; i++)
 		{
 			aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
 			_meshes.push_back(ProcessMesh(mesh, scene));
 		}
 
 		// do the same for each of its children:
-		length = node->mNumChildren;
-		for (unsigned int i = 0; i < length; i++) ProcessNode(node->mChildren[i], scene);
+		for (unsigned int i = 0; i < node->mNumChildren; i++) ProcessNode(node->mChildren[i], scene);
 	}
 
-	std::shared_ptr<Mesh> Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
+	const std::shared_ptr<Mesh> Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 	{
 		// convert aiMesh into Mimic::Mesh: (vertex, normal, tex coords):
 		std::vector<Vertex> vertices;
 		std::vector<unsigned int> indices;
 		std::vector<std::shared_ptr<Texture>> textures;
 
-		unsigned int length = mesh->mNumVertices;
-		for (unsigned int i = 0; i < length; i++)
+		for (unsigned int i = 0; i < mesh->mNumVertices; i++)
 		{
 			const aiVector3D meshVertices = mesh->mVertices[i];
 			const aiVector3D meshNormals = mesh->mNormals[i];
@@ -81,14 +65,13 @@ namespace Mimic
 				glm::vec2(0.0f)
 			);
 
-			if (mesh->mTextureCoords[0]) newVertex.TextureCoordinates = glm::vec2(mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y);
+			if (mesh->mTextureCoords[0]) newVertex._textureCoordinates = glm::vec2(mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y);
 
 			vertices.push_back(newVertex);
 		}
 
 		// store face indices (each face representing a primitive/triangle):
-		length = mesh->mNumFaces;
-		for (unsigned int i = 0; i < length; i++)
+		for (unsigned int i = 0; i < mesh->mNumFaces; i++)
 		{
 			aiFace face = mesh->mFaces[i];
 			const unsigned int faceIndicesLength = face.mNumIndices;
@@ -118,7 +101,7 @@ namespace Mimic
 		return newMesh;
 	}
 
-	const std::vector<std::shared_ptr<Texture>> Model::LoadMaterialTextures(aiMaterial* material, const aiTextureType type, const std::string typeName)
+	const std::vector<std::shared_ptr<Texture>> Model::LoadMaterialTextures(const aiMaterial* material, const aiTextureType& type, const std::string& typeName)
 	{
 		std::vector<std::shared_ptr<Texture>> loadedTextures;
 

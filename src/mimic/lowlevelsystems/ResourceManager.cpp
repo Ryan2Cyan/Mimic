@@ -1,6 +1,4 @@
 #include "ResourceManager.h"
-#include <lowlevelsystems/Resource.h>
-#include <utility/Logger.h>
 
 namespace Mimic
 {

@@ -5,18 +5,25 @@
 #include <lowlevelsystems/GameObject.h>
 #include <lowlevelsystems/Environment.h>
 #include <renderengine/Renderer.h>
-#include <string>
 
 
 namespace Mimic
 {
+	std::shared_ptr<Camera> MimicCore::CurrentCamera;
+	std::shared_ptr<ResourceManager> MimicCore::ResourceManager;
+	std::vector<std::shared_ptr<GameObject>> MimicCore::_gameObjects;
+	std::vector<std::shared_ptr<Camera>> MimicCore::_cameras;
+	std::shared_ptr<Renderer> MimicCore::_renderer;
+	std::shared_ptr<Window> MimicCore::_window;
+	std::shared_ptr<Environment> MimicCore::_environment;
+
 	MimicCore::MimicCore()
 	{
 		Mimic::Logger::Init();
 
 		// initialise SDL_Window, SDL_Renderer, & GL_Context:
 		glm::vec2 aspectRatio = glm::vec2(1260.0f, 720.0f);
-		Window = Window->Initialise("DMTK", aspectRatio);
+		_window = Window::Initialise("[Mimic Engine] Dungeon Master's Tool Kit", aspectRatio);
 
 		// init glew:
 		glewExperimental = GL_TRUE;
@@ -28,7 +35,6 @@ namespace Mimic
 		}
 		MIMIC_LOG_INFO("[GLEW] Initialisation successful.");
 
-		
 		ApplicationRunning = true;
 		glEnable(GL_DEPTH_TEST);
 	}
@@ -41,48 +47,41 @@ namespace Mimic
 		newMimicCore->_self = newMimicCore;
 
 		// init resource manager:
-		newMimicCore->ResourceManager = newMimicCore->ResourceManager->Initialise();
+		newMimicCore->ResourceManager = ResourceManager::Initialise();
 		newMimicCore->ResourceManager->_mimicCore = newMimicCore->_self;
 		newMimicCore->ResourceManager->_self = newMimicCore->ResourceManager;
 		MIMIC_LOG_INFO("[Mimic::ResourceManager] Initialisation successful.");
 
 		// init environment:
-		newMimicCore->Environment = newMimicCore->Environment->Initialise(70.0f);
+		newMimicCore->_environment = newMimicCore->_environment->Initialise(70.0f);
 		MIMIC_LOG_INFO("[Mimic::Environment] Initialisation successful.");
 		if(newMimicCore != nullptr) MIMIC_LOG_INFO("[Mimic::MimicCore] Initialisation successful.");
-		return newMimicCore;
 
 		// init renderer:
-		newMimicCore->Renderer = newMimicCore->Renderer->Initialise();
+		newMimicCore->_renderer = Renderer::Initialise();
 		MIMIC_LOG_INFO("[Mimic::Renderer] Initialisation successful.");
+
+		return newMimicCore;
 	}
 
 	void MimicCore::Update()
 	{
 		// other updates:
-		Environment->CalculateDeltaTime();
+		_environment->CalculateDeltaTime();
 
 		// update game objects:
-		for (unsigned int i = 0; i < GameObjects.size(); i++) GameObjects[i]->Update();
+		for (auto camera : _cameras) for (auto gameObject : _gameObjects) gameObject->Update();
 	}
 
 	void MimicCore::Draw()
 	{
-		// draw game objects:
-		for (unsigned int i = 0; i < Cameras.size(); i++)
-		{
-			for (unsigned int i = 0; i < GameObjects.size(); i++)
-			{
-				GameObjects[i]->Draw();
-			}
-		}
-
-		SDL_GL_SwapWindow(Window->_window);
+		_renderer->Draw();
+		SDL_GL_SwapWindow(_window->_window);
 	}
 
-	glm::vec2 MimicCore::GetAspectRatio() const noexcept
+	const glm::vec2 MimicCore::GetAspectRatio() const noexcept
 	{
-		return Window->AspectRatio;
+		return _window->_aspectRatio;
 	}
 
 	std::shared_ptr<GameObject> MimicCore::AddEmptyGameObject() noexcept
@@ -90,21 +89,21 @@ namespace Mimic
 		std::shared_ptr<GameObject> emptyGameObject = std::make_shared<GameObject>();
 		emptyGameObject->_self = emptyGameObject;
 		emptyGameObject->_mimicCore = _self;
-		emptyGameObject->Name = "EmptyGameObject_" + std::to_string(GameObjects.size());
+		emptyGameObject->Name = "EmptyGameObject_" + std::to_string(_gameObjects.size());
 
-		GameObjects.push_back(emptyGameObject);
+		_gameObjects.push_back(emptyGameObject);
 		MIMIC_LOG_INFO("[Mimic::MimicCore] Added Mimic::GameObject: \"%\".", emptyGameObject->Name);
 		return emptyGameObject;
 	}
 
-	std::shared_ptr<GameObject> MimicCore::AddEmptyGameObject(const char* name) noexcept
+	std::shared_ptr<GameObject> MimicCore::AddEmptyGameObject(const std::string& name) noexcept
 	{
 		std::shared_ptr<GameObject> emptyGameObject = std::make_shared<GameObject>();
 		emptyGameObject->_self = emptyGameObject;
 		emptyGameObject->_mimicCore = _self;
 		emptyGameObject->Name = name;
 
-		GameObjects.push_back(emptyGameObject);
+		_gameObjects.push_back(emptyGameObject);
 		MIMIC_LOG_INFO("[Mimic::MimicCore] Added Mimic::GameObject: \"%\".", emptyGameObject->Name);
 		return emptyGameObject;
 	}
@@ -118,7 +117,7 @@ namespace Mimic
 		}
 		gameObject->_mimicCore = _self;
 		MIMIC_LOG_INFO("[Mimic::MimicCore] Added Mimic::GameObject: \"%\".", gameObject->Name);
-		GameObjects.push_back(gameObject);
+		_gameObjects.push_back(gameObject);
 	}
 
 	void MimicCore::AddCamera(const std::shared_ptr<Camera> camera, const bool setToCurrent) noexcept
@@ -128,13 +127,13 @@ namespace Mimic
 			MIMIC_LOG_WARNING("Attempted to add null camera to hierarchy.");
 			return;
 		}
-		Cameras.push_back(camera);
+		_cameras.push_back(camera);
 
 
 		if (!setToCurrent) return;
 		CurrentCamera = camera;
-		Renderer->_viewMatrix = CurrentCamera->_viewMatrix;
-		Renderer->_projectionMatrix = CurrentCamera->_projectionMatrix;
+		_renderer->_cachedViewMatrix = CurrentCamera->_viewMatrix;
+		_renderer->_cachedProjectionMatrix = CurrentCamera->_projectionMatrix;
 		MIMIC_LOG_INFO("[Mimic::MimicCore] Added Mimic::Camera: \"%\".", camera->GetGameObject()->Name);
 	}
 }

@@ -10,8 +10,13 @@ namespace Mimic
 	// #############################################################################
 	struct Texture : Resource
 	{
-		unsigned int Id;
-		std::string Type;
 		const int Load(const std::string& path) override;
+
+	private:
+		friend struct Renderer;
+		friend struct Mesh;
+
+		unsigned int _id;
+		std::string _type;
 	};
 }

@@ -17,15 +17,15 @@ namespace Mimic
 		return resultPath;
 	}
 
-	const std::filesystem::path FileLoader::LocateFileInDirectory(const std::filesystem::path& directoryPath, const std::string fileName)
+	const std::string FileLoader::LocateFileInDirectory(const std::filesystem::path& directoryPath, const std::string fileName)
 	{
 		std::filesystem::path resultPath;
 		for (auto const& dir_entry : std::filesystem::recursive_directory_iterator{ directoryPath })
 		{
 			resultPath = dir_entry / fileName;
-			if (std::filesystem::exists(resultPath)) return resultPath;
+			if (std::filesystem::exists(resultPath)) return resultPath.generic_string();
 		}
 		MIMIC_LOG_WARNING("[FileLoader] Could not find file \"%\" in directory correlating to name: \"%\"", fileName, directoryPath.generic_string());
-		return resultPath;
+		return resultPath.generic_string();
 	}
 }

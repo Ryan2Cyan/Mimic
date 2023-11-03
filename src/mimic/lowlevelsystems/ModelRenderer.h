@@ -1,7 +1,7 @@
 #pragma once
 #include <lowlevelsystems/Component.h>
-#include <GL/glew.h>
 #include <memory>
+#include <string>
 
 namespace Mimic
 {	
@@ -13,13 +13,18 @@ namespace Mimic
 
 	struct ModelRenderer : Component
 	{
-		explicit ModelRenderer();
+		static std::shared_ptr<ModelRenderer> Initialise();
+		void Initialise(const std::string& modelFileName, const std::string& shaderFileName);
+		void Initialise(const std::shared_ptr<Model>& model, const std::string& shaderFileName);
+		void Initialise(const std::string& modelFileName, const std::shared_ptr<Shader>& shader);
+		void Initialise(const std::shared_ptr<Model>& model, const std::shared_ptr<Shader>& shader);
+		bool SetModel(const std::string& fileName);
+		bool SetModel(const std::shared_ptr<Model>& model);
+		bool SetShader(const std::string& fileName);
+		bool SetShader(const std::shared_ptr<Shader>& shader);
 
-		void Initialise(const char* modelPath, std::shared_ptr<Shader> shader);
-		
 		private:
 		void Update() override;
-		void Draw() override;
 
 		std::shared_ptr<Shader> _shader;
 		std::shared_ptr<Model>_model;

@@ -1,7 +1,6 @@
 #pragma once
 #include <utility/Logger.h>
 #include <utility/FileLoader.h>
-#include <lowlevelsystems/Component.h>
 #include <string>
 #include <memory>
 #include <unordered_map>
@@ -48,7 +47,6 @@ namespace Mimic
 	// #############################################################################
 	// resource manager stuct:
 	// #############################################################################
-	struct MimicCore;
 	struct Resource;
 
 	struct ResourceManager
@@ -59,11 +57,9 @@ namespace Mimic
 		template<typename T> std::shared_ptr<T> LoadResource(const std::string& fileName)
 		{
 			// check if the resource is already loaded:
-			std::filesystem::path filePath = _fileLoader->LocateFileInDirectory(_assetsDirectory, fileName);
-			std::string pathCStr = filePath.generic_string();
+			const std::string filePath = _fileLoader->LocateFileInDirectory(_assetsDirectory, fileName);
 
-
-			auto iterator = _loadedResources.find(pathCStr);
+			auto iterator = _loadedResources.find(filePath);
 			if (iterator != _loadedResources.end())
 			{
 				auto resultPair = *iterator; 
@@ -75,15 +71,15 @@ namespace Mimic
 			std::shared_ptr<T> newResource = std::make_shared<T>();
 			newResource->_resourceManager = _self; // just incase a Resouce needs to load Resources itself.
 			newResource->Path = fileName;
-			if (newResource->Name.empty()) newResource->Name = GetNameFromFilePath(pathCStr);
-			const int success = newResource->Load(pathCStr);
+			if (newResource->Name.empty()) newResource->Name = GetNameFromFilePath(filePath);
+			const int success = newResource->Load(filePath);
 			if (success == -1)
 			{
 				MIMIC_LOG_WARNING("[ResourceManager] Invalid resource filepath attempted to load: \"%\"", fileName.c_str());
 				return nullptr;
 			}
-			_loadedResources[pathCStr] = newResource;
-			MIMIC_LOG_INFO("[Mimic::ResourceManager] Successfully loaded resource from path: \"%\".", pathCStr);
+			_loadedResources[filePath] = newResource;
+			MIMIC_LOG_INFO("[Mimic::ResourceManager] Successfully loaded resource from path: \"%\".", filePath);
 			return newResource;
 		}
 
@@ -92,7 +88,7 @@ namespace Mimic
 	private:
 		friend struct MimicCore;
 
-		std::shared_ptr<ResourceManager> Initialise();
+		static std::shared_ptr<ResourceManager> Initialise();
 		const std::string GetNameFromFilePath(const std::string& path) const noexcept;
 
 		std::unordered_map<std::string, std::shared_ptr<Resource>> _loadedResources;

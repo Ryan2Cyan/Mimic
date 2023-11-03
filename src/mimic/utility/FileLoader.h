@@ -10,7 +10,7 @@ namespace Mimic
 	{
 		explicit FileLoader();
 		const std::filesystem::path LocateDirectory(const std::string& directoryName);
-		const std::filesystem::path LocateFileInDirectory(const std::filesystem::path& directoryPath, const std::string fileName);
+		const std::string LocateFileInDirectory(const std::filesystem::path& directoryPath, const std::string fileName);
 
 	private:
 		const std::filesystem::path _workingDirectory;

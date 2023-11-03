@@ -1,15 +1,11 @@
 #include "Camera.h"
-#include <lowlevelsystems/MimicCore.h>
+#include <utility/Logger.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
 namespace Mimic
 {
-	Camera::Camera() 
-	{
-	}
-
-	void Camera::Initialise(const glm::vec2 aspectRatio, const float fov)
+	void Camera::Initialise(const glm::vec2& aspectRatio, const float& fov)
 	{
 		Fov = fov;
 		ClippingPlane = glm::vec2(0.1f, 100.0f);
@@ -35,13 +31,5 @@ namespace Mimic
 		MIMIC_LOG_INFO("[Mimic::Camera] Load successful.");
 	}
 
-	void Camera::Update()
-	{
-
-	}
-
-	void Camera::Draw()
-	{
-
-	}
+	void Camera::Update() {}
 }

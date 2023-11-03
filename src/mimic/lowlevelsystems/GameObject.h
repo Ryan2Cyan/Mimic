@@ -1,4 +1,5 @@
 #pragma once
+#include <utility/Logger.h>
 #include <memory>
 #include <vector>
 #include <string>
@@ -22,10 +23,22 @@ namespace Mimic
 			newComponent->GameObject = _self;
 
 			_components.push_back(newComponent);
-			_componentsCount++;
 			return newComponent;
 		}
-		std::shared_ptr<MimicCore> GetMimicCore() const;
+
+		template <typename T> std::shared_ptr<T> GetComponent() const
+		{
+			for (auto component : _components)
+			{
+				std::shared_ptr<T> componentDynCast = std::dynamic_pointer_cast<T>(component);
+				if (componentDynCast != nullptr) return componentDynCast;
+			}
+
+			MIMIC_LOG_WARNING("[GameObject] \"%\" Could not find component of specified type.", Name);
+			return nullptr;
+		}
+
+		std::shared_ptr<MimicCore> GetMimicCore() const noexcept;
 
 		glm::vec3 Position;
 		glm::vec3 Rotation;
@@ -34,16 +47,13 @@ namespace Mimic
 
 	private:
 		friend struct MimicCore;
-		friend struct Component;
-		friend struct ModelRenderer;
+		friend struct ModelRenderer; // needs the model matrix
 
-		void Update();
-		void Draw();
+		void Update() noexcept;
 
 		std::vector<std::shared_ptr<Component>> _components;
 		glm::mat4 _modelMatrix;
 		std::weak_ptr<MimicCore> _mimicCore;
 		std::weak_ptr<GameObject> _self;
-		unsigned int _componentsCount;
 	};
 }

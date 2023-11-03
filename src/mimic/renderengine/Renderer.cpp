@@ -1,9 +1,18 @@
 #include "Renderer.h"
+#include <renderengine/Texture.h>
 #include <utility>
 #include <GL/glew.h>
 
 namespace Mimic
 {
+	// #############################################################################
+	// render object member functions:
+	// #############################################################################
+	RenderObject::RenderObject(const unsigned int& vaoId, std::vector<std::shared_ptr<Texture>>& textures, std::vector<unsigned int>& indices, const std::shared_ptr<Shader>& shader, const glm::mat4& modelMatrix) noexcept
+		: _vertexArrayId(vaoId), _textures(textures), _indices(indices), _shader(shader), _modelMatrix(modelMatrix)
+	{
+	}
+
 	// #############################################################################
 	// renderer functions:
 	// #############################################################################
@@ -21,13 +30,13 @@ namespace Mimic
 	{
 		for (RenderObject renderObject : _renderQue)
 		{
-			glUseProgram(renderObject._shader->ShaderProgramId);
+			glUseProgram(renderObject._shader->_shaderProgramId);
 
 			renderObject._shader->SetModelMatrix(renderObject._modelMatrix);
-			renderObject._shader->SetViewMatrix(_viewMatrix);
-			renderObject._shader->SetProjectionMatrix(_projectionMatrix);
+			renderObject._shader->SetViewMatrix(_cachedViewMatrix);
+			renderObject._shader->SetProjectionMatrix(_cachedProjectionMatrix);
 
-			unsigned int textureIndex = 1;
+			/*unsigned int textureIndex = 1;*/
 
 			const unsigned int length = renderObject._textures.size();
 			renderObject._shader->SetInt("materialsCount", length);
@@ -36,10 +45,10 @@ namespace Mimic
 			{
 				// activate texture unit before binding:
 				glActiveTexture(GL_TEXTURE0 + i);
-				std::string textureNumber = std::to_string(i);
+
 				// will probably need to insert the type eventually:
-				renderObject._shader->SetInt(("materials[" + textureNumber + "].texture").c_str(), i);
-				glBindTexture(GL_TEXTURE_2D, renderObject._textures[i].Id);
+				renderObject._shader->SetInt(("materials[" + std::to_string(i) + "].texture").c_str(), i);
+				glBindTexture(GL_TEXTURE_2D, renderObject._textures[i]->_id);
 			}
 			glActiveTexture(GL_TEXTURE0);
 
@@ -51,10 +60,4 @@ namespace Mimic
 		}
 		_renderQue.clear();
 	}
-
-	// #############################################################################
-	// render object member functions:
-	// #############################################################################
-	RenderObject::RenderObject(const unsigned int& vaoId, std::vector<Texture>& textures, std::vector<unsigned int>& indices, const std::shared_ptr<Shader>& shader) noexcept
-		: _vertexArrayId(vaoId), _textures(textures), _indices(indices), _shader(shader) {}
 }
