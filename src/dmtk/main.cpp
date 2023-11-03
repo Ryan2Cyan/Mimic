@@ -25,8 +25,10 @@ int main(int argc, char* argv[])
 		dmtkCore->AddCamera(mainCamera, true);
 
 		std::shared_ptr<GameObject> mushroomGameObject = dmtkCore->AddEmptyGameObject();
-		mushroomGameObject->AddComponent<ModelRenderer>();
-		mushroomGameObject->GetComponent<ModelRenderer>()->Initialise("Mushrooms1.obj", "Texture.glsl");
+		mushroomGameObject->AddComponent<ModelRenderer>()->Initialise("Mushrooms1.obj", "BasicShader.glsl");
+		std::shared_ptr<ModelRenderer> mushroomModelRenderer = mushroomGameObject->GetComponent<ModelRenderer>();
+		mushroomModelRenderer->AddMaterial<BasicMaterial>();
+		/*mushroomGameObject->GetComponent<ModelRenderer>()->Initialise("Mushrooms1.obj", "Texture.glsl");*/
 		/*mushroomModelRenderer->Initialise( "Mushrooms1.obj", "Texture.glsl" );*/
 
 		/*std::shared_ptr<GameObject> explorerGameObject = dmtkCore->AddEmptyGameObject();

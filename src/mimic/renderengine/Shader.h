@@ -19,6 +19,8 @@ namespace Mimic
 
 	private:
 		friend struct Renderer;
+		friend struct Material;
+		friend struct BasicMaterial;
 
 		const std::string ReadShaderFile(const std::string& path);
 		static GLenum ShaderTypeFromString(const std::string& type);
@@ -28,14 +30,15 @@ namespace Mimic
 		void SetModelMatrix(const glm::mat4& value) noexcept;
 		void SetViewMatrix(const glm::mat4& value) noexcept;
 		void SetProjectionMatrix(const glm::mat4& value) noexcept;
+		void SetTexture(const char* name, const int& textureId, const int& bindPoint);
 		void SetBool(const char* name, const bool value) const noexcept;
 		void SetInt(const char* name, const int value) const noexcept;
 		void SetFloat(const char* name, const float value) const noexcept;
 		void SetMat4(const char* name, const glm::mat4 value) const noexcept;
 
-		int _modelMatrixUniformLocation;
-		int _viewMatrixUniformLocation;
-		int _projectionMatrixUniformLocation;
+		int _modelMatrixUniformLocation = -1;
+		int _viewMatrixUniformLocation = -1;
+		int _projectionMatrixUniformLocation = -1;
 		unsigned int _shaderProgramId;
 		bool _initialised;
 	};

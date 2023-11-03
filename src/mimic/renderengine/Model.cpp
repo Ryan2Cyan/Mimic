@@ -9,6 +9,8 @@
 
 namespace Mimic
 {
+	typedef std::vector<std::shared_ptr<Texture>> textureVector;
+
 	const int Model::Load(const std::string& path)
 	{
 		Assimp::Importer importer;
@@ -52,7 +54,6 @@ namespace Mimic
 		// convert aiMesh into Mimic::Mesh: (vertex, normal, tex coords):
 		std::vector<Vertex> vertices;
 		std::vector<unsigned int> indices;
-		std::vector<std::shared_ptr<Texture>> textures;
 
 		for (unsigned int i = 0; i < mesh->mNumVertices; i++)
 		{
@@ -78,32 +79,34 @@ namespace Mimic
 			for (unsigned int i = 0; i < faceIndicesLength; i++) indices.push_back(face.mIndices[i]);
 		}
 
+		std::shared_ptr<Texture> diffuseMap;
+		std::shared_ptr<Texture> specularMap;
+		std::shared_ptr<Texture> normalMap;
+		std::shared_ptr<Texture> heightMap;
+
 		// mesh contains material index - retrieve material from scene:
 		if (mesh->mMaterialIndex >= 0)
 		{
-			aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
+			const aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 
-			const std::vector<std::shared_ptr<Texture>> diffuseMaps = LoadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
-			textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
-
-			const std::vector<std::shared_ptr<Texture>> specularMaps = LoadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
-			textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
-
-			const std::vector<std::shared_ptr<Texture>> normalMaps = LoadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal");
-			textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
-
-			const std::vector<std::shared_ptr<Texture>> heightMaps = LoadMaterialTextures(material, aiTextureType_AMBIENT, "texture_height");
-			textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
+			diffuseMap = LoadMaterialTextures(material, aiTextureType_DIFFUSE, "diffuse");
+			specularMap = LoadMaterialTextures(material, aiTextureType_SPECULAR, "specular");
+			normalMap = LoadMaterialTextures(material, aiTextureType_HEIGHT, "normal");
+			heightMap = LoadMaterialTextures(material, aiTextureType_AMBIENT, "height");
 		}
 
-		std::shared_ptr<Mesh> newMesh = std::make_shared<Mesh>(vertices, indices, textures);
-		if (textures.size() < 1) MIMIC_LOG_WARNING("[Model] Mesh \"%\" loaded with no textures.", Name.c_str());
+		std::shared_ptr<Mesh> newMesh = std::make_shared<Mesh>(vertices, indices);
+		newMesh->SetDiffuse(diffuseMap);
+		newMesh->SetSpecular(specularMap);
+		newMesh->SetNormal(normalMap);
+		newMesh->SetHeight(heightMap);
+
 		return newMesh;
 	}
 
-	const std::vector<std::shared_ptr<Texture>> Model::LoadMaterialTextures(const aiMaterial* material, const aiTextureType& type, const std::string& typeName)
+	const std::shared_ptr<Texture> Model::LoadMaterialTextures(const aiMaterial* material, const aiTextureType& type, const std::string&& typeName)
 	{
-		std::vector<std::shared_ptr<Texture>> loadedTextures;
+		std::shared_ptr<Texture> loadedTexture;
 
 		const unsigned int length = material->GetTextureCount(type);
 		for (unsigned int i = 0; i < length; i++)
@@ -111,14 +114,15 @@ namespace Mimic
 			aiString aiPath;
 			material->GetTexture(type, i, &aiPath);
 			std::string texturePath = aiPath.C_Str();
-			std::shared_ptr<Texture> loadedTexture = GetResourceManager()->LoadResource<Texture>(texturePath);
+			loadedTexture = GetResourceManager()->LoadResource<Texture>(texturePath);
 			if (loadedTexture != nullptr)
 			{
-				/*loadedTexture->Type = type;*/
-				loadedTextures.push_back(loadedTexture);
+				loadedTexture->_type = typeName;
+				return loadedTexture;
 			}
 			else MIMIC_LOG_WARNING("[Model] Unable to load texture of type: \"%\", from path: \"%\"", typeName, texturePath);
 		}
-		return loadedTextures;
+		MIMIC_LOG_WARNING("[Model] Unable to load texture of type: \"%\"", typeName);
+		return loadedTexture;
 	}
 }

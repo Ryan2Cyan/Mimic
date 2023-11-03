@@ -18,6 +18,7 @@
 #include <renderengine/Vertex.h>
 #include <renderengine/Texture.h>
 #include <renderengine/Renderer.h>
+#include <renderengine/Material.h>
 
 #include <utility/PerformanceCounter.h>
 #include <utility/Logger.h>

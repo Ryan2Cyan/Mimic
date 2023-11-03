@@ -1,4 +1,5 @@
 #include "Mesh.h"
+#include <utility/Logger.h>
 #include <GL/glew.h>
 
 namespace Mimic
@@ -9,8 +10,7 @@ namespace Mimic
 	// #############################################################################
 	// Source: https://learnopengl.com/Model-Loading/Mesh
 
-	Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<std::shared_ptr<Texture>> textures)
-		: _vertices(vertices), _indices(indices), _textures(textures) 
+	Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices) : _vertices(vertices), _indices(indices) 
 	{
 		constexpr size_t VERTEX_SIZE = sizeof(Vertex);
 
@@ -38,4 +38,45 @@ namespace Mimic
 
 		glBindVertexArray(0);
 	}
+
+	void Mesh::SetDiffuse(const std::shared_ptr<Texture>& diffuse)
+	{
+		if (diffuse == nullptr) 
+		{ 
+			MIMIC_LOG_WARNING("[Mesh] Unable to assign diffuse texture.");
+			return;
+		}
+		_diffuseTexture = diffuse;
+	}
+
+	void Mesh::SetSpecular(const std::shared_ptr<Texture>& specular)
+	{
+		if (specular == nullptr)
+		{
+			MIMIC_LOG_WARNING("[Mesh] Unable to assign specular texture.");
+			return;
+		}
+		_specularTexture = specular;
+	}
+
+	void Mesh::SetNormal(const std::shared_ptr<Texture>& normal)
+	{
+		if (normal == nullptr)
+		{
+			MIMIC_LOG_WARNING("[Mesh] Unable to assign normal texture.");
+			return;
+		}
+		_normalTexture = normal;
+	}
+
+	void Mesh::SetHeight(const std::shared_ptr<Texture>& height)
+	{
+		if (height == nullptr)
+		{
+			MIMIC_LOG_WARNING("[Mesh] Unable to assign height texture.");
+			return;
+		}
+		_heightTexture = height;
+	}
+
 }

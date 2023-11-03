@@ -150,6 +150,7 @@ namespace Mimic
 		for (auto shaderId : glShaderIds) glDetachShader(_shaderProgramId, shaderId);
 	}
 
+
 	void Shader::SetBool(const char* name, const bool value) const noexcept
 	{
 		GLint location = glGetUniformLocation(_shaderProgramId, name);
@@ -170,6 +171,13 @@ namespace Mimic
 			return;
 		}
 		glUniform1i(location, value);
+	}
+
+	void Shader::SetTexture(const char* name, const int& textureId, const int& bindPoint)
+	{
+		glActiveTexture(GL_TEXTURE0 + bindPoint);
+		glBindTexture(GL_TEXTURE_2D, textureId);
+		SetInt(name, textureId);
 	}
 
 	void Shader::SetFloat(const char* name, const float value) const noexcept

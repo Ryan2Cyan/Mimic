@@ -4,6 +4,8 @@
 #include <lowlevelsystems/MimicCore.h>
 #include <renderengine/Renderer.h>
 #include <renderengine/Model.h>
+#include <renderengine/Material.h>
+#include <functional>
 
 namespace Mimic
 {
@@ -15,24 +17,28 @@ namespace Mimic
 	void ModelRenderer::Initialise(const std::string& modelFileName, const std::string& shaderFileName)
 	{
 		_initialised = SetModel(modelFileName) && SetShader(shaderFileName);
+		_material = AddMaterial<BasicMaterial>();
 		if (_initialised) MIMIC_LOG_INFO("[Mimic::ModelRenderer] Initialisation successful.");
 	}
 
 	void ModelRenderer::Initialise(const std::shared_ptr<Model>& model, const std::string& shaderFileName)
 	{
 		_initialised = SetModel(model) && SetShader(shaderFileName);
+		_material = AddMaterial<BasicMaterial>();
 		if (_initialised) MIMIC_LOG_INFO("[Mimic::ModelRenderer] Initialisation successful.");
 	}
 
 	void ModelRenderer::Initialise(const std::string& modelFileName, const std::shared_ptr<Shader>& shader)
 	{
 		_initialised = SetModel(modelFileName) && SetShader(shader);
+		_material = AddMaterial<BasicMaterial>();
 		if (_initialised) MIMIC_LOG_INFO("[Mimic::ModelRenderer] Initialisation successful.");
 	}
 
 	void ModelRenderer::Initialise(const std::shared_ptr<Model>& model, const std::shared_ptr<Shader>& shader)
 	{
 		_initialised = SetModel(model) && SetShader(shader);
+		_material = AddMaterial<BasicMaterial>();
 		if (_initialised) MIMIC_LOG_INFO("[Mimic::ModelRenderer] Initialisation successful.");
 	}
 
@@ -92,14 +98,25 @@ namespace Mimic
 
 		// add each mesh in the model into the draw queue:
 		const std::shared_ptr<Renderer> renderer = GetGameObject()->GetMimicCore()->_renderer;
+		std::function<void()> materialOnDrawLambda = [&]() { _material->OnDraw(); };
+		_material->_shader = _shader;
+
 		for (auto mesh : _model->_meshes)
 		{
-			const RenderObject currentRenderObject = RenderObject(
+			// store texture id's in material:
+			if(mesh->_diffuseTexture != nullptr) _material->_diffuseTexture = mesh->_diffuseTexture->_id;
+			if (mesh->_specularTexture != nullptr) _material->_specularTexture = mesh->_specularTexture->_id;
+			if (mesh->_normalTexture != nullptr) _material->_normalTexture = mesh->_normalTexture->_id;
+			if (mesh->_heightTexture != nullptr) _material->_heightTexture = mesh->_heightTexture->_id;
+
+			// send render object to renderer:
+			 RenderObject currentRenderObject = RenderObject(
 				mesh->_vertexArrayId, 
 				mesh->_textures, 
 				mesh->_indices, 
 				_shader, 
-				GetGameObject()->_modelMatrix
+				GetGameObject()->_modelMatrix,
+				materialOnDrawLambda
 			);
 			renderer->AddToDrawQue(currentRenderObject);
 		}
