@@ -36,6 +36,7 @@ namespace Mimic
 		void SetInt(const char* name, const int value) const noexcept;
 		void SetFloat(const char* name, const float value) const noexcept;
 		void SetVector3(const char* name, const glm::vec3 value) const noexcept;
+		void SetVector4(const char* name, glm::vec4 value) const noexcept;
 		void SetMat4(const char* name, const glm::mat4 value) const noexcept;
 
 		int _modelMatrixUniformLocation = -1;

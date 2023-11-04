@@ -18,14 +18,14 @@ namespace Mimic
 
 	void ModelRenderer::Initialise(const std::string& modelFileName)
 	{
-		Material = std::make_shared<BasicMaterial>();
+		Material = std::make_shared<PBRMaterial>();
 		SetModel(modelFileName);
 		if (_initialised) MIMIC_LOG_INFO("[Mimic::ModelRenderer] Initialisation successful.");
 	}
 
 	void ModelRenderer::Initialise(const std::shared_ptr<Model>& model)
 	{
-		Material = std::make_shared<BasicMaterial>();
+		Material = std::make_shared<PBRMaterial>();
 		SetModel(model);
 		if (_initialised) MIMIC_LOG_INFO("[Mimic::ModelRenderer] Initialisation successful.");
 	}
@@ -70,6 +70,12 @@ namespace Mimic
 				if (texture->_type == "normal") Material->SetNormal(texture);
 				if (texture->_type == "height") Material->SetHeight(texture);
 			}
+		}
+
+		if (Material->_shader.expired())
+		{
+			MIMIC_LOG_WARNING("[Mimic::ModelRenderer] \"%\" material failed to load shader.", GetGameObject()->Name);
+			return false;
 		}
 
 		return true;

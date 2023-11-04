@@ -199,7 +199,18 @@ namespace Mimic
 			MIMIC_LOG_WARNING("[Mimic::Shader] Could not find location of shader uniform [glm::vec3] named \"%\"", name);
 			return;
 		}
-		glUniform3f(location, value.x, value.y, value.z);
+		glUniform3fv(location, 1, glm::value_ptr(value));
+	}
+
+	void Shader::SetVector4(const char* name, glm::vec4 value) const noexcept
+	{
+		GLint location = glGetUniformLocation(_shaderProgramId, name);
+		if (location == -1)
+		{
+			MIMIC_LOG_WARNING("[Mimic::Shader] Could not find location of shader uniform [glm::vec3] named \"%\"", name);
+			return;
+		}
+		glUniform4fv(location, 1, glm::value_ptr(value));
 	}
 
 	void Shader::SetMat4(const char* name, const glm::mat4 value) const noexcept

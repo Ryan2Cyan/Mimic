@@ -1,26 +1,28 @@
 #type vertex
 #version 430 core
 
-layout(location = 0) in vec4 vertexPosition;
-layout(location = 1) in vec3 vertexNormal;
+layout(location = 0) in vec4 aPos;
+layout(location = 1) in vec3 aNormal;
+layout(location = 2) in vec2 aTexCoord;
 
 uniform mat4 u_Model;
 uniform mat4 u_View;
 uniform mat4 u_Projection;
-
-uniform vec4 worldSpaceLightPos;
+uniform vec4 u_WorldSpaceLightPos;
 
 out vec3 viewDirectionNormalV;
 out vec3 lightPositionV;
 out vec3 vertexPositionV;
+out vec2 texCoord;
 
 void main()
 {
-	gl_Position = u_Projection * u_View * u_Model * vertexPosition;
+	gl_Position = u_Projection * u_View * u_Model * aPos;
 
-	vertexPositionV = vec3(u_View * u_Model * vertexPosition);
-	lightPositionV = vec3(u_View * worldSpaceLightPos);
-	viewDirectionNormalV = mat3(u_View * u_Model) * vertexNormal;
+	vertexPositionV = vec3(u_View * u_Model * aPos);
+	lightPositionV = vec3(u_View * u_WorldSpaceLightPos);
+	viewDirectionNormalV = mat3(u_View * u_Model) * aNormal;
+	texCoord = aTexCoord;
 }
 
 
@@ -28,11 +30,18 @@ void main()
 
 #type fragment
 #version 430 core
+// Source: https://learnopengl.com/PBR/Lighting
+
 const float PI = 3.14159265359;
 
 in vec3 viewDirectionNormalV;
 in vec3 lightPositionV;
 in vec3 vertexPositionV;
+
+uniform sampler2D u_Diffuse;
+uniform sampler2D u_Specular;
+uniform sampler2D u_Normal;
+uniform sampler2D u_Height;
 
 uniform vec3 u_Albedo = vec3(1.0f);
 uniform vec3 u_Emissive = { 0, 0, 0 };
@@ -48,7 +57,7 @@ out vec4 fragColour;
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Normal Distribution Function (Trowbridge-Reitz GGX) - Approximates surface's microfacets that align to the halfway vector:
-float DistrubutionGGX(vec3 normal, vec3 halfwayVector, float roughness)
+float DistrubutionGGX(const in vec3 normal, const in vec3 halfwayVector, const in float roughness)
 {
 	float roughnessPow2 = roughness * roughness;
 	float normalDotHalfway = max(dot(normal, halfwayVector), 0.0);
@@ -59,23 +68,23 @@ float DistrubutionGGX(vec3 normal, vec3 halfwayVector, float roughness)
 }
 
 // Fresnel Schlick - Ratio of light reflected based on the viewing angle:
-vec3 FresnelSchlick(float cosTheta, vec3 baseReflectivity)
+vec3 FresnelSchlick(const in float cosTheta, vec3 baseReflectivity)
 {
 	return baseReflectivity + (1.0 - baseReflectivity) * pow(1.0 - cosTheta, 5.0);
 }
 
 // Roughness Remapper (Used in Schlick-GGX):
-float SchlickGGXRoughnessRemapperDirect(float roughness) { return pow((roughness + 1), 2.0) / 8.0; }
-float SchlickGGXRoughnessRemapperIBL(float roughness) { return (roughness * roughness) / 2.0; }
+float SchlickGGXRoughnessRemapperDirect(const in float roughness) { return pow((roughness + 1), 2.0) / 8.0; }
+float SchlickGGXRoughnessRemapperIBL(const in float roughness) { return (roughness * roughness) / 2.0; }
 
 // Schlick-GGX:
-float GeometrySchlickGGX(float normalDotViewDirection, float remappedRoughness)
+float GeometrySchlickGGX(float normalDotViewDirection, const in float remappedRoughness)
 {
 	return normalDotViewDirection / (normalDotViewDirection * (1.0 - remappedRoughness) + remappedRoughness);
 }
 
 // Schlick-GGX combined with Smith's method:
-float GeometrySmith(vec3 normal, vec3 viewDirection, vec3 lightDirection, float remappedRoughness)
+float GeometrySmith(const in vec3 normal, const in vec3 viewDirection, const in vec3 lightDirection, const in float remappedRoughness)
 {
 	float normalDotView = max(dot(normal, viewDirection), 0.0);
 	float normalDotLight = max(dot(normal, lightDirection), 0.0);
