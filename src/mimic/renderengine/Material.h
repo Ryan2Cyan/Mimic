@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <memory>
+#include <GLM/glm.hpp>
 
 namespace Mimic
 {
@@ -41,6 +42,30 @@ namespace Mimic
 		BasicMaterial();
 
 	private:
+		void OnDraw() override;
+	};
+
+	// #############################################################################
+	// pbr stuct:
+	// #############################################################################
+	struct PBRMaterial : Material
+	{
+		PBRMaterial();
+
+		void SetAlbedo(const glm::vec3& albedo);
+		void SetEmissive(const glm::vec3& emissive);
+		void SetMetallic(const float& metallic);
+		void SetRoughness(const float& roughness);
+		void SetAmbientOcclusion(const float& ambientOcclusion);
+		void SetAlpha(const float& alpha);
+
+	private:
+		glm::vec3 _albedo;
+		glm::vec3 _emissive;
+		float _metallic;
+		float _roughness;
+		float _ambientOcclusion;
+		float _alpha;
 		void OnDraw() override;
 	};
 }

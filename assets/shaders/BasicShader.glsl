@@ -27,18 +27,18 @@ out vec4 FragColor;
 
 in vec2 TexCoord;
 
-uniform sampler2D diffuse;
-uniform sampler2D specular;
-uniform sampler2D normal;
-uniform sampler2D height;
+uniform sampler2D u_Diffuse;
+uniform sampler2D u_Specular;
+uniform sampler2D u_Normal;
+uniform sampler2D u_Height;
 
 void main()
 {
     vec4 resultTexture;
-    resultTexture += texture2D(diffuse, TexCoord);
-    resultTexture += texture2D(specular, TexCoord);
-    resultTexture += texture2D(normal, TexCoord);
-    resultTexture += texture2D(height, TexCoord);
+    resultTexture += texture2D(u_Diffuse, TexCoord);
+    resultTexture += texture2D(u_Specular, TexCoord);
+    resultTexture += texture2D(u_Normal, TexCoord);
+    resultTexture += texture2D(u_Height, TexCoord);
     
     FragColor = clamp(resultTexture, 0.0f, 1.0f);
 }

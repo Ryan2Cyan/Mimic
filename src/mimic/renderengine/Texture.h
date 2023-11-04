@@ -19,6 +19,7 @@ namespace Mimic
 		friend struct Model;
 		friend struct Material;
 		friend struct BasicMaterial;
+		friend struct PBRMaterial;
 
 		unsigned int _id;
 		std::string _type;

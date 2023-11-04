@@ -18,7 +18,6 @@ void main()
     gl_Position = u_Projection * u_View * u_Model * vec4(aPos, 1.0f);
     TexCoord = aTexCoord;
     FragPos = vec3(u_Model * vec4(aPos, 1.0));
-    vertexColour = vec4(1.0, 0.0, 0.0, 1.0);
 }
 
 

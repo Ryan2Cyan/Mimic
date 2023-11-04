@@ -31,7 +31,7 @@ namespace Mimic
 			in.read(&result[0], result.size());
 			in.close();
 		}
-		else MIMIC_LOG_WARNING("[Shader] Could not open shader from filepath: %", path);
+		else MIMIC_LOG_WARNING("[Mimic::Shader] Could not open shader from filepath: %", path);
 	
 		return result;
 	}
@@ -66,7 +66,7 @@ namespace Mimic
 			const GLenum glEnumType = ShaderTypeFromString(type);
 			if (glEnumType == 0)
 			{
-				MIMIC_LOG_WARNING("[Shader] Shader source type token \"%\" is invalid", type);
+				MIMIC_LOG_WARNING("[Mimic::Shader] Shader source type token \"%\" is invalid", type);
 				return shaderSources;
 			}
 			shaderSources[ShaderTypeFromString(type)] = source.substr(nextLinePosition, currentPosition - (nextLinePosition == std::string::npos ? source.size() - 1 : nextLinePosition));
@@ -100,7 +100,7 @@ namespace Mimic
 			if (!success)
 			{
 				glGetShaderInfoLog(shaderId, 512, NULL, infoLog);
-				MIMIC_LOG_WARNING("[Shader] Shader(s) have failed to compile: %", infoLog);
+				MIMIC_LOG_WARNING("[Mimic::Shader] Shader(s) have failed to compile: %", infoLog);
 				return;
 			}
 
@@ -117,7 +117,7 @@ namespace Mimic
 		if (!success)
 		{
 			glGetProgramInfoLog(programId, 512, NULL, infoLog);
-			MIMIC_LOG_WARNING("[Shader] Shader(s) have failed to link to the ShaderProgram: %", infoLog);
+			MIMIC_LOG_WARNING("[Mimic::Shader] Shader(s) have failed to link to the ShaderProgram: %", infoLog);
 
 			glDeleteProgram(programId);
 			for (auto shaderId : glShaderIds) glDeleteShader(shaderId);
@@ -131,19 +131,19 @@ namespace Mimic
 		_modelMatrixUniformLocation = glGetUniformLocation(_shaderProgramId, "u_Model");
 		if (_modelMatrixUniformLocation == -1)
 		{
-			MIMIC_LOG_WARNING("[Shader] Unable to locate model matrix uniform location.");
+			MIMIC_LOG_WARNING("[Mimic::Shader] Unable to locate model matrix uniform location.");
 			_initialised = false;
 		}
 		_viewMatrixUniformLocation = glGetUniformLocation(_shaderProgramId, "u_View");
 		if (_viewMatrixUniformLocation == -1)
 		{
-			MIMIC_LOG_WARNING("[Shader] Unable to locate view matrix uniform location.");
+			MIMIC_LOG_WARNING("[Mimic::Shader] Unable to locate view matrix uniform location.");
 			_initialised = false;
 		}
 		_projectionMatrixUniformLocation = glGetUniformLocation(_shaderProgramId, "u_Projection");
 		if (_projectionMatrixUniformLocation == -1)
 		{
-			MIMIC_LOG_WARNING("[Shader] Unable to locate projection matrix uniform location.");
+			MIMIC_LOG_WARNING("[Mimic::Shader] Unable to locate projection matrix uniform location.");
 			_initialised = false;
 		}
 
@@ -156,7 +156,7 @@ namespace Mimic
 		GLint location = glGetUniformLocation(_shaderProgramId, name);
 		if (location == -1)
 		{
-			MIMIC_LOG_WARNING("[Shader] Could not find location of shader uniform [bool] named \"%\"", name);
+			MIMIC_LOG_WARNING("[Mimic::Shader] Could not find location of shader uniform [bool] named \"%\"", name);
 			return;
 		}
 		glUniform1i(location, (int)value);
@@ -167,7 +167,7 @@ namespace Mimic
 		GLint location = glGetUniformLocation(_shaderProgramId, name);
 		if (location == -1)
 		{
-			MIMIC_LOG_WARNING("[Shader] Could not find location of shader uniform [integer] named \"%\"", name);
+			MIMIC_LOG_WARNING("[Mimic::Shader] Could not find location of shader uniform [integer] named \"%\"", name);
 			return;
 		}
 		glUniform1i(location, value);
@@ -185,10 +185,21 @@ namespace Mimic
 		GLint location = glGetUniformLocation(_shaderProgramId, name);
 		if (location == -1)
 		{
-			MIMIC_LOG_WARNING("[Shader] Could not find location of shader uniform [float] named \"%\"", name);
+			MIMIC_LOG_WARNING("[Mimic::Shader] Could not find location of shader uniform [float] named \"%\"", name);
 			return;
 		}
 		glUniform1f(location, value);
+	}
+
+	void Shader::SetVector3(const char* name, const glm::vec3 value) const noexcept
+	{
+		GLint location = glGetUniformLocation(_shaderProgramId, name);
+		if (location == -1)
+		{
+			MIMIC_LOG_WARNING("[Mimic::Shader] Could not find location of shader uniform [glm::vec3] named \"%\"", name);
+			return;
+		}
+		glUniform3f(location, value.x, value.y, value.z);
 	}
 
 	void Shader::SetMat4(const char* name, const glm::mat4 value) const noexcept
@@ -196,7 +207,7 @@ namespace Mimic
 		GLint location = glGetUniformLocation(_shaderProgramId, name);
 		if (location == -1)
 		{
-			MIMIC_LOG_WARNING("[Shader] Could not find location of shader uniform [matrix 4x4] named \"%\"", name);
+			MIMIC_LOG_WARNING("[Mimic::Shader] Could not find location of shader uniform [matrix 4x4] named \"%\"", name);
 			return;
 		}
 		glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(value));
@@ -206,7 +217,7 @@ namespace Mimic
 	{
 		if (_modelMatrixUniformLocation == -1)
 		{
-			MIMIC_LOG_WARNING("[Shader] Unable to set model matrix as it's location is unfound.");
+			MIMIC_LOG_WARNING("[Mimic::Shader] Unable to set model matrix as it's location is unfound.");
 			return;
 		}
 		glUniformMatrix4fv(_modelMatrixUniformLocation, 1, GL_FALSE, glm::value_ptr(value));
@@ -216,7 +227,7 @@ namespace Mimic
 	{
 		if (_viewMatrixUniformLocation == -1)
 		{
-			MIMIC_LOG_WARNING("[Shader] Unable to set view matrix as it's location is unfound.");
+			MIMIC_LOG_WARNING("[Mimic::Shader] Unable to set view matrix as it's location is unfound.");
 			return;
 		}
 		glUniformMatrix4fv(_viewMatrixUniformLocation, 1, GL_FALSE, glm::value_ptr(value));
@@ -226,7 +237,7 @@ namespace Mimic
 	{
 		if (_projectionMatrixUniformLocation == -1)
 		{
-			MIMIC_LOG_WARNING("[Shader] Unable to set projection matrix as it's location is unfound.");
+			MIMIC_LOG_WARNING("[Mimic::Shader] Unable to set projection matrix as it's location is unfound.");
 			return;
 		}
 		glUniformMatrix4fv(_projectionMatrixUniformLocation, 1, GL_FALSE, glm::value_ptr(value));
