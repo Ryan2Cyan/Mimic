@@ -99,7 +99,6 @@ namespace Mimic
 			// send render object to renderer:
 			MimicCore::_renderer->AddToDrawQue(RenderObject(
 				mesh->_vertexArrayId,
-				mesh->_textures,
 				mesh->_indices,
 				Material->_shader.lock(),
 				GetGameObject()->_modelMatrix,

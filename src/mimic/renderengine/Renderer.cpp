@@ -6,9 +6,9 @@ namespace Mimic
 	// #############################################################################
 	// render object member functions:
 	// #############################################################################
-	RenderObject::RenderObject(const unsigned int& vaoId, std::vector<std::shared_ptr<Texture>>& textures, std::vector<unsigned int>& indices, 
-								const std::shared_ptr<Shader>& shader, const glm::mat4& modelMatrix, std::function<void()>& materialOnDraw)
-								: _vertexArrayId(vaoId), _textures(textures), _indices(indices), _shader(shader), _modelMatrix(modelMatrix),
+	RenderObject::RenderObject(const unsigned int& vaoId, std::vector<unsigned int>& indices, const std::shared_ptr<Shader>& shader, const glm::mat4& modelMatrix, 
+		                        std::function<void()>& materialOnDraw)
+								: _vertexArrayId(vaoId), _indices(indices), _shader(shader), _modelMatrix(modelMatrix),
 								_materialOnDraw(materialOnDraw) { }
 
 	// #############################################################################

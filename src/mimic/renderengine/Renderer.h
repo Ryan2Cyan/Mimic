@@ -18,8 +18,8 @@ namespace Mimic
 		friend struct ModelRenderer;
 		friend struct Renderer;
 
-		RenderObject(const unsigned int& vaoId, std::vector<std::shared_ptr<Texture>>& textures, std::vector<unsigned int>& indices,
-					 const std::shared_ptr<Shader>& shader, const glm::mat4& modelMatrix, std::function<void()>& materialOnDraw);
+		RenderObject(const unsigned int& vaoId, std::vector<unsigned int>& indices, const std::shared_ptr<Shader>& shader, 
+			         const glm::mat4& modelMatrix, std::function<void()>& materialOnDraw);
 
 		glm::mat4 _modelMatrix;
 		std::vector<std::shared_ptr<Texture>> _textures;

@@ -37,20 +37,20 @@ const float PI = 3.14159265359;
 in vec3 viewDirectionNormalV;
 in vec3 lightPositionV;
 in vec3 vertexPositionV;
+in vec2 texCoord;
 
 uniform sampler2D u_Diffuse;
 uniform sampler2D u_Specular;
-uniform sampler2D u_Normal;
-uniform sampler2D u_Height;
+// uniform sampler2D u_Normal;
+// uniform sampler2D u_Height;
 
-uniform vec3 u_Albedo = vec3(1.0f);
-uniform vec3 u_Emissive = { 0, 0, 0 };
-uniform float u_Metallic = 0.1;
-uniform float u_Roughness = 0.1;
-uniform float u_Alpha = 1.0f;
-uniform float u_AmbientOcclusion = 1.0;
+uniform vec3 u_Emissive;
+uniform float u_Metallic;
+uniform float u_Roughness;
+uniform float u_Alpha;
+uniform float u_AmbientOcclusion;
 
-uniform vec3 u_LightColour = { 1, 1, 1 };
+uniform vec3 u_LightColour = vec3(1.0f, 1.0f, 1.0f);
 // uniform vec3 ambientColour = { 0.1, 0.1, 0.2 };
 
 out vec4 fragColour;
@@ -96,12 +96,20 @@ float GeometrySmith(const in vec3 normal, const in vec3 viewDirection, const in 
 
 void main()
 {
+    vec4 resultTexture;
+    resultTexture += texture(u_Diffuse, texCoord).rgba;
+    resultTexture += texture2D(u_Specular, texCoord).rgba;
+	// vec3 albedo = resultTexture.rgb;
+	vec3 albedo = vec3(pow(resultTexture.r, 2.2f), pow(resultTexture.g, 2.2f), pow(resultTexture.b, 2.2f));
+	// vec3 albedo = vec3(1.0f, 0.0f, 0.0f);
+	
+
 	vec3 lightDir = normalize( lightPositionV - vertexPositionV );
 	vec3 normal = normalize( viewDirectionNormalV );
 	vec3 eyeDir = normalize( -vertexPositionV );
 
 	vec3 baseReflectivity = vec3(0.04);
-	baseReflectivity = mix(baseReflectivity , u_Albedo, u_Metallic);
+	baseReflectivity = mix(baseReflectivity , albedo, u_Metallic);
 	float remappedRoughness = SchlickGGXRoughnessRemapperIBL(u_Roughness);
 	
 	vec3 totalRadiance = vec3(0.0);
@@ -129,10 +137,10 @@ void main()
 
 		// Add to outgoing radiance:
 		float normalDotLight = max(dot(normal, lightDir), 0.0);
-		totalRadiance += (kD * u_Albedo / PI + specular) * radiance * normalDotLight;
+		totalRadiance += (kD * albedo / PI + specular) * radiance * normalDotLight;
 	}
 
-	vec3 ambient = vec3(0.03) * u_Albedo * u_AmbientOcclusion;
+	vec3 ambient = vec3(0.03) * albedo * u_AmbientOcclusion;
 	vec3 colour = ambient + totalRadiance;
 	colour = colour / (colour + vec3(1.0));
 	colour = pow(colour, vec3(1.0/2.2));

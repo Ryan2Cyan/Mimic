@@ -108,6 +108,7 @@ namespace Mimic
 		if (loadedTexture != nullptr)
 		{
 			loadedTexture->_type = typeName;
+			loadedTexture->Name = texturePath;
 			// check for repeats:
 			for (auto texture : _materialTextures)
 			{

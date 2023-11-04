@@ -75,7 +75,7 @@ namespace Mimic
 			const int success = newResource->Load(filePath);
 			if (success == -1)
 			{
-				MIMIC_LOG_WARNING("[ResourceManager] Invalid resource filepath attempted to load: \"%\"", fileName.c_str());
+				MIMIC_LOG_WARNING("[Mimic::ResourceManager] Invalid resource filepath attempted to load: \"%\"", fileName.c_str());
 				return nullptr;
 			}
 			_loadedResources[filePath] = newResource;
