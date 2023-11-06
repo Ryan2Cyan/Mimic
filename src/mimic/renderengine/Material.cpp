@@ -64,9 +64,9 @@ namespace Mimic
 
 		SetAlbedo(glm::vec3(1.0f));
 		SetEmissive(glm::vec3(0.0f));
-		SetMetallic(0.7f);
-		SetRoughness(0.1f);
-		SetAmbientOcclusion(1.0f);
+		SetMetallic(0.0f);
+		SetRoughness(0.9f);
+		SetAmbientOcclusion(0.9f);
 		SetAlpha(1.0f);
 	}
 
@@ -104,16 +104,16 @@ namespace Mimic
 	{
 		if (_shader.expired()) return;
 		const std::shared_ptr<Shader> shader = _shader.lock();
-		if (!_diffuseTexture.expired()) shader->SetTexture("u_Diffuse", _diffuseTexture.lock()->_id, 1);
-		if (!_specularTexture.expired()) shader->SetTexture("u_Specular", _specularTexture.lock()->_id, 2);
-		// if (!_normalTexture.expired()) shader->SetTexture("u_Normal", _normalTexture.lock()->_id, 2);
+		if (!_diffuseTexture.expired()) shader->SetTexture("u_Albedo", _diffuseTexture.lock()->_id, 1);
+		if (!_specularTexture.expired()) shader->SetTexture("u_Roughness", _specularTexture.lock()->_id, 2);
+		if (!_normalTexture.expired()) shader->SetTexture("u_Normal", _normalTexture.lock()->_id, 3);
 		// if (!_heightTexture.expired()) shader->SetTexture("u_Height", _heightTexture.lock()->_id, 3);
 
-		shader->SetVector4("u_WorldSpaceLightPos", glm::vec4(0.0f, 0.5f, 0.5f, 1.0f));
+		shader->SetVector4("u_WorldSpaceLightPos", glm::vec4(0.2f, 0.5f, 0.5f, 1.0f));
 		//// shader->SetVector3("u_Albedo", _albedo);
 		shader->SetVector3("u_Emissive", _emissive);
-		shader->SetFloat("u_Metallic", _metallic);
-		shader->SetFloat("u_Roughness", _roughness);
+		// shader->SetFloat("u_Metallic", _metallic);
+		// shader->SetFloat("u_Roughness", _roughness);
 		shader->SetFloat("u_Alpha", _alpha);
 		shader->SetFloat("u_AmbientOcclusion", _ambientOcclusion);
 	}

@@ -96,6 +96,7 @@ namespace Mimic
 		return newMesh;
 	}
 
+	// Source: https://scylardor.fr/2021/05/21/coercing-assimp-into-reading-obj-pbr-materials/
 	const void Model::LoadMaterialTextures(const aiMaterial* material, const aiTextureType& type, const std::string&& typeName)
 	{
 		std::shared_ptr<Texture> loadedTexture;

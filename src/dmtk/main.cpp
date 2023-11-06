@@ -25,9 +25,9 @@ int main(int argc, char* argv[])
 		dmtkCore->AddCamera(mainCamera, true);
 
 		std::shared_ptr<GameObject> mushroomGameObject = dmtkCore->AddEmptyGameObject();
-		mushroomGameObject->Scale = glm::vec3(0.05f, 0.05f, 0.05f);
+		mushroomGameObject->Scale = glm::vec3(0.03f, 0.03f, 0.03f);
 		std::shared_ptr<ModelRenderer> mushroomRenderer = mushroomGameObject->AddComponent<ModelRenderer>();
-		mushroomRenderer->Initialise("Hero_Forge_Paladin_Demo.stl");
+		mushroomRenderer->Initialise("Mushrooms1.obj");
 		
 		constexpr float maxRotAngle = 2.0f * 3.141592653589793238462643383f;
 

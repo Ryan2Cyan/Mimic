@@ -10,6 +10,7 @@ uniform mat4 u_View;
 uniform mat4 u_Projection;
 uniform vec4 u_WorldSpaceLightPos;
 
+// invariant keyword ensures that multiple program's output will be the same:
 out vec3 viewDirectionNormalV;
 out vec3 lightPositionV;
 out vec3 vertexPositionV;
@@ -30,23 +31,26 @@ void main()
 
 #type fragment
 #version 430 core
-// Source: https://learnopengl.com/PBR/Lighting
+#pragma debug(on)
+#define PI 3.14159265359f
 
-const float PI = 3.14159265359;
+// Source: https://learnopengl.com/Advanced-Lighting/Normal-Mapping
+// Source: https://learnopengl.com/PBR/Lighting
 
 in vec3 viewDirectionNormalV;
 in vec3 lightPositionV;
 in vec3 vertexPositionV;
 in vec2 texCoord;
 
-uniform sampler2D u_Diffuse;
-uniform sampler2D u_Specular;
-// uniform sampler2D u_Normal;
+uniform sampler2D u_Albedo;
+uniform sampler2D u_Roughness;
+// uniform sampler2D u_Metallic;
+uniform sampler2D u_Normal;
 // uniform sampler2D u_Height;
 
 uniform vec3 u_Emissive;
-uniform float u_Metallic;
-uniform float u_Roughness;
+// uniform float u_Metallic;
+// uniform float u_Roughness;
 uniform float u_Alpha;
 uniform float u_AmbientOcclusion;
 
@@ -96,22 +100,25 @@ float GeometrySmith(const in vec3 normal, const in vec3 viewDirection, const in 
 
 void main()
 {
-    vec4 resultTexture;
-    resultTexture += texture(u_Diffuse, texCoord).rgba;
-    resultTexture += texture2D(u_Specular, texCoord).rgba;
-	// vec3 albedo = resultTexture.rgb;
-	vec3 albedo = vec3(pow(resultTexture.r, 2.2f), pow(resultTexture.g, 2.2f), pow(resultTexture.b, 2.2f));
-	// vec3 albedo = vec3(1.0f, 0.0f, 0.0f);
-	
+	// PBR where albedo, normal, and roughness are loaded from a texture:
+	// Kd_map: Albedo, Ks_map: Roughness, map_Bump: Normal
 
+	vec3 diffuse = texture(u_Albedo, texCoord).rgb;
+	vec3 albedo = vec3(pow(diffuse.r, 2.2f), pow(diffuse.g, 2.2f), pow(diffuse.b, 2.2f));
+	
+	vec3 normal = texture(u_Normal, texCoord).rgb;
+	normal = normalize(normal * 2.0f - 1.0f);
+	
 	vec3 lightDir = normalize( lightPositionV - vertexPositionV );
-	vec3 normal = normalize( viewDirectionNormalV );
 	vec3 eyeDir = normalize( -vertexPositionV );
 
-	vec3 baseReflectivity = vec3(0.04);
-	baseReflectivity = mix(baseReflectivity , albedo, u_Metallic);
-	float remappedRoughness = SchlickGGXRoughnessRemapperIBL(u_Roughness);
-	
+	float roughness = texture(u_Roughness, texCoord).r;
+	float remappedRoughness = SchlickGGXRoughnessRemapperIBL(roughness);
+	float metallic = 1.0 - roughness;
+
+	vec3 baseReflectivity = mix(vec3(0.04), albedo, metallic);
+	albedo = mix(albedo, vec3(0), metallic);
+
 	vec3 totalRadiance = vec3(0.0);
 	for(int i = 0; i < 1; ++i)
 	{
@@ -123,13 +130,13 @@ void main()
 		vec3 radiance = u_LightColour * attenuation;
 
 		// Cook-Torrence BRDF:
-		float d = DistrubutionGGX(normal, halfVec, u_Roughness);
+		float d = DistrubutionGGX(normal, halfVec, roughness);
 		vec3 f = FresnelSchlick(dot(normal, halfVec), baseReflectivity);
 		float g = GeometrySmith(normal, eyeDir, lightDir, remappedRoughness);
 
 		vec3 kS = f;
-		vec3 kD = vec3(1.0) - kS;
-		kD *= 1.0 - u_Metallic;
+		// vec3 kD = vec3(1.0) - kS;
+		vec3 kD = kS * ( 1.0 - metallic );
 
 		vec3 numerator = d * g * f;
 		float denominator = 4.0f * max(dot(normal, eyeDir), 0.0) * max(dot(normal, lightDir), 0.0) + 0.0001;
