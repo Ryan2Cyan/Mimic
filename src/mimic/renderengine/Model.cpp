@@ -14,7 +14,7 @@ namespace Mimic
 	const int Model::Load(const std::string& path)
 	{
 		Assimp::Importer importer;
-		const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
+		const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
 
 		if (!scene)
 		{
@@ -60,10 +60,14 @@ namespace Mimic
 		{
 			const aiVector3D meshVertices = mesh->mVertices[i];
 			const aiVector3D meshNormals = mesh->mNormals[i];
+			const aiVector3D meshTangents = mesh->mTangents[i];
+			const aiVector3D meshBitangents = mesh->mBitangents[i];
 
 			Vertex newVertex(
 				glm::vec3(meshVertices.x, meshVertices.y, meshVertices.z),
 				glm::vec3(meshNormals.x, meshNormals.y, meshNormals.z),
+				glm::vec3(meshTangents.x, meshTangents.y, meshTangents.z),
+				glm::vec3(meshBitangents.x, meshBitangents.y, meshBitangents.z),
 				glm::vec2(0.0f)
 			);
 

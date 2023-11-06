@@ -137,7 +137,7 @@ namespace Mimic
 			shader->SetFloat("u_Roughness", _roughness);
 		}
 
-		shader->SetVector4("u_WorldSpaceLightPos", glm::vec4(0.2f, 0.5f, 0.5f, 1.0f));
+		shader->SetVector4("u_WorldSpaceLightPos", glm::vec4(0.2f, 1.5f, 1.5f, 1.0f));
 		shader->SetVector3("u_Emissive", _emissive);
 		shader->SetFloat("u_Alpha", _alpha);
 		shader->SetFloat("u_AmbientOcclusion", _ambientOcclusion);

@@ -19,15 +19,16 @@ int main(int argc, char* argv[])
 
 
 		std::shared_ptr<GameObject> cameraObject = dmtkCore->AddEmptyGameObject("Camera_1");
-		cameraObject->Position = glm::vec3(0.0f, 2.0f, 5.0f);
+		cameraObject->Position = glm::vec3(0.0f, 2.0f, 2.0f);
 		std::shared_ptr<Camera> mainCamera = cameraObject->AddComponent<Camera>();
 		mainCamera->Initialise(dmtkCore->GetAspectRatio(), 45.0f);
 		dmtkCore->AddCamera(mainCamera, true);
 
 		std::shared_ptr<GameObject> mushroomGameObject = dmtkCore->AddEmptyGameObject();
-		mushroomGameObject->Scale = glm::vec3(0.03f, 0.03f, 0.03f);
+		mushroomGameObject->Scale = glm::vec3(1.00f, 1.00f, 1.00f);
+		
 		std::shared_ptr<ModelRenderer> mushroomRenderer = mushroomGameObject->AddComponent<ModelRenderer>();
-		mushroomRenderer->Initialise("Mushrooms1.obj");
+		mushroomRenderer->Initialise("normal_rock_sphere.obj");
 		
 		constexpr float maxRotAngle = 2.0f * 3.141592653589793238462643383f;
 

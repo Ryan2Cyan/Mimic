@@ -12,10 +12,12 @@ namespace Mimic
 		friend struct Mesh;
 		friend struct Model;
 
-		explicit Vertex(glm::vec3 position, glm::vec3 normal, glm::vec2 textureCoordinates);
+		explicit Vertex(const glm::vec3& position, const glm::vec3& normal, const glm::vec3& tangent, const glm::vec3& biTangent, const glm::vec2& textureCoordinates);
 
 		glm::vec3 _position;
 		glm::vec3 _normal;
+		glm::vec3 _tangent;
+		glm::vec3 _biTangent;
 		glm::vec2 _textureCoordinates;
 	};
 }
