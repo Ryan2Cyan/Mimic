@@ -81,7 +81,11 @@ namespace Mimic
 
 	void MimicCore::Draw()
 	{
-		_renderer->Draw();
+		for (auto camera : _cameras)
+		{
+			_renderer->Draw(camera->_viewMatrix, camera->_projectionMatrix);
+		}
+		_renderer->_renderQue.clear();
 		SDL_GL_SwapWindow(_window->_window);
 	}
 

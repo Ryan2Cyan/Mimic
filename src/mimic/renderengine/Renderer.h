@@ -41,7 +41,8 @@ namespace Mimic
 
 		static std::shared_ptr<Renderer> Initialise();
 		void AddToDrawQue(const RenderObject& renderObject);
-		void Draw();
+		void Draw(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix);
+
 
 		glm::mat4 _cachedViewMatrix;
 		glm::mat4 _cachedProjectionMatrix;

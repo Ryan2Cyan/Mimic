@@ -13,6 +13,7 @@ namespace Mimic
 	struct Environment;
 	struct Camera;
 	struct Renderer;
+	struct Light;
 
 	// #############################################################################
 	// mimic core struct:
@@ -42,6 +43,7 @@ namespace Mimic
 
 		static std::vector<std::shared_ptr<GameObject>> _gameObjects;
 		static std::vector<std::shared_ptr<Camera>> _cameras;
+		static std::vector<std::shared_ptr<Light>> _lights;
 		static std::shared_ptr<Renderer> _renderer;
 		static std::shared_ptr<Window> _window;
 		static std::shared_ptr<Environment> _environment;

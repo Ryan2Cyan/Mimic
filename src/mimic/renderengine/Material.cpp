@@ -121,11 +121,12 @@ namespace Mimic
 			case PbrMode::AutoTexture:
 			{
 				glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &_autoTextureSubRoutine);
+				if (!_specularTexture.expired()) shader->SetTexture("u_RoughnessMap", _specularTexture.lock()->_id, 2);
 			}break;
 			default: return;
 		}
+
 		if (!_diffuseTexture.expired()) shader->SetTexture("u_AlbedoMap", _diffuseTexture.lock()->_id, 1);
-		if (!_specularTexture.expired()) shader->SetTexture("u_RoughnessMap", _specularTexture.lock()->_id, 2);
 		if (!_normalTexture.expired()) shader->SetTexture("u_NormalMap", _normalTexture.lock()->_id, 3);
 		if (!_heightTexture.expired()) shader->SetTexture("u_Height", _heightTexture.lock()->_id, 4);
 

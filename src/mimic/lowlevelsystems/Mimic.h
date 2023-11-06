@@ -19,6 +19,7 @@
 #include <renderengine/Texture.h>
 #include <renderengine/Renderer.h>
 #include <renderengine/Material.h>
+#include <renderengine/Light.h>
 
 #include <utility/PerformanceCounter.h>
 #include <utility/Logger.h>

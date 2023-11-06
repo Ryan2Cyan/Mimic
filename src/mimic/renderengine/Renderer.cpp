@@ -24,15 +24,15 @@ namespace Mimic
 		_renderQue.push_back(renderObject);
 	}
 
-	void Renderer::Draw()
+	void Renderer::Draw(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix)
 	{
 		for (RenderObject renderObject : _renderQue)
 		{
 			// set uniforms:
 			glUseProgram(renderObject._shader->_shaderProgramId);
 			renderObject._shader->SetModelMatrix(renderObject._modelMatrix);
-			renderObject._shader->SetViewMatrix(_cachedViewMatrix);
-			renderObject._shader->SetProjectionMatrix(_cachedProjectionMatrix);
+			renderObject._shader->SetViewMatrix(viewMatrix);
+			renderObject._shader->SetProjectionMatrix(projectionMatrix);
 			renderObject._materialOnDraw();
 			glActiveTexture(GL_TEXTURE0);
 
@@ -42,6 +42,5 @@ namespace Mimic
 			glBindVertexArray(0);
 			glUseProgram(0);
 		}
-		_renderQue.clear();
 	}
 }

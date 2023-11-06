@@ -78,6 +78,8 @@ add_library(mimicrenderer
     src/mimic/renderengine/Renderer.h
     src/mimic/renderengine/Material.cpp
     src/mimic/renderengine/Material.h
+    src/mimic/renderengine/Light.cpp
+    src/mimic/renderengine/Light.h
 
     SDKs/stbi/include/stb_image.h
 )
