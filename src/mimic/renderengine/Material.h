@@ -48,6 +48,11 @@ namespace Mimic
 	// #############################################################################
 	// pbr stuct:
 	// #############################################################################
+	enum PbrMode
+	{
+		Manual, AutoTexture
+	};
+
 	struct PBRMaterial : Material
 	{
 		PBRMaterial();
@@ -58,6 +63,7 @@ namespace Mimic
 		void SetRoughness(const float& roughness);
 		void SetAmbientOcclusion(const float& ambientOcclusion);
 		void SetAlpha(const float& alpha);
+		void SetPBRMode(const PbrMode& pbrMode);
 
 	private:
 		glm::vec3 _albedo;
@@ -66,6 +72,9 @@ namespace Mimic
 		float _roughness;
 		float _ambientOcclusion;
 		float _alpha;
+		PbrMode _pbrMode;
+		unsigned int _autoTextureSubRoutine;
+		unsigned int _manualSubRoutine;
 		void OnDraw() override;
 	};
 }

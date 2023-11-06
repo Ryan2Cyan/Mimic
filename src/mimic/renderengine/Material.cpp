@@ -61,6 +61,9 @@ namespace Mimic
 	PBRMaterial::PBRMaterial()
 	{
 		_shader = MimicCore::ResourceManager->LoadResource<Shader>("PBRShader.glsl");
+		_pbrMode = AutoTexture;
+		_autoTextureSubRoutine = glGetSubroutineIndex(_shader.lock()->_shaderProgramId, GL_FRAGMENT_SHADER, "CalculatePBRColourAutoTexture");
+		_manualSubRoutine = glGetSubroutineIndex(_shader.lock()->_shaderProgramId, GL_FRAGMENT_SHADER, "CalculatePBRColourManual");
 
 		SetAlbedo(glm::vec3(1.0f));
 		SetEmissive(glm::vec3(0.0f));
@@ -100,20 +103,41 @@ namespace Mimic
 		_alpha = std::clamp(alpha, 0.0f, 1.0f);
 	}
 
+	void PBRMaterial::SetPBRMode(const PbrMode& pbrMode)
+	{
+		_pbrMode = pbrMode;
+	}
+
 	void PBRMaterial::OnDraw()
 	{
 		if (_shader.expired()) return;
 		const std::shared_ptr<Shader> shader = _shader.lock();
-		if (!_diffuseTexture.expired()) shader->SetTexture("u_Albedo", _diffuseTexture.lock()->_id, 1);
-		if (!_specularTexture.expired()) shader->SetTexture("u_Roughness", _specularTexture.lock()->_id, 2);
-		if (!_normalTexture.expired()) shader->SetTexture("u_Normal", _normalTexture.lock()->_id, 3);
-		// if (!_heightTexture.expired()) shader->SetTexture("u_Height", _heightTexture.lock()->_id, 3);
+		switch (_pbrMode)
+		{
+			case PbrMode::Manual: 
+			{
+				glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &_manualSubRoutine);
+			}break;
+			case PbrMode::AutoTexture:
+			{
+				glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &_autoTextureSubRoutine);
+			}break;
+			default: return;
+		}
+		if (!_diffuseTexture.expired()) shader->SetTexture("u_AlbedoMap", _diffuseTexture.lock()->_id, 1);
+		if (!_specularTexture.expired()) shader->SetTexture("u_RoughnessMap", _specularTexture.lock()->_id, 2);
+		if (!_normalTexture.expired()) shader->SetTexture("u_NormalMap", _normalTexture.lock()->_id, 3);
+		if (!_heightTexture.expired()) shader->SetTexture("u_Height", _heightTexture.lock()->_id, 4);
+
+		if (_pbrMode == Manual)
+		{
+			// shader->SetVector3("u_Albedo", _albedo);
+			shader->SetFloat("u_Metallic", _metallic);
+			shader->SetFloat("u_Roughness", _roughness);
+		}
 
 		shader->SetVector4("u_WorldSpaceLightPos", glm::vec4(0.2f, 0.5f, 0.5f, 1.0f));
-		//// shader->SetVector3("u_Albedo", _albedo);
 		shader->SetVector3("u_Emissive", _emissive);
-		// shader->SetFloat("u_Metallic", _metallic);
-		// shader->SetFloat("u_Roughness", _roughness);
 		shader->SetFloat("u_Alpha", _alpha);
 		shader->SetFloat("u_AmbientOcclusion", _ambientOcclusion);
 	}

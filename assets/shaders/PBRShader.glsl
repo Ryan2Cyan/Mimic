@@ -32,7 +32,7 @@ void main()
 #type fragment
 #version 430 core
 #pragma debug(on)
-#define PI 3.14159265359f
+#define PI 3.14159265359
 
 // Source: https://learnopengl.com/Advanced-Lighting/Normal-Mapping
 // Source: https://learnopengl.com/PBR/Lighting
@@ -42,22 +42,25 @@ in vec3 lightPositionV;
 in vec3 vertexPositionV;
 in vec2 texCoord;
 
-uniform sampler2D u_Albedo;
-uniform sampler2D u_Roughness;
-// uniform sampler2D u_Metallic;
-uniform sampler2D u_Normal;
-// uniform sampler2D u_Height;
+subroutine vec3 CalculatePBRColour();
+subroutine uniform CalculatePBRColour PBRMode;
+vec3 CalculatePBRColourManual();
+vec3 CalculatePBRColourAutoTexture();
+
+uniform sampler2D u_AlbedoMap;
+uniform sampler2D u_RoughnessMap;
+uniform sampler2D u_NormalMap;
 
 uniform vec3 u_Emissive;
-// uniform float u_Metallic;
-// uniform float u_Roughness;
+uniform float u_Metallic;
+uniform float u_Roughness;
 uniform float u_Alpha;
 uniform float u_AmbientOcclusion;
 
-uniform vec3 u_LightColour = vec3(1.0f, 1.0f, 1.0f);
+uniform vec3 u_LightColour = vec3(1.0, 1.0, 1.0);
 // uniform vec3 ambientColour = { 0.1, 0.1, 0.2 };
 
-out vec4 fragColour;
+out vec4 FragColour;
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Normal Distribution Function (Trowbridge-Reitz GGX) - Approximates surface's microfacets that align to the halfway vector:
@@ -72,17 +75,17 @@ float DistrubutionGGX(const in vec3 normal, const in vec3 halfwayVector, const i
 }
 
 // Fresnel Schlick - Ratio of light reflected based on the viewing angle:
-vec3 FresnelSchlick(const in float cosTheta, vec3 baseReflectivity)
+vec3 FresnelSchlick(const in float cosTheta, const in vec3 baseReflectivity)
 {
 	return baseReflectivity + (1.0 - baseReflectivity) * pow(1.0 - cosTheta, 5.0);
 }
 
-// Roughness Remapper (Used in Schlick-GGX):
+// roughness remapper (Used in Schlick-GGX):
 float SchlickGGXRoughnessRemapperDirect(const in float roughness) { return pow((roughness + 1), 2.0) / 8.0; }
 float SchlickGGXRoughnessRemapperIBL(const in float roughness) { return (roughness * roughness) / 2.0; }
 
 // Schlick-GGX:
-float GeometrySchlickGGX(float normalDotViewDirection, const in float remappedRoughness)
+float GeometrySchlickGGX(const in float normalDotViewDirection, const in float remappedRoughness)
 {
 	return normalDotViewDirection / (normalDotViewDirection * (1.0 - remappedRoughness) + remappedRoughness);
 }
@@ -96,61 +99,114 @@ float GeometrySmith(const in vec3 normal, const in vec3 viewDirection, const in 
 	float ggx2 = GeometrySchlickGGX(normalDotLight, remappedRoughness);
 	return ggx1 * ggx2;
 }
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-void main()
+// Manual Mode: excludes roughness & metallic maps. uses the values defined by the user:
+subroutine(CalculatePBRColour) vec3 CalculatePBRColourManual()
 {
-	// PBR where albedo, normal, and roughness are loaded from a texture:
-	// Kd_map: Albedo, Ks_map: Roughness, map_Bump: Normal
+	const vec3 diffuse = texture(u_AlbedoMap, texCoord).rgb;
+	const vec3 albedo = vec3(pow(diffuse.r, 2.2f), pow(diffuse.g, 2.2f), pow(diffuse.b, 2.2f));
 
-	vec3 diffuse = texture(u_Albedo, texCoord).rgb;
+	const vec3 lightDir = normalize( lightPositionV - vertexPositionV );
+	const vec3 normal = normalize( viewDirectionNormalV );
+	const vec3 eyeDir = normalize( -vertexPositionV );
+
+	vec3 baseReflectivity = vec3(0.04);
+	baseReflectivity = mix(baseReflectivity , albedo, u_Metallic);
+	const float remappedRoughness = SchlickGGXRoughnessRemapperIBL(u_Roughness);
+	
+	vec3 totalRadiance = vec3(0.0);
+	for(int i = 0; i < 1; ++i)
+	{
+		// Calculate per-light radiance:
+		const vec3 L = normalize(lightPositionV - vertexPositionV);
+		const vec3 halfVec = normalize(lightDir + eyeDir);
+		const float distance = length(lightPositionV - vertexPositionV);
+		const float attenuation = 1.0 / (distance * distance);
+		const vec3 radiance = u_LightColour * attenuation;
+
+		// Cook-Torrence BRDF:
+		const float d = DistrubutionGGX(normal, halfVec, u_Roughness);
+		const vec3 f = FresnelSchlick(dot(normal, halfVec), baseReflectivity);
+		const float g = GeometrySmith(normal, eyeDir, lightDir, remappedRoughness);
+
+		const vec3 kS = f;
+		const vec3 kD = (vec3(1.0) - kS) * (1.0 - u_Metallic);
+
+		const vec3 numerator = d * g * f;
+		const float denominator = 4.0f * max(dot(normal, eyeDir), 0.0) * max(dot(normal, lightDir), 0.0) + 0.0001;
+		const vec3 specular = numerator / denominator;
+
+		// Add to outgoing radiance:
+		const float normalDotLight = max(dot(normal, lightDir), 0.0);
+		totalRadiance += (kD * albedo / PI + specular) * radiance * normalDotLight;
+	}
+
+	const vec3 ambient = vec3(0.03) * albedo * u_AmbientOcclusion;
+	vec3 colour = ambient + totalRadiance;
+	colour = colour / (colour + vec3(1.0));
+	colour = pow(colour, vec3(1.0/2.2));
+	return colour;
+}
+
+// Auto Texture Mode: roughness (and metalness) are loaded from a texture,
+// albedo (Kd_map), roughness/metalness (Ks_map), Normal (map_Bump).
+subroutine(CalculatePBRColour)
+vec3 CalculatePBRColourAutoTexture()
+{
+
+	const vec3 diffuse = texture(u_AlbedoMap, texCoord).rgb;
 	vec3 albedo = vec3(pow(diffuse.r, 2.2f), pow(diffuse.g, 2.2f), pow(diffuse.b, 2.2f));
 	
-	vec3 normal = texture(u_Normal, texCoord).rgb;
-	normal = normalize(normal * 2.0f - 1.0f);
-	
-	vec3 lightDir = normalize( lightPositionV - vertexPositionV );
-	vec3 eyeDir = normalize( -vertexPositionV );
+	const vec3 normal = normalize(texture(u_NormalMap, texCoord).rgb * 2.0f - 1.0f);
 
-	float roughness = texture(u_Roughness, texCoord).r;
-	float remappedRoughness = SchlickGGXRoughnessRemapperIBL(roughness);
-	float metallic = 1.0 - roughness;
+	const float roughness = texture(u_RoughnessMap, texCoord).r;
+	const float remappedRoughness = SchlickGGXRoughnessRemapperIBL(roughness);
+	const float metallic = 1.0 - roughness;
 
-	vec3 baseReflectivity = mix(vec3(0.04), albedo, metallic);
+	const vec3 baseReflectivity = mix(vec3(0.04), albedo, metallic);
 	albedo = mix(albedo, vec3(0), metallic);
+
+	const vec3 lightDir = normalize( lightPositionV - vertexPositionV );
+	const vec3 eyeDir = normalize( -vertexPositionV );
 
 	vec3 totalRadiance = vec3(0.0);
 	for(int i = 0; i < 1; ++i)
 	{
 		// Calculate per-light radiance:
-		vec3 L = normalize(lightPositionV - vertexPositionV);
-		vec3 halfVec = normalize(lightDir + eyeDir);
-		float distance = length(lightPositionV - vertexPositionV);
-		float attenuation = 1.0 / (distance * distance);
-		vec3 radiance = u_LightColour * attenuation;
+		const vec3 L = normalize(lightPositionV - vertexPositionV);
+		const vec3 halfVec = normalize(lightDir + eyeDir);
+		const float distance = length(lightPositionV - vertexPositionV);
+		const float attenuation = 1.0 / (distance * distance);
+		const vec3 radiance = u_LightColour * attenuation;
 
 		// Cook-Torrence BRDF:
-		float d = DistrubutionGGX(normal, halfVec, roughness);
-		vec3 f = FresnelSchlick(dot(normal, halfVec), baseReflectivity);
-		float g = GeometrySmith(normal, eyeDir, lightDir, remappedRoughness);
+		const float d = DistrubutionGGX(normal, halfVec, roughness);
+		const vec3 f = FresnelSchlick(dot(normal, halfVec), baseReflectivity);
+		const float g = GeometrySmith(normal, eyeDir, lightDir, remappedRoughness);
 
-		vec3 kS = f;
+		const vec3 kS = f;
 		// vec3 kD = vec3(1.0) - kS;
-		vec3 kD = kS * ( 1.0 - metallic );
+		const vec3 kD = kS * ( 1.0 - metallic );
 
-		vec3 numerator = d * g * f;
-		float denominator = 4.0f * max(dot(normal, eyeDir), 0.0) * max(dot(normal, lightDir), 0.0) + 0.0001;
-		vec3 specular = numerator / denominator;
+		const vec3 numerator = d * g * f;
+		const float denominator = 4.0f * max(dot(normal, eyeDir), 0.0) * max(dot(normal, lightDir), 0.0) + 0.0001;
+		const vec3 specular = numerator / denominator;
 
 		// Add to outgoing radiance:
-		float normalDotLight = max(dot(normal, lightDir), 0.0);
+		const float normalDotLight = max(dot(normal, lightDir), 0.0);
 		totalRadiance += (kD * albedo / PI + specular) * radiance * normalDotLight;
 	}
 
-	vec3 ambient = vec3(0.03) * albedo * u_AmbientOcclusion;
+	const vec3 ambient = vec3(0.03) * albedo * u_AmbientOcclusion;
 	vec3 colour = ambient + totalRadiance;
 	colour = colour / (colour + vec3(1.0));
 	colour = pow(colour, vec3(1.0/2.2));
+	return colour;
+}
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-	fragColour = vec4( u_Emissive + colour, u_Alpha );
+void main()
+{
+	const vec3 colour = PBRMode();
+	FragColour = vec4( u_Emissive + colour, u_Alpha );
 }
