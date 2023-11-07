@@ -5,6 +5,7 @@
 #include <lowlevelsystems/GameObject.h>
 #include <lowlevelsystems/Environment.h>
 #include <renderengine/Renderer.h>
+#include <renderengine/Light.h>
 #include <GL/glew.h>
 
 
@@ -13,6 +14,7 @@ namespace Mimic
 	std::shared_ptr<Camera> MimicCore::CurrentCamera;
 	std::shared_ptr<ResourceManager> MimicCore::ResourceManager;
 	std::vector<std::shared_ptr<GameObject>> MimicCore::_gameObjects;
+	std::vector<std::shared_ptr<DirectLight>> MimicCore::_lights;
 	std::vector<std::shared_ptr<Camera>> MimicCore::_cameras;
 	std::shared_ptr<Renderer> MimicCore::_renderer;
 	std::shared_ptr<Window> MimicCore::_window;
@@ -83,7 +85,12 @@ namespace Mimic
 	{
 		for (auto camera : _cameras)
 		{
-			_renderer->Draw(camera->_viewMatrix, camera->_projectionMatrix);
+			_renderer->Draw(
+				camera->GetGameObject()->_modelMatrix * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), 
+				camera->_viewMatrix, 
+				camera->_projectionMatrix,
+				_lights
+			);
 		}
 		_renderer->_renderQue.clear();
 		SDL_GL_SwapWindow(_window->_window);
@@ -116,6 +123,16 @@ namespace Mimic
 		_gameObjects.push_back(emptyGameObject);
 		MIMIC_LOG_INFO("[Mimic::MimicCore] Added Mimic::GameObject: \"%\".", emptyGameObject->Name);
 		return emptyGameObject;
+	}
+
+	std::shared_ptr<DirectLight> MimicCore::AddLight() noexcept
+	{
+		std::shared_ptr<DirectLight> newLight = std::make_shared<DirectLight>();
+		newLight->Name = "Light_" + _lights.size();
+
+		_lights.push_back(newLight);
+		MIMIC_LOG_INFO("[Mimic::MimicCore] Added Mimic::Light: \"%\".", newLight->Name);
+		return newLight;
 	}
 
 	void MimicCore::AddGameObject(const std::shared_ptr<GameObject> gameObject) noexcept

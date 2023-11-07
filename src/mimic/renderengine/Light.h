@@ -1,17 +1,24 @@
 #pragma once
 #include <GLM/glm.hpp>
+#include <string>
 
 namespace Mimic
 {
+	// Source: https://learnopengl.com/Lighting/Light-casters
 	// #############################################################################
-	// light class:
+	// direct light class:
 	// #############################################################################
-	struct Light
+	struct DirectLight
 	{
+		explicit DirectLight();
+		explicit DirectLight(const glm::vec3& position, const glm::vec3& direction, const glm::vec3& colour);
+		
 		glm::vec3 Position;
 		glm::vec3 Direction;
-		// glm::vec3 Ambient;
-		// glm::vec3 Diffuse;
-		// glm::vec3 Specular;
+		
+		glm::vec3 Colour;
+		std::string Name;
+	private:
+		// glm::mat4 _modelMatrix;
 	};
 }

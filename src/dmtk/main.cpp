@@ -24,6 +24,18 @@ int main(int argc, char* argv[])
 		mainCamera->Initialise(dmtkCore->GetAspectRatio(), 45.0f);
 		dmtkCore->AddCamera(mainCamera, true);
 
+		std::shared_ptr<DirectLight> light1 = dmtkCore->AddLight();
+		light1->Position = glm::vec3(2.0f, 1.f, 1.5f);
+		light1->Colour = glm::vec3(1.0f, 1.0f, 30.0f);
+
+		/*std::shared_ptr<DirectLight> light2 = dmtkCore->AddLight();
+		light2->Position = glm::vec3(-2.0f, 1.0f, 1.5f);
+		light2->Colour = glm::vec3(30.0f, 1.0f, 1.0f);
+
+		std::shared_ptr<DirectLight> light3 = dmtkCore->AddLight();
+		light3->Position = glm::vec3(0.0f, 5.0f, 1.5f);
+		light3->Colour = glm::vec3(0.0f, 30.0f, 1.0f);*/
+
 		std::shared_ptr<GameObject> mushroomGameObject = dmtkCore->AddEmptyGameObject();
 		mushroomGameObject->Scale = glm::vec3(1.00f, 1.00f, 1.00f);
 		

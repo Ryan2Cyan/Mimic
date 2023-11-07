@@ -62,6 +62,8 @@ namespace Mimic
 	{
 		std::shared_ptr<Shader> shader = MimicCore::ResourceManager->LoadResource<Shader>("PBRShader.glsl");
 
+		ManualMode = false;
+
 		// load all subroutines:
 	    // Source: https://stackoverflow.com/questions/23391311/glsl-subroutine-is-not-changed
 		_albedoSubroutineUniform = glGetSubroutineUniformLocation(shader->_shaderProgramId, GL_FRAGMENT_SHADER, "AlbedoMode");
@@ -78,7 +80,7 @@ namespace Mimic
 
 		_subroutineIndices = { _albedoSubroutineUniform, _normalSubroutineUniform, _roughnessSubroutineUniform };
 
-		SetAlbedo(glm::vec3(0.0f));
+		SetAlbedo(glm::vec3(1.0f));
 		SetEmissive(glm::vec3(0.0f));
 		SetMetallic(0.0f);
 		SetRoughness(0.9f);
@@ -124,7 +126,7 @@ namespace Mimic
 		const std::shared_ptr<Shader> shader = _shader.lock();
 
 		// load albedo (map_kd):
-		if (!_diffuseTexture.expired())
+		if (!_diffuseTexture.expired() && !ManualMode)
 		{
 			_subroutineIndices[_albedoSubroutineUniform] = _autoAlbedo;
 			shader->SetTexture("u_AlbedoMap", _diffuseTexture.lock()->_id, 1);
@@ -136,7 +138,7 @@ namespace Mimic
 		}
 
 		// load roughness/metallic (map_ks):
-		if (!_specularTexture.expired())
+		if (!_specularTexture.expired() && !ManualMode)
 		{
 			_subroutineIndices[_roughnessSubroutineUniform] = _autoRoughness;
 			shader->SetTexture("u_RoughnessMap", _specularTexture.lock()->_id, 2);
@@ -148,7 +150,7 @@ namespace Mimic
 		}
 
 		// load normals (map_Bump):
-		if (!_normalTexture.expired())
+		if (!_normalTexture.expired() && !ManualMode)
 		{
 			_subroutineIndices[_normalSubroutineUniform] = _autoNormal;
 			shader->SetTexture("u_NormalMap", _normalTexture.lock()->_id, 3);
@@ -160,7 +162,6 @@ namespace Mimic
 		// not sure assimp ever loads this:
 		/*if (!_heightTexture.expired()) shader->SetTexture("u_Height", _heightTexture.lock()->_id, 4);*/
 
-		shader->SetVector4("u_WorldSpaceLightPos", glm::vec4(0.2f, 1.5f, 1.5f, 1.0f));
 		shader->SetVector3("u_Emissive", _emissive);
 		shader->SetFloat("u_Alpha", _alpha);
 		shader->SetFloat("u_AmbientOcclusion", _ambientOcclusion);

@@ -13,7 +13,7 @@ namespace Mimic
 	struct Environment;
 	struct Camera;
 	struct Renderer;
-	struct Light;
+	struct DirectLight;
 
 	// #############################################################################
 	// mimic core struct:
@@ -31,6 +31,7 @@ namespace Mimic
 		const glm::vec2 GetAspectRatio() const noexcept;
 		std::shared_ptr<GameObject> AddEmptyGameObject() noexcept;
 		std::shared_ptr<GameObject> AddEmptyGameObject(const std::string& name) noexcept;
+		std::shared_ptr<DirectLight> AddLight() noexcept;
 		void AddGameObject(const std::shared_ptr<GameObject> gameObject) noexcept;
 		void AddCamera(const std::shared_ptr<Camera> camera, const bool setToCurrent) noexcept;
 
@@ -43,7 +44,7 @@ namespace Mimic
 
 		static std::vector<std::shared_ptr<GameObject>> _gameObjects;
 		static std::vector<std::shared_ptr<Camera>> _cameras;
-		static std::vector<std::shared_ptr<Light>> _lights;
+		static std::vector<std::shared_ptr<DirectLight>> _lights;
 		static std::shared_ptr<Renderer> _renderer;
 		static std::shared_ptr<Window> _window;
 		static std::shared_ptr<Environment> _environment;

@@ -49,11 +49,6 @@ namespace Mimic
 	// #############################################################################
 	// pbr stuct:
 	// #############################################################################
-	enum PbrMode
-	{
-		Manual, AutoTexture
-	};
-
 	struct PBRMaterial : Material
 	{
 		PBRMaterial();
@@ -65,6 +60,7 @@ namespace Mimic
 		void SetAmbientOcclusion(const float& ambientOcclusion);
 		void SetAlpha(const float& alpha);
 
+		bool ManualMode; // if true will not load textures and passes in member pbr params
 	private:
 		std::vector<unsigned int> _subroutineIndices;
 
