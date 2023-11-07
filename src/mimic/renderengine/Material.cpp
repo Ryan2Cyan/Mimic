@@ -60,17 +60,32 @@ namespace Mimic
 
 	PBRMaterial::PBRMaterial()
 	{
-		_shader = MimicCore::ResourceManager->LoadResource<Shader>("PBRShader.glsl");
-		_pbrMode = AutoTexture;
-		_autoTextureSubRoutine = glGetSubroutineIndex(_shader.lock()->_shaderProgramId, GL_FRAGMENT_SHADER, "CalculatePBRColourAutoTexture");
-		_manualSubRoutine = glGetSubroutineIndex(_shader.lock()->_shaderProgramId, GL_FRAGMENT_SHADER, "CalculatePBRColourManual");
+		std::shared_ptr<Shader> shader = MimicCore::ResourceManager->LoadResource<Shader>("PBRShader.glsl");
 
-		SetAlbedo(glm::vec3(1.0f));
+		// load all subroutines:
+	    // Source: https://stackoverflow.com/questions/23391311/glsl-subroutine-is-not-changed
+		_albedoSubroutineUniform = glGetSubroutineUniformLocation(shader->_shaderProgramId, GL_FRAGMENT_SHADER, "AlbedoMode");
+		_autoAlbedo = glGetSubroutineIndex(shader->_shaderProgramId, GL_FRAGMENT_SHADER, "CalculateAlbedoAutoTexture");
+		_manualAlbedo = glGetSubroutineIndex(shader->_shaderProgramId, GL_FRAGMENT_SHADER, "CalculateAlbedoManual");
+
+		_normalSubroutineUniform = glGetSubroutineUniformLocation(shader->_shaderProgramId, GL_FRAGMENT_SHADER, "NormalMode");
+		_autoNormal = glGetSubroutineIndex(shader->_shaderProgramId, GL_FRAGMENT_SHADER, "CalculateNormalAutoTexture");
+		_manualNormal = glGetSubroutineIndex(shader->_shaderProgramId, GL_FRAGMENT_SHADER, "CalculateNormalManual");
+
+		_roughnessSubroutineUniform = glGetSubroutineUniformLocation(shader->_shaderProgramId, GL_FRAGMENT_SHADER, "RoughnessMode");
+		_autoRoughness = glGetSubroutineIndex(shader->_shaderProgramId, GL_FRAGMENT_SHADER, "CalculateRoughnessAutoTexture");
+		_manualRoughness = glGetSubroutineIndex(shader->_shaderProgramId, GL_FRAGMENT_SHADER, "CalculateRoughnessManual");
+
+		_subroutineIndices = { _albedoSubroutineUniform, _normalSubroutineUniform, _roughnessSubroutineUniform };
+
+		SetAlbedo(glm::vec3(0.0f));
 		SetEmissive(glm::vec3(0.0f));
 		SetMetallic(0.0f);
 		SetRoughness(0.9f);
 		SetAmbientOcclusion(0.9f);
 		SetAlpha(1.0f);
+
+		_shader = shader;
 	}
 
 	void PBRMaterial::SetAlbedo(const glm::vec3& albedo)
@@ -103,39 +118,47 @@ namespace Mimic
 		_alpha = std::clamp(alpha, 0.0f, 1.0f);
 	}
 
-	void PBRMaterial::SetPBRMode(const PbrMode& pbrMode)
-	{
-		_pbrMode = pbrMode;
-	}
-
 	void PBRMaterial::OnDraw()
 	{
 		if (_shader.expired()) return;
 		const std::shared_ptr<Shader> shader = _shader.lock();
-		switch (_pbrMode)
+
+		// load albedo (map_kd):
+		if (!_diffuseTexture.expired())
 		{
-			case PbrMode::Manual: 
-			{
-				glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &_manualSubRoutine);
-			}break;
-			case PbrMode::AutoTexture:
-			{
-				glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &_autoTextureSubRoutine);
-				if (!_specularTexture.expired()) shader->SetTexture("u_RoughnessMap", _specularTexture.lock()->_id, 2);
-			}break;
-			default: return;
+			_subroutineIndices[_albedoSubroutineUniform] = _autoAlbedo;
+			shader->SetTexture("u_AlbedoMap", _diffuseTexture.lock()->_id, 1);
+		}
+		else
+		{
+			_subroutineIndices[_albedoSubroutineUniform] = _manualAlbedo;
+			shader->SetVector3("u_Albedo", _albedo);
 		}
 
-		if (!_diffuseTexture.expired()) shader->SetTexture("u_AlbedoMap", _diffuseTexture.lock()->_id, 1);
-		if (!_normalTexture.expired()) shader->SetTexture("u_NormalMap", _normalTexture.lock()->_id, 3);
-		if (!_heightTexture.expired()) shader->SetTexture("u_Height", _heightTexture.lock()->_id, 4);
-
-		if (_pbrMode == Manual)
+		// load roughness/metallic (map_ks):
+		if (!_specularTexture.expired())
 		{
-			// shader->SetVector3("u_Albedo", _albedo);
-			shader->SetFloat("u_Metallic", _metallic);
+			_subroutineIndices[_roughnessSubroutineUniform] = _autoRoughness;
+			shader->SetTexture("u_RoughnessMap", _specularTexture.lock()->_id, 2);
+		}
+		else
+		{
+			_subroutineIndices[_roughnessSubroutineUniform] = _manualRoughness;
 			shader->SetFloat("u_Roughness", _roughness);
 		}
+
+		// load normals (map_Bump):
+		if (!_normalTexture.expired())
+		{
+			_subroutineIndices[_normalSubroutineUniform] = _autoNormal;
+			shader->SetTexture("u_NormalMap", _normalTexture.lock()->_id, 3);
+		}
+		else _subroutineIndices[_normalSubroutineUniform] = _manualNormal;
+
+		glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, _subroutineIndices.size(), _subroutineIndices.data());
+
+		// not sure assimp ever loads this:
+		/*if (!_heightTexture.expired()) shader->SetTexture("u_Height", _heightTexture.lock()->_id, 4);*/
 
 		shader->SetVector4("u_WorldSpaceLightPos", glm::vec4(0.2f, 1.5f, 1.5f, 1.0f));
 		shader->SetVector3("u_Emissive", _emissive);

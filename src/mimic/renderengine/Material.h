@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <memory>
+#include <vector>
 #include <GLM/glm.hpp>
 
 namespace Mimic
@@ -63,18 +64,28 @@ namespace Mimic
 		void SetRoughness(const float& roughness);
 		void SetAmbientOcclusion(const float& ambientOcclusion);
 		void SetAlpha(const float& alpha);
-		void SetPBRMode(const PbrMode& pbrMode);
 
 	private:
+		std::vector<unsigned int> _subroutineIndices;
+
 		glm::vec3 _albedo;
 		glm::vec3 _emissive;
 		float _metallic;
 		float _roughness;
 		float _ambientOcclusion;
 		float _alpha;
-		PbrMode _pbrMode;
-		unsigned int _autoTextureSubRoutine;
-		unsigned int _manualSubRoutine;
+
+		unsigned int _albedoSubroutineUniform;
+		unsigned int _autoAlbedo;
+		unsigned int _manualAlbedo;
+
+		unsigned int _normalSubroutineUniform;
+		unsigned int _autoNormal;
+		unsigned int _manualNormal;
+
+		unsigned int _roughnessSubroutineUniform;
+		unsigned int _autoRoughness;
+		unsigned int _manualRoughness;
 		void OnDraw() override;
 	};
 }

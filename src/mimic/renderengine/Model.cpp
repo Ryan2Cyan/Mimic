@@ -54,14 +54,20 @@ namespace Mimic
 		// convert aiMesh into Mimic::Mesh: (vertex, normal, tex coords):
 		std::vector<Vertex> vertices;
 		std::vector<unsigned int> indices;
+		const bool tangents = mesh->mTangents > 0;
 
 		// get mesh vertices:
 		for (unsigned int i = 0; i < mesh->mNumVertices; i++)
 		{
 			const aiVector3D meshVertices = mesh->mVertices[i];
 			const aiVector3D meshNormals = mesh->mNormals[i];
-			const aiVector3D meshTangents = mesh->mTangents[i];
-			const aiVector3D meshBitangents = mesh->mBitangents[i];
+			aiVector3D meshTangents;
+			aiVector3D meshBitangents;
+			if (tangents)
+			{
+				meshTangents = mesh->mTangents[i];
+				meshBitangents = mesh->mBitangents[i];
+			}
 
 			Vertex newVertex(
 				glm::vec3(meshVertices.x, meshVertices.y, meshVertices.z),

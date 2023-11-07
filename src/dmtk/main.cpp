@@ -59,13 +59,13 @@ int main(int argc, char* argv[])
 			}
 
 			// display to window:
-			glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+			glClearColor(0.2f, 0.5f, 0.5f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-			float cubeYRotation = mushroomGameObject->Rotation.y;
+			float cubeYRotation = mushroomGameObject->Rotation.x;
 			cubeYRotation += DeltaTime() * 1.8f;
 			while (cubeYRotation > (maxRotAngle)) cubeYRotation -= maxRotAngle;
-			mushroomGameObject->Rotation.y = cubeYRotation;
+			mushroomGameObject->Rotation.x = cubeYRotation;
 
 			dmtkCore->Update();
 			dmtkCore->Draw();
