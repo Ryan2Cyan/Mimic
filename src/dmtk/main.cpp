@@ -12,79 +12,67 @@ using namespace Mimic;
 #undef main
 int main(int argc, char* argv[])
 {
+	// game engine code:
+	std::shared_ptr<MimicCore> dmtkCore = MimicCore::Initialise();
+	MIMIC_LOG_INFO("Hello World!");
+
+	std::shared_ptr<GameObject> cameraObject = dmtkCore->AddEmptyGameObject("Camera_1");
+	cameraObject->Position = glm::vec3(0.0f, 0.0f, 2.0f);
+	std::shared_ptr<Camera> mainCamera = cameraObject->AddComponent<Camera>();
+	mainCamera->Initialise(glm::vec2(800.0f, 800.0f), 45.0f);
+	dmtkCore->AddCamera(mainCamera, true);
+
+	std::shared_ptr<DirectLight> light1 = dmtkCore->AddLight();
+	light1->Position = glm::vec3(2.0f, 1.f, 1.5f);
+	light1->Colour = glm::vec3(1.0f, 1.0f, 30.0f);
+
+	std::shared_ptr<GameObject> mushroomGameObject = dmtkCore->AddEmptyGameObject();
+	mushroomGameObject->Scale = glm::vec3(1.00f, 1.00f, 1.00f);
+	mushroomGameObject->Position = glm::vec3(0.0f, 0.0f, -3.0f);
+
+	std::shared_ptr<ModelRenderer> mushroomRenderer = mushroomGameObject->AddComponent<ModelRenderer>();
+	mushroomRenderer->Initialise("normal_rock_sphere.obj");
+	
+	constexpr float maxRotAngle = 2.0f * 3.141592653589793238462643383f;
+	std::shared_ptr<PerformanceCounter> performanceCounter = PerformanceCounter::Initialise();
+
+	dmtkCore->Start();
+
+	while (dmtkCore->ApplicationRunning)
 	{
-		// game engine code:
-		std::shared_ptr<MimicCore> dmtkCore = MimicCore::Initialise();
-		MIMIC_LOG_INFO("Hello World!");
+		// performanceCounter->StartPerformanceCounter();
 
-
-		std::shared_ptr<GameObject> cameraObject = dmtkCore->AddEmptyGameObject("Camera_1");
-		cameraObject->Position = glm::vec3(0.0f, 2.0f, 2.0f);
-		std::shared_ptr<Camera> mainCamera = cameraObject->AddComponent<Camera>();
-		mainCamera->Initialise(dmtkCore->GetAspectRatio(), 45.0f);
-		dmtkCore->AddCamera(mainCamera, true);
-
-		std::shared_ptr<DirectLight> light1 = dmtkCore->AddLight();
-		light1->Position = glm::vec3(2.0f, 1.f, 1.5f);
-		light1->Colour = glm::vec3(1.0f, 1.0f, 30.0f);
-
-		/*std::shared_ptr<DirectLight> light2 = dmtkCore->AddLight();
-		light2->Position = glm::vec3(-2.0f, 1.0f, 1.5f);
-		light2->Colour = glm::vec3(30.0f, 1.0f, 1.0f);
-
-		std::shared_ptr<DirectLight> light3 = dmtkCore->AddLight();
-		light3->Position = glm::vec3(0.0f, 5.0f, 1.5f);
-		light3->Colour = glm::vec3(0.0f, 30.0f, 1.0f);*/
-
-		std::shared_ptr<GameObject> mushroomGameObject = dmtkCore->AddEmptyGameObject();
-		mushroomGameObject->Scale = glm::vec3(1.00f, 1.00f, 1.00f);
-		
-		std::shared_ptr<ModelRenderer> mushroomRenderer = mushroomGameObject->AddComponent<ModelRenderer>();
-		mushroomRenderer->Initialise("normal_rock_sphere.obj");
-		
-		constexpr float maxRotAngle = 2.0f * 3.141592653589793238462643383f;
-
-		std::shared_ptr<PerformanceCounter> performanceCounter = PerformanceCounter::Initialise();
-
-		// #############################################################################
-		// game loop:
-	    // #############################################################################
-		dmtkCore->Start();
-		while (dmtkCore->ApplicationRunning)
+		// handle human interface devices:
+		SDL_Event event;
+		while (SDL_PollEvent(&event))
 		{
-			performanceCounter->StartPerformanceCounter();
-			// handle human interface devices:
-			SDL_Event event;
-			while (SDL_PollEvent(&event))
+			switch (event.type)
 			{
-				switch (event.type)
+				case SDL_QUIT:
 				{
-					case SDL_QUIT:
-					{
-						dmtkCore->ApplicationRunning = false;
-						break;
-					}
-
-					case SDL_KEYDOWN: { break; }
-					case SDL_KEYUP: { break; }
+					dmtkCore->ApplicationRunning = false;
+					break;
 				}
+
+				case SDL_KEYDOWN: { break; }
+				case SDL_KEYUP: { break; }
 			}
-
-			// display to window:
-			glClearColor(0.2f, 0.5f, 0.5f, 1.0f);
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-			float cubeYRotation = mushroomGameObject->Rotation.x;
-			cubeYRotation += DeltaTime() * 1.8f;
-			while (cubeYRotation > (maxRotAngle)) cubeYRotation -= maxRotAngle;
-			mushroomGameObject->Rotation.x = cubeYRotation;
-
-			dmtkCore->Update();
-			dmtkCore->Draw();
-
-			performanceCounter->EndPerformanceCounter();
-			/*MIMIC_LOG_INFO("FPS: %", performanceCounter->GetFPS());*/
 		}
+
+		// display to window:
+		glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		float cubeYRotation = mushroomGameObject->Rotation.x;
+		cubeYRotation += DeltaTime() * 1.8f;
+		while (cubeYRotation > (maxRotAngle)) cubeYRotation -= maxRotAngle;
+		mushroomGameObject->Rotation.x = cubeYRotation;
+		dmtkCore->Update();
+		
+		dmtkCore->Draw();
+
+			// performanceCounter->EndPerformanceCounter();
+			/*MIMIC_LOG_INFO("FPS: %", performanceCounter->GetFPS());*/
 	}
 	return 0;
 }

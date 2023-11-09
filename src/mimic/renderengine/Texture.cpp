@@ -1,6 +1,5 @@
 #include "Texture.h"
 # include <utility/Logger.h>
-#include <GL/glew.h>
 #define STB_IMAGE_IMPLEMENTATION
 #define STBI_ASSERT(x)
 #include <stb_image.h>
@@ -8,6 +7,9 @@
 
 namespace Mimic
 {
+	// #############################################################################
+	// texture functions:
+	// #############################################################################
 	const int Texture::Load(const std::string& path)
 	{
 		glGenTextures(1, &_id);
@@ -16,7 +18,12 @@ namespace Mimic
 		int height;
 		int componentsN;
 		unsigned char* data = stbi_load(path.c_str(), &width, &height, &componentsN, 0);
-		if (data == nullptr) return -1;
+		if (data == nullptr)
+		{
+			MIMIC_LOG_WARNING("[Mimic::Texture] Texture data could not be loaded by stbi, at path: \"%\"", path);
+			stbi_image_free(data);
+			return -1;
+		}
 
 		GLenum format = GL_RGBA;
 		switch (componentsN)
@@ -35,7 +42,8 @@ namespace Mimic
 			}break;
 			default:
 			{
-				MIMIC_LOG_WARNING("[Texture] No pixel data format was found at path: \"%\"", path);
+				MIMIC_LOG_WARNING("[Mimic::Texture] No pixel data format was found at path: \"%\"", path);
+				stbi_image_free(data);
 				return -1;
 			}break;
 		}

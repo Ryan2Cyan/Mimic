@@ -8,29 +8,25 @@ namespace Mimic
 	void Camera::Initialise(const glm::vec2& aspectRatio, const float& fov)
 	{
 		Fov = fov;
-		ClippingPlane = glm::vec2(0.1f, 100.0f);
-		AspectRatio = glm::vec2(0.0f);
-		glm::vec3 position = GetGameObject()->Position;
-
-		// Gram-Schmidt to create LookAt matrix:
-		Target = glm::vec3(0.0f);
-		Direction = glm::normalize(position - Target);
-
+		Orientation = glm::vec3(0.0f, 0.0f, -1.0f);
 		Up = glm::vec3(0.0f, 1.0f, 0.0f);
-		Right = glm::normalize(glm::cross(Up, Direction));
-
-		Up = glm::cross(Direction, Right);
-
-		// create view matrix via glm::lookAt:
-		_viewMatrix = glm::mat4(1.0f);
-		_viewMatrix = glm::lookAt(position, Target, Up);
+		ClippingPlane = glm::vec2(0.1f, 100.0f);
+		AspectRatio = aspectRatio;
 		
-		// create projection matrix:
-		_projectionMatrix = glm::perspective(Fov, aspectRatio.x / aspectRatio.y, ClippingPlane.x, ClippingPlane.y);
-
 		_initialised = true;
 		MIMIC_LOG_INFO("[Mimic::Camera] Load successful.");
 	}
 
-	void Camera::Update() {}
+	void Camera::Update() 
+	{
+		// Initializes matrices since otherwise they will be the null matrix
+		glm::mat4 view = glm::mat4(1.0f);
+		glm::mat4 projection = glm::mat4(1.0f);
+		glm::vec3 position = GetGameObject()->Position;
+
+		// Makes camera look in the right direction from the right position
+		_viewMatrix = glm::lookAt(position, position + Orientation, Up);
+		// Adds perspective to the scene
+		_projectionMatrix = glm::perspective(glm::radians(Fov), AspectRatio.x / AspectRatio.y, ClippingPlane.x, ClippingPlane.y);
+	}
 }

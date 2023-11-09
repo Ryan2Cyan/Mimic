@@ -87,6 +87,7 @@ namespace Mimic
 
 	private:
 		friend struct MimicCore;
+		friend struct CubeMap;
 
 		static std::shared_ptr<ResourceManager> Initialise();
 		const std::string GetNameFromFilePath(const std::string& path) const noexcept;

@@ -1,7 +1,7 @@
 #type vertex
 #version 430 core
 
-layout(location = 0) in vec4 aPos;
+layout(location = 0) in vec3 aPos;
 layout(location = 1) in vec3 aNormal;
 layout(location = 2) in vec3 aTangent;
 layout(location = 3) in vec3 aBiTangent;
@@ -31,11 +31,12 @@ void main()
 	const vec3 b = cross(n, t);
 	TBN = mat3(t, b, n);
 
+	const vec4 aPosVec4 = vec4(aPos, 1.0);
     viewPosition = vec3(u_ViewPosition);
-    fragPosition = vec3(u_Model * aPos);
+    fragPosition = vec3(u_Model * aPosVec4);
 	viewDirectionNormal = mat3(u_View * u_Model) * aNormal;
 
-	gl_Position = u_Projection * u_View * u_Model * aPos;
+	gl_Position = u_Projection * u_View * u_Model * aPosVec4;
 }
 
 

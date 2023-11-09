@@ -4,6 +4,7 @@
 #include <lowlevelsystems/ResourceManager.h>
 #include <lowlevelsystems/GameObject.h>
 #include <lowlevelsystems/Environment.h>
+#include <lowlevelsystems/CubeMap.h>
 #include <renderengine/Renderer.h>
 #include <renderengine/Light.h>
 #include <GL/glew.h>
@@ -17,6 +18,7 @@ namespace Mimic
 	std::vector<std::shared_ptr<DirectLight>> MimicCore::_lights;
 	std::vector<std::shared_ptr<Camera>> MimicCore::_cameras;
 	std::shared_ptr<Renderer> MimicCore::_renderer;
+	std::shared_ptr<CubeMap> MimicCore::_cubeMap;
 	std::shared_ptr<Window> MimicCore::_window;
 	std::shared_ptr<Environment> MimicCore::_environment;
 
@@ -25,8 +27,9 @@ namespace Mimic
 		Mimic::Logger::Init();
 
 		// initialise SDL_Window, SDL_Renderer, & GL_Context:
-		glm::vec2 aspectRatio = glm::vec2(1260.0f, 720.0f);
+		glm::vec2 aspectRatio = glm::vec2(800.0f, 800.0f);
 		_window = Window::Initialise("[Mimic Engine] Dungeon Master's Tool Kit", aspectRatio);
+		glViewport(0, 0, aspectRatio.x, aspectRatio.y);
 
 		// init glew:
 		glewExperimental = GL_TRUE;
@@ -39,6 +42,7 @@ namespace Mimic
 		MIMIC_LOG_INFO("[GLEW] Initialisation successful.");
 
 		ApplicationRunning = true;
+		glViewport(0, 0, 800.0f, 800.0f);
 		glEnable(GL_DEPTH_TEST);
 	}
 
@@ -64,12 +68,30 @@ namespace Mimic
 		newMimicCore->_renderer = Renderer::Initialise();
 		MIMIC_LOG_INFO("[Mimic::Renderer] Initialisation successful.");
 
+		_cubeMap = std::make_shared<CubeMap>();
+		_cubeMap->SetFaceTexture(CubeMapFace::FaceRight, "right.jpg");
+		_cubeMap->SetFaceTexture(CubeMapFace::FaceLeft, "left.jpg");
+		_cubeMap->SetFaceTexture(CubeMapFace::FaceTop, "top.jpg");
+		_cubeMap->SetFaceTexture(CubeMapFace::FaceBottom, "bottom.jpg");
+		_cubeMap->SetFaceTexture(CubeMapFace::FaceFront, "front.jpg");
+		_cubeMap->SetFaceTexture(CubeMapFace::FaceBack, "back.jpg");
+		_cubeMap->Load();
+
+		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_CULL_FACE);
+		glCullFace(GL_FRONT);
+		glFrontFace(GL_CCW);
+
 		return newMimicCore;
 	}
 
 	void MimicCore::Start()
 	{
 		for (auto gameObject : _gameObjects) gameObject->Start();
+		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_CULL_FACE);
+		glCullFace(GL_FRONT);
+		glFrontFace(GL_CCW);
 	}
 
 	void MimicCore::Update()
@@ -78,11 +100,19 @@ namespace Mimic
 		_environment->CalculateDeltaTime();
 
 		// update game objects:
-		for (auto camera : _cameras) for (auto gameObject : _gameObjects) gameObject->Update();
+		for (auto camera : _cameras)
+		{
+			for (auto gameObject : _gameObjects)
+			{
+				gameObject->Update();
+			}
+		}
 	}
 
 	void MimicCore::Draw()
 	{
+		/*glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);*/
 		for (auto camera : _cameras)
 		{
 			_renderer->Draw(
@@ -93,6 +123,7 @@ namespace Mimic
 			);
 		}
 		_renderer->_renderQue.clear();
+		_cubeMap->Draw(CurrentCamera->_viewMatrix, CurrentCamera->_projectionMatrix);
 		SDL_GL_SwapWindow(_window->_window);
 	}
 

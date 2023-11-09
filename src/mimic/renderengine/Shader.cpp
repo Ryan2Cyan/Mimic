@@ -132,7 +132,7 @@ namespace Mimic
 		if (_modelMatrixUniformLocation == -1)
 		{
 			MIMIC_LOG_WARNING("[Mimic::Shader] Unable to locate model matrix uniform location.");
-			_initialised = false;
+			// _initialised = false;
 		}
 		_viewMatrixUniformLocation = glGetUniformLocation(_shaderProgramId, "u_View");
 		if (_viewMatrixUniformLocation == -1)

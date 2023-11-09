@@ -17,17 +17,19 @@ namespace Mimic
 		glm::vec3 Right;
 		glm::vec3 Up;
 		glm::vec3 Direction; // needs to be reversed.
+		glm::vec3 Orientation; // needs to be reversed.
 		glm::vec3 Target;
 		glm::vec2 AspectRatio;
 		glm::vec2 ClippingPlane;
 		float Fov;
-
+		
 	private:
 		friend struct MimicCore;
+		friend struct GameObject;
+
+		void Update() override;
 
 		glm::mat4 _projectionMatrix;
 		glm::mat4 _viewMatrix;
-
-		void Update() override;
 	};
 }

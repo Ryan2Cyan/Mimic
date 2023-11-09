@@ -53,6 +53,8 @@ add_library(mimic
     src/mimic/lowlevelsystems/ModelRenderer.h
     src/mimic/lowlevelsystems/Resource.cpp
     src/mimic/lowlevelsystems/Resource.h
+    src/mimic/lowlevelsystems/CubeMap.cpp
+    src/mimic/lowlevelsystems/CubeMap.h
 
     src/mimic/utility/Logger.cpp
     src/mimic/utility/Logger.h

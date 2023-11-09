@@ -58,6 +58,7 @@ namespace Mimic
 		{
 			Log("\x1b[1m\033[33m[WARNING] ");
 			std::cout << format << std::endl;
+			Log("\033[0;37m\x1b[0m");
 		}
 
 		template<typename T, typename... Targs> void LogWarning(const char* format, T value, Targs... Fargs)

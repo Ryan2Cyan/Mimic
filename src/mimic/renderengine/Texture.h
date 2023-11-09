@@ -1,6 +1,7 @@
 #pragma once
 #include <lowlevelsystems/Resource.h>
 #include <string>
+#include <GL/glew.h>
 
 
 namespace Mimic
