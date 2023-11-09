@@ -75,7 +75,6 @@ namespace Mimic
 		_cubeMap->SetFaceTexture(CubeMapFace::FaceBottom, "bottom.jpg");
 		_cubeMap->SetFaceTexture(CubeMapFace::FaceFront, "front.jpg");
 		_cubeMap->SetFaceTexture(CubeMapFace::FaceBack, "back.jpg");
-		_cubeMap->Load();
 
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_CULL_FACE);
@@ -88,6 +87,7 @@ namespace Mimic
 	void MimicCore::Start()
 	{
 		for (auto gameObject : _gameObjects) gameObject->Start();
+		_cubeMap->Load();
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_FRONT);
