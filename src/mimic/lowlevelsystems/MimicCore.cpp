@@ -19,6 +19,7 @@ namespace Mimic
 	std::vector<std::shared_ptr<Camera>> MimicCore::_cameras;
 	std::shared_ptr<Renderer> MimicCore::_renderer;
 	std::shared_ptr<CubeMap> MimicCore::_cubeMap;
+	std::shared_ptr<HDRCubeMap> MimicCore::_hdrCubeMap;
 	std::shared_ptr<Window> MimicCore::_window;
 	std::shared_ptr<Environment> MimicCore::_environment;
 
@@ -76,6 +77,8 @@ namespace Mimic
 		_cubeMap->SetFaceTexture(CubeMapFace::FaceFront, "front.jpg");
 		_cubeMap->SetFaceTexture(CubeMapFace::FaceBack, "back.jpg");
 
+		_hdrCubeMap = std::make_shared<HDRCubeMap>();
+
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_FRONT);
@@ -88,6 +91,7 @@ namespace Mimic
 	{
 		for (auto gameObject : _gameObjects) gameObject->Start();
 		_cubeMap->Load();
+		_hdrCubeMap->Load("rural_asphalt_road_4k.hdr");
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_FRONT);
@@ -123,6 +127,7 @@ namespace Mimic
 			);
 		}
 		_renderer->_renderQue.clear();
+		// _hdrCubeMap->Draw(CurrentCamera->_viewMatrix, CurrentCamera->_projectionMatrix);
 		_cubeMap->Draw(CurrentCamera->_viewMatrix, CurrentCamera->_projectionMatrix);
 		SDL_GL_SwapWindow(_window->_window);
 	}

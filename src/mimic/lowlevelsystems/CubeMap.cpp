@@ -12,6 +12,9 @@
 
 namespace Mimic
 {
+	// #############################################################################
+	// cubemap functions:
+	// #############################################################################
 	CubeMap::CubeMap() : _initialised(false), _skipDraw(false)
 	{
 		_faceTextures = {"", "", "", "", "", ""};
@@ -24,7 +27,7 @@ namespace Mimic
 
 	void CubeMap::Load()
 	{
-		_initialised = LoadShader() && LoadUnitCube() && LoadCubeMapTexture();
+		_initialised = LoadShader("CubeMapShader.glsl") && LoadUnitCube() && LoadCubeMapTexture();
 	}
 
 	bool CubeMap::LoadUnitCube()
@@ -92,17 +95,14 @@ namespace Mimic
 		return true;
 	}
 
-	bool CubeMap::LoadShader()
+	bool CubeMap::LoadShader(const std::string& fileName)
 	{
-		_shader = MimicCore::ResourceManager->LoadResource<Shader>("CubeMapShader.glsl");
+		_shader = MimicCore::ResourceManager->LoadResource<Shader>(fileName);
 		if (_shader == nullptr)
 		{
 			MIMIC_LOG_WARNING("[Mimic::CubeMap] Unable to load shader with file name: \"%\"", "CubeMapShader.glsl");
 			return false;
 		}
-		glUseProgram(_shader->_shaderProgramId);
-		_shader->SetInt("skybox", 0);
-		glUseProgram(0);
 		return true;
 	}
 
@@ -117,6 +117,7 @@ namespace Mimic
 
 		glDepthFunc(GL_LEQUAL);
 		glUseProgram(_shader->_shaderProgramId);
+		_shader->SetInt("skybox", 0);
 		glm::mat4 view = glm::mat4(glm::mat3(viewMatrix));
 		_shader->SetMat4("u_View", view);
 		_shader->SetMat4("u_Projection", projectionMatrix);
@@ -128,5 +129,52 @@ namespace Mimic
 		glBindVertexArray(0);
 
 		glDepthFunc(GL_LESS);
+	}
+
+	// #############################################################################
+	// hdr cubemap functions:
+	// #############################################################################
+
+	void HDRCubeMap::Load(const std::string& equirectangularTextureFileName)
+	{
+		_initialised = LoadEquirectangular(equirectangularTextureFileName) &&
+			LoadShader("HDRCubeMapShader.glsl") &&
+			LoadUnitCube();
+	}
+
+	void HDRCubeMap::Draw(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix)
+	{
+		if (_skipDraw) return;
+		if (!_initialised)
+		{
+			MIMIC_LOG_WARNING("[Mimic::CubeMap] Is uninitialised, therefore unable to draw.");
+			_skipDraw = true;
+		}
+
+		glDepthFunc(GL_LEQUAL);
+		glUseProgram(_shader->_shaderProgramId);
+		_shader->SetTexture("u_EquirectangularMap", _equirectangularTexture->_id, 1);
+		glm::mat4 view = glm::mat4(glm::mat3(viewMatrix));
+		_shader->SetMat4("u_View", view);
+		_shader->SetMat4("u_Projection", projectionMatrix);
+
+		glBindVertexArray(_cubeMapVertexArrayId);
+		glActiveTexture(GL_TEXTURE0);
+		/*glBindTexture(GL_TEXTURE_CUBE_MAP, _cubeMapTextureId);*/
+		glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+		glBindVertexArray(0);
+
+		glDepthFunc(GL_LESS);
+	}
+
+	bool HDRCubeMap::LoadEquirectangular(const std::string& fileName)
+	{
+		_equirectangularTexture = MimicCore::ResourceManager->LoadResource<Texture>(fileName);
+		if (_equirectangularTexture == nullptr)
+		{
+			MIMIC_LOG_WARNING("[Mimic::HDRCubeMap] Unable to load equirectangular texture from file name: ", fileName);
+			return false;
+		}
+		return true;
 	}
 }

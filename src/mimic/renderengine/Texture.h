@@ -19,6 +19,7 @@ namespace Mimic
 		friend struct Mesh;
 		friend struct Model;
 		friend struct Material;
+		friend struct HDRCubeMap;
 		friend struct BasicMaterial;
 		friend struct PBRMaterial;
 

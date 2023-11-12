@@ -17,7 +17,7 @@ int main(int argc, char* argv[])
 	MIMIC_LOG_INFO("Hello World!");
 
 	std::shared_ptr<GameObject> cameraObject = dmtkCore->AddEmptyGameObject("Camera_1");
-	cameraObject->Position = glm::vec3(0.0f, 0.0f, 2.0f);
+	cameraObject->Position = glm::vec3(0.0f, 0.0f, 10.0f);
 	std::shared_ptr<Camera> mainCamera = cameraObject->AddComponent<Camera>();
 	mainCamera->Initialise(glm::vec2(800.0f, 800.0f), 45.0f);
 	dmtkCore->AddCamera(mainCamera, true);

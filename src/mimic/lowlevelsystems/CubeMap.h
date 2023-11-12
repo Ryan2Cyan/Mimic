@@ -27,14 +27,16 @@ namespace Mimic
 		explicit CubeMap();
 		void SetFaceTexture(const CubeMapFace& face, const std::string& textureFileName);
 		void Draw(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix);
-		void Load();
 
 	private:
+		void Load();
+
+	protected:
 		friend struct MimicCore;
 
 		bool LoadUnitCube();
 		bool LoadCubeMapTexture();
-		bool LoadShader();
+		bool LoadShader(const std::string& fileName);
 		std::array<std::string, 6> _faceTextures;
 		std::shared_ptr<Shader> _shader;
 		unsigned int _cubeMapTextureId;
@@ -48,22 +50,16 @@ namespace Mimic
 	// #############################################################################
 	// Source: https://learnopengl.com/PBR/IBL/Diffuse-irradiance
 
-	/*struct HDRCubeMap
+	struct Texture;
+
+	struct HDRCubeMap : CubeMap
 	{
-		explicit CubeMap();
-		void SetFaceTexture(const CubeMapFace& face, const std::string& textureFileName);
-		void Load();
+		void Load(const std::string& equirectangularTextureFileName);
 		void Draw(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix);
-
-
+		
 	private:
-		friend struct MimicCore;
+		bool LoadEquirectangular(const std::string& fileName);
 
-		std::shared_ptr<Shader> _shader;
-		unsigned int _cubeMapTextureId;
-		unsigned int _skyboxVertexArrayId;
-		std::array<std::string, 6> _faceTextures;
-		bool _skipDraw;
-		bool _initialised;
-	};*/
+		std::shared_ptr<Texture> _equirectangularTexture;
+	};
 }

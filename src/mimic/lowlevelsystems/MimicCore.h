@@ -15,6 +15,7 @@ namespace Mimic
 	struct Renderer;
 	struct DirectLight;
 	struct CubeMap;
+	struct HDRCubeMap;
 
 	// #############################################################################
 	// mimic core struct:
@@ -49,6 +50,7 @@ namespace Mimic
 		static std::shared_ptr<Renderer> _renderer;
 		static std::shared_ptr<Window> _window;
 		static std::shared_ptr<CubeMap> _cubeMap;
+		static std::shared_ptr<HDRCubeMap> _hdrCubeMap;
 		static std::shared_ptr<Environment> _environment;
 		std::weak_ptr<MimicCore> _self;
 	};
