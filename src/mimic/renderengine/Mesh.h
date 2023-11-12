@@ -18,6 +18,7 @@ namespace Mimic
 	private:
 		friend struct ModelRenderer;
 		friend struct Model;
+		friend struct CubeMap;
 
 		void SetDiffuse(const std::shared_ptr<Texture>& diffuse);
 		void SetSpecular(const std::shared_ptr<Texture>& specular);

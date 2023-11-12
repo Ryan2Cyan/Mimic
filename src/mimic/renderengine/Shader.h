@@ -16,8 +16,6 @@ namespace Mimic
 	struct Shader : Resource
 	{
 		const int Load(const std::string& path) override;
-		void SetInt(const char* name, const int value) const noexcept;
-		void SetMat4(const char* name, const glm::mat4 value) const noexcept;
 
 	private:
 		friend struct Renderer;
@@ -36,9 +34,11 @@ namespace Mimic
 		void SetProjectionMatrix(const glm::mat4& value) noexcept;
 		void SetTexture(const char* name, const int& textureId, const int& bindPoint);
 		void SetBool(const char* name, const bool value) const noexcept;
+		void SetInt(const char* name, const int value) const noexcept;
 		void SetFloat(const char* name, const float value) const noexcept;
 		void SetVector3(const char* name, const glm::vec3 value) const noexcept;
 		void SetVector4(const char* name, glm::vec4 value) const noexcept;
+		void SetMat4(const char* name, const glm::mat4 value) const noexcept;
 
 		int _modelMatrixUniformLocation = -1;
 		int _viewMatrixUniformLocation = -1;

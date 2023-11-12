@@ -24,6 +24,7 @@ namespace Mimic
 	private:
 		friend struct ResourceManager;
 		friend struct ModelRenderer;
+		friend struct CubeMap;
 
 		const int Load(const std::string& path) override;
 		void ProcessNode(aiNode* node, const aiScene* scene);
