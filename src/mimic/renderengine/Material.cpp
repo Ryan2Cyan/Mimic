@@ -82,9 +82,9 @@ namespace Mimic
 
 		SetAlbedo(glm::vec3(1.0f));
 		SetEmissive(glm::vec3(0.0f));
-		SetMetallic(0.0f);
-		SetRoughness(0.9f);
-		SetAmbientOcclusion(0.9f);
+		SetMetallic(0.7f);
+		SetRoughness(0.1f);
+		SetAmbientOcclusion(1.0f);
 		SetAlpha(1.0f);
 
 		_shader = shader;

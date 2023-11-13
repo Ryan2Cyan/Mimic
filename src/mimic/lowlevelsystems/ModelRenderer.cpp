@@ -65,26 +65,10 @@ namespace Mimic
 		{
 			for (auto texture : model->_materialTextures)
 			{
-				if (texture->_type == "diffuse")
-				{
-					Material->SetDiffuse(texture);
-					continue;
-				}
-				if (texture->_type == "specular")
-				{
-					Material->SetSpecular(texture);
-					continue;
-				}
-				if (texture->_type == "normal")
-				{
-					Material->SetNormal(texture);
-					continue;
-				}
-				if (texture->_type == "height")
-				{
-					Material->SetHeight(texture);
-					continue;
-				}
+				if (texture->_type == "diffuse") Material->SetDiffuse(texture);
+				if (texture->_type == "specular") Material->SetSpecular(texture);
+				if (texture->_type == "normal") Material->SetNormal(texture);
+				if (texture->_type == "height") Material->SetHeight(texture);
 			}
 		}
 

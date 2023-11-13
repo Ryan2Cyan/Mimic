@@ -29,7 +29,7 @@ namespace Mimic
 		void SetHeight(const std::shared_ptr<Texture>& height);
 
 		std::weak_ptr<Texture> _diffuseTexture;
-		std::weak_ptr<Texture> _specularTexture; // used as specular (map_ks) and roughness (map_Ns)
+		std::weak_ptr<Texture> _specularTexture;
 		std::weak_ptr<Texture> _normalTexture;
 		std::weak_ptr<Texture> _heightTexture;
 		std::weak_ptr<Shader> _shader;
