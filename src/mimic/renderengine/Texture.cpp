@@ -49,6 +49,7 @@ namespace Mimic
 		}
 
 		glBindTexture(GL_TEXTURE_2D, _id);
+		MIMIC_DEBUG_LOG("[OpenGL] Texture generated with ID: %", _id);
 		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
 		glGenerateMipmap(GL_TEXTURE_2D);
 

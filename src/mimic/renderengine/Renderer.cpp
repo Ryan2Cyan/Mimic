@@ -1,4 +1,5 @@
 #include "Renderer.h"
+#include <utility/Logger.h>
 #include <renderengine/Shader.h>
 #include <renderengine/Light.h>
 #include <string>
@@ -31,7 +32,7 @@ namespace Mimic
 		for (RenderObject renderObject : _renderQue)
 		{
 			// set uniforms:
-			glUseProgram(renderObject._shader->_shaderProgramId);
+			renderObject._shader->UseShader();
 			renderObject._shader->SetVector4("u_ViewPosition", viewPosition);
 			renderObject._shader->SetModelMatrix(renderObject._modelMatrix);
 			renderObject._shader->SetViewMatrix(viewMatrix);
@@ -51,10 +52,11 @@ namespace Mimic
 			}
 			renderObject._shader->SetInt("u_DirectLightsCount", lights.size());
 			renderObject._materialOnDraw();
-			glActiveTexture(GL_TEXTURE0);
+			//glActiveTexture(GL_TEXTURE0);
 
 			// draw mesh:
 			glBindVertexArray(renderObject._vertexArrayId);
+			if(_debug) MIMIC_DEBUG_LOG("[OpenGL] Drawing vertices from vertex array [%].", renderObject._vertexArrayId);
 			glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(renderObject._indices.size()), GL_UNSIGNED_INT, 0);
 			glBindVertexArray(0);
 			glUseProgram(0);

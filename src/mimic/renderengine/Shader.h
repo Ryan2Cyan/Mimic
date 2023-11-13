@@ -25,6 +25,7 @@ namespace Mimic
 		friend struct BasicMaterial;
 		friend struct PBRMaterial;
 
+		void UseShader() const noexcept;
 		const std::string ReadShaderFile(const std::string& path);
 		static GLenum ShaderTypeFromString(const std::string& type);
 		const std::unordered_map<GLuint, std::string> PreProcess(const std::string& source);

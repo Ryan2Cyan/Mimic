@@ -91,7 +91,7 @@ namespace Mimic
 	{
 		for (auto gameObject : _gameObjects) gameObject->Start();
 		_cubeMap->Load();
-		_hdrCubeMap->Load("rural_asphalt_road_4k.hdr");
+		// _hdrCubeMap->Load("rural_asphalt_road_4k.hdr");
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_FRONT);
@@ -127,6 +127,7 @@ namespace Mimic
 			);
 		}
 		_renderer->_renderQue.clear();
+		_renderer->_debug = false;
 		// _hdrCubeMap->Draw(CurrentCamera->_viewMatrix, CurrentCamera->_projectionMatrix);
 		_cubeMap->Draw(CurrentCamera->_viewMatrix, CurrentCamera->_projectionMatrix);
 		SDL_GL_SwapWindow(_window->_window);
