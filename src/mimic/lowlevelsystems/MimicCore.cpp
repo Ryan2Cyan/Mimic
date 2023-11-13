@@ -30,7 +30,7 @@ namespace Mimic
 		// initialise SDL_Window, SDL_Renderer, & GL_Context:
 		glm::vec2 aspectRatio = glm::vec2(800.0f, 800.0f);
 		_window = Window::Initialise("[Mimic Engine] Dungeon Master's Tool Kit", aspectRatio);
-		glViewport(0, 0, aspectRatio.x, aspectRatio.y);
+		// glViewport(0, 0, aspectRatio.x, aspectRatio.y);
 
 		// init glew:
 		glewExperimental = GL_TRUE;
@@ -43,7 +43,7 @@ namespace Mimic
 		MIMIC_LOG_INFO("[GLEW] Initialisation successful.");
 
 		ApplicationRunning = true;
-		glViewport(0, 0, 800.0f, 800.0f);
+		// glViewport(0, 0, 800.0f, 800.0f);
 		glEnable(GL_DEPTH_TEST);
 	}
 
@@ -79,11 +79,6 @@ namespace Mimic
 
 		_hdrCubeMap = std::make_shared<HDRCubeMap>();
 
-		glEnable(GL_DEPTH_TEST);
-		glEnable(GL_CULL_FACE);
-		glCullFace(GL_FRONT);
-		glFrontFace(GL_CCW);
-
 		return newMimicCore;
 	}
 
@@ -93,9 +88,6 @@ namespace Mimic
 		_cubeMap->Load();
 		// _hdrCubeMap->Load("rural_asphalt_road_4k.hdr");
 		glEnable(GL_DEPTH_TEST);
-		glEnable(GL_CULL_FACE);
-		glCullFace(GL_FRONT);
-		glFrontFace(GL_CCW);
 	}
 
 	void MimicCore::Update()
@@ -128,8 +120,8 @@ namespace Mimic
 		}
 		_renderer->_renderQue.clear();
 		_renderer->_debug = false;
-		// _hdrCubeMap->Draw(CurrentCamera->_viewMatrix, CurrentCamera->_projectionMatrix);
 		_cubeMap->Draw(CurrentCamera->_viewMatrix, CurrentCamera->_projectionMatrix);
+		// _hdrCubeMap->Draw(CurrentCamera->_viewMatrix, CurrentCamera->_projectionMatrix);
 		SDL_GL_SwapWindow(_window->_window);
 	}
 
