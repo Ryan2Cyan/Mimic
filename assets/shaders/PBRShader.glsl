@@ -68,6 +68,7 @@ subroutine uniform CalculateNormal NormalMode;
 subroutine float CalculateRoughness();
 subroutine uniform CalculateRoughness RoughnessMode;
 
+uniform samplerCube u_IrradianceMap;
 uniform sampler2D u_AlbedoMap;
 uniform sampler2D u_RoughnessMap;
 uniform sampler2D u_NormalMap;
@@ -173,12 +174,12 @@ void main()
 	const vec3 baseReflectivity = mix(vec3(0.04), albedo, metallic);
 	
 	vec3 totalRadiance = vec3(0.0);
+	const vec3 viewDir = normalize( vec3(viewPosition) - fragPosition );
 	
 	for(int i = 0; i < u_DirectLightsCount; ++i)
 	{
 		const vec3 lightPosition = u_DirectLights[i].position.xyz;
 		const vec3 lightDir = normalize( lightPosition - fragPosition );
-		const vec3 viewDir = normalize( vec3(viewPosition) - fragPosition );
 		// will need to use the raw direction value for directional lights, but not point:
 		// const vec3 lightDirection = u_DirectLights[i].direction;
 
@@ -207,7 +208,13 @@ void main()
 		totalRadiance += (kD * albedo / PI + specular) * radiance * normalDotLight;
 	}
 
-	const vec3 ambient = vec3(0.03) * albedo * u_AmbientOcclusion;
+	// const vec3 ambient = vec3(0.03) * albedo * u_AmbientOcclusion;
+	const vec3 kS = FresnelSchlick(max(dot(normal, viewDir), 0.0), baseReflectivity);
+	const vec3 kD = 1.0 - kS;
+	const vec3 irradiance = texture(u_IrradianceMap, normal).rgb;
+	const vec3 diffuse = irradiance * albedo;
+	const vec3 ambient = (kD * diffuse) * u_AmbientOcclusion;
+
 	vec3 colour = ambient + totalRadiance;
 	colour = colour / (colour + vec3(1.0));
 	colour = pow(colour, vec3(1.0/2.2));

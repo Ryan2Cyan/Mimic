@@ -165,5 +165,6 @@ namespace Mimic
 		shader->SetVector3("u_Emissive", _emissive);
 		shader->SetFloat("u_Alpha", _alpha);
 		shader->SetFloat("u_AmbientOcclusion", _ambientOcclusion);
+		shader->SetInt("u_IrradianceMap", 0);
 	}
 }

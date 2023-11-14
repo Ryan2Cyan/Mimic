@@ -236,7 +236,7 @@ namespace Mimic
 
 		glBindVertexArray(_unitCubeVertexArrayId);
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, _irradianceMapTextureId);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, _environmentCubeMapTextureId);
 		glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 		glBindVertexArray(0);
 
