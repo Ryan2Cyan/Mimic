@@ -12,7 +12,10 @@ out vec3 localPosition;
 void main()
 {
 	localPosition = aPos;
-	gl_Position = u_Projection * u_View * vec4(aPos, 1.0);
+	const mat4 rotView = mat4(mat3(u_View));
+	const vec4 clipPosition = u_Projection * rotView * vec4(localPosition, 1.0);
+
+	gl_Position = clipPosition.xyww;
 }
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -23,23 +26,14 @@ void main()
 
 in vec3 localPosition;
 
-uniform sampler2D u_EquirectangularMap;
+uniform samplerCube u_EnvironmentMap;
 
 out vec4 fragColour;
 
- const vec2 inverseAtan = vec2(0.1591, 0.3183);
-
- const vec2 SampleSphericalMap(const vec3 vertex)
- {
- 	vec2 uv = vec2(atan(vertex.z, vertex.x), asin(vertex.y));
- 	uv *= inverseAtan;
- 	uv += 0.5;
-	return uv;
-}
-
 void main()
 {
-	const vec2 uv = SampleSphericalMap(normalize(localPosition));
-	const vec3 colour = texture(u_EquirectangularMap, vec2(1.0)).rgb;
-	fragColour = vec4(colour, 1.0);
+	vec3 environmentColour = texture(u_EnvironmentMap, localPosition).rgb;
+	environmentColour = pow(environmentColour, vec3(1.0 / 2.2));
+
+	fragColour = vec4(environmentColour, 1.0);
 }

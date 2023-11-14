@@ -21,7 +21,7 @@ namespace Mimic
 		friend struct Renderer;
 		friend struct Material;
 		friend struct CubeMap;
-		friend struct HDRCubeMap;
+		friend struct EnvironmentCubeMap;
 		friend struct BasicMaterial;
 		friend struct PBRMaterial;
 

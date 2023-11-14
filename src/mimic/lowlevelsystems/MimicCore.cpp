@@ -19,8 +19,8 @@ namespace Mimic
 	std::vector<std::shared_ptr<Camera>> MimicCore::_cameras;
 	std::shared_ptr<Renderer> MimicCore::_renderer;
 	std::shared_ptr<CubeMap> MimicCore::_cubeMap;
-	std::shared_ptr<HDRCubeMap> MimicCore::_hdrCubeMap;
-	std::shared_ptr<Window> MimicCore::_window;
+	std::shared_ptr<EnvironmentCubeMap> MimicCore::_environmentCubeMap;
+	std::shared_ptr<Window> MimicCore::Window;
 	std::shared_ptr<Environment> MimicCore::_environment;
 
 	MimicCore::MimicCore()
@@ -29,7 +29,7 @@ namespace Mimic
 
 		// initialise SDL_Window, SDL_Renderer, & GL_Context:
 		glm::vec2 aspectRatio = glm::vec2(800.0f, 800.0f);
-		_window = Window::Initialise("[Mimic Engine] Dungeon Master's Tool Kit", aspectRatio);
+		Window = Window::Initialise("[Mimic Engine] Dungeon Master's Tool Kit", aspectRatio);
 		// glViewport(0, 0, aspectRatio.x, aspectRatio.y);
 
 		// init glew:
@@ -69,15 +69,15 @@ namespace Mimic
 		newMimicCore->_renderer = Renderer::Initialise();
 		MIMIC_LOG_INFO("[Mimic::Renderer] Initialisation successful.");
 
-		_cubeMap = std::make_shared<CubeMap>();
+		/*_cubeMap = std::make_shared<CubeMap>();
 		_cubeMap->SetFaceTexture(CubeMapFace::FaceRight, "right.jpg");
 		_cubeMap->SetFaceTexture(CubeMapFace::FaceLeft, "left.jpg");
 		_cubeMap->SetFaceTexture(CubeMapFace::FaceTop, "top.jpg");
 		_cubeMap->SetFaceTexture(CubeMapFace::FaceBottom, "bottom.jpg");
 		_cubeMap->SetFaceTexture(CubeMapFace::FaceFront, "front.jpg");
-		_cubeMap->SetFaceTexture(CubeMapFace::FaceBack, "back.jpg");
+		_cubeMap->SetFaceTexture(CubeMapFace::FaceBack, "back.jpg");*/
 
-		_hdrCubeMap = std::make_shared<HDRCubeMap>();
+		_environmentCubeMap = std::make_shared<EnvironmentCubeMap>();
 
 		return newMimicCore;
 	}
@@ -85,8 +85,8 @@ namespace Mimic
 	void MimicCore::Start()
 	{
 		for (auto gameObject : _gameObjects) gameObject->Start();
-		_cubeMap->Load();
-		// _hdrCubeMap->Load("rural_asphalt_road_4k.hdr");
+		// _cubeMap->Load();
+		_environmentCubeMap->Load("rural_asphalt_road_4k.hdr");
 		glEnable(GL_DEPTH_TEST);
 	}
 
@@ -120,14 +120,9 @@ namespace Mimic
 		}
 		_renderer->_renderQue.clear();
 		_renderer->_debug = false;
-		_cubeMap->Draw(CurrentCamera->_viewMatrix, CurrentCamera->_projectionMatrix);
-		// _hdrCubeMap->Draw(CurrentCamera->_viewMatrix, CurrentCamera->_projectionMatrix);
-		SDL_GL_SwapWindow(_window->_window);
-	}
-
-	const glm::vec2 MimicCore::GetAspectRatio() const noexcept
-	{
-		return _window->_aspectRatio;
+		// _cubeMap->Draw(CurrentCamera->_viewMatrix, CurrentCamera->_projectionMatrix);
+		_environmentCubeMap->Draw(CurrentCamera->_viewMatrix, CurrentCamera->_projectionMatrix);
+		SDL_GL_SwapWindow(Window->_window);
 	}
 
 	std::shared_ptr<GameObject> MimicCore::AddEmptyGameObject() noexcept

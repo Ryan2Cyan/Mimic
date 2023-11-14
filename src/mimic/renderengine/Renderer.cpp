@@ -52,7 +52,6 @@ namespace Mimic
 			}
 			renderObject._shader->SetInt("u_DirectLightsCount", lights.size());
 			renderObject._materialOnDraw();
-			//glActiveTexture(GL_TEXTURE0);
 
 			// draw mesh:
 			glBindVertexArray(renderObject._vertexArrayId);

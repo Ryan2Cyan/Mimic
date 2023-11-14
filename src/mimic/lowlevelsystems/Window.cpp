@@ -63,6 +63,11 @@ namespace Mimic
 		else MIMIC_LOG_ERROR("[Mimic::Window] SDL_Window null, destruction failed.");
 	}
 
+	const glm::vec2 Window::GetAspectRatio() const noexcept
+	{
+		return _aspectRatio;
+	}
+
 	std::shared_ptr<Window> Window::Initialise(const std::string& windowName, const glm::vec2 aspectRatio)
 	{
 		return std::make_shared<Window>(windowName, aspectRatio);

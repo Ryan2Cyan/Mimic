@@ -15,7 +15,7 @@ namespace Mimic
 	struct Renderer;
 	struct DirectLight;
 	struct CubeMap;
-	struct HDRCubeMap;
+	struct EnvironmentCubeMap;
 
 	// #############################################################################
 	// mimic core struct:
@@ -30,7 +30,7 @@ namespace Mimic
 		void Start();
 		void Update();
 		void Draw();
-		const glm::vec2 GetAspectRatio() const noexcept;
+
 		std::shared_ptr<GameObject> AddEmptyGameObject() noexcept;
 		std::shared_ptr<GameObject> AddEmptyGameObject(const std::string& name) noexcept;
 		std::shared_ptr<DirectLight> AddLight() noexcept;
@@ -39,6 +39,7 @@ namespace Mimic
 
 		static std::shared_ptr<Camera> CurrentCamera;
 		static std::shared_ptr<ResourceManager> ResourceManager;
+		static std::shared_ptr<Window> Window;
 		bool ApplicationRunning;
 
 	private:
@@ -48,9 +49,8 @@ namespace Mimic
 		static std::vector<std::shared_ptr<Camera>> _cameras;
 		static std::vector<std::shared_ptr<DirectLight>> _lights;
 		static std::shared_ptr<Renderer> _renderer;
-		static std::shared_ptr<Window> _window;
 		static std::shared_ptr<CubeMap> _cubeMap;
-		static std::shared_ptr<HDRCubeMap> _hdrCubeMap;
+		static std::shared_ptr<EnvironmentCubeMap> _environmentCubeMap;
 		static std::shared_ptr<Environment> _environment;
 		std::weak_ptr<MimicCore> _self;
 	};

@@ -129,7 +129,7 @@ namespace Mimic
 		if (!_diffuseTexture.expired() && !ManualMode)
 		{
 			_subroutineIndices[_albedoSubroutineUniform] = _autoAlbedo;
-			shader->SetTexture("u_AlbedoMap", _diffuseTexture.lock()->_id, 1);
+			shader->SetTexture("u_AlbedoMap", _diffuseTexture.lock()->_id, 1); // texture unit slots start at 1.
 		}
 		else
 		{

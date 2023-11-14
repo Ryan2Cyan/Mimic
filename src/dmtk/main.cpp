@@ -15,12 +15,11 @@ int main(int argc, char* argv[])
 	{
 		// game engine code:
 		std::shared_ptr<MimicCore> dmtkCore = MimicCore::Initialise();
-		MIMIC_LOG_INFO("Hello World!");
 
 		std::shared_ptr<GameObject> cameraObject = dmtkCore->AddEmptyGameObject("Camera_1");
 		cameraObject->Position = glm::vec3(0.0f, 0.0f, 2.0f);
 		std::shared_ptr<Camera> mainCamera = cameraObject->AddComponent<Camera>();
-		mainCamera->Initialise(dmtkCore->GetAspectRatio(), 45.0f);
+		mainCamera->Initialise(MimicCore::Window->GetAspectRatio(), 45.0f);
 		dmtkCore->AddCamera(mainCamera, true);
 
 		std::shared_ptr<DirectLight> light1 = dmtkCore->AddLight();
