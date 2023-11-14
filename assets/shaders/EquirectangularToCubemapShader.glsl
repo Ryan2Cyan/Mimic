@@ -27,10 +27,10 @@ uniform sampler2D u_EquirectangularMap;
 
 out vec4 fragColour;
 
- const vec2 inverseAtan = vec2(0.1591, 0.3183);
+const vec2 inverseAtan = vec2(0.1591, 0.3183);
 
- const vec2 SampleSphericalMap(const vec3 vertex)
- {
+const vec2 SampleSphericalMap(const vec3 vertex)
+{
  	vec2 uv = vec2(atan(vertex.z, vertex.x), asin(vertex.y));
  	uv *= inverseAtan;
  	uv += 0.5;
