@@ -284,7 +284,7 @@ namespace Mimic
 		return true;
 	}
 
-	const bool EnvironmentCubeMap::LoadCubeMapTexture()
+	void EnvironmentCubeMap::LoadCubeMapTexture()
 	{
 		// convert HDR equirectangular environment map into a cubemap equivalent:
 		_equirectangularToCubemapShader->UseShader();
@@ -307,10 +307,9 @@ namespace Mimic
 			glBindVertexArray(0);
 		}
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		return true;
 	}
 
-	const bool EnvironmentCubeMap::LoadIrradianceMapTexture()
+	void EnvironmentCubeMap::LoadIrradianceMapTexture()
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, _framebufferId);
 		glBindRenderbuffer(GL_RENDERBUFFER, _renderObjectId);
@@ -338,6 +337,22 @@ namespace Mimic
 		}
 		glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		return true;
+	}
+
+	void EnvironmentCubeMap::LoadPrefilteredMapTexture()
+	{
+		glGenTextures(1, &_prefilteredMapTextureId);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, _prefilteredMapTextureId);
+		for (unsigned int i = 0; i < 6; i++)
+		{
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, 128, 128, 0, GL_RGB, GL_FLOAT, nullptr);
+		}
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 	}
 }

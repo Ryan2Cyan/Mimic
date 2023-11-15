@@ -61,8 +61,9 @@ namespace Mimic
 	private:
 		const bool LoadEquirectangular(const std::string& fileName);
 		const bool LoadUnitCube();
-		const bool LoadCubeMapTexture();
-		const bool LoadIrradianceMapTexture();
+		void LoadCubeMapTexture();
+		void LoadIrradianceMapTexture();
+		void LoadPrefilteredMapTexture();
 		const bool LoadShader(const std::string& fileName, std::shared_ptr<Shader>& shader);
 
 		std::array<glm::mat4, 6> _captureViews;
@@ -73,6 +74,7 @@ namespace Mimic
 		std::shared_ptr<Shader> _cubeMapShader;
 		unsigned int _environmentCubeMapTextureId;
 		unsigned int _irradianceMapTextureId;
+		unsigned int _prefilteredMapTextureId;
 		unsigned int _unitCubeVertexArrayId;
 		unsigned int _framebufferId;
 		unsigned int _renderObjectId;
