@@ -128,6 +128,8 @@ namespace Mimic
 		if (_shader.expired()) return;
 		const std::shared_ptr<Shader> shader = _shader.lock();
 
+		shader->SetInt("u_IrradianceMap", 0);
+
 		// load albedo (map_kd):
 		if (!_diffuseTexture.expired() && !ManualMode)
 		{
@@ -168,7 +170,6 @@ namespace Mimic
 		shader->SetVector3("u_Emissive", Emissive);
 		shader->SetFloat("u_Alpha", Alpha);
 		shader->SetFloat("u_AmbientOcclusion", AmbientOcclusion);
-		shader->SetInt("u_IrradianceMap", 0);
 		// shader->SetMat3("u_NormalMatrix", glm::transpose(glm::inverse(glm::mat3(_gameObject.lock()->_modelMatrix))));
 	}
 }

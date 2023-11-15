@@ -33,7 +33,7 @@ int main(int argc, char* argv[])
 		mushroomGameObject->Position = glm::vec3(0.0f, 0.0f, -3.0f);
 
 		std::shared_ptr<ModelRenderer> mushroomRenderer = mushroomGameObject->AddComponent<ModelRenderer>();
-		mushroomRenderer->Initialise("sphere.obj");
+		mushroomRenderer->Initialise("normal_rock_sphere.obj");
 
 		auto mushroomMaterial = mushroomRenderer->GetMaterial<PBRMaterial>();
 
@@ -84,6 +84,7 @@ int main(int argc, char* argv[])
 			// light controls:
 			ImGui::Begin("Light");
 			ImGui::SliderFloat3("Position##l1", &(light1->Position[0]), -5.0f, 5.0f);
+			ImGui::SliderFloat3("Colour##l2", &(light1->Colour[0]), 0.0f, 100.0f);
 			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 			ImGui::End();
 
@@ -94,12 +95,18 @@ int main(int argc, char* argv[])
 			ImGui::End();
 
 			// material controls:
-			ImGui::Begin("Material");
+			ImGui::Begin("PBR Material");
 			ImGui::ColorEdit3("Albedo##m1", &(mushroomMaterial->Albedo[0]));
 			ImGui::ColorEdit3("Emissive##m2", &(mushroomMaterial->Emissive[0]));
 			ImGui::SliderFloat("Roughness##m4", &(mushroomMaterial->Roughness), 0.001f, 1.0f);
 			ImGui::SliderFloat("Ambient Occlusion##m5", &(mushroomMaterial->AmbientOcclusion), 0.0f, 1.0f);
 			ImGui::SliderFloat("Alpha##m6", &(mushroomMaterial->Alpha), 0.0f, 1.0f);
+			ImGui::End();
+
+			// material controls:
+			ImGui::Begin("Camera");
+			ImGui::SliderFloat3("Position##c1", &(mainCamera->GetGameObject()->Position[0]), -5.0f, 5.0f);
+			ImGui::SliderFloat3("Rotation##c2", &(mainCamera->Orientation[0]), -maxRotAngle, maxRotAngle);
 			ImGui::End();
 
 			ImGui::Render();

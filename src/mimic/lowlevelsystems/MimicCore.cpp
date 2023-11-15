@@ -112,7 +112,7 @@ namespace Mimic
 		for (auto camera : _cameras)
 		{
 			_renderer->Draw(
-				camera->GetGameObject()->_modelMatrix * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), 
+				camera->GetGameObject()->Position, 
 				camera->_viewMatrix, 
 				camera->_projectionMatrix,
 				_lights

@@ -11,19 +11,18 @@ uniform vec4 u_ViewPosition;
 uniform mat4 u_Model;
 uniform mat4 u_View;
 uniform mat4 u_Projection;
-uniform mat3 u_NormalMatrix;
+// uniform mat3 u_NormalMatrix;
 
 out vec2 texCoord;
-out vec3 vertexNormal;
+// out vec3 vertexNormal;
 out vec3 fragPosition;
-out vec3 viewPosition;
 out vec3 viewDirectionNormal;
 out mat3 TBN;
 
 void main()
 {
 	texCoord = aTexCoord;
-	vertexNormal = u_NormalMatrix * aNormal;
+	// vertexNormal = u_NormalMatrix * aNormal;
 
 	// normal mapping: calculate tangent-bitangent-normal matrix.
 	vec3 t = normalize(vec3(u_Model * vec4(aTangent, 0.0)));
@@ -33,9 +32,8 @@ void main()
 	TBN = mat3(t, b, n);
 
 	const vec4 aPosVec4 = vec4(aPos, 1.0);
-    viewPosition = vec3(u_ViewPosition);
     fragPosition = vec3(u_Model * aPosVec4);
-	viewDirectionNormal = mat3(u_View * u_Model) * aNormal;
+	viewDirectionNormal = transpose(inverse(mat3(u_Model))) * aNormal;
 
 	gl_Position = u_Projection * u_View * u_Model * aPosVec4;
 }
@@ -53,10 +51,9 @@ void main()
 // Source: https://learnopengl.com/PBR/Lighting
 
 in vec2 texCoord;
-in vec3 vertexNormal;
+// in vec3 vertexNormal;
 
 in vec3 fragPosition;
-in vec3 viewPosition;
 in vec3 viewDirectionNormal;
 in mat3 TBN;
 
@@ -69,19 +66,10 @@ subroutine uniform CalculateNormal NormalMode;
 subroutine float CalculateRoughness();
 subroutine uniform CalculateRoughness RoughnessMode;
 
-uniform samplerCube u_IrradianceMap;
+uniform vec3 u_CameraPosition;
 uniform sampler2D u_AlbedoMap;
 uniform sampler2D u_RoughnessMap;
 uniform sampler2D u_NormalMap;
-
-struct Light
-{
-	vec4 position;
-	vec4 direction;
-	vec4 colour;
-};
-uniform Light u_DirectLights[20];
-uniform int u_DirectLightsCount;
 
 uniform vec3 u_Albedo;
 uniform float u_Roughness;
@@ -89,6 +77,17 @@ uniform float u_Metallic;
 uniform vec3 u_Emissive;
 uniform float u_AmbientOcclusion;
 uniform float u_Alpha;
+
+uniform samplerCube u_IrradianceMap;
+
+struct Light
+{
+	vec3 position;
+	vec4 direction;
+	vec4 colour;
+};
+uniform Light u_DirectLights[20];
+uniform int u_DirectLightsCount;
 
 out vec4 FragColour;
 
@@ -139,7 +138,7 @@ const float GeometrySmith(const in vec3 normal, const in vec3 viewDirection, con
 // 'Manual' means the value is literal and set directly by the user.
 subroutine(CalculateNormal) const vec3 CalculateNormalManual()
 {
-	return normalize(viewDirectionNormal);
+	return viewDirectionNormal;
 }
 
 subroutine(CalculateNormal) const vec3 CalculateNormalAutoTexture()
@@ -174,24 +173,25 @@ subroutine(CalculateRoughness) const float CalculateRoughnessAutoTexture()
 void main()
 {
 	const vec3 normal = NormalMode();
+	const vec3 viewDir = normalize( u_CameraPosition - fragPosition );
+
 	const float roughness = RoughnessMode();
 	const float metallic = 1.0 - roughness;
 	const vec3 albedo = mix(AlbedoMode(), vec3(0.0), metallic);
 	const vec3 baseReflectivity = mix(vec3(0.04), albedo, metallic);
 	
 	vec3 totalRadiance = vec3(0.0);
-	const vec3 viewDir = normalize( vec3(viewPosition) - fragPosition );
 	
 	for(int i = 0; i < u_DirectLightsCount; ++i)
 	{
-		const vec3 lightPosition = u_DirectLights[i].position.xyz;
+		const vec3 lightPosition = u_DirectLights[i].position;
 		const vec3 lightDir = normalize( lightPosition - fragPosition );
 		// will need to use the raw direction value for directional lights, but not point:
 		// const vec3 lightDirection = u_DirectLights[i].direction;
 
 		// Calculate per-light radiance:
 		const vec3 L = normalize(lightPosition - fragPosition);
-		const vec3 halfVec = normalize(lightDir + viewDir);
+		const vec3 halfVec = normalize(viewDir + L);
 		const float distance = length(lightPosition - fragPosition);
 		const float attenuation = 1.0 / (distance * distance);
 		const vec3 radiance = vec3(u_DirectLights[i].colour) * attenuation;
@@ -199,18 +199,18 @@ void main()
 		// Cook-Torrence BRDF:
 		const float d = DistrubutionGGX(normal, halfVec, roughness);
 		const vec3 f = FresnelSchlick(dot(normal, halfVec), baseReflectivity);
-		const float g = GeometrySmith(normal, viewDir, lightDir, roughness);
+		const float g = GeometrySmith(normal, viewDir, L, roughness);
 
 		const vec3 kS = f;
 		// vec3 kD = vec3(1.0) - kS;
 		vec3 kD = kS * ( 1.0 - metallic );
 
 		const vec3 numerator = d * g * f;
-		const float denominator = 4.0f * max(dot(normal, viewDir), 0.0) * max(dot(normal, lightDir), 0.0) + 0.0001;
+		const float denominator = 4.0f * max(dot(normal, viewDir), 0.0) * max(dot(normal, L), 0.0) + 0.0001;
 		const vec3 specular = numerator / denominator;
 
 		// Add to outgoing radiance:
-		const float normalDotLight = max(dot(normal, lightDir), 0.0);
+		const float normalDotLight = max(dot(normal, L), 0.0);
 		totalRadiance += (kD * albedo / PI + specular) * radiance * normalDotLight;
 	}
 
