@@ -7,10 +7,11 @@ layout(location = 2) in vec3 aTangent;
 layout(location = 3) in vec3 aBiTangent;
 layout(location = 4) in vec2 aTexCoord;
 
+uniform vec4 u_ViewPosition;
 uniform mat4 u_Model;
 uniform mat4 u_View;
 uniform mat4 u_Projection;
-uniform vec4 u_ViewPosition;
+uniform mat3 u_NormalMatrix;
 
 out vec2 texCoord;
 out vec3 vertexNormal;
@@ -22,7 +23,7 @@ out mat3 TBN;
 void main()
 {
 	texCoord = aTexCoord;
-	vertexNormal = aNormal;
+	vertexNormal = u_NormalMatrix * aNormal;
 
 	// normal mapping: calculate tangent-bitangent-normal matrix.
 	vec3 t = normalize(vec3(u_Model * vec4(aTangent, 0.0)));
@@ -108,6 +109,11 @@ const vec3 FresnelSchlick(const in float cosTheta, const in vec3 baseReflectivit
 {
 	return baseReflectivity + (1.0 - baseReflectivity) * pow(1.0 - cosTheta, 5.0);
 }
+
+const vec3 FresnelSchlickRoughness(const float cosTheta, const vec3 baseReflectivity, const float roughness)
+{
+    return baseReflectivity + (max(vec3(1.0 - roughness), baseReflectivity) - baseReflectivity) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
+}  
 
 // roughness remapper (Used in Schlick-GGX):
 const float SchlickGGXRoughnessRemapperDirect(const in float roughness) { return pow((roughness + 1), 2.0) / 8.0; }
@@ -209,7 +215,7 @@ void main()
 	}
 
 	// const vec3 ambient = vec3(0.03) * albedo * u_AmbientOcclusion;
-	const vec3 kS = FresnelSchlick(max(dot(normal, viewDir), 0.0), baseReflectivity);
+	const vec3 kS = FresnelSchlickRoughness(max(dot(normal, viewDir), 0.0), baseReflectivity, roughness);
 	const vec3 kD = 1.0 - kS;
 	const vec3 irradiance = texture(u_IrradianceMap, normal).rgb;
 	const vec3 diffuse = irradiance * albedo;

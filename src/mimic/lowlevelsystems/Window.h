@@ -15,7 +15,7 @@ namespace Mimic
 		Window(std::string, glm::vec2 aspectRatio);
 		~Window();
 		const glm::vec2 GetAspectRatio() const noexcept;
-
+		void SwapWindow();
 	private:
 		friend struct MimicCore;
 

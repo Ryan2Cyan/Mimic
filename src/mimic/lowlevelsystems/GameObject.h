@@ -48,7 +48,9 @@ namespace Mimic
 
 	private:
 		friend struct MimicCore;
-		friend struct ModelRenderer; // needs the model matrix
+		friend struct ModelRenderer; 
+		friend struct Material; 
+		friend struct PBRMaterial; 
 
 		void Start() noexcept;
 		void Update() noexcept;

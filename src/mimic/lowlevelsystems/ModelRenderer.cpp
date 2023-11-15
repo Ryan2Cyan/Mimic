@@ -19,6 +19,7 @@ namespace Mimic
 	void ModelRenderer::Initialise(const std::string& modelFileName)
 	{
 		Material = std::make_shared<PBRMaterial>();
+		Material->_gameObject = GetGameObject();
 		SetModel(modelFileName);
 		if (_initialised) MIMIC_LOG_INFO("[Mimic::ModelRenderer] Initialisation successful.");
 	}
@@ -26,6 +27,7 @@ namespace Mimic
 	void ModelRenderer::Initialise(const std::shared_ptr<Model>& model)
 	{
 		Material = std::make_shared<PBRMaterial>();
+		Material->_gameObject = GetGameObject();
 		SetModel(model);
 		if (_initialised) MIMIC_LOG_INFO("[Mimic::ModelRenderer] Initialisation successful.");
 	}

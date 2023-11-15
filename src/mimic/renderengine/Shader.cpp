@@ -219,6 +219,17 @@ namespace Mimic
 		glUniform4fv(location, 1, glm::value_ptr(value));
 	}
 
+	void Shader::SetMat3(const char* name, const glm::mat3 value) const noexcept
+	{
+		GLint location = glGetUniformLocation(_shaderProgramId, name);
+		if (location == -1)
+		{
+			MIMIC_LOG_WARNING("[Mimic::Shader] Could not find location of shader uniform [matrix 3x3] named \"%\"", name);
+			return;
+		}
+		glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(value));
+	}
+
 	void Shader::SetMat4(const char* name, const glm::mat4 value) const noexcept
 	{
 		GLint location = glGetUniformLocation(_shaderProgramId, name);

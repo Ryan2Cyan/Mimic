@@ -12,6 +12,7 @@ namespace Mimic
 	struct ResourceManager;
 	struct Shader;
 	struct Texture;
+	struct GameObject;
 
 	struct Material
 	{
@@ -33,6 +34,7 @@ namespace Mimic
 		std::weak_ptr<Texture> _normalTexture;
 		std::weak_ptr<Texture> _heightTexture;
 		std::weak_ptr<Shader> _shader;
+		std::weak_ptr<GameObject> _gameObject;
 	};
 
 	// #############################################################################
@@ -60,16 +62,15 @@ namespace Mimic
 		void SetAmbientOcclusion(const float& ambientOcclusion);
 		void SetAlpha(const float& alpha);
 
+		glm::vec3 Albedo;
+		glm::vec3 Emissive;
+		float Metallic; // unused
+		float Roughness;
+		float AmbientOcclusion;
+		float Alpha;
 		bool ManualMode; // if true will not load textures and passes in member pbr params
 	private:
 		std::vector<unsigned int> _subroutineIndices;
-
-		glm::vec3 _albedo;
-		glm::vec3 _emissive;
-		float _metallic;
-		float _roughness;
-		float _ambientOcclusion;
-		float _alpha;
 
 		unsigned int _albedoSubroutineUniform;
 		unsigned int _autoAlbedo;

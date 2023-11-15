@@ -1,9 +1,12 @@
 #include "Material.h"
 #include <lowlevelsystems/MimicCore.h>
 #include <lowlevelsystems/ResourceManager.h>
+#include <lowlevelsystems/GameObject.h>
 #include <renderengine/Shader.h>
 #include <renderengine/Texture.h>
 #include <algorithm>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 namespace Mimic
 {
@@ -82,9 +85,9 @@ namespace Mimic
 
 		SetAlbedo(glm::vec3(1.0f));
 		SetEmissive(glm::vec3(0.0f));
-		SetMetallic(0.7f);
-		SetRoughness(0.1f);
-		SetAmbientOcclusion(1.0f);
+		SetMetallic(0.0f);
+		SetRoughness(0.5f);
+		SetAmbientOcclusion(0.001f);
 		SetAlpha(1.0f);
 
 		_shader = shader;
@@ -92,32 +95,32 @@ namespace Mimic
 
 	void PBRMaterial::SetAlbedo(const glm::vec3& albedo)
 	{
-		_albedo = glm::clamp(albedo, 0.0f, 1.0f);
+		Albedo = glm::clamp(albedo, 0.0f, 1.0f);
 	}
 
 	void PBRMaterial::SetEmissive(const glm::vec3& emissive)
 	{
-		_emissive = glm::clamp(emissive, 0.0f, 1.0f);
+		Emissive = glm::clamp(emissive, 0.0f, 1.0f);
 	}
 
 	void PBRMaterial::SetMetallic(const float& metallic)
 	{
-		_metallic = std::clamp(metallic, 0.001f, 1.0f);
+		Metallic = std::clamp(metallic, 0.001f, 1.0f);
 	}
 
 	void PBRMaterial::SetRoughness(const float& roughness)
 	{
-		_roughness = std::clamp(roughness, 0.001f, 1.0f);
+		Roughness = std::clamp(roughness, 0.001f, 1.0f);
 	}
 
 	void PBRMaterial::SetAmbientOcclusion(const float& ambientOcclusion)
 	{
-		_ambientOcclusion = std::clamp(ambientOcclusion, 0.0f, 1.0f);
+		AmbientOcclusion = std::clamp(ambientOcclusion, 0.0f, 1.0f);
 	}
 
 	void PBRMaterial::SetAlpha(const float& alpha)
 	{
-		_alpha = std::clamp(alpha, 0.0f, 1.0f);
+		Alpha = std::clamp(alpha, 0.0f, 1.0f);
 	}
 
 	void PBRMaterial::OnDraw()
@@ -134,7 +137,7 @@ namespace Mimic
 		else
 		{
 			_subroutineIndices[_albedoSubroutineUniform] = _manualAlbedo;
-			shader->SetVector3("u_Albedo", _albedo);
+			shader->SetVector3("u_Albedo", Albedo);
 		}
 
 		// load roughness/metallic (map_ks):
@@ -146,7 +149,7 @@ namespace Mimic
 		else
 		{
 			_subroutineIndices[_roughnessSubroutineUniform] = _manualRoughness;
-			shader->SetFloat("u_Roughness", _roughness);
+			shader->SetFloat("u_Roughness", Roughness);
 		}
 
 		// load normals (map_Bump):
@@ -162,9 +165,10 @@ namespace Mimic
 		// not sure assimp ever loads this:
 		/*if (!_heightTexture.expired()) shader->SetTexture("u_Height", _heightTexture.lock()->_id, 4);*/
 
-		shader->SetVector3("u_Emissive", _emissive);
-		shader->SetFloat("u_Alpha", _alpha);
-		shader->SetFloat("u_AmbientOcclusion", _ambientOcclusion);
+		shader->SetVector3("u_Emissive", Emissive);
+		shader->SetFloat("u_Alpha", Alpha);
+		shader->SetFloat("u_AmbientOcclusion", AmbientOcclusion);
 		shader->SetInt("u_IrradianceMap", 0);
+		// shader->SetMat3("u_NormalMatrix", glm::transpose(glm::inverse(glm::mat3(_gameObject.lock()->_modelMatrix))));
 	}
 }

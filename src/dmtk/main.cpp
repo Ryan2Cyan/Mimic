@@ -4,7 +4,9 @@
 #include <glm/gtc/matrix_transform.hpp> 
 #include <glm/gtc/type_ptr.hpp>
 #include <cstdio>
-#include "imgui.h"
+#include <imgui.h>
+#include <imgui_impl_opengl3.h>
+#include <imgui_impl_sdl2.h>
 #define SDL_MAIN_HANDLED
 
 using namespace Mimic;
@@ -31,7 +33,9 @@ int main(int argc, char* argv[])
 		mushroomGameObject->Position = glm::vec3(0.0f, 0.0f, -3.0f);
 
 		std::shared_ptr<ModelRenderer> mushroomRenderer = mushroomGameObject->AddComponent<ModelRenderer>();
-		mushroomRenderer->Initialise("normal_rock_sphere.obj");
+		mushroomRenderer->Initialise("sphere.obj");
+
+		auto mushroomMaterial = mushroomRenderer->GetMaterial<PBRMaterial>();
 
 		constexpr float maxRotAngle = 2.0f * 3.141592653589793238462643383f;
 		std::shared_ptr<PerformanceCounter> performanceCounter = PerformanceCounter::Initialise();
@@ -40,12 +44,13 @@ int main(int argc, char* argv[])
 
 		while (dmtkCore->ApplicationRunning)
 		{
-			// performanceCounter->StartPerformanceCounter();
+			//performanceCounter->StartPerformanceCounter();
 
 			// handle human interface devices:
 			SDL_Event event;
 			while (SDL_PollEvent(&event))
 			{
+				ImGui_ImplSDL2_ProcessEvent(&event);
 				switch (event.type)
 				{
 					case SDL_QUIT:
@@ -63,15 +68,44 @@ int main(int argc, char* argv[])
 			glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-			float cubeYRotation = mushroomGameObject->Rotation.y;
+			/*float cubeYRotation = mushroomGameObject->Rotation.y;
 			cubeYRotation += DeltaTime() * 1.8f;
 			while (cubeYRotation > (maxRotAngle)) cubeYRotation -= maxRotAngle;
-			mushroomGameObject->Rotation.y = cubeYRotation;
+			mushroomGameObject->Rotation.y = cubeYRotation;*/
 			dmtkCore->Update();
 
 			dmtkCore->Draw();
 
-			// performanceCounter->EndPerformanceCounter();
+			// gui:
+			ImGui_ImplOpenGL3_NewFrame();
+			ImGui_ImplSDL2_NewFrame();
+			ImGui::NewFrame();
+
+			// light controls:
+			ImGui::Begin("Light");
+			ImGui::SliderFloat3("Position##l1", &(light1->Position[0]), -5.0f, 5.0f);
+			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+			ImGui::End();
+
+			// model controls:
+			ImGui::Begin("Model");
+			ImGui::SliderFloat3("Position##m1", &(mushroomGameObject->Position[0]), -5.0f, 5.0f);
+			ImGui::SliderFloat3("Rotation##m2", &(mushroomGameObject->Rotation[0]), -5.0f, 5.0f);
+			ImGui::End();
+
+			// material controls:
+			ImGui::Begin("Material");
+			ImGui::ColorEdit3("Albedo##m1", &(mushroomMaterial->Albedo[0]));
+			ImGui::ColorEdit3("Emissive##m2", &(mushroomMaterial->Emissive[0]));
+			ImGui::SliderFloat("Roughness##m4", &(mushroomMaterial->Roughness), 0.001f, 1.0f);
+			ImGui::SliderFloat("Ambient Occlusion##m5", &(mushroomMaterial->AmbientOcclusion), 0.0f, 1.0f);
+			ImGui::SliderFloat("Alpha##m6", &(mushroomMaterial->Alpha), 0.0f, 1.0f);
+			ImGui::End();
+
+			ImGui::Render();
+			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+			MimicCore::Window->SwapWindow();
 			/*MIMIC_LOG_INFO("FPS: %", performanceCounter->GetFPS());*/
 		}
 	}

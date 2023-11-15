@@ -122,7 +122,6 @@ namespace Mimic
 		_renderer->_debug = false;
 		// _cubeMap->Draw(CurrentCamera->_viewMatrix, CurrentCamera->_projectionMatrix);
 		_environmentCubeMap->Draw(CurrentCamera->_viewMatrix, CurrentCamera->_projectionMatrix);
-		SDL_GL_SwapWindow(Window->_window);
 	}
 
 	std::shared_ptr<GameObject> MimicCore::AddEmptyGameObject() noexcept

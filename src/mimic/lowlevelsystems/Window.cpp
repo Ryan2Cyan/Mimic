@@ -1,5 +1,8 @@
 #include "Window.h"
 #include <utility/Logger.h>
+#include <imgui.h>
+#include <imgui_impl_opengl3.h>
+#include <imgui_impl_sdl2.h>
 
 namespace Mimic
 {
@@ -38,6 +41,17 @@ namespace Mimic
 			throw;
 		}
 		MIMIC_LOG_INFO("[Mimic::Window] SDL_GL_Context initialisation successful.");
+
+		IMGUI_CHECKVERSION();
+		ImGui::CreateContext();
+		ImGuiIO& io = ImGui::GetIO(); (void)io;
+		ImGui::StyleColorsDark();
+
+		const char* glslVersion = "#version 130";
+		ImGui_ImplSDL2_InitForOpenGL(_window, _glContext);
+		ImGui_ImplOpenGL3_Init(glslVersion);
+		MIMIC_LOG_INFO("[Mimic::Window] ImGui initialisation successful.");
+
 		MIMIC_LOG_INFO("[Mimic::Window] Initialisation successful.");
 	}
 
@@ -61,11 +75,20 @@ namespace Mimic
 			MIMIC_LOG_INFO("[Mimic::Window] SDL_Window destruction successful.");
 		}
 		else MIMIC_LOG_ERROR("[Mimic::Window] SDL_Window null, destruction failed.");
+
+		ImGui_ImplOpenGL3_Shutdown();
+		ImGui_ImplSDL2_Shutdown();
+		ImGui::DestroyContext();
 	}
 
 	const glm::vec2 Window::GetAspectRatio() const noexcept
 	{
 		return _aspectRatio;
+	}
+
+	void Window::SwapWindow()
+	{
+		SDL_GL_SwapWindow(_window);
 	}
 
 	std::shared_ptr<Window> Window::Initialise(const std::string& windowName, const glm::vec2 aspectRatio)
