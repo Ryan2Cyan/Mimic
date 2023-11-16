@@ -29,11 +29,11 @@ int main(int argc, char* argv[])
 		light1->Colour = glm::vec3(10.0f, 10.0f, 10.0f);
 
 		std::shared_ptr<GameObject> mushroomGameObject = dmtkCore->AddEmptyGameObject();
-		mushroomGameObject->Scale = glm::vec3(1.00f, 1.00f, 1.00f);
+		mushroomGameObject->Scale = glm::vec3(1.0f, 1.0f, 1.0f);
 		mushroomGameObject->Position = glm::vec3(0.0f, 0.0f, -3.0f);
 
 		std::shared_ptr<ModelRenderer> mushroomRenderer = mushroomGameObject->AddComponent<ModelRenderer>();
-		mushroomRenderer->Initialise("normal_rock_sphere.obj");
+		mushroomRenderer->Initialise("sphere.obj");
 
 		auto mushroomMaterial = mushroomRenderer->GetMaterial<PBRMaterial>();
 

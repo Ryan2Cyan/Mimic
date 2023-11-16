@@ -32,8 +32,8 @@ out vec4 fragColour;
 
 void main()
 {
-	vec3 environmentColour = texture(u_EnvironmentMap, localPosition).rgb;
-	environmentColour = pow(environmentColour, vec3(1.0 / 2.2));
-
+	// vec3 environmentColour = texture(u_EnvironmentMap, localPosition).rgb;
+	// environmentColour = pow(environmentColour, vec3(1.0 / 2.2));
+	vec3 environmentColour = textureLod(u_EnvironmentMap, localPosition, 1.0).rgb;
 	fragColour = vec4(environmentColour, 1.0);
 }

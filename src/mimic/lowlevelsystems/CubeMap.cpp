@@ -10,6 +10,7 @@
 #include <GL/glew.h>
 #include <memory>
 #include <filesystem>
+#include <cmath>
 
 namespace Mimic
 {
@@ -141,7 +142,7 @@ namespace Mimic
 	// hdr cubemap functions:
 	// #############################################################################
 	EnvironmentCubeMap::EnvironmentCubeMap() : _initialised(false), _skipDraw(false), _environmentCubeMapTextureId(0), _unitCubeVertexArrayId(0),
-		_framebufferId(0), _renderObjectId(0), _captureProjection(glm::mat4(1.0f)), _irradianceMapTextureId(0)
+		_framebufferId(0), _renderObjectId(0), _captureProjection(glm::mat4(1.0f)), _irradianceMapTextureId(0), _prefilteredMapTextureId(0)
 	{
 		// set up 6 view matrices (facing each side of the cube), set a projection matrix to 90 fov, and capture each face of the cubemap:
 		_captureProjection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f);
@@ -162,6 +163,7 @@ namespace Mimic
 			LoadShader("EquirectangularToCubemapShader.glsl", _equirectangularToCubemapShader) &&
 			LoadShader("CubeMaptoConvolutedCubeMap.glsl", _convolutionShader) &&
 			LoadShader("EnvironmentCubeMapShader.glsl", _cubeMapShader) &&
+			LoadShader("PreFilteredCubeMapShader.glsl", _preFilteredShader) &&
 			LoadUnitCube();
 
 		if (_initialised)
@@ -216,6 +218,23 @@ namespace Mimic
 			glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 32, 32);
 
 			LoadIrradianceMapTexture();
+
+			// pre-convoluted map:
+			glGenTextures(1, &_prefilteredMapTextureId);
+			glBindTexture(GL_TEXTURE_CUBE_MAP, _prefilteredMapTextureId);
+			for (unsigned int i = 0; i < 6; i++)
+			{
+				glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, 128, 128, 0, GL_RGB, GL_FLOAT, nullptr);
+			}
+			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+			glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+
+			LoadPrefilteredMapTexture();
 			glViewport(0, 0, aspectRatio.x, aspectRatio.y);
 		}
 	}
@@ -236,7 +255,7 @@ namespace Mimic
 
 		glBindVertexArray(_unitCubeVertexArrayId);
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, _environmentCubeMapTextureId);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, _prefilteredMapTextureId);
 		glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 		glBindVertexArray(0);
 
@@ -314,6 +333,7 @@ namespace Mimic
 		glBindFramebuffer(GL_FRAMEBUFFER, _framebufferId);
 		glBindRenderbuffer(GL_RENDERBUFFER, _renderObjectId);
 		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 32, 32);
+		glViewport(0, 0, 32, 32);
 
 		// convert cubemap to irradiance map:
 		_convolutionShader->UseShader();
@@ -322,8 +342,6 @@ namespace Mimic
 		glActiveTexture(GL_TEXTURE0 + 1);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, _environmentCubeMapTextureId);
 
-		glViewport(0, 0, 32, 32);
-		glBindFramebuffer(GL_FRAMEBUFFER, _framebufferId);
 		for (unsigned int i = 0; i < 6; i++)
 		{
 			_convolutionShader->SetMat4("u_View", _captureViews[i]);
@@ -341,18 +359,41 @@ namespace Mimic
 
 	void EnvironmentCubeMap::LoadPrefilteredMapTexture()
 	{
-		glGenTextures(1, &_prefilteredMapTextureId);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, _prefilteredMapTextureId);
-		for (unsigned int i = 0; i < 6; i++)
-		{
-			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, 128, 128, 0, GL_RGB, GL_FLOAT, nullptr);
-		}
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glBindFramebuffer(GL_FRAMEBUFFER, _framebufferId);
 
-		glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+		// convert cubemap to pre-convoluted map:
+		_preFilteredShader->UseShader();
+		_preFilteredShader->SetInt("u_EnvironmentMap", 1);
+		_preFilteredShader->SetMat4("u_Projection", _captureProjection);
+		glActiveTexture(GL_TEXTURE0 + 1);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, _environmentCubeMapTextureId);
+	
+		constexpr unsigned int maxMipLevels = 5;
+		for (unsigned int mip = 0; mip < maxMipLevels; mip++)
+		{
+			// resize framebuffer according to mip-level size:
+			const unsigned int mipWidth = 128 * std::pow(0.5f, mip);
+			const unsigned int mipHeight = mipWidth;
+			glBindRenderbuffer(GL_RENDERBUFFER, _renderObjectId);
+			glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, mipWidth, mipHeight);
+			glViewport(0, 0, mipWidth, mipHeight);
+
+			float roughness = (float)mip / (float)(maxMipLevels - 1);
+			_preFilteredShader->SetFloat("u_Roughness", roughness);
+
+			for (unsigned int i = 0; i < 6; i++)
+			{
+				_preFilteredShader->SetMat4("u_View", _captureViews[i]);
+				glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, _prefilteredMapTextureId, mip);
+				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+				// render unit cube:
+				glBindVertexArray(_unitCubeVertexArrayId);
+				glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+				glBindVertexArray(0);
+			}
+		}
+		glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 }
