@@ -33,6 +33,7 @@ namespace Mimic
 	{
 		for (RenderObject renderObject : _renderQue)
 		{
+
 			// set uniforms:
 			renderObject._shader->UseShader();
 			renderObject._shader->SetVector3("u_CameraPosition", viewPosition);
@@ -42,7 +43,6 @@ namespace Mimic
 			renderObject._materialOnDraw();
 
 			glBindVertexArray(renderObject._vertexArrayId);
-			glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(renderObject._indices.size()), GL_UNSIGNED_INT, 0);
 
 			for (int i = 0; i < lights.size(); i++)
 			{

@@ -34,7 +34,6 @@ int main(int argc, char* argv[])
 
 		std::shared_ptr<ModelRenderer> mushroomRenderer = mushroomGameObject->AddComponent<ModelRenderer>();
 		mushroomRenderer->Initialise("normal_rock_sphere.obj");
-
 		auto mushroomMaterial = mushroomRenderer->GetMaterial<PBRMaterial>();
 
 		constexpr float maxRotAngle = 2.0f * 3.141592653589793238462643383f;

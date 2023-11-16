@@ -65,7 +65,7 @@ namespace Mimic
 		const bool LoadEquirectangular(const std::string& fileName);
 		const bool LoadUnitCube();
 		const bool LoadUnitQuad();
-		void LoadCubeMapTexture();
+		void LoadEnvironmentMap();
 		void LoadIrradianceMapTexture();
 		void LoadPrefilteredMapTexture();
 		void LoadBRDFConvolutedTexture();
@@ -82,7 +82,7 @@ namespace Mimic
 		std::shared_ptr<Shader> _convolutionShader;
 		std::shared_ptr<Shader> _cubeMapShader;
 
-		unsigned int _environmentCubeMapTextureId;
+		unsigned int _environmentMapId;
 		unsigned int _irradianceMapTextureId;
 		unsigned int _prefilteredMapTextureId;
 		unsigned int _brdfConvolutedTextureId;
