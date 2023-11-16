@@ -142,7 +142,8 @@ namespace Mimic
 	// hdr cubemap functions:
 	// #############################################################################
 	EnvironmentCubeMap::EnvironmentCubeMap() : _initialised(false), _skipDraw(false), _environmentCubeMapTextureId(0), _unitCubeVertexArrayId(0),
-		_framebufferId(0), _renderObjectId(0), _captureProjection(glm::mat4(1.0f)), _irradianceMapTextureId(0), _prefilteredMapTextureId(0)
+		_framebufferId(0), _renderObjectId(0), _captureProjection(glm::mat4(1.0f)), _irradianceMapTextureId(0), _prefilteredMapTextureId(0),
+		_brdfConvolutedTextureId(0), _unitQuadVertexArrayId(0)
 	{
 		// set up 6 view matrices (facing each side of the cube), set a projection matrix to 90 fov, and capture each face of the cubemap:
 		_captureProjection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f);
@@ -155,6 +156,11 @@ namespace Mimic
 			glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f,  0.0f,  1.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
 			glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f,  0.0f, -1.0f), glm::vec3(0.0f, -1.0f,  0.0f))
 		};
+	}
+
+	std::shared_ptr<EnvironmentCubeMap> EnvironmentCubeMap::Initialise()
+	{
+		return std::make_shared<EnvironmentCubeMap>();
 	}
 
 	void EnvironmentCubeMap::Load(const std::string& equirectangularTextureFileName)
@@ -214,10 +220,6 @@ namespace Mimic
 			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-			glBindFramebuffer(GL_FRAMEBUFFER, _framebufferId);
-			glBindRenderbuffer(GL_RENDERBUFFER, _renderObjectId);
-			glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 32, 32);
-
 			LoadIrradianceMapTexture();
 
 			// pre-convoluted map:
@@ -232,10 +234,20 @@ namespace Mimic
 			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
 			glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
-
 			LoadPrefilteredMapTexture();
+
+			// BRDF convolution:
+			glGenTextures(1, &_brdfConvolutedTextureId);
+			// pre-allocate enough memory for the lookup texture (LUT):
+			glBindTexture(GL_TEXTURE_2D, _brdfConvolutedTextureId);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16F, 512, 512, 0, GL_RG, GL_FLOAT, 0);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			LoadBRDFConvolutedTexture();
+
 			glViewport(0, 0, aspectRatio.x, aspectRatio.y);
 		}
 	}
@@ -256,11 +268,14 @@ namespace Mimic
 
 		glBindVertexArray(_unitCubeVertexArrayId);
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, _prefilteredMapTextureId);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, _environmentCubeMapTextureId);
 		glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 		glBindVertexArray(0);
 
 		glDepthFunc(GL_LESS);
+
+		/*_brdfConvolutionShader->UseShader();
+		RenderQuad();*/
 	}
 
 	const bool EnvironmentCubeMap::LoadEquirectangular(const std::string& fileName)
@@ -301,6 +316,24 @@ namespace Mimic
 		}
 		_unitCubeVertexArrayId = unitCube->_meshes[0]->_vertexArrayId;
 		MIMIC_DEBUG_LOG("[OpenGL] Cubemap unit cube loaded with ID: [%]", _unitCubeVertexArrayId);
+		return true;
+	}
+
+	const bool EnvironmentCubeMap::LoadUnitQuad()
+	{
+		std::shared_ptr<Model> unitQuad = MimicCore::ResourceManager->LoadResource<Model>("quad.obj");
+		if (unitQuad == nullptr)
+		{
+			MIMIC_LOG_WARNING("[Mimic::EnvironmentCubeMap] Unable to load cubemap unit quad with filename: \"%\"", "cube.obj");
+			return false;
+		}
+		if (unitQuad->_meshes.empty())
+		{
+			MIMIC_LOG_WARNING("[Mimic::EnvironmentCubeMap] Unable to load cubemap unit quad with filename: \"%\", the model contains no loaded meshes.", "cube.obj");
+			return false;
+		}
+		_unitQuadVertexArrayId = unitQuad->_meshes[0]->_vertexArrayId;
+		MIMIC_DEBUG_LOG("[OpenGL] Cubemap unit quad loaded with ID: [%]", _unitQuadVertexArrayId);
 		return true;
 	}
 
@@ -396,5 +429,50 @@ namespace Mimic
 		}
 		glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	}
+
+	void EnvironmentCubeMap::LoadBRDFConvolutedTexture()
+	{
+		glBindFramebuffer(GL_FRAMEBUFFER, _framebufferId);
+		glBindRenderbuffer(GL_RENDERBUFFER, _renderObjectId);
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 512, 512);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _brdfConvolutedTextureId, 0);
+		glViewport(0, 0, 512, 512);
+
+		_brdfConvolutionShader->UseShader();
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		RenderQuad();
+
+		glBindTexture(GL_TEXTURE_2D, 0);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	}
+
+	void EnvironmentCubeMap::RenderQuad()
+	{
+		if (_unitQuadVertexArrayId == 0)
+		{
+			unsigned int quadVBO;
+			float quadVertices[] = {
+				// positions        // texture Coords
+				-1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
+				-1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+				 1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
+				 1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+			};
+			// setup plane VAO
+			glGenVertexArrays(1, &_unitQuadVertexArrayId);
+			glGenBuffers(1, &quadVBO);
+			glBindVertexArray(_unitQuadVertexArrayId);
+			glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+			glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+			glEnableVertexAttribArray(0);
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+			glEnableVertexAttribArray(1);
+			glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+		}
+		glBindVertexArray(_unitQuadVertexArrayId);
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+		glBindVertexArray(0);
 	}
 }

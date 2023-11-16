@@ -18,8 +18,8 @@ namespace Mimic
 	std::vector<std::shared_ptr<DirectLight>> MimicCore::_lights;
 	std::vector<std::shared_ptr<Camera>> MimicCore::_cameras;
 	std::shared_ptr<Renderer> MimicCore::_renderer;
-	std::shared_ptr<CubeMap> MimicCore::_cubeMap;
-	std::shared_ptr<EnvironmentCubeMap> MimicCore::_environmentCubeMap;
+	std::shared_ptr<CubeMap> MimicCore::CubeMap;
+	std::shared_ptr<EnvironmentCubeMap> MimicCore::EnvironmentCubeMap;
 	std::shared_ptr<Window> MimicCore::Window;
 	std::shared_ptr<Environment> MimicCore::_environment;
 
@@ -77,7 +77,7 @@ namespace Mimic
 		_cubeMap->SetFaceTexture(CubeMapFace::FaceFront, "front.jpg");
 		_cubeMap->SetFaceTexture(CubeMapFace::FaceBack, "back.jpg");*/
 
-		_environmentCubeMap = std::make_shared<EnvironmentCubeMap>();
+		EnvironmentCubeMap = EnvironmentCubeMap::Initialise();
 
 		return newMimicCore;
 	}
@@ -88,7 +88,7 @@ namespace Mimic
 		glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 		for (auto gameObject : _gameObjects) gameObject->Start();
 		// _cubeMap->Load();
-		_environmentCubeMap->Load("rural_asphalt_road_4k.hdr");
+		EnvironmentCubeMap->Load("rural_asphalt_road_4k.hdr");
 	}
 
 	void MimicCore::Update()
@@ -122,7 +122,7 @@ namespace Mimic
 		_renderer->_renderQue.clear();
 		_renderer->_debug = false;
 		// _cubeMap->Draw(CurrentCamera->_viewMatrix, CurrentCamera->_projectionMatrix);
-		_environmentCubeMap->Draw(CurrentCamera->_viewMatrix, CurrentCamera->_projectionMatrix);
+		EnvironmentCubeMap->Draw(CurrentCamera->_viewMatrix, CurrentCamera->_projectionMatrix);
 	}
 
 	std::shared_ptr<GameObject> MimicCore::AddEmptyGameObject() noexcept

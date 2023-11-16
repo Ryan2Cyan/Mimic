@@ -2,6 +2,7 @@
 #include <lowlevelsystems/MimicCore.h>
 #include <lowlevelsystems/ResourceManager.h>
 #include <lowlevelsystems/GameObject.h>
+#include <lowlevelsystems/CubeMap.h>
 #include <renderengine/Shader.h>
 #include <renderengine/Texture.h>
 #include <algorithm>
@@ -128,7 +129,7 @@ namespace Mimic
 		if (_shader.expired()) return;
 		const std::shared_ptr<Shader> shader = _shader.lock();
 
-		shader->SetInt("u_IrradianceMap", 0);
+	
 
 		// load albedo (map_kd):
 		if (!_diffuseTexture.expired() && !ManualMode)
@@ -164,6 +165,17 @@ namespace Mimic
 
 		glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, _subroutineIndices.size(), _subroutineIndices.data());
 
+		shader->SetInt("u_IrradianceMap", 4);
+		glActiveTexture(GL_TEXTURE4);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, MimicCore::EnvironmentCubeMap->_irradianceMapTextureId);
+
+		shader->SetInt("u_PrefilterMap", 5);
+		glActiveTexture(GL_TEXTURE5);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, MimicCore::EnvironmentCubeMap->_prefilteredMapTextureId);
+
+		shader->SetInt("u_BRDFLookupTexture", 6);
+		glActiveTexture(GL_TEXTURE6);
+		glBindTexture(GL_TEXTURE_2D, MimicCore::EnvironmentCubeMap->_brdfConvolutedTextureId);
 		// not sure assimp ever loads this:
 		/*if (!_heightTexture.expired()) shader->SetTexture("u_Height", _heightTexture.lock()->_id, 4);*/
 

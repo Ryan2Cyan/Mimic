@@ -67,6 +67,10 @@ subroutine float CalculateRoughness();
 subroutine uniform CalculateRoughness RoughnessMode;
 
 uniform vec3 u_CameraPosition;
+
+uniform samplerCube u_IrradianceMap;
+uniform samplerCube u_PrefilterMap;
+uniform sampler2D u_BRDFLookupTexture;
 uniform sampler2D u_AlbedoMap;
 uniform sampler2D u_RoughnessMap;
 uniform sampler2D u_NormalMap;
@@ -77,8 +81,6 @@ uniform float u_Metallic;
 uniform vec3 u_Emissive;
 uniform float u_AmbientOcclusion;
 uniform float u_Alpha;
-
-uniform samplerCube u_IrradianceMap;
 
 struct Light
 {
@@ -174,6 +176,7 @@ void main()
 {
 	const vec3 normal = NormalMode();
 	const vec3 viewDir = normalize( u_CameraPosition - fragPosition );
+	const vec3 reflectionDir = reflect(-viewDir, normal);
 
 	const float roughness = RoughnessMode();
 	const float metallic = 1.0 - roughness;
@@ -215,13 +218,21 @@ void main()
 	}
 
 	// const vec3 ambient = vec3(0.03) * albedo * u_AmbientOcclusion;
-	const vec3 kS = FresnelSchlickRoughness(max(dot(normal, viewDir), 0.0), baseReflectivity, roughness);
+	const vec3 fresnel = FresnelSchlickRoughness(max(dot(normal, viewDir), 0.0), baseReflectivity, roughness);
+	const vec3 kS = fresnel;
 	const vec3 kD = 1.0 - kS;
 	const vec3 irradiance = texture(u_IrradianceMap, normal).rgb;
 	const vec3 diffuse = irradiance * albedo;
-	const vec3 ambient = (kD * diffuse) * u_AmbientOcclusion;
+
+	const float maxReflectionLOD = 4.0;
+	const vec3 prefilteredColour = textureLod(u_PrefilterMap, reflectionDir, roughness * maxReflectionLOD).rgb;
+	const vec2 brdf = texture(u_BRDFLookupTexture, vec2(max(dot(normal, viewDir), 0.0), roughness)).rg;
+	const vec3 specular = prefilteredColour * (fresnel * brdf.x + brdf.y);
+
+	const vec3 ambient = (kD * diffuse + specular) * u_AmbientOcclusion;
 
 	vec3 colour = ambient + totalRadiance;
+
 	colour = colour / (colour + vec3(1.0));
 	colour = pow(colour, vec3(1.0/2.2));
 	FragColour = vec4( u_Emissive + colour, u_Alpha );

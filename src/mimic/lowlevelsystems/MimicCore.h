@@ -40,6 +40,8 @@ namespace Mimic
 		static std::shared_ptr<Camera> CurrentCamera;
 		static std::shared_ptr<ResourceManager> ResourceManager;
 		static std::shared_ptr<Window> Window;
+		static std::shared_ptr<CubeMap> CubeMap;
+		static std::shared_ptr<EnvironmentCubeMap> EnvironmentCubeMap;
 		bool ApplicationRunning;
 
 	private:
@@ -49,8 +51,6 @@ namespace Mimic
 		static std::vector<std::shared_ptr<Camera>> _cameras;
 		static std::vector<std::shared_ptr<DirectLight>> _lights;
 		static std::shared_ptr<Renderer> _renderer;
-		static std::shared_ptr<CubeMap> _cubeMap;
-		static std::shared_ptr<EnvironmentCubeMap> _environmentCubeMap;
 		static std::shared_ptr<Environment> _environment;
 		std::weak_ptr<MimicCore> _self;
 	};

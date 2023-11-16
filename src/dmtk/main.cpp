@@ -33,7 +33,7 @@ int main(int argc, char* argv[])
 		mushroomGameObject->Position = glm::vec3(0.0f, 0.0f, -3.0f);
 
 		std::shared_ptr<ModelRenderer> mushroomRenderer = mushroomGameObject->AddComponent<ModelRenderer>();
-		mushroomRenderer->Initialise("sphere.obj");
+		mushroomRenderer->Initialise("normal_rock_sphere.obj");
 
 		auto mushroomMaterial = mushroomRenderer->GetMaterial<PBRMaterial>();
 
