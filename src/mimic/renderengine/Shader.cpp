@@ -143,13 +143,13 @@ namespace Mimic
 		if (_viewMatrixUniformLocation == -1)
 		{
 			MIMIC_LOG_WARNING("[Mimic::Shader] Unable to locate view matrix uniform location.");
-			_initialised = false;
+			// _initialised = false;
 		}
 		_projectionMatrixUniformLocation = glGetUniformLocation(_shaderProgramId, "u_Projection");
 		if (_projectionMatrixUniformLocation == -1)
 		{
 			MIMIC_LOG_WARNING("[Mimic::Shader] Unable to locate projection matrix uniform location.");
-			_initialised = false;
+			// _initialised = false;
 		}
 
 		for (auto shaderId : glShaderIds) glDetachShader(_shaderProgramId, shaderId);

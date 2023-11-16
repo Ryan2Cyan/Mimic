@@ -164,6 +164,7 @@ namespace Mimic
 			LoadShader("CubeMaptoConvolutedCubeMap.glsl", _convolutionShader) &&
 			LoadShader("EnvironmentCubeMapShader.glsl", _cubeMapShader) &&
 			LoadShader("PreFilteredCubeMapShader.glsl", _preFilteredShader) &&
+			LoadShader("BRDFConvolutionShader.glsl", _brdfConvolutionShader) &&
 			LoadUnitCube();
 
 		if (_initialised)

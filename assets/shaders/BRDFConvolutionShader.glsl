@@ -3,16 +3,14 @@
 // Source: https://learnopengl.com/PBR/IBL/Specular-IBL
 
 layout (location = 0) in vec3 aPos;
+layout (location = 1) in vec2 aTexCoords;
 
-uniform mat4 u_View;
-uniform mat4 u_Projection;
-
-out vec3 localPosition;
+out vec2 textureCoordinates;
 
 void main()
 {
-	localPosition = aPos;
-	gl_Position = u_Projection * u_View * vec4(aPos, 1.0);
+	textureCoordinates = aTexCoords;
+	gl_Position = vec4(aPos, 1.0);
 }
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -22,23 +20,8 @@ void main()
 #version 430 core
 #define PI 3.14159265359
 
-in vec3 localPosition;
-
-uniform samplerCube u_EnvironmentMap;
-uniform float u_Roughness;
-
-out vec4 fragColour;
-
-// Normal Distribution Function (Trowbridge-Reitz GGX) - Approximates surface's microfacets that align to the halfway vector:
-const float DistrubutionGGX(const in vec3 normal, const in vec3 halfwayVector, const in float roughness)
-{
-	float roughnessPow2 = roughness * roughness;
-	float normalDotHalfway = max(dot(normal, halfwayVector), 0.0);
-	float normalDotHalfwayPow2 = normalDotHalfway * normalDotHalfway;
-	float denominator = (normalDotHalfwayPow2 * (roughnessPow2 - 1.0) + 1.0);
-	denominator = PI * denominator * denominator;
-	return roughnessPow2 / denominator;
-}
+in vec2 textureCoordinates;
+out vec2 fragColour;
 
 float RadicalInverse_VdC(uint bits)
 {
@@ -57,11 +40,11 @@ vec2 Hammersley(uint i, uint N)
 
 vec3 ImportanceSampleGGX(vec2 Xi, vec3 N, float roughness)
 {
-    float a = roughness*roughness;
+    float a = roughness *roughness;
 	
     float phi = 2.0 * PI * Xi.x;
     float cosTheta = sqrt((1.0 - Xi.y) / (1.0 + (a*a - 1.0) * Xi.y));
-    float sinTheta = sqrt(1.0 - cosTheta*cosTheta);
+    float sinTheta = sqrt(1.0 - cosTheta * cosTheta);
 	
     // from spherical coordinates to cartesian coordinates:
     vec3 H;
@@ -78,42 +61,67 @@ vec3 ImportanceSampleGGX(vec2 Xi, vec3 N, float roughness)
     return normalize(sampleVec);
 }
 
-void main()
+// Schlick-GGX:
+const float GeometrySchlickGGX(const in float normalDotViewDirection, const in float roughness)
 {
-	vec3 N = normalize(localPosition);
-    vec3 R = N;
-    vec3 V = R;
+    float k = (roughness * roughness) / 2.0;
+    float nom = normalDotViewDirection;
+    float denom = normalDotViewDirection * (1.0 - k) + k;
+
+	return nom / denom;
+}
+
+// Schlick-GGX combined with Smith's method:
+const float GeometrySmith(const in vec3 normal, const in vec3 viewDirection, const in vec3 lightDirection, const in float remappedRoughness)
+{
+	float normalDotView = max(dot(normal, viewDirection), 0.0);
+	float normalDotLight = max(dot(normal, lightDirection), 0.0);
+	float ggx1 = GeometrySchlickGGX(normalDotView, remappedRoughness);
+	float ggx2 = GeometrySchlickGGX(normalDotLight, remappedRoughness);
+	return ggx1 * ggx2;
+}
+
+vec2 IntegrateBRDF(float NdotV, float roughness)
+{
+    vec3 V;
+    V.x = sqrt(1.0 - NdotV * NdotV);
+    V.y = 0.0;
+    V.z = NdotV;
+
+    float A = 0.0;
+    float B = 0.0;
+
+    vec3 N = vec3(0.0, 0.0, 1.0);
 
     const uint sampleCount = 1024u;
-    float totalWeight = 0.0;
-    vec3 prefilteredColour = vec3(0.0);
-
     for(uint i = 0u; i < sampleCount; i++)
     {
         vec2 Xi = Hammersley(i, sampleCount);
-        vec3 H = ImportanceSampleGGX(Xi, N, u_Roughness);
+        vec3 H = ImportanceSampleGGX(Xi, N, roughness);
         vec3 L = normalize(2.0 * dot(V, H) * H - V);
 
-        float NdotL = max(dot(N, L), 0.0);
+        float NdotL = max(L.z, 0.0);
+        float NdotH = max(H.z, 0.0);
+        float VdotH = max(dot(V, H), 0.0);
+
         if(NdotL > 0.0)
         {
-            // sample from the environment's mip level based on roughness/pdf:
-            float D = DistrubutionGGX(N, H, u_Roughness);
-            float NdotH = max(dot(N, H), 0.0);
-            float HdotV = max(dot(H, V), 0.0);
-            float pdf = D * NdotH / (4.0 * HdotV) + 0.0001;
+            float G = GeometrySmith(N, V, L, roughness);
+            float G_Vis = (G * VdotH) / (NdotH * NdotV);
+            float Fc = pow(1.0 - VdotH, 5.0);
 
-            float resolution = 512.0; // resolution of source cubemap (per face).
-            float saTexel = 4.0 * PI / (6.0 * resolution * resolution);
-            float saSample = 1.0 / (float(sampleCount) * pdf + 0.0001);
-
-            float mipLevel = u_Roughness == 0.0 ? 0.0 : 0.5 * log2(saSample / saTexel);
-
-            prefilteredColour += textureLod(u_EnvironmentMap, L, mipLevel).rgb * NdotL;
-            totalWeight += NdotL;
+            A += (1.0 - Fc) * G_Vis;
+            B += Fc * G_Vis;
         }
     }
+    const float sampleCountF = float(sampleCount);
+    A /= sampleCountF;
+    B /= sampleCountF;
+    return vec2(A, B);
+}
 
-    prefilteredColour = prefilteredColour / totalWeight;
-    fragColour = vec4(prefilteredColour, 1.0);
+void main()
+{
+	vec2 integrateBRDF = IntegrateBRDF(textureCoordinates.x, textureCoordinates.y);
+	fragColour = integrateBRDF;
 }

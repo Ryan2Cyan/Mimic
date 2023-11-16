@@ -84,10 +84,11 @@ namespace Mimic
 
 	void MimicCore::Start()
 	{
+		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 		for (auto gameObject : _gameObjects) gameObject->Start();
 		// _cubeMap->Load();
 		_environmentCubeMap->Load("rural_asphalt_road_4k.hdr");
-		glEnable(GL_DEPTH_TEST);
 	}
 
 	void MimicCore::Update()
