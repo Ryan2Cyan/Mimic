@@ -28,10 +28,28 @@ int main(int argc, char* argv[])
 		light1->Position = glm::vec3(1.0f, 0.0f, -1.0f);
 		light1->Colour = glm::vec3(10.0f, 10.0f, 10.0f);
 
+		std::shared_ptr<GameObject> light1GameObject = dmtkCore->AddEmptyGameObject();
+		light1GameObject->Scale = glm::vec3(0.3f);
+		std::shared_ptr<ModelRenderer> light1Renderer = light1GameObject->AddComponent<ModelRenderer>();
+		light1Renderer->Initialise("sphere.obj");
+		auto light1Material = light1Renderer->GetMaterial<PBRMaterial>();
+		light1Material->Emissive = glm::vec3(255.0f);
+
+		std::shared_ptr<DirectLight> light2 = dmtkCore->AddLight();
+		light2->Position = glm::vec3(1.0f, 0.0f, 1.0f);
+		light2->Colour = glm::vec3(10.0f, 10.0f, 10.0f);
+
+		std::shared_ptr<GameObject> light2GameObject = dmtkCore->AddEmptyGameObject();
+		light2GameObject->Scale = glm::vec3(0.3f);
+		std::shared_ptr<ModelRenderer> light2Renderer = light2GameObject->AddComponent<ModelRenderer>();
+		light2Renderer->Initialise("sphere.obj");
+		auto light2Material = light2Renderer->GetMaterial<PBRMaterial>();
+		light2Material->Emissive = glm::vec3(255.0f);
+
+		// model:
 		std::shared_ptr<GameObject> mushroomGameObject = dmtkCore->AddEmptyGameObject();
 		mushroomGameObject->Scale = glm::vec3(1.0f, 1.0f, 1.0f);
 		mushroomGameObject->Position = glm::vec3(0.0f, 0.0f, -3.0f);
-
 		std::shared_ptr<ModelRenderer> mushroomRenderer = mushroomGameObject->AddComponent<ModelRenderer>();
 		mushroomRenderer->Initialise("normal_rock_sphere.obj");
 		auto mushroomMaterial = mushroomRenderer->GetMaterial<PBRMaterial>();
@@ -71,6 +89,7 @@ int main(int argc, char* argv[])
 			cubeYRotation += DeltaTime() * 1.8f;
 			while (cubeYRotation > (maxRotAngle)) cubeYRotation -= maxRotAngle;
 			mushroomGameObject->Rotation.y = cubeYRotation;
+
 			dmtkCore->Update();
 
 			dmtkCore->Draw();
@@ -84,7 +103,15 @@ int main(int argc, char* argv[])
 			ImGui::Begin("Light");
 			ImGui::SliderFloat3("Position##l1", &(light1->Position[0]), -5.0f, 5.0f);
 			ImGui::SliderFloat3("Colour##l2", &(light1->Colour[0]), 0.0f, 100.0f);
+			light1GameObject->Position = light1->Position;
 			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+			ImGui::End();
+
+			// light controls:
+			ImGui::Begin("Light2");
+			ImGui::SliderFloat3("Position##l21", &(light2->Position[0]), -5.0f, 5.0f);
+			ImGui::SliderFloat3("Colour##l22", &(light2->Colour[0]), 0.0f, 100.0f);
+			light2GameObject->Position = light2->Position;
 			ImGui::End();
 
 			// model controls:
