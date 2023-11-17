@@ -1,8 +1,10 @@
 #pragma once
 #include <utility/Logger.h>
 #include <utility/FileLoader.h>
+
 #include <string>
 #include <memory>
+#include <vector>
 #include <unordered_map>
 #include <filesystem>
 
@@ -83,6 +85,23 @@ namespace Mimic
 			return newResource;
 		}
 
+		template<typename T, typename... Args> std::shared_ptr<T> CreateResource(Args... args)
+		{
+			std::shared_ptr<T> newResource = std::make_shared<T>();
+			newResource->_resourceManager = _self;
+
+			// if (newResource->Name.empty()) newResource->Name = GetNameFromFilePath(filePath);
+			const int success = newResource->Create(args...);
+			if (success == -1)
+			{
+				MIMIC_LOG_WARNING("[Mimic::ResourceManager] Unable to create new resource.");
+				return nullptr;
+			}
+			_createdResources.push_back(newResource);
+			MIMIC_LOG_INFO("[Mimic::ResourceManager] Successfully created new resource");
+			return newResource;
+		}
+
 		const std::string AssetsDirectoryPath;
 
 	private:
@@ -93,6 +112,7 @@ namespace Mimic
 		const std::string GetNameFromFilePath(const std::string& path) const noexcept;
 
 		std::unordered_map<std::string, std::shared_ptr<Resource>> _loadedResources;
+		std::vector<std::shared_ptr<Resource>> _createdResources;
 		std::shared_ptr<FileLoader> _fileLoader;
 		std::filesystem::path _assetsDirectory;
 		std::weak_ptr<MimicCore> _mimicCore;

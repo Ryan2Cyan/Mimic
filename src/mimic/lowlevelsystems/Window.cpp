@@ -6,7 +6,7 @@
 
 namespace Mimic
 {
-	Window::Window(std::string windowName, const glm::vec2 aspectRatio) : _windowName(windowName), _aspectRatio(aspectRatio)
+	Window::Window(const std::string& windowName, glm::ivec2 aspectRatio) : _windowName(windowName), _aspectRatio(aspectRatio)
 	{
 		if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) < 0)
 		{
@@ -91,7 +91,7 @@ namespace Mimic
 		SDL_GL_SwapWindow(_window);
 	}
 
-	std::shared_ptr<Window> Window::Initialise(const std::string& windowName, const glm::vec2 aspectRatio)
+	std::shared_ptr<Window> Window::Initialise(const std::string& windowName, const glm::ivec2& aspectRatio)
 	{
 		return std::make_shared<Window>(windowName, aspectRatio);
 	}

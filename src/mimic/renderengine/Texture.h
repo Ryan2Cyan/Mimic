@@ -2,6 +2,7 @@
 #include <lowlevelsystems/Resource.h>
 #include <string>
 #include <GL/glew.h>
+#include <GLM/glm.hpp>
 
 
 namespace Mimic
@@ -12,6 +13,7 @@ namespace Mimic
 	struct Texture : Resource
 	{
 		const int Load(const std::string& path) override;
+		const int Create(const glm::ivec2& aspectRatio, const GLenum& targetType, const GLint& internalFormat, const GLenum& format, const GLenum& dataType);
 
 	private:
 		friend struct ModelRenderer;

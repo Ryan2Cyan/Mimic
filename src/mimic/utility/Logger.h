@@ -1,5 +1,6 @@
 #pragma once
 #include <memory>
+#include <string>
 #include <iostream>
 
 // Source: https://www.youtube.com/watch?v=dZr-53LAlOw&t=1619s
@@ -10,6 +11,8 @@
 #define MIMIC_LOG_ERROR(...)			::Mimic::Logger::GetCoreLogger()->LogError(__VA_ARGS__)
 #define MIMIC_LOG_FATAL(...)			::Mimic::Logger::GetCoreLogger()->LogFatal(__VA_ARGS__)
 
+#define MIMIC_LOG_OPENGL(...)			::Mimic::Logger::GetCoreLogger()->LogOpenGLError(__VA_ARGS__)
+
 namespace Mimic
 {
 	// #############################################################################
@@ -19,14 +22,6 @@ namespace Mimic
 	{
 		static void Init();
 
-		void DebugLog(const char* format)
-		{
-#ifdef MIMIC_DEBUG
-			Log("[DEBUG] ");
-			std::cout << format << std::endl;
-#endif // MIMIC_DEBUG
-		}
-
 		template<typename T, typename... Targs> void DebugLog(const char* format, T value, Targs... Fargs)
 		{
 #ifdef MIMIC_DEBUG
@@ -34,15 +29,6 @@ namespace Mimic
 			Log(format, value, Fargs...);
 			Log("\n");
 #endif		
-		}
-
-		void LogInfo(const char* format) 
-		{ 
-#ifdef MIMIC_DEBUG
-			Log("\x1b[36m[INFO] ");
-			std::cout << format << std::endl; 
-			Log("\x1b[0m");
-#endif
 		}
 
 		template<typename T, typename... Targs> void LogInfo(const char* format, T value, Targs... Fargs)
@@ -54,24 +40,11 @@ namespace Mimic
 #endif
 		}
 
-		void LogWarning(const char* format) 
-		{
-			Log("\x1b[1m\033[33m[WARNING] ");
-			std::cout << format << std::endl;
-			Log("\033[0;37m\x1b[0m");
-		}
-
 		template<typename T, typename... Targs> void LogWarning(const char* format, T value, Targs... Fargs)
 		{
 			Log("\x1b[1m\033[33m[WARNING] ");
 			Log(format, value, Fargs...);
 			Log("\n\033[0;37m\x1b[0m");
-		}
-
-		void LogError(const char* format) 
-		{ 
-			Log("\x1b[1m\x1b[31m[ERROR] ");
-			std::cout << format << std::endl;
 		}
 
 		template<typename T, typename... Targs> void LogError(const char* format, T value, Targs... Fargs)
@@ -81,11 +54,6 @@ namespace Mimic
 			Log("\n\033[0;37m\x1b[0m");
 		}
 
-		void LogFatal(const char* format) 
-		{ 
-			Log("\x1b[1m\x1b[31m[FATAL] ");
-			std::cout << format << std::endl;
-		}
 
 		template<typename T, typename... Targs> void LogFatal(const char* format, T value, Targs... Fargs)
 		{
@@ -93,9 +61,6 @@ namespace Mimic
 			Log(format, value, Fargs...);
 			Log("\n\033[0;37m\x1b[0m");
 		}
-
-
-		void Log(const char* format) { std::cout << format; }
 
 		template<typename T, typename... Targs> void Log(const char* format, T value, Targs... Fargs)
 		{
@@ -115,6 +80,13 @@ namespace Mimic
 		}
 
 		inline static std::shared_ptr<Logger>& GetCoreLogger() { return _coreLogger; }
+		void LogOpenGLError(const std::string& callerName) const noexcept;
+		void DebugLog(const char* format);
+		void LogInfo(const char* format);
+		void LogWarning(const char* format);
+		void LogError(const char* format);
+		void LogFatal(const char* format);
+		void Log(const char* format);
 
 	private:
 		static std::shared_ptr<Logger> _coreLogger;

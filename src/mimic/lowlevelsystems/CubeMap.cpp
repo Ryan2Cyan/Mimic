@@ -6,12 +6,10 @@
 #include <renderengine/Shader.h>
 #include <renderengine/Model.h>
 #include <renderengine/CubemapTexture.h>
+#include <renderengine/Framebuffer.h>
 #include <utility/Logger.h>
 #include <stb_image.h>
 #include <GL/glew.h>
-#include <memory>
-#include <filesystem>
-#include <cmath>
 
 namespace Mimic
 {
@@ -142,6 +140,7 @@ namespace Mimic
 	// #############################################################################
 	// hdr cubemap functions:
 	// #############################################################################
+
 	EnvironmentCubeMap::EnvironmentCubeMap() : _initialised(false), _skipDraw(false), _environmentMapId(0), _unitCubeVertexArrayId(0),
 		_framebufferId(0), _renderObjectId(0), _captureProjection(glm::mat4(1.0f)), _irradianceMapTextureId(0), _prefilteredMapTextureId(0),
 		_brdfConvolutedTextureId(0), _unitQuadVertexArrayId(0)
@@ -151,7 +150,7 @@ namespace Mimic
 		_captureViews =
 		{
 			glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
-			glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
+			glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f, 0.0f)),
 			glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f,  1.0f,  0.0f), glm::vec3(0.0f,  0.0f,  1.0f)),
 			glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f,  0.0f), glm::vec3(0.0f,  0.0f, -1.0f)),
 			glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f,  0.0f,  1.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
@@ -159,7 +158,7 @@ namespace Mimic
 		};
 	}
 
-	std::shared_ptr<EnvironmentCubeMap> EnvironmentCubeMap::Initialise()
+	std::shared_ptr<EnvironmentCubeMap> EnvironmentCubeMap::Initialise() 
 	{
 		return std::make_shared<EnvironmentCubeMap>();
 	}
@@ -181,16 +180,21 @@ namespace Mimic
 			const glm::vec2 aspectRatio = MimicCore::Window->GetAspectRatio();
 
 			// set up framebuffer & renderbuffer object:
-			glGenFramebuffers(1, &_framebufferId);
-			glGenRenderbuffers(1, &_renderObjectId);
+			if (_framebuffer == nullptr)
+			{
+				_framebuffer = Framebuffer::Initialise();
+				_framebuffer->AttachRenderObject(GL_DEPTH_ATTACHMENT);
+			}
+			
+			 glGenFramebuffers(1, &_framebufferId);
+			 glGenRenderbuffers(1, &_renderObjectId);
 
-			glBindFramebuffer(GL_FRAMEBUFFER, _framebufferId);
-			glBindRenderbuffer(GL_RENDERBUFFER, _renderObjectId);
-			glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, aspectRatio.x, aspectRatio.y);
-			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _renderObjectId);
+			 glBindFramebuffer(GL_FRAMEBUFFER, _framebufferId);
+			 glBindRenderbuffer(GL_RENDERBUFFER, _renderObjectId);
+			 glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _renderObjectId);
+			
 
-
-			// generate cubemap color textures for each face (6) of the cubemap:
+			// hdr environment map:
 			_environmentMapId = CubeMapTexture::Initialise(aspectRatio);
 			LoadEnvironmentMap();
 
@@ -239,31 +243,29 @@ namespace Mimic
 
 		glDepthFunc(GL_LESS);
 
+		// render the BRDF 2D lookup texture to the screen:
 		/*_brdfConvolutionShader->UseShader();
 		RenderQuad();*/
 	}
 
 	const bool EnvironmentCubeMap::LoadEquirectangular(const std::string& fileName)
 	{
+		// check if the environment map has already been loaded:
+		if (_equirectangularTexture != nullptr) 
+		{
+			if (_equirectangularTexture->Name == fileName) return true;
+		}
+
 		stbi_set_flip_vertically_on_load(true);
 		_equirectangularTexture = MimicCore::ResourceManager->LoadResource<Texture>(fileName);
-		if (_equirectangularTexture == nullptr)
-		{
-			MIMIC_LOG_WARNING("[Mimic::EnvironmentCubeMap] Unable to load equirectangular texture from file name: ", fileName);
-			return false;
-		}
-		return true;
+
+		return _equirectangularTexture != nullptr;
 	}
 
 	const bool EnvironmentCubeMap::LoadShader(const std::string& fileName, std::shared_ptr<Shader>& shader)
 	{
 		shader = MimicCore::ResourceManager->LoadResource<Shader>(fileName);
-		if (shader == nullptr)
-		{
-			MIMIC_LOG_WARNING("[Mimic::EnvironmentCubeMap] Unable to load shader with file name: \"%\"", fileName);
-			return false;
-		}
-		return true;
+		return shader != nullptr;
 	}
 
 	const bool EnvironmentCubeMap::LoadUnitCube()
@@ -280,20 +282,24 @@ namespace Mimic
 			return false;
 		}
 		_unitCubeVertexArrayId = unitCube->_meshes[0]->_vertexArrayId;
-		MIMIC_DEBUG_LOG("[OpenGL] Cubemap unit cube loaded with ID: [%]", _unitCubeVertexArrayId);
+
 		return true;
 	}
 
 	void EnvironmentCubeMap::LoadEnvironmentMap()
 	{
-		// convert HDR equirectangular environment map into a cubemap equivalent:
+		glBindFramebuffer(GL_FRAMEBUFFER, _framebufferId);
+		glBindRenderbuffer(GL_RENDERBUFFER, _renderObjectId);
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, MimicCore::Window->GetAspectRatio().x, MimicCore::Window->GetAspectRatio().y);
+		// _framebuffer->UtiliseRenderObject(GL_DEPTH_COMPONENT24, MimicCore::Window->GetAspectRatio());
+
+		// convert HDR equirectangular environment map into an environment cubemap equivalent:
 		_equirectangularToCubemapShader->UseShader();
 		_equirectangularToCubemapShader->SetInt("u_EquirectangularMap", 1);
 		_equirectangularToCubemapShader->SetMat4("u_Projection", _captureProjection);
 		glActiveTexture(GL_TEXTURE0 + 1);
 		glBindTexture(GL_TEXTURE_2D, _equirectangularTexture->_id);
 
-		glViewport(0, 0, MimicCore::Window->GetAspectRatio().x, MimicCore::Window->GetAspectRatio().y);
 		glBindFramebuffer(GL_FRAMEBUFFER, _framebufferId);
 		for (unsigned int i = 0; i < 6; i++)
 		{
@@ -315,6 +321,7 @@ namespace Mimic
 		glBindRenderbuffer(GL_RENDERBUFFER, _renderObjectId);
 		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 32, 32);
 		glViewport(0, 0, 32, 32);
+		// _framebuffer->UtiliseRenderObject(GL_DEPTH_COMPONENT24, glm::ivec2(32, 32));
 
 		// convert cubemap to irradiance map:
 		_convolutionShader->UseShader();
@@ -329,10 +336,7 @@ namespace Mimic
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, _irradianceMapTextureId, 0);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-			// render unit cube:
-			glBindVertexArray(_unitCubeVertexArrayId);
-			glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
-			glBindVertexArray(0);
+			RenderUnitCube();
 		}
 		glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -368,10 +372,7 @@ namespace Mimic
 				glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, _prefilteredMapTextureId, mip);
 				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-				// render unit cube:
-				glBindVertexArray(_unitCubeVertexArrayId);
-				glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
-				glBindVertexArray(0);
+				RenderUnitCube();
 			}
 		}
 		glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
@@ -393,6 +394,13 @@ namespace Mimic
 
 		glBindTexture(GL_TEXTURE_2D, 0);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	}
+
+	void EnvironmentCubeMap::RenderUnitCube() const noexcept
+	{
+		glBindVertexArray(_unitCubeVertexArrayId);
+		glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+		glBindVertexArray(0);
 	}
 
 	void EnvironmentCubeMap::RenderQuad()

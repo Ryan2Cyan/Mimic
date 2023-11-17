@@ -51,6 +51,7 @@ namespace Mimic
 	// Source: https://learnopengl.com/PBR/IBL/Diffuse-irradiance
 
 	struct Texture;
+	struct Framebuffer;
 
 	struct EnvironmentCubeMap
 	{
@@ -64,12 +65,13 @@ namespace Mimic
 
 		const bool LoadEquirectangular(const std::string& fileName);
 		const bool LoadUnitCube();
-		const bool LoadUnitQuad();
 		void LoadEnvironmentMap();
 		void LoadIrradianceMapTexture();
 		void LoadPrefilteredMapTexture();
 		void LoadBRDFConvolutedTexture();
 		const bool LoadShader(const std::string& fileName, std::shared_ptr<Shader>& shader);
+
+		void RenderUnitCube() const noexcept;
 		void RenderQuad();
 
 		std::array<glm::mat4, 6> _captureViews;
@@ -81,6 +83,8 @@ namespace Mimic
 		std::shared_ptr<Shader> _equirectangularToCubemapShader;
 		std::shared_ptr<Shader> _convolutionShader;
 		std::shared_ptr<Shader> _cubeMapShader;
+
+		std::shared_ptr<Framebuffer> _framebuffer;
 
 		unsigned int _environmentMapId;
 		unsigned int _irradianceMapTextureId;

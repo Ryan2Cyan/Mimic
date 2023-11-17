@@ -27,6 +27,6 @@ namespace Mimic
 		std::weak_ptr<ResourceManager> _resourceManager;
 
 		// Return -1 on failure, 0 on success:
-		virtual const int Load(const std::string& path) = 0;
+		virtual const int Load(const std::string& path) = 0; 
 	};
 }

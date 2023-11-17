@@ -65,13 +65,7 @@ namespace Mimic
 		if (model->_materialTextures.size() <= 0) MIMIC_LOG_WARNING("[Mimic::ModelRenderer] \"%\" Model has no loaded textures.", GetGameObject()->Name);
 		else
 		{
-			for (auto texture : model->_materialTextures)
-			{
-				if (texture->_type == "diffuse") Material->SetDiffuse(texture);
-				if (texture->_type == "specular") Material->SetSpecular(texture);
-				if (texture->_type == "normal") Material->SetNormal(texture);
-				if (texture->_type == "height") Material->SetHeight(texture);
-			}
+			for (auto texture : model->_materialTextures) Material->SetTextureMap(texture);
 		}
 
 		if (Material->_shader.expired())

@@ -46,10 +46,10 @@ void main()
 		for(float theta = 0.0; theta < 0.5 * PI; theta += sampleDelta)
 		{
 			// spherical to cartesian (tangent space):
-			vec3 tangentSample = vec3(sin(theta) * cos(phi),  sin(theta) * sin(phi), cos(theta));
+			const vec3 tangentSample = vec3(sin(theta) * cos(phi),  sin(theta) * sin(phi), cos(theta));
 
 			// tangent space to world space:
-            vec3 sampleVec = tangentSample.x * right + tangentSample.y * up + tangentSample.z * normal; 
+            const vec3 sampleVec = tangentSample.x * right + tangentSample.y * up + tangentSample.z * normal; 
 
 			irradiance += texture(u_EnvironmentMap, sampleVec).rgb * cos(theta) * sin(theta);
 			numberOfSamples++;

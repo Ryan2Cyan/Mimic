@@ -24,15 +24,7 @@ namespace Mimic
 		friend struct ModelRenderer;
 
 		void SetShader(const std::shared_ptr<Shader>& shader);
-		void SetDiffuse(const std::shared_ptr<Texture>& diffuse);
-		void SetSpecular(const std::shared_ptr<Texture>& specular);
-		void SetNormal(const std::shared_ptr<Texture>& normal);
-		void SetHeight(const std::shared_ptr<Texture>& height);
-
-		std::weak_ptr<Texture> _diffuseTexture;
-		std::weak_ptr<Texture> _specularTexture;
-		std::weak_ptr<Texture> _normalTexture;
-		std::weak_ptr<Texture> _heightTexture;
+		virtual void SetTextureMap(const std::shared_ptr<Texture>& diffuse) = 0;
 		std::weak_ptr<Shader> _shader;
 		std::weak_ptr<GameObject> _gameObject;
 	};
@@ -43,8 +35,20 @@ namespace Mimic
 	struct BasicMaterial : Material
 	{	
 		BasicMaterial();
+		void SetDiffuse(const std::shared_ptr<Texture>& diffuse);
+		void SetSpecular(const std::shared_ptr<Texture>& specular);
+		void SetNormal(const std::shared_ptr<Texture>& normal);
+		void SetHeight(const std::shared_ptr<Texture>& height);
+
+	protected:
+		friend struct ModelRenderer;
+		void SetTextureMap(const std::shared_ptr<Texture>& texture) override;
 
 	private:
+		std::weak_ptr<Texture> _diffuseTexture;
+		std::weak_ptr<Texture> _specularTexture;
+		std::weak_ptr<Texture> _normalTexture;
+		std::weak_ptr<Texture> _heightTexture;
 		void OnDraw() override;
 	};
 
@@ -54,6 +58,11 @@ namespace Mimic
 	struct PBRMaterial : Material
 	{
 		PBRMaterial();
+
+		void SetAlbedoTexture(const std::shared_ptr<Texture>& albedo);
+		void SetMetallicTexture(const std::shared_ptr<Texture>& metallic);
+		void SetRoughnessTexture(const std::shared_ptr<Texture>& roughness);
+		void SetNormalTexture(const std::shared_ptr<Texture>& normal);
 
 		void SetAlbedo(const glm::vec3& albedo);
 		void SetEmissive(const glm::vec3& emissive);
@@ -69,9 +78,18 @@ namespace Mimic
 		float AmbientOcclusion;
 		float Alpha;
 		bool ManualMode; // if true will not load textures and passes in member pbr params
+
+	protected:
+		friend struct ModelRenderer;
+		void SetTextureMap(const std::shared_ptr<Texture>& texture) override;
+
 	private:
 		std::vector<unsigned int> _subroutineIndices;
 
+		std::weak_ptr<Texture> _albedoTexture;
+		std::weak_ptr<Texture> _metallicTexture;
+		std::weak_ptr<Texture> _roughnessTexture;
+		std::weak_ptr<Texture> _normalTexture;
 		unsigned int _albedoSubroutineUniform;
 		unsigned int _autoAlbedo;
 		unsigned int _manualAlbedo;

@@ -12,37 +12,17 @@
 namespace Mimic
 {
 	// #############################################################################
-	// basic material functions:
+	// material functions:
 	// #############################################################################
 	void Material::SetShader(const std::shared_ptr<Shader>& shader)
 	{
 		_shader = shader;
 	}
 
-	void Material::SetDiffuse(const std::shared_ptr<Texture>& diffuse)
-	{
-		_diffuseTexture = diffuse;
-	}
-
-	void Material::SetSpecular(const std::shared_ptr<Texture>& specular)
-	{
-		_specularTexture = specular;
-	}
-
-	void Material::SetNormal(const std::shared_ptr<Texture>& normal)
-	{
-		_normalTexture = normal;
-	}
-
-	void Material::SetHeight(const std::shared_ptr<Texture>& height)
-	{
-		_heightTexture = height;
-	}
 
 	// #############################################################################
 	// basic material functions:
 	// #############################################################################
-
 	BasicMaterial::BasicMaterial()
 	{
 		_shader = MimicCore::ResourceManager->LoadResource<Shader>("BasicShader.glsl");
@@ -56,6 +36,34 @@ namespace Mimic
 		if (!_specularTexture.expired()) shader->SetTexture("u_Specular", _specularTexture.lock()->_id, 1);
 		if (!_normalTexture.expired()) shader->SetTexture("u_Normal", _normalTexture.lock()->_id, 2);
 		if (!_heightTexture.expired()) shader->SetTexture("u_Height", _heightTexture.lock()->_id, 3);
+	}
+
+	void BasicMaterial::SetDiffuse(const std::shared_ptr<Texture>& diffuse)
+	{
+		_diffuseTexture = diffuse;
+	}
+
+	void BasicMaterial::SetSpecular(const std::shared_ptr<Texture>& specular)
+	{
+		_specularTexture = specular;
+	}
+
+	void BasicMaterial::SetNormal(const std::shared_ptr<Texture>& normal)
+	{
+		_normalTexture = normal;
+	}
+
+	void BasicMaterial::SetHeight(const std::shared_ptr<Texture>& height)
+	{
+		_heightTexture = height;
+	}
+
+	void BasicMaterial::SetTextureMap(const std::shared_ptr<Texture>& texture)
+	{
+		if (texture->_type == "diffuse") _diffuseTexture = texture;
+		if (texture->_type == "specular") _specularTexture = texture;
+		if (texture->_type == "normal") _normalTexture = texture;
+		if (texture->_type == "height") _heightTexture = texture;
 	}
 
 	// #############################################################################
@@ -94,6 +102,26 @@ namespace Mimic
 		_shader = shader;
 	}
 
+	void PBRMaterial::SetAlbedoTexture(const std::shared_ptr<Texture>& albedo)
+	{
+		_albedoTexture = albedo;
+	}
+
+	void PBRMaterial::SetMetallicTexture(const std::shared_ptr<Texture>& metallic)
+	{
+		_metallicTexture = metallic;
+	}
+
+	void PBRMaterial::SetNormalTexture(const std::shared_ptr<Texture>& normal)
+	{
+		_normalTexture = normal;
+	}
+
+	void PBRMaterial::SetRoughnessTexture(const std::shared_ptr<Texture>& roughness)
+	{
+		_roughnessTexture = roughness;
+	}
+
 	void PBRMaterial::SetAlbedo(const glm::vec3& albedo)
 	{
 		Albedo = glm::clamp(albedo, 0.0f, 1.0f);
@@ -124,6 +152,13 @@ namespace Mimic
 		Alpha = std::clamp(alpha, 0.0f, 1.0f);
 	}
 
+	void PBRMaterial::SetTextureMap(const std::shared_ptr<Texture>& texture)
+	{
+		if (texture->_type == "diffuse") _albedoTexture = texture;
+		if (texture->_type == "specular") _metallicTexture = texture;
+		if (texture->_type == "normal") _normalTexture = texture;
+	};
+
 	void PBRMaterial::OnDraw()
 	{
 		if (_shader.expired()) return;
@@ -132,10 +167,10 @@ namespace Mimic
 	
 
 		// load albedo (map_kd):
-		if (!_diffuseTexture.expired() && !ManualMode)
+		if (!_albedoTexture.expired() && !ManualMode)
 		{
 			_subroutineIndices[_albedoSubroutineUniform] = _autoAlbedo;
-			shader->SetTexture("u_AlbedoMap", _diffuseTexture.lock()->_id, 1); // texture unit slots start at 1.
+			shader->SetTexture("u_AlbedoMap", _albedoTexture.lock()->_id, 1); // texture unit slots start at 1.
 		}
 		else
 		{
@@ -144,10 +179,10 @@ namespace Mimic
 		}
 
 		// load roughness/metallic (map_ks):
-		if (!_specularTexture.expired() && !ManualMode)
+		if (!_metallicTexture.expired() && !ManualMode)
 		{
 			_subroutineIndices[_roughnessSubroutineUniform] = _autoRoughness;
-			shader->SetTexture("u_RoughnessMap", _specularTexture.lock()->_id, 2);
+			shader->SetTexture("u_RoughnessMap", _metallicTexture.lock()->_id, 2);
 		}
 		else
 		{
@@ -176,12 +211,9 @@ namespace Mimic
 		shader->SetInt("u_BRDFLookupTexture", 6);
 		glActiveTexture(GL_TEXTURE6);
 		glBindTexture(GL_TEXTURE_2D, MimicCore::EnvironmentCubeMap->_brdfConvolutedTextureId);
-		// not sure assimp ever loads this:
-		/*if (!_heightTexture.expired()) shader->SetTexture("u_Height", _heightTexture.lock()->_id, 4);*/
-
+		
 		shader->SetVector3("u_Emissive", Emissive);
 		shader->SetFloat("u_Alpha", Alpha);
 		shader->SetFloat("u_AmbientOcclusion", AmbientOcclusion);
-		// shader->SetMat3("u_NormalMatrix", glm::transpose(glm::inverse(glm::mat3(_gameObject.lock()->_modelMatrix))));
 	}
 }

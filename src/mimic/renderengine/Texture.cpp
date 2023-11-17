@@ -62,4 +62,19 @@ namespace Mimic
 		stbi_image_free(data);
 		return 0;
 	}
+
+	const int Texture::Create(const glm::ivec2& aspectRatio, const GLenum& targetType, const GLint& internalFormat, const GLenum& format, const GLenum& dataType)
+	{
+		glGenTextures(1, &_id);
+		glBindTexture(targetType, _id);
+		glTexImage2D(targetType, 0, internalFormat, aspectRatio.x, aspectRatio.y, 0, format, dataType, 0);
+		
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		MIMIC_LOG_OPENGL("Texture");
+		return 0;
+	}
 }
