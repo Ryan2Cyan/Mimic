@@ -30,7 +30,6 @@ namespace Mimic
 		// initialise SDL_Window, SDL_Renderer, & GL_Context:
 		glm::vec2 aspectRatio = glm::vec2(800.0f, 800.0f);
 		Window = Window::Initialise("[Mimic Engine] Dungeon Master's Tool Kit", aspectRatio);
-		// glViewport(0, 0, aspectRatio.x, aspectRatio.y);
 
 		// init glew:
 		glewExperimental = GL_TRUE;
@@ -120,7 +119,6 @@ namespace Mimic
 			);
 		}
 		_renderer->_renderQue.clear();
-		_renderer->_debug = false;
 		// _cubeMap->Draw(CurrentCamera->_viewMatrix, CurrentCamera->_projectionMatrix);
 		EnvironmentCubeMap->Draw(CurrentCamera->_viewMatrix, CurrentCamera->_projectionMatrix);
 	}

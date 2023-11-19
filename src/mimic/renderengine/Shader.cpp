@@ -180,7 +180,6 @@ namespace Mimic
 
 	void Shader::SetTexture(const char* name, const int& textureId, const int& bindPoint)
 	{
-		MIMIC_DEBUG_LOG("[OpenGL] Texture sampler (\"%\") has been bound to texture [%] at texture unit [%]", name, textureId, bindPoint);
 		glActiveTexture(GL_TEXTURE0 + bindPoint);
 		glBindTexture(GL_TEXTURE_2D, textureId);
 		SetInt(name, textureId);

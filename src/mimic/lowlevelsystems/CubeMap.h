@@ -78,6 +78,9 @@ namespace Mimic
 		glm::mat4 _captureProjection;
 		std::shared_ptr<Texture> _equirectangularTexture;
 		std::shared_ptr<Texture> _environmentMapTexture;
+		std::shared_ptr<Texture> _irradianceMapTexture;
+		std::shared_ptr<Texture> _prefilteredMapTexture;
+		std::shared_ptr<Texture> _brdfConvolutedTexture;
 
 		std::shared_ptr<Shader> _brdfConvolutionShader;
 		std::shared_ptr<Shader> _preFilteredShader;
@@ -86,11 +89,6 @@ namespace Mimic
 		std::shared_ptr<Shader> _cubeMapShader;
 
 		std::shared_ptr<Framebuffer> _framebuffer;
-
-		unsigned int _environmentMapId;
-		unsigned int _irradianceMapTextureId;
-		unsigned int _prefilteredMapTextureId;
-		unsigned int _brdfConvolutedTextureId;
 
 		unsigned int _unitQuadVertexArrayId;
 		unsigned int _unitCubeVertexArrayId;

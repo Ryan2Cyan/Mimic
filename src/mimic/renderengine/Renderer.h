@@ -48,6 +48,5 @@ namespace Mimic
 		glm::mat4 _cachedViewMatrix;
 		glm::mat4 _cachedProjectionMatrix;
 		std::vector<RenderObject> _renderQue;
-		bool _debug = true;
 	};
 }

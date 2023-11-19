@@ -61,7 +61,6 @@ namespace Mimic
 
 			// draw mesh:
 			glBindVertexArray(renderObject._vertexArrayId);
-			if(_debug) MIMIC_DEBUG_LOG("[OpenGL] Drawing vertices from vertex array [%].", renderObject._vertexArrayId);
 			glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(renderObject._indices.size()), GL_UNSIGNED_INT, 0);
 			glBindVertexArray(0);
 			glUseProgram(0);

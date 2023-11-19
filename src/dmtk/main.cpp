@@ -31,11 +31,11 @@ int main(int argc, char* argv[])
 		std::shared_ptr<GameObject> light1GameObject = dmtkCore->AddEmptyGameObject();
 		light1GameObject->Scale = glm::vec3(0.3f);
 		std::shared_ptr<ModelRenderer> light1Renderer = light1GameObject->AddComponent<ModelRenderer>();
-		light1Renderer->Initialise("sphere.obj");
+		light1Renderer->Initialise("sphere.obj"); 
 		auto light1Material = light1Renderer->GetMaterial<PBRMaterial>();
-		light1Material->Emissive = glm::vec3(255.0f);
+		light1Material->Emissive = glm::vec3(1.0f);
 
-		std::shared_ptr<DirectLight> light2 = dmtkCore->AddLight();
+	/*	std::shared_ptr<DirectLight> light2 = dmtkCore->AddLight();
 		light2->Position = glm::vec3(1.0f, 0.0f, 1.0f);
 		light2->Colour = glm::vec3(10.0f, 10.0f, 10.0f);
 
@@ -44,7 +44,7 @@ int main(int argc, char* argv[])
 		std::shared_ptr<ModelRenderer> light2Renderer = light2GameObject->AddComponent<ModelRenderer>();
 		light2Renderer->Initialise("sphere.obj");
 		auto light2Material = light2Renderer->GetMaterial<PBRMaterial>();
-		light2Material->Emissive = glm::vec3(255.0f);
+		light2Material->Emissive = glm::vec3(255.0f);*/
 
 		/*std::shared_ptr<Texture> emptyTexture = MimicCore::ResourceManager->CreateResource<Texture>(
 			glm::ivec2(800, 800),
@@ -60,7 +60,7 @@ int main(int argc, char* argv[])
 		std::shared_ptr<ModelRenderer> mushroomRenderer = mushroomGameObject->AddComponent<ModelRenderer>();
 		mushroomRenderer->Initialise("normal_rock_sphere.obj");
 		auto mushroomMaterial = mushroomRenderer->GetMaterial<PBRMaterial>();
-		// mushroomMaterial->ManualMode = true;
+		//mushroomMaterial->ManualMode = true;
 
 		constexpr float maxRotAngle = 2.0f * 3.141592653589793238462643383f;
 		std::shared_ptr<PerformanceCounter> performanceCounter = PerformanceCounter::Initialise();
@@ -116,11 +116,11 @@ int main(int argc, char* argv[])
 			ImGui::End();
 
 			// light controls:
-			ImGui::Begin("Light2");
+			/*ImGui::Begin("Light2");
 			ImGui::SliderFloat3("Position##l21", &(light2->Position[0]), -5.0f, 5.0f);
 			ImGui::SliderFloat3("Colour##l22", &(light2->Colour[0]), 0.0f, 100.0f);
 			light2GameObject->Position = light2->Position;
-			ImGui::End();
+			ImGui::End();*/
 
 			// model controls:
 			ImGui::Begin("Model");

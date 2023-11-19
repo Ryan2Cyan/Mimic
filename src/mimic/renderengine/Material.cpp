@@ -202,15 +202,15 @@ namespace Mimic
 
 		shader->SetInt("u_IrradianceMap", 4);
 		glActiveTexture(GL_TEXTURE4);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, MimicCore::EnvironmentCubeMap->_irradianceMapTextureId);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, MimicCore::EnvironmentCubeMap->_irradianceMapTexture->_id);
 
 		shader->SetInt("u_PrefilterMap", 5);
 		glActiveTexture(GL_TEXTURE5);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, MimicCore::EnvironmentCubeMap->_prefilteredMapTextureId);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, MimicCore::EnvironmentCubeMap->_prefilteredMapTexture->_id);
 
 		shader->SetInt("u_BRDFLookupTexture", 6);
 		glActiveTexture(GL_TEXTURE6);
-		glBindTexture(GL_TEXTURE_2D, MimicCore::EnvironmentCubeMap->_brdfConvolutedTextureId);
+		glBindTexture(GL_TEXTURE_2D, MimicCore::EnvironmentCubeMap->_brdfConvolutedTexture->_id);
 		
 		shader->SetVector3("u_Emissive", Emissive);
 		shader->SetFloat("u_Alpha", Alpha);

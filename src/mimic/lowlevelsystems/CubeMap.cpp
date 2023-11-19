@@ -141,9 +141,8 @@ namespace Mimic
 	// hdr cubemap functions:
 	// #############################################################################
 
-	EnvironmentCubeMap::EnvironmentCubeMap() : _initialised(false), _skipDraw(false), _environmentMapId(0), _unitCubeVertexArrayId(0),
-		_framebufferId(0), _renderObjectId(0), _captureProjection(glm::mat4(1.0f)), _irradianceMapTextureId(0), _prefilteredMapTextureId(0),
-		_brdfConvolutedTextureId(0), _unitQuadVertexArrayId(0)
+	EnvironmentCubeMap::EnvironmentCubeMap() : _initialised(false), _skipDraw(false), _unitCubeVertexArrayId(0),
+		_framebufferId(0), _renderObjectId(0), _captureProjection(glm::mat4(1.0f)), _unitQuadVertexArrayId(0)
 	{
 		// set up 6 view matrices (facing each side of the cube), set a projection matrix to 90 fov, and capture each face of the cubemap:
 		_captureProjection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f);
@@ -195,31 +194,19 @@ namespace Mimic
 			
 
 			// hdr environment map:
-			// _environmentMapId = CubeMapTexture::Initialise(aspectRatio);
-			 _environmentMapTexture = MimicCore::ResourceManager->CreateResource<Texture>(
-				 aspectRatio,
-				 Texture::MIMIC_CUBEMAP_TEXTURE_PARAMS,
-				 Texture::MIMIC_RGB16F,
-				 Texture::MIMIC_RGB);
+			 _environmentMapTexture = MimicCore::ResourceManager->CreateResource<Texture>(aspectRatio, Texture::MIMIC_CUBEMAP_TEXTURE_PARAMS, Texture::MIMIC_RGB16F, Texture::MIMIC_RGB);
 			LoadEnvironmentMap();
 
 			// convolute cubemap:
-			_irradianceMapTextureId = CubeMapTexture::Initialise(glm::vec2(32, 32));
+			_irradianceMapTexture = MimicCore::ResourceManager->CreateResource<Texture>(glm::ivec2(32, 32), Texture::MIMIC_CUBEMAP_TEXTURE_PARAMS, Texture::MIMIC_RGB16F, Texture::MIMIC_RGB);
 			LoadIrradianceMapTexture();
 
 			// pre-filtred map:
-			_prefilteredMapTextureId = CubeMapTexture::Initialise(glm::vec2(32, 32), true);
+			_prefilteredMapTexture = MimicCore::ResourceManager->CreateResource<Texture>(glm::ivec2(32, 32), Texture::MIMIC_CUBEMAP_TEXTURE_PARAMS | Texture::MIMIC_GEN_MIPMAP, Texture::MIMIC_RGB16F, Texture::MIMIC_RGB);
 			LoadPrefilteredMapTexture();
 
 			// BRDF convolution:
-			glGenTextures(1, &_brdfConvolutedTextureId);
-			// pre-allocate enough memory for the lookup texture (LUT):
-			glBindTexture(GL_TEXTURE_2D, _brdfConvolutedTextureId);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16F, 512, 512, 0, GL_RG, GL_FLOAT, 0);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			_brdfConvolutedTexture = MimicCore::ResourceManager->CreateResource<Texture>(glm::ivec2(512, 512), Texture::MIMIC_BRDF_TEXTURE_PARAMS, Texture::MIMIC_RG16F, Texture::MIMIC_RG);
 			LoadBRDFConvolutedTexture();
 
 			glViewport(0, 0, aspectRatio.x, aspectRatio.y);
@@ -338,7 +325,7 @@ namespace Mimic
 		for (unsigned int i = 0; i < 6; i++)
 		{
 			_convolutionShader->SetMat4("u_View", _captureViews[i]);
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, _irradianceMapTextureId, 0);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, _irradianceMapTexture->_id, 0);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 			RenderUnitCube();
@@ -374,7 +361,7 @@ namespace Mimic
 			for (unsigned int i = 0; i < 6; i++)
 			{
 				_preFilteredShader->SetMat4("u_View", _captureViews[i]);
-				glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, _prefilteredMapTextureId, mip);
+				glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, _prefilteredMapTexture->_id, mip);
 				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 				RenderUnitCube();
@@ -389,7 +376,7 @@ namespace Mimic
 		glBindFramebuffer(GL_FRAMEBUFFER, _framebufferId);
 		glBindRenderbuffer(GL_RENDERBUFFER, _renderObjectId);
 		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 512, 512);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _brdfConvolutedTextureId, 0);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _brdfConvolutedTexture->_id, 0);
 		glViewport(0, 0, 512, 512);
 
 		_brdfConvolutionShader->UseShader();

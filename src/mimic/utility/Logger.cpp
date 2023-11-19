@@ -67,7 +67,7 @@ namespace Mimic
             case GL_OUT_OF_MEMORY: error = "OUT_OF_MEMORY"; break;
             case GL_INVALID_FRAMEBUFFER_OPERATION: error = "INVALID_FRAMEBUFFER_OPERATION"; break;
             }
-            MIMIC_LOG_ERROR("[Mimic::%] OpenGL error: %", callerName, error);
+            MIMIC_LOG_WARNING("[Mimic::%] OpenGL error: %", callerName, error);
         }
 	}
 }

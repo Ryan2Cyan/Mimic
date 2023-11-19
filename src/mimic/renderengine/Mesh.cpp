@@ -44,7 +44,6 @@ namespace Mimic
 		glEnableVertexAttribArray(4);
 		glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, VERTEX_SIZE, (void*)offsetof(Vertex, _textureCoordinates));
 
-		MIMIC_DEBUG_LOG("[OpenGL] New Vertex Array: [%], Attributes: Vertices: 0 [%], Normals: 1, Tangent: 2, BiTangent: 3, TexCoords: 4", _vertexArrayId);
 		glBindVertexArray(0);
 	}
 
