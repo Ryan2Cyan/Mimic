@@ -56,6 +56,8 @@ add_library(mimic
     src/mimic/lowlevelsystems/Resource.h
     src/mimic/lowlevelsystems/CubeMap.cpp
     src/mimic/lowlevelsystems/CubeMap.h
+    src/mimic/lowlevelsystems/Material.cpp
+    src/mimic/lowlevelsystems/Material.h
 
     src/mimic/utility/Logger.cpp
     src/mimic/utility/Logger.h
@@ -79,12 +81,8 @@ add_library(mimicrenderer
     src/mimic/renderengine/Texture.h
     src/mimic/renderengine/Renderer.cpp
     src/mimic/renderengine/Renderer.h
-    src/mimic/renderengine/Material.cpp
-    src/mimic/renderengine/Material.h
     src/mimic/renderengine/Light.cpp
     src/mimic/renderengine/Light.h
-    src/mimic/renderengine/CubemapTexture.cpp
-    src/mimic/renderengine/CubemapTexture.h
     src/mimic/renderengine/Framebuffer.cpp
     src/mimic/renderengine/Framebuffer.h
 
@@ -130,8 +128,6 @@ target_link_libraries(mimic
 #    assimp-vc143-mt
 #    glew32s
 #)
-
-
 
 #############################################################################
 # DMTK program

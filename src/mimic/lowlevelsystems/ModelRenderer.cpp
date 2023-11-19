@@ -2,9 +2,9 @@
 #include <utility/Logger.h>
 #include <lowlevelsystems/ResourceManager.h>
 #include <lowlevelsystems/MimicCore.h>
+#include <lowlevelsystems/Material.h>
 #include <renderengine/Renderer.h>
 #include <renderengine/Model.h>
-#include <renderengine/Material.h>
 #include <functional>
 
 // need to provide a way for the user to edit some parameters inside the material (e.g. albedo).

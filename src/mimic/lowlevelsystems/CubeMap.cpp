@@ -5,7 +5,6 @@
 #include <utility/FileLoader.h>
 #include <renderengine/Shader.h>
 #include <renderengine/Model.h>
-#include <renderengine/CubemapTexture.h>
 #include <renderengine/Framebuffer.h>
 #include <utility/Logger.h>
 #include <stb_image.h>

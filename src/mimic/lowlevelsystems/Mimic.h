@@ -12,6 +12,7 @@
 #include "Resource.h"
 #include "ModelRenderer.h"
 #include "CubeMap.h"
+#include "Material.h"
 
 #include <renderengine/Mesh.h>
 #include <renderengine/Shader.h>
@@ -19,7 +20,6 @@
 #include <renderengine/Vertex.h>
 #include <renderengine/Texture.h>
 #include <renderengine/Renderer.h>
-#include <renderengine/Material.h>
 #include <renderengine/Light.h>
 
 #include <utility/PerformanceCounter.h>
