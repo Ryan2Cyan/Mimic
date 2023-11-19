@@ -46,6 +46,13 @@ int main(int argc, char* argv[])
 		auto light2Material = light2Renderer->GetMaterial<PBRMaterial>();
 		light2Material->Emissive = glm::vec3(255.0f);
 
+		/*std::shared_ptr<Texture> emptyTexture = MimicCore::ResourceManager->CreateResource<Texture>(
+			glm::ivec2(800, 800),
+			Texture::MIMIC_2D_TEXTURE,
+			Texture::MIMIC_MODEL_TEXTURE_PARAMS,
+			Texture::MIMIC_RGB,
+			Texture::MIMIC_RGB);*/
+
 		// model:
 		std::shared_ptr<GameObject> mushroomGameObject = dmtkCore->AddEmptyGameObject();
 		mushroomGameObject->Scale = glm::vec3(1.0f, 1.0f, 1.0f);
@@ -53,7 +60,7 @@ int main(int argc, char* argv[])
 		std::shared_ptr<ModelRenderer> mushroomRenderer = mushroomGameObject->AddComponent<ModelRenderer>();
 		mushroomRenderer->Initialise("normal_rock_sphere.obj");
 		auto mushroomMaterial = mushroomRenderer->GetMaterial<PBRMaterial>();
-		mushroomMaterial->ManualMode = true;
+		// mushroomMaterial->ManualMode = true;
 
 		constexpr float maxRotAngle = 2.0f * 3.141592653589793238462643383f;
 		std::shared_ptr<PerformanceCounter> performanceCounter = PerformanceCounter::Initialise();

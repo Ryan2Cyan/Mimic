@@ -77,6 +77,7 @@ namespace Mimic
 		std::array<glm::mat4, 6> _captureViews;
 		glm::mat4 _captureProjection;
 		std::shared_ptr<Texture> _equirectangularTexture;
+		std::shared_ptr<Texture> _environmentMapTexture;
 
 		std::shared_ptr<Shader> _brdfConvolutionShader;
 		std::shared_ptr<Shader> _preFilteredShader;

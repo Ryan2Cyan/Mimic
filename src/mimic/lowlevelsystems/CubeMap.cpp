@@ -195,7 +195,12 @@ namespace Mimic
 			
 
 			// hdr environment map:
-			_environmentMapId = CubeMapTexture::Initialise(aspectRatio);
+			// _environmentMapId = CubeMapTexture::Initialise(aspectRatio);
+			 _environmentMapTexture = MimicCore::ResourceManager->CreateResource<Texture>(
+				 aspectRatio,
+				 Texture::MIMIC_CUBEMAP_TEXTURE_PARAMS,
+				 Texture::MIMIC_RGB16F,
+				 Texture::MIMIC_RGB);
 			LoadEnvironmentMap();
 
 			// convolute cubemap:
@@ -237,7 +242,7 @@ namespace Mimic
 
 		glBindVertexArray(_unitCubeVertexArrayId);
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, _environmentMapId);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, _environmentMapTexture->_id);
 		glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 		glBindVertexArray(0);
 
@@ -304,7 +309,7 @@ namespace Mimic
 		for (unsigned int i = 0; i < 6; i++)
 		{
 			_equirectangularToCubemapShader->SetMat4("u_View", _captureViews[i]);
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, _environmentMapId, 0);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, _environmentMapTexture->_id, 0);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 			// render unit cube:
@@ -328,7 +333,7 @@ namespace Mimic
 		_convolutionShader->SetInt("u_EnvironmentMap", 1);
 		_convolutionShader->SetMat4("u_Projection", _captureProjection);
 		glActiveTexture(GL_TEXTURE0 + 1);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, _environmentMapId);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, _environmentMapTexture->_id);
 
 		for (unsigned int i = 0; i < 6; i++)
 		{
@@ -351,7 +356,7 @@ namespace Mimic
 		_preFilteredShader->SetInt("u_EnvironmentMap", 1);
 		_preFilteredShader->SetMat4("u_Projection", _captureProjection);
 		glActiveTexture(GL_TEXTURE0 + 1);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, _environmentMapId);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, _environmentMapTexture->_id);
 	
 		constexpr unsigned int maxMipLevels = 5;
 		for (unsigned int mip = 0; mip < maxMipLevels; mip++)
