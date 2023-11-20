@@ -15,9 +15,28 @@ namespace Mimic
 		
 		glm::vec3 Position;
 		glm::vec3 Direction;
-		
 		glm::vec3 Colour;
 		std::string Name;
+	private:
+		// glm::mat4 _modelMatrix;
+	};
+
+
+	// #############################################################################
+	// point light class:
+	// #############################################################################
+	struct PointLight
+	{
+		explicit PointLight();
+		explicit PointLight(const glm::vec3& position, const glm::vec3& colour);
+
+		glm::vec3 Position;
+		glm::vec3 Colour;
+		std::string Name;
+
+		float Constant;
+		float Linear;
+		float Quadratic;
 	private:
 		// glm::mat4 _modelMatrix;
 	};

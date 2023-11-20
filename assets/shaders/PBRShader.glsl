@@ -87,14 +87,25 @@ uniform vec3 u_Emissive;
 uniform float u_AmbientOcclusion;
 uniform float u_Alpha;
 
-struct Light
+struct DirectLight
 {
+	vec4 colour;
 	vec3 position;
 	vec3 direction;
-	vec4 colour;
 };
-uniform Light u_DirectLights[20];
+uniform DirectLight u_DirectLights[20];
 uniform int u_DirectLightsCount;
+
+struct PointLight
+{
+	vec4 colour;
+	vec3 position;
+	float constant;
+	float linear;
+	float quadratic;
+};
+uniform PointLight u_PointLights[20];
+uniform int u_PointLightsCount;
 
 out vec4 FragColour;
 
@@ -200,38 +211,65 @@ void main()
 	
 	vec3 totalRadiance = vec3(0.0);
 	
+	// sum radiance for all direct lights:
 	for(int i = 0; i < u_DirectLightsCount; ++i)
 	{
 		const vec3 lightPosition = u_DirectLights[i].position;
-		// const vec3 lightDir = normalize( lightPosition - fragPosition );
-		// will need to use the raw direction value for directional lights, but not point:
+		const vec3 lightDirection = u_DirectLights[i].direction;
 
-
-		// Calculate per-light radiance:
-		const vec3 L = normalize(lightPosition - fragPosition);
-		const vec3 halfVec = normalize(viewDir + L);
-		const float distance = length(lightPosition - fragPosition);
+		const vec3 halfVec = normalize(viewDir + lightDirection);
+		const float distance = 1.0; // constant distance as the light is extremely far away (parallel light rays)
 		const float attenuation = 1.0 / (distance * distance);
 		const vec3 radiance = vec3(u_DirectLights[i].colour) * attenuation;
 
 		// Cook-Torrence BRDF:
 		const float d = DistrubutionGGX(normal, halfVec, roughness);
 		const vec3 f = FresnelSchlick(dot(normal, halfVec), baseReflectivity);
-		const float g = GeometrySmith(normal, viewDir, L, roughness);
+		const float g = GeometrySmith(normal, viewDir, lightDirection, roughness);
 
 		const vec3 kS = f;
 		// vec3 kD = vec3(1.0) - kS;
 		vec3 kD = kS * ( 1.0 - metallic );
 
 		const vec3 numerator = d * g * f;
-		const float denominator = 4.0f * max(dot(normal, viewDir), 0.0) * max(dot(normal, L), 0.0) + 0.0001;
+		const float denominator = 4.0f * max(dot(normal, viewDir), 0.0) * max(dot(normal, lightDirection), 0.0) + 0.0001;
 		const vec3 specular = numerator / denominator;
 
 		// Add to outgoing radiance:
-		const float normalDotLight = max(dot(normal, L), 0.0);
+		const float normalDotLight = max(dot(normal, lightDirection), 0.0);
 		totalRadiance += (kD * albedo / PI + specular) * radiance * normalDotLight;
 	}
 
+	// sum radiance for all point lights:
+	for(int i = 0; i < u_PointLightsCount; ++i)
+	{
+		const vec3 lightPosition = u_PointLights[i].position;
+		const vec3 lightDirection = normalize(lightPosition - fragPosition);
+
+		const vec3 halfVec = normalize(viewDir + lightDirection);
+		const float distance = length(lightPosition - fragPosition);
+		const float attenuation = 1.0 / (u_PointLights[i].constant + u_PointLights[i].linear * distance + u_PointLights[i].quadratic * (distance * distance));
+		const vec3 radiance = vec3(u_PointLights[i].colour) * attenuation;
+
+		// Cook-Torrence BRDF:
+		const float d = DistrubutionGGX(normal, halfVec, roughness);
+		const vec3 f = FresnelSchlick(dot(normal, halfVec), baseReflectivity);
+		const float g = GeometrySmith(normal, viewDir, lightDirection, roughness);
+
+		const vec3 kS = f;
+		// vec3 kD = vec3(1.0) - kS;
+		vec3 kD = kS * ( 1.0 - metallic );
+
+		const vec3 numerator = d * g * f;
+		const float denominator = 4.0f * max(dot(normal, viewDir), 0.0) * max(dot(normal, lightDirection), 0.0) + 0.0001;
+		const vec3 specular = numerator / denominator;
+
+		// Add to outgoing radiance:
+		const float normalDotLight = max(dot(normal, lightDirection), 0.0);
+		totalRadiance += (kD * albedo / PI + specular) * radiance * normalDotLight;
+	}
+
+	// calculate ambience:
 	// const vec3 ambient = vec3(0.03) * albedo * u_AmbientOcclusion;
 	const vec3 fresnel = FresnelSchlickRoughness(max(dot(normal, viewDir), 0.0), baseReflectivity, roughness);
 	const vec3 kS = fresnel;
@@ -247,7 +285,6 @@ void main()
 	const vec3 ambient = (kD * diffuse + specular) * u_AmbientOcclusion;
 
 	vec3 colour = ambient + totalRadiance;
-
 	colour = colour / (colour + vec3(1.0));
 	colour = pow(colour, vec3(1.0/2.2));
 	FragColour = vec4( u_Emissive + colour, u_Alpha );
