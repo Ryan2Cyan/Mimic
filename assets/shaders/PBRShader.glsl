@@ -57,6 +57,7 @@ in vec3 fragPosition;
 in vec3 viewDirectionNormal;
 in mat3 TBN;
 
+// subroutine definitions:
 subroutine vec3 CalculateAlbedo();
 subroutine uniform CalculateAlbedo AlbedoMode;
 
@@ -66,6 +67,9 @@ subroutine uniform CalculateNormal NormalMode;
 subroutine float CalculateRoughness();
 subroutine uniform CalculateRoughness RoughnessMode;
 
+subroutine float CalculateMetallic();
+subroutine uniform CalculateMetallic MetallicMode;
+
 uniform vec3 u_CameraPosition;
 
 uniform samplerCube u_IrradianceMap;
@@ -74,6 +78,7 @@ uniform sampler2D u_BRDFLookupTexture;
 uniform sampler2D u_AlbedoMap;
 uniform sampler2D u_RoughnessMap;
 uniform sampler2D u_NormalMap;
+uniform sampler2D u_MetallicMap;
 
 uniform vec3 u_Albedo;
 uniform float u_Roughness;
@@ -170,6 +175,16 @@ subroutine(CalculateRoughness) const float CalculateRoughnessAutoTexture()
 {
 	return texture(u_RoughnessMap, texCoord).r;
 }
+
+subroutine(CalculateMetallic) const float CalculateMetallicManual()
+{
+	return u_Metallic;
+}
+
+subroutine(CalculateMetallic) const float CalculateMetallicAutoTexture()
+{
+	return texture(u_MetallicMap, texCoord).r;
+}
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 void main()
@@ -179,7 +194,7 @@ void main()
 	const vec3 reflectionDir = reflect(-viewDir, normal);
 
 	const float roughness = RoughnessMode();
-	const float metallic = 1.0 - roughness;
+	const float metallic = MetallicMode();
 	const vec3 albedo = mix(AlbedoMode(), vec3(0.0), metallic);
 	const vec3 baseReflectivity = mix(vec3(0.04), albedo, metallic);
 	

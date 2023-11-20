@@ -60,6 +60,11 @@ int main(int argc, char* argv[])
 		std::shared_ptr<ModelRenderer> mushroomRenderer = mushroomGameObject->AddComponent<ModelRenderer>();
 		mushroomRenderer->Initialise("normal_rock_sphere.obj");
 		auto mushroomMaterial = mushroomRenderer->GetMaterial<PBRMaterial>();
+
+		// manually load in texture maps:
+		auto metallicTexture = MimicCore::ResourceManager->LoadResource<Texture>("rustediron2_metallic.png");
+		metallicTexture->SetType(TextureType::MIMIC_METALLIC);
+		mushroomMaterial->SetTextureMap(metallicTexture);
 		//mushroomMaterial->ManualMode = true;
 
 		constexpr float maxRotAngle = 2.0f * 3.141592653589793238462643383f;
@@ -133,8 +138,9 @@ int main(int argc, char* argv[])
 			ImGui::ColorEdit3("Albedo##m1", &(mushroomMaterial->Albedo[0]));
 			ImGui::ColorEdit3("Emissive##m2", &(mushroomMaterial->Emissive[0]));
 			ImGui::SliderFloat("Roughness##m4", &(mushroomMaterial->Roughness), 0.001f, 1.0f);
-			ImGui::SliderFloat("Ambient Occlusion##m5", &(mushroomMaterial->AmbientOcclusion), 0.0f, 1.0f);
-			ImGui::SliderFloat("Alpha##m6", &(mushroomMaterial->Alpha), 0.0f, 1.0f);
+			ImGui::SliderFloat("Metallic##m5", &(mushroomMaterial->Metallic), 0.001f, 1.0f);
+			ImGui::SliderFloat("Ambient Occlusion##m6", &(mushroomMaterial->AmbientOcclusion), 0.0f, 1.0f);
+			// ImGui::SliderFloat("Alpha##m6", &(mushroomMaterial->Alpha), 0.0f, 1.0f);
 			ImGui::End();
 
 			// material controls:

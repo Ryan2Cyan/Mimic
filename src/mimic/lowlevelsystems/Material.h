@@ -59,6 +59,7 @@ namespace Mimic
 	{
 		PBRMaterial();
 
+		void SetTextureMap(const std::shared_ptr<Texture>& texture) override;
 		void SetAlbedoTexture(const std::shared_ptr<Texture>& albedo);
 		void SetMetallicTexture(const std::shared_ptr<Texture>& metallic);
 		void SetRoughnessTexture(const std::shared_ptr<Texture>& roughness);
@@ -73,7 +74,7 @@ namespace Mimic
 
 		glm::vec3 Albedo;
 		glm::vec3 Emissive;
-		float Metallic; // unused
+		float Metallic;
 		float Roughness;
 		float AmbientOcclusion;
 		float Alpha;
@@ -81,7 +82,6 @@ namespace Mimic
 
 	protected:
 		friend struct ModelRenderer;
-		void SetTextureMap(const std::shared_ptr<Texture>& texture) override;
 
 	private:
 		std::vector<unsigned int> _subroutineIndices;
@@ -90,6 +90,7 @@ namespace Mimic
 		std::weak_ptr<Texture> _metallicTexture;
 		std::weak_ptr<Texture> _roughnessTexture;
 		std::weak_ptr<Texture> _normalTexture;
+
 		unsigned int _albedoSubroutineUniform;
 		unsigned int _autoAlbedo;
 		unsigned int _manualAlbedo;
@@ -101,6 +102,10 @@ namespace Mimic
 		unsigned int _roughnessSubroutineUniform;
 		unsigned int _autoRoughness;
 		unsigned int _manualRoughness;
+
+		unsigned int _metallicSubroutineUniform;
+		unsigned int _autoMetallic;
+		unsigned int _manualMetallic;
 		void OnDraw() override;
 	};
 }

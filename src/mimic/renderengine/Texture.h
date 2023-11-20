@@ -4,9 +4,21 @@
 #include <GL/glew.h>
 #include <cstdint>
 #include <GLM/glm.hpp>
+#include <vector>
 
 namespace Mimic
 {
+	enum TextureType
+	{
+		MIMIC_DIFFUSE = 0x01,
+		MIMIC_SPECULAR = 0x02,
+		MIMIC_NORMAL = 0x04,
+		MIMIC_HEIGHT = 0x08,
+		MIMIC_ALBEDO = 0x10,
+		MIMIC_ROUGHNESS = 0x20,
+		MIMIC_METALLIC = 0x40
+	};
+
 	// #############################################################################
 	// texture stuct:
 	// #############################################################################
@@ -49,7 +61,7 @@ namespace Mimic
 		static const std::uint16_t MIMIC_CUBEMAP_TEXTURE_PARAMS = MIMIC_CUBEMAP_TEXTURE | MIMIC_FLOAT | MIMIC_WRAPS_CLAMP | MIMIC_WRAPT_CLAMP | MIMIC_WRAPR_CLAMP | MIMIC_MIN_LINEAR | MIMIC_MAG_LINEAR;
 		
 		unsigned int _id;
-		std::string _type;
+		int _type;
 
 	public:
 		enum TextureFormats
@@ -64,7 +76,7 @@ namespace Mimic
 
 		const int Load(const std::string& path) override;
 		const int Create(const glm::ivec2& aspectRatio, const std::uint16_t& textureParams, const TextureFormats& internalFormat, const TextureFormats& format);
-
+		void SetType(const int& type);
 		// user texture parameters:
 		static const std::uint16_t MIMIC_MODEL_TEXTURE_PARAMS = MIMIC_2D_TEXTURE | MIMIC_UNSIGNED_BYTE | MIMIC_WRAPS_REPEAT | MIMIC_WRAPT_REPEAT | MIMIC_MIN_MIPMAP_LINEAR | MIMIC_MAG_LINEAR | MIMIC_GEN_MIPMAP;
 	};

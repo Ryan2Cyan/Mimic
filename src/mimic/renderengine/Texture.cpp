@@ -119,7 +119,6 @@ namespace Mimic
 
 		glGenTextures(1, &_id);
 		glBindTexture(target, _id);
-		
 
 		if (textureParams & MIMIC_2D_TEXTURE)
 		{
@@ -146,10 +145,14 @@ namespace Mimic
 		if (textureParams & MIMIC_MIN_MIPMAP_LINEAR) glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 		if (textureParams & MIMIC_MAG_MIPMAP_LINEAR) glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 
-
 		if (textureParams & MIMIC_GEN_MIPMAP) glGenerateMipmap(target); 
 
 		glBindTexture(target, 0);
 		return 0;
+	}
+
+	void Texture::SetType(const int& type)
+	{
+		_type = type;
 	}
 }

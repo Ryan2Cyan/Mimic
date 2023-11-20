@@ -96,17 +96,17 @@ namespace Mimic
 		{
 			const aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 
-			LoadMaterialTextures(material, aiTextureType_DIFFUSE, "diffuse");
-			LoadMaterialTextures(material, aiTextureType_SPECULAR, "specular");
-			LoadMaterialTextures(material, aiTextureType_HEIGHT, "normal");
-			LoadMaterialTextures(material, aiTextureType_AMBIENT, "height");
+			LoadMaterialTextures(material, aiTextureType_DIFFUSE, MIMIC_DIFFUSE | MIMIC_ALBEDO);
+			LoadMaterialTextures(material, aiTextureType_SPECULAR, MIMIC_SPECULAR | MIMIC_ROUGHNESS);
+			LoadMaterialTextures(material, aiTextureType_HEIGHT, MIMIC_NORMAL);
+			LoadMaterialTextures(material, aiTextureType_AMBIENT, MIMIC_HEIGHT);
 		}
 
 		std::shared_ptr<Mesh> newMesh = std::make_shared<Mesh>(vertices, indices);
 		return newMesh;
 	}
 
-	const void Model::LoadMaterialTextures(const aiMaterial* material, const aiTextureType& type, const std::string&& typeName)
+	const void Model::LoadMaterialTextures(const aiMaterial* material, const aiTextureType& type, const int& typeName)
 	{
 		std::shared_ptr<Texture> loadedTexture;
 		

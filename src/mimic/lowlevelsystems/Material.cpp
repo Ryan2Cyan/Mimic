@@ -60,10 +60,13 @@ namespace Mimic
 
 	void BasicMaterial::SetTextureMap(const std::shared_ptr<Texture>& texture)
 	{
-		if (texture->_type == "diffuse") _diffuseTexture = texture;
-		if (texture->_type == "specular") _specularTexture = texture;
-		if (texture->_type == "normal") _normalTexture = texture;
-		if (texture->_type == "height") _heightTexture = texture;
+		const int type = texture->_type;
+
+		if(type & TextureType::MIMIC_DIFFUSE) _diffuseTexture = texture;
+		else if(type & TextureType::MIMIC_SPECULAR) _specularTexture = texture;
+		else if (type & TextureType::MIMIC_HEIGHT) _heightTexture = texture;
+		else if (type & TextureType::MIMIC_NORMAL) _normalTexture = texture;
+		else MIMIC_LOG_WARNING("[Mimic::Material] Unable to set texture as it has no value type.");
 	}
 
 	// #############################################################################
@@ -90,7 +93,11 @@ namespace Mimic
 		_autoRoughness = glGetSubroutineIndex(shader->_shaderProgramId, GL_FRAGMENT_SHADER, "CalculateRoughnessAutoTexture");
 		_manualRoughness = glGetSubroutineIndex(shader->_shaderProgramId, GL_FRAGMENT_SHADER, "CalculateRoughnessManual");
 
-		_subroutineIndices = { _albedoSubroutineUniform, _normalSubroutineUniform, _roughnessSubroutineUniform };
+		_metallicSubroutineUniform = glGetSubroutineUniformLocation(shader->_shaderProgramId, GL_FRAGMENT_SHADER, "MetallicMode");
+		_autoMetallic = glGetSubroutineIndex(shader->_shaderProgramId, GL_FRAGMENT_SHADER, "CalculateMetallicAutoTexture");
+		_manualMetallic = glGetSubroutineIndex(shader->_shaderProgramId, GL_FRAGMENT_SHADER, "CalculateMetallicManual");
+
+		_subroutineIndices = { _albedoSubroutineUniform, _normalSubroutineUniform, _roughnessSubroutineUniform, _metallicSubroutineUniform };
 
 		SetAlbedo(glm::vec3(1.0f));
 		SetEmissive(glm::vec3(0.0f));
@@ -154,9 +161,13 @@ namespace Mimic
 
 	void PBRMaterial::SetTextureMap(const std::shared_ptr<Texture>& texture)
 	{
-		if (texture->_type == "diffuse") _albedoTexture = texture;
-		if (texture->_type == "specular") _metallicTexture = texture;
-		if (texture->_type == "normal") _normalTexture = texture;
+		const int type = texture->_type;
+
+		if (type & TextureType::MIMIC_DIFFUSE || type & TextureType::MIMIC_ALBEDO) _albedoTexture = texture;
+		else if (type & TextureType::MIMIC_SPECULAR || type & TextureType::MIMIC_ROUGHNESS) _roughnessTexture = texture;
+		else if (type & TextureType::MIMIC_METALLIC) _metallicTexture = texture;
+		else if (type & TextureType::MIMIC_NORMAL) _normalTexture = texture;
+		else MIMIC_LOG_WARNING("[Mimic::Material] Unable to set texture as it has no value type.");
 	};
 
 	void PBRMaterial::OnDraw()
@@ -178,17 +189,18 @@ namespace Mimic
 			shader->SetVector3("u_Albedo", Albedo);
 		}
 
-		// load roughness/metallic (map_ks):
-		if (!_metallicTexture.expired() && !ManualMode)
+		// load roughness(map_ks):
+		if (!_roughnessTexture.expired() && !ManualMode)
 		{
 			_subroutineIndices[_roughnessSubroutineUniform] = _autoRoughness;
-			shader->SetTexture("u_RoughnessMap", _metallicTexture.lock()->_id, 2);
+			shader->SetTexture("u_RoughnessMap", _roughnessTexture.lock()->_id, 2);
 		}
 		else
 		{
 			_subroutineIndices[_roughnessSubroutineUniform] = _manualRoughness;
 			shader->SetFloat("u_Roughness", Roughness);
 		}
+
 
 		// load normals (map_Bump):
 		if (!_normalTexture.expired() && !ManualMode)
@@ -198,18 +210,30 @@ namespace Mimic
 		}
 		else _subroutineIndices[_normalSubroutineUniform] = _manualNormal;
 
+		// load metallic (must be specified by user):
+		if (!_metallicTexture.expired() && !ManualMode)
+		{
+			_subroutineIndices[_metallicSubroutineUniform] = _autoMetallic;
+			shader->SetTexture("u_MetallicMap", _metallicTexture.lock()->_id, 4);
+		}
+		else
+		{
+			_subroutineIndices[_metallicSubroutineUniform] = _manualMetallic;
+			shader->SetFloat("u_Metallic", Metallic);
+		}
+
 		glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, _subroutineIndices.size(), _subroutineIndices.data());
 
-		shader->SetInt("u_IrradianceMap", 4);
-		glActiveTexture(GL_TEXTURE4);
+		shader->SetInt("u_IrradianceMap", 5);
+		glActiveTexture(GL_TEXTURE5);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, MimicCore::EnvironmentCubeMap->_irradianceMapTexture->_id);
 
-		shader->SetInt("u_PrefilterMap", 5);
-		glActiveTexture(GL_TEXTURE5);
+		shader->SetInt("u_PrefilterMap", 6);
+		glActiveTexture(GL_TEXTURE6);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, MimicCore::EnvironmentCubeMap->_prefilteredMapTexture->_id);
 
-		shader->SetInt("u_BRDFLookupTexture", 6);
-		glActiveTexture(GL_TEXTURE6);
+		shader->SetInt("u_BRDFLookupTexture", 7);
+		glActiveTexture(GL_TEXTURE7);
 		glBindTexture(GL_TEXTURE_2D, MimicCore::EnvironmentCubeMap->_brdfConvolutedTexture->_id);
 		
 		shader->SetVector3("u_Emissive", Emissive);
