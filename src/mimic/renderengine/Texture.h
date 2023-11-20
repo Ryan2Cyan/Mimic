@@ -19,6 +19,25 @@ namespace Mimic
 		MIMIC_METALLIC = 0x40
 	};
 
+	enum class TextureAttachment
+	{
+		MIMIC_COLOR0,
+		MIMIC_DEPTH,
+		MIMIC_STENCIL,
+		MIMIC_DEPTH_STENCIL
+	};
+
+	enum class TextureTarget
+	{
+		MIMIC_TEXTURE_2D = 0,
+		MIMIC_CUBE_MAP_POSITIVE_X = 1,
+		MIMIC_CUBE_MAP_NEGATIVE_X = 2,
+		MIMIC_CUBE_MAP_POSITIVE_Y = 3,
+		MIMIC_CUBE_MAP_NEGATIVE_Y = 4,
+		MIMIC_CUBE_MAP_POSITIVE_Z = 5,
+		MIMIC_CUBE_MAP_NEGATIVE_Z = 6
+	};
+
 	// #############################################################################
 	// texture stuct:
 	// #############################################################################

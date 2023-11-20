@@ -51,8 +51,8 @@ namespace Mimic
 				const glm::vec3 position = glm::vec3(lights[i]->Position.x, lights[i]->Position.y, lights[i]->Position.z);
 				renderObject._shader->SetVector3((currentLightName + ".position").c_str(), position);
 
-				// const glm::vec4 direction = glm::vec4(lights[i]->Direction.x, lights[i]->Direction.y, lights[i]->Direction.z, 0.0f);
-				// renderObject._shader->SetVector4((currentLightName + ".direction").c_str(), direction);
+				 // const glm::vec4 direction = glm::vec4(lights[i]->Direction.x, lights[i]->Direction.y, lights[i]->Direction.z, 0.0f);
+				 // renderObject._shader->SetVector4((currentLightName + ".direction").c_str(), direction);
 
 				const glm::vec4 colour = glm::vec4(lights[i]->Colour.x, lights[i]->Colour.y, lights[i]->Colour.z, 1.0f);
 				renderObject._shader->SetVector4((currentLightName + ".colour").c_str(), colour);

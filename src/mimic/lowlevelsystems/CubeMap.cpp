@@ -140,8 +140,7 @@ namespace Mimic
 	// hdr cubemap functions:
 	// #############################################################################
 
-	EnvironmentCubeMap::EnvironmentCubeMap() : _initialised(false), _skipDraw(false), _unitCubeVertexArrayId(0),
-		_framebufferId(0), _renderObjectId(0), _captureProjection(glm::mat4(1.0f)), _unitQuadVertexArrayId(0)
+	EnvironmentCubeMap::EnvironmentCubeMap() : _initialised(false), _skipDraw(false), _unitCubeVertexArrayId(0), _captureProjection(glm::mat4(1.0f)), _unitQuadVertexArrayId(0)
 	{
 		// set up 6 view matrices (facing each side of the cube), set a projection matrix to 90 fov, and capture each face of the cubemap:
 		_captureProjection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f);
@@ -178,19 +177,10 @@ namespace Mimic
 			const glm::vec2 aspectRatio = MimicCore::Window->GetAspectRatio();
 
 			// set up framebuffer & renderbuffer object:
-			if (_framebuffer == nullptr)
-			{
-				_framebuffer = Framebuffer::Initialise();
-				_framebuffer->AttachRenderObject(GL_DEPTH_ATTACHMENT);
-			}
+			if (_framebuffer == nullptr) _framebuffer = MimicCore::ResourceManager->CreateResource<Framebuffer>();
+			if (_renderbufferObject == nullptr) _renderbufferObject = MimicCore::ResourceManager->CreateResource<RenderbufferObject>(TextureAttachment::MIMIC_DEPTH);
 			
-			 glGenFramebuffers(1, &_framebufferId);
-			 glGenRenderbuffers(1, &_renderObjectId);
-
-			 glBindFramebuffer(GL_FRAMEBUFFER, _framebufferId);
-			 glBindRenderbuffer(GL_RENDERBUFFER, _renderObjectId);
-			 glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _renderObjectId);
-			
+			_framebuffer->AttachRenderObject(_renderbufferObject);
 
 			// hdr environment map:
 			 _environmentMapTexture = MimicCore::ResourceManager->CreateResource<Texture>(aspectRatio, Texture::MIMIC_CUBEMAP_TEXTURE_PARAMS, Texture::MIMIC_RGB16F, Texture::MIMIC_RGB);
@@ -226,10 +216,9 @@ namespace Mimic
 		_cubeMapShader->SetMat4("u_View", viewMatrix);
 		_cubeMapShader->SetMat4("u_Projection", projectionMatrix);
 
-		glBindVertexArray(_unitCubeVertexArrayId);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, _environmentMapTexture->_id);
-		glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+		RenderUnitCube();		
 		glBindVertexArray(0);
 
 		glDepthFunc(GL_LESS);
@@ -279,10 +268,7 @@ namespace Mimic
 
 	void EnvironmentCubeMap::LoadEnvironmentMap()
 	{
-		glBindFramebuffer(GL_FRAMEBUFFER, _framebufferId);
-		glBindRenderbuffer(GL_RENDERBUFFER, _renderObjectId);
-		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, MimicCore::Window->GetAspectRatio().x, MimicCore::Window->GetAspectRatio().y);
-		// _framebuffer->UtiliseRenderObject(GL_DEPTH_COMPONENT24, MimicCore::Window->GetAspectRatio());
+		_framebuffer->UseRenderObject(MimicCore::Window->GetAspectRatio());
 
 		// convert HDR equirectangular environment map into an environment cubemap equivalent:
 		_equirectangularToCubemapShader->UseShader();
@@ -291,28 +277,22 @@ namespace Mimic
 		glActiveTexture(GL_TEXTURE0 + 1);
 		glBindTexture(GL_TEXTURE_2D, _equirectangularTexture->_id);
 
-		glBindFramebuffer(GL_FRAMEBUFFER, _framebufferId);
+		// glBindFramebuffer(GL_FRAMEBUFFER, _framebufferId);
+		constexpr int startTargetIndex = (int)TextureTarget::MIMIC_CUBE_MAP_POSITIVE_X;
 		for (unsigned int i = 0; i < 6; i++)
 		{
 			_equirectangularToCubemapShader->SetMat4("u_View", _captureViews[i]);
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, _environmentMapTexture->_id, 0);
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			_framebuffer->RenderToTexture(_environmentMapTexture->_id, TextureAttachment::MIMIC_COLOR0, (TextureTarget)(startTargetIndex + i));
 
 			// render unit cube:
-			glBindVertexArray(_unitCubeVertexArrayId);
-			glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
-			glBindVertexArray(0);
+			RenderUnitCube();
 		}
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
 	void EnvironmentCubeMap::LoadIrradianceMapTexture()
 	{
-		glBindFramebuffer(GL_FRAMEBUFFER, _framebufferId);
-		glBindRenderbuffer(GL_RENDERBUFFER, _renderObjectId);
-		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 32, 32);
-		glViewport(0, 0, 32, 32);
-		// _framebuffer->UtiliseRenderObject(GL_DEPTH_COMPONENT24, glm::ivec2(32, 32));
+		_framebuffer->UseRenderObject(glm::ivec2(32, 32));
 
 		// convert cubemap to irradiance map:
 		_convolutionShader->UseShader();
@@ -321,21 +301,21 @@ namespace Mimic
 		glActiveTexture(GL_TEXTURE0 + 1);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, _environmentMapTexture->_id);
 
+		constexpr int startTargetIndex = (int)TextureTarget::MIMIC_CUBE_MAP_POSITIVE_X;
 		for (unsigned int i = 0; i < 6; i++)
 		{
 			_convolutionShader->SetMat4("u_View", _captureViews[i]);
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, _irradianceMapTexture->_id, 0);
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			_framebuffer->RenderToTexture(_irradianceMapTexture->_id, TextureAttachment::MIMIC_COLOR0, (TextureTarget)(startTargetIndex + i));
 
 			RenderUnitCube();
 		}
 		glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		_framebuffer->Unbind();
 	}
 
 	void EnvironmentCubeMap::LoadPrefilteredMapTexture()
 	{
-		glBindFramebuffer(GL_FRAMEBUFFER, _framebufferId);
+		glBindFramebuffer(GL_FRAMEBUFFER, _framebuffer->_id);
 
 		// convert cubemap to pre-convoluted map:
 		_preFilteredShader->UseShader();
@@ -344,15 +324,15 @@ namespace Mimic
 		glActiveTexture(GL_TEXTURE0 + 1);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, _environmentMapTexture->_id);
 	
+		constexpr int startTargetIndex = (int)TextureTarget::MIMIC_CUBE_MAP_POSITIVE_X;
 		constexpr unsigned int maxMipLevels = 5;
 		for (unsigned int mip = 0; mip < maxMipLevels; mip++)
 		{
 			// resize framebuffer according to mip-level size:
 			const unsigned int mipWidth = 128 * std::pow(0.5f, mip);
 			const unsigned int mipHeight = mipWidth;
-			glBindRenderbuffer(GL_RENDERBUFFER, _renderObjectId);
-			glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, mipWidth, mipHeight);
-			glViewport(0, 0, mipWidth, mipHeight);
+
+			_framebuffer->UseRenderObject(glm::ivec2(mipWidth, mipHeight));
 
 			float roughness = (float)mip / (float)(maxMipLevels - 1);
 			_preFilteredShader->SetFloat("u_Roughness", roughness);
@@ -360,31 +340,25 @@ namespace Mimic
 			for (unsigned int i = 0; i < 6; i++)
 			{
 				_preFilteredShader->SetMat4("u_View", _captureViews[i]);
-				glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, _prefilteredMapTexture->_id, mip);
-				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+				_framebuffer->RenderToTexture(_prefilteredMapTexture->_id, TextureAttachment::MIMIC_COLOR0, (TextureTarget)(startTargetIndex + i), mip);
 				RenderUnitCube();
 			}
 		}
 		glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		_framebuffer->Unbind();
 	}
 
 	void EnvironmentCubeMap::LoadBRDFConvolutedTexture()
 	{
-		glBindFramebuffer(GL_FRAMEBUFFER, _framebufferId);
-		glBindRenderbuffer(GL_RENDERBUFFER, _renderObjectId);
-		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 512, 512);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _brdfConvolutedTexture->_id, 0);
-		glViewport(0, 0, 512, 512);
+		_framebuffer->UseRenderObject(glm::ivec2(512, 512));
+		_framebuffer->RenderToTexture(_brdfConvolutedTexture->_id, TextureAttachment::MIMIC_COLOR0, TextureTarget::MIMIC_TEXTURE_2D);
 
 		_brdfConvolutionShader->UseShader();
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		RenderQuad();
 
 		glBindTexture(GL_TEXTURE_2D, 0);
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		_framebuffer->Unbind();
 	}
 
 	void EnvironmentCubeMap::RenderUnitCube() const noexcept
@@ -400,11 +374,11 @@ namespace Mimic
 		{
 			unsigned int quadVBO;
 			float quadVertices[] = {
-				// positions        // texture Coords
-				-1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
-				-1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
-				 1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
-				 1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+				// positions          // texture Coords
+				-1.0f,  1.0f, 0.0f,   0.0f, 1.0f,
+				-1.0f, -1.0f, 0.0f,   0.0f, 0.0f,
+				 1.0f,  1.0f, 0.0f,   1.0f, 1.0f,
+				 1.0f, -1.0f, 0.0f,   1.0f, 0.0f,
 			};
 			// setup plane VAO
 			glGenVertexArrays(1, &_unitQuadVertexArrayId);

@@ -11,6 +11,11 @@ namespace Mimic
 {
 	typedef std::vector<std::shared_ptr<Texture>> textureVector;
 
+	const int Model::Create()
+	{
+		return -1;
+	}
+
 	const int Model::Load(const std::string& path)
 	{
 		Assimp::Importer importer;

@@ -52,6 +52,7 @@ namespace Mimic
 
 	struct Texture;
 	struct Framebuffer;
+	struct RenderbufferObject;
 
 	struct EnvironmentCubeMap
 	{
@@ -76,6 +77,7 @@ namespace Mimic
 
 		std::array<glm::mat4, 6> _captureViews;
 		glm::mat4 _captureProjection;
+
 		std::shared_ptr<Texture> _equirectangularTexture;
 		std::shared_ptr<Texture> _environmentMapTexture;
 		std::shared_ptr<Texture> _irradianceMapTexture;
@@ -89,11 +91,10 @@ namespace Mimic
 		std::shared_ptr<Shader> _cubeMapShader;
 
 		std::shared_ptr<Framebuffer> _framebuffer;
+		std::shared_ptr<RenderbufferObject> _renderbufferObject;
 
 		unsigned int _unitQuadVertexArrayId;
 		unsigned int _unitCubeVertexArrayId;
-		unsigned int _framebufferId;
-		unsigned int _renderObjectId;
 
 		bool _skipDraw;
 		bool _initialised;

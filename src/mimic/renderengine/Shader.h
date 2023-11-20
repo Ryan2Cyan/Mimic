@@ -16,7 +16,7 @@ namespace Mimic
 	struct Shader : Resource
 	{
 		const int Load(const std::string& path) override;
-
+		const int Create();
 	private:
 		friend struct Renderer;
 		friend struct Material;

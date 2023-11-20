@@ -90,7 +90,7 @@ uniform float u_Alpha;
 struct Light
 {
 	vec3 position;
-	vec4 direction;
+	vec3 direction;
 	vec4 colour;
 };
 uniform Light u_DirectLights[20];
@@ -203,9 +203,9 @@ void main()
 	for(int i = 0; i < u_DirectLightsCount; ++i)
 	{
 		const vec3 lightPosition = u_DirectLights[i].position;
-		const vec3 lightDir = normalize( lightPosition - fragPosition );
+		// const vec3 lightDir = normalize( lightPosition - fragPosition );
 		// will need to use the raw direction value for directional lights, but not point:
-		// const vec3 lightDirection = u_DirectLights[i].direction;
+
 
 		// Calculate per-light radiance:
 		const vec3 L = normalize(lightPosition - fragPosition);

@@ -27,6 +27,7 @@ namespace Mimic
 		friend struct CubeMap;
 		friend struct EnvironmentCubeMap;
 
+		const int Create();
 		const int Load(const std::string& path) override;
 		void ProcessNode(aiNode* node, const aiScene* scene);
 		const std::shared_ptr<Mesh> ProcessMesh(aiMesh* mesh, const aiScene* scene);

@@ -131,6 +131,12 @@ namespace Mimic
 				glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, internalFormatGL, aspectRatio.x, aspectRatio.y, 0, formatGL, type, nullptr);
 			}
 		}
+		else
+		{
+			MIMIC_LOG_WARNING("[Mimic::Texture] Could not create texture, no valid texture target arguement.");
+			MIMIC_LOG_OPENGL("Texture");
+			return -1;
+		}
 		
 		if (textureParams & MIMIC_WRAPS_REPEAT) glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		if (textureParams & MIMIC_WRAPT_REPEAT) glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_REPEAT);

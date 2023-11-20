@@ -19,6 +19,11 @@ namespace Mimic
 		return _initialised ? 0 : -1;
 	}
 
+	const int Shader::Create()
+	{
+		return 0;
+	}
+
 	void Shader::UseShader() const noexcept
 	{
 		glUseProgram(_shaderProgramId);
