@@ -50,7 +50,7 @@ namespace Mimic
 			{
 				const std::string currentLight = "u_DirectLights[" + std::to_string(i) + "]";
 
-				renderObject._shader->SetVector3((currentLight + ".position").c_str(), directLights[i]->Position);
+				// renderObject._shader->SetVector3((currentLight + ".position").c_str(), directLights[i]->Position);
 				// negate the direction of the light to be coming from the light source
 				renderObject._shader->SetVector3((currentLight + ".direction").c_str(), glm::normalize(-directLights[i]->Direction));
 				const glm::vec4 colour = glm::vec4(directLights[i]->Colour.x, directLights[i]->Colour.y, directLights[i]->Colour.z, 1.0f);

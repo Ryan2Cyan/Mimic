@@ -24,13 +24,13 @@ int main(int argc, char* argv[])
 		mainCamera->Initialise(MimicCore::Window->GetAspectRatio(), 45.0f);
 		dmtkCore->AddCamera(mainCamera, true);
 
-		/*std::shared_ptr<DirectLight> light1 = dmtkCore->AddDirectLight();
-		light1->Position = glm::vec3(1.0f, 0.0f, -1.0f);
-		light1->Colour = glm::vec3(10.0f, 10.0f, 10.0f);*/
-
-		std::shared_ptr<PointLight> light1 = dmtkCore->AddPointLight();
+		std::shared_ptr<DirectLight> light1 = dmtkCore->AddDirectLight();
 		light1->Position = glm::vec3(1.0f, 0.0f, -1.0f);
 		light1->Colour = glm::vec3(10.0f, 10.0f, 10.0f);
+
+		/*std::shared_ptr<PointLight> light1 = dmtkCore->AddPointLight();
+		light1->Position = glm::vec3(1.0f, 0.0f, -1.0f);
+		light1->Colour = glm::vec3(10.0f, 10.0f, 10.0f);*/
 
 		std::shared_ptr<GameObject> light1GameObject = dmtkCore->AddEmptyGameObject();
 		light1GameObject->Scale = glm::vec3(0.1f);
@@ -119,7 +119,7 @@ int main(int argc, char* argv[])
 			// light controls:
 			ImGui::Begin("Light");
 			ImGui::SliderFloat3("Position##l1", &(light1->Position[0]), -5.0f, 5.0f);
-			//ImGui::SliderFloat3("Direction##l2", &(light1->Direction[0]), -1.0f, 1.0f);
+			ImGui::SliderFloat3("Direction##l2", &(light1->Direction[0]), -1.0f, 1.0f);
 			ImGui::SliderFloat3("Colour##l3", &(light1->Colour[0]), 0.0f, 100.0f);
 			light1GameObject->Position = light1->Position;
 			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
