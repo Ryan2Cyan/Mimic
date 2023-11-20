@@ -13,6 +13,7 @@ namespace Mimic
 	struct Texture;
 	struct Shader;
 	struct DirectLight;
+	struct PointLight;
 
 	class RenderObject
 	{
@@ -42,7 +43,7 @@ namespace Mimic
 
 		static std::shared_ptr<Renderer> Initialise();
 		void AddToDrawQue(const RenderObject& renderObject);
-		void Draw(const glm::vec3& viewPosition, const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, const std::vector<std::shared_ptr<DirectLight>>& lights);
+		void Draw(const glm::vec3& viewPosition, const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, const std::vector<std::shared_ptr<DirectLight>>& directLights, const std::vector<std::shared_ptr<PointLight>>& pointLights);
 
 
 		glm::mat4 _cachedViewMatrix;

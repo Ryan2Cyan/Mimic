@@ -15,7 +15,8 @@ namespace Mimic
 	std::shared_ptr<Camera> MimicCore::CurrentCamera;
 	std::shared_ptr<ResourceManager> MimicCore::ResourceManager;
 	std::vector<std::shared_ptr<GameObject>> MimicCore::_gameObjects;
-	std::vector<std::shared_ptr<DirectLight>> MimicCore::_lights;
+	std::vector<std::shared_ptr<DirectLight>> MimicCore::_directLights;
+	std::vector<std::shared_ptr<PointLight>> MimicCore::_pointLights;
 	std::vector<std::shared_ptr<Camera>> MimicCore::_cameras;
 	std::shared_ptr<Renderer> MimicCore::_renderer;
 	std::shared_ptr<CubeMap> MimicCore::CubeMap;
@@ -115,7 +116,8 @@ namespace Mimic
 				camera->GetGameObject()->Position, 
 				camera->_viewMatrix, 
 				camera->_projectionMatrix,
-				_lights
+				_directLights,
+				_pointLights
 			);
 		}
 		_renderer->_renderQue.clear();
@@ -147,13 +149,23 @@ namespace Mimic
 		return emptyGameObject;
 	}
 
-	std::shared_ptr<DirectLight> MimicCore::AddLight() noexcept
+	std::shared_ptr<DirectLight> MimicCore::AddDirectLight() noexcept
 	{
 		std::shared_ptr<DirectLight> newLight = std::make_shared<DirectLight>();
-		newLight->Name = "Light_" + _lights.size();
+		newLight->Name = "DirectLight_" + _directLights.size();
 
-		_lights.push_back(newLight);
-		MIMIC_LOG_INFO("[Mimic::MimicCore] Added Mimic::Light: \"%\".", newLight->Name);
+		_directLights.push_back(newLight);
+		MIMIC_LOG_INFO("[Mimic::MimicCore] Added Mimic::DirectLight: \"%\".", newLight->Name);
+		return newLight;
+	}
+
+	std::shared_ptr<PointLight> MimicCore::AddPointLight() noexcept
+	{
+		std::shared_ptr<PointLight> newLight = std::make_shared<PointLight>();
+		newLight->Name = "PointLight_" + _directLights.size();
+
+		_pointLights.push_back(newLight);
+		MIMIC_LOG_INFO("[Mimic::MimicCore] Added Mimic::PointLight: \"%\".", newLight->Name);
 		return newLight;
 	}
 

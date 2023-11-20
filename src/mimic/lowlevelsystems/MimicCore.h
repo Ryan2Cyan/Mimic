@@ -14,6 +14,7 @@ namespace Mimic
 	struct Camera;
 	struct Renderer;
 	struct DirectLight;
+	struct PointLight;
 	struct CubeMap;
 	struct EnvironmentCubeMap;
 
@@ -33,7 +34,8 @@ namespace Mimic
 
 		std::shared_ptr<GameObject> AddEmptyGameObject() noexcept;
 		std::shared_ptr<GameObject> AddEmptyGameObject(const std::string& name) noexcept;
-		std::shared_ptr<DirectLight> AddLight() noexcept;
+		std::shared_ptr<DirectLight> AddDirectLight() noexcept;
+		std::shared_ptr<PointLight> AddPointLight() noexcept;
 		void AddGameObject(const std::shared_ptr<GameObject> gameObject) noexcept;
 		void AddCamera(const std::shared_ptr<Camera> camera, const bool setToCurrent) noexcept;
 
@@ -49,7 +51,8 @@ namespace Mimic
 
 		static std::vector<std::shared_ptr<GameObject>> _gameObjects;
 		static std::vector<std::shared_ptr<Camera>> _cameras;
-		static std::vector<std::shared_ptr<DirectLight>> _lights;
+		static std::vector<std::shared_ptr<DirectLight>> _directLights;
+		static std::vector<std::shared_ptr<PointLight>> _pointLights;
 		static std::shared_ptr<Renderer> _renderer;
 		static std::shared_ptr<Environment> _environment;
 		std::weak_ptr<MimicCore> _self;
