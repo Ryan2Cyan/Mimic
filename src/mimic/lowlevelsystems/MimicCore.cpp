@@ -29,8 +29,7 @@ namespace Mimic
 		Mimic::Logger::Init();
 
 		// initialise SDL_Window, SDL_Renderer, & GL_Context:
-		glm::vec2 aspectRatio = glm::vec2(800.0f, 800.0f);
-		Window = Window::Initialise("[Mimic Engine] Dungeon Master's Tool Kit", aspectRatio);
+		Window = Window::Initialise("[Mimic Engine] Dungeon Master's Tool Kit");
 
 		// init glew:
 		glewExperimental = GL_TRUE;
@@ -45,6 +44,7 @@ namespace Mimic
 		ApplicationRunning = true;
 		// glViewport(0, 0, 800.0f, 800.0f);
 		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 	}
 
 	MimicCore::~MimicCore() { }

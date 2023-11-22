@@ -6,7 +6,7 @@
 
 namespace Mimic
 {
-	Window::Window(const std::string& windowName, glm::ivec2 aspectRatio) : _windowName(windowName), _aspectRatio(aspectRatio)
+	Window::Window(const std::string& windowName) : _windowName(windowName)
 	{
 		if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) < 0)
 		{
@@ -18,7 +18,11 @@ namespace Mimic
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 		MIMIC_LOG_INFO("[Mimic::Window] SDL initialisation successful.");
 
-		_window = SDL_CreateWindow(windowName.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, aspectRatio.x, aspectRatio.y, SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL);
+		SDL_DisplayMode displayMode;
+		SDL_GetCurrentDisplayMode(0, &displayMode);
+		_aspectRatio = glm::ivec2(displayMode.w, displayMode.h);
+
+		_window = SDL_CreateWindow(windowName.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, _aspectRatio.x, _aspectRatio.y, SDL_WINDOW_FULLSCREEN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL);
 		if (_window == nullptr)
 		{
 			MIMIC_LOG_FATAL("Failed to initialize SDL_Window: %", SDL_GetError());
@@ -91,8 +95,8 @@ namespace Mimic
 		SDL_GL_SwapWindow(_window);
 	}
 
-	std::shared_ptr<Window> Window::Initialise(const std::string& windowName, const glm::ivec2& aspectRatio)
+	std::shared_ptr<Window> Window::Initialise(const std::string& windowName)
 	{
-		return std::make_shared<Window>(windowName, aspectRatio);
+		return std::make_shared<Window>(windowName);
 	}
 }

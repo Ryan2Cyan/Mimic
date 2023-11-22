@@ -93,7 +93,16 @@ int main(int argc, char* argv[])
 						break;
 					}
 
-					case SDL_KEYDOWN: { break; }
+					case SDL_KEYDOWN: { 
+						switch (event.key.keysym.sym)
+						{
+						case SDLK_ESCAPE:
+							dmtkCore->ApplicationRunning = false;
+							break;
+							// cases for other keypresses
+						}
+						break; 
+					}
 					case SDL_KEYUP: { break; }
 				}
 			}

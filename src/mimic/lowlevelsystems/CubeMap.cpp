@@ -180,7 +180,7 @@ namespace Mimic
 			if (_environmentMapRenderTexture == nullptr)
 			{
 				_environmentMapRenderTexture = RenderTexture::Initialise();
-				_environmentMapRenderTexture->SetTexture(MimicCore::ResourceManager->CreateResource<Texture>(aspectRatio, Texture::MIMIC_CUBEMAP_TEXTURE_PARAMS, Texture::MIMIC_RGB16F, Texture::MIMIC_RGB));
+				_environmentMapRenderTexture->SetTexture(MimicCore::ResourceManager->CreateResource<Texture>(glm::ivec2(512, 512), Texture::MIMIC_CUBEMAP_TEXTURE_PARAMS, Texture::MIMIC_RGB16F, Texture::MIMIC_RGB));
 			}
 			LoadEnvironmentMap();
 
@@ -247,6 +247,7 @@ namespace Mimic
 
 		stbi_set_flip_vertically_on_load(true);
 		_equirectangularTexture = MimicCore::ResourceManager->LoadResource<Texture>(fileName);
+		stbi_set_flip_vertically_on_load(false);
 
 		return _equirectangularTexture != nullptr;
 	}
@@ -277,7 +278,7 @@ namespace Mimic
 
 	void EnvironmentCubeMap::LoadEnvironmentMap()
 	{
-		_environmentMapRenderTexture->UseRenderObject(MimicCore::Window->GetAspectRatio());
+		_environmentMapRenderTexture->UseRenderObject(glm::ivec2(512, 512));
 
 		// convert HDR equirectangular environment map into an environment cubemap equivalent:
 		_equirectangularToCubemapShader->UseShader();
