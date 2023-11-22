@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <renderengine/Light.h>
 
 namespace Mimic
 {
@@ -71,7 +72,7 @@ namespace Mimic
 	}
 
 	// #############################################################################
-	// pbr functions:
+	// pbr material functions:
 	// #############################################################################
 
 	PBRMaterial::PBRMaterial()
@@ -108,26 +109,6 @@ namespace Mimic
 		SetAlpha(1.0f);
 
 		_shader = shader;
-	}
-
-	void PBRMaterial::SetAlbedoTexture(const std::shared_ptr<Texture>& albedo)
-	{
-		_albedoTexture = albedo;
-	}
-
-	void PBRMaterial::SetMetallicTexture(const std::shared_ptr<Texture>& metallic)
-	{
-		_metallicTexture = metallic;
-	}
-
-	void PBRMaterial::SetNormalTexture(const std::shared_ptr<Texture>& normal)
-	{
-		_normalTexture = normal;
-	}
-
-	void PBRMaterial::SetRoughnessTexture(const std::shared_ptr<Texture>& roughness)
-	{
-		_roughnessTexture = roughness;
 	}
 
 	void PBRMaterial::SetAlbedo(const glm::vec3& albedo)
@@ -175,8 +156,6 @@ namespace Mimic
 	{
 		if (_shader.expired()) return;
 		const std::shared_ptr<Shader> shader = _shader.lock();
-
-	
 
 		// load albedo (map_kd):
 		if (!_albedoTexture.expired() && !ManualMode)
@@ -240,5 +219,56 @@ namespace Mimic
 		shader->SetVector3("u_Emissive", Emissive);
 		shader->SetFloat("u_Alpha", Alpha);
 		shader->SetFloat("u_AmbientOcclusion", AmbientOcclusion);
+
+		// direct lights:
+		const std::vector<std::shared_ptr<DirectLight>> directLights = MimicCore::_directLights;
+		for (int i = 0; i < directLights.size(); i++)
+		{
+			const std::string currentLight = "u_DirectLights[" + std::to_string(i) + "]";
+
+			shader->SetVector3((currentLight + ".direction").c_str(), glm::normalize(-directLights[i]->Direction));
+			const glm::vec4 colour = glm::vec4(directLights[i]->Colour.x, directLights[i]->Colour.y, directLights[i]->Colour.z, 1.0f);
+			shader->SetVector4((currentLight + ".colour").c_str(), colour);
+		}
+		shader->SetInt("u_DirectLightsCount", directLights.size());
+
+
+		// point lights:
+		const std::vector<std::shared_ptr<PointLight>> pointLights = MimicCore::_pointLights;
+		for (int i = 0; i < pointLights.size(); i++)
+		{
+			const std::string currentLight = "u_PointLights[" + std::to_string(i) + "]";
+
+			shader->SetVector3((currentLight + ".position").c_str(), pointLights[i]->Position);
+			const glm::vec4 colour = glm::vec4(pointLights[i]->Colour.x, pointLights[i]->Colour.y, pointLights[i]->Colour.z, 1.0f);
+			shader->SetVector4((currentLight + ".colour").c_str(), colour);
+			shader->SetFloat((currentLight + ".constant").c_str(), pointLights[i]->Constant);
+			shader->SetFloat((currentLight + ".linear").c_str(), pointLights[i]->Linear);
+			shader->SetFloat((currentLight + ".quadratic").c_str(), pointLights[i]->Quadratic);
+		}
+		shader->SetInt("u_PointLightsCount", pointLights.size());
+	}
+
+	// #############################################################################
+	// cubemap material functions:
+	// #############################################################################
+	CubeMapMaterial::CubeMapMaterial()
+	{
+
+	}
+
+	void CubeMapMaterial::SetSourceTexture(const std::shared_ptr<Texture>& texture)
+	{
+		if (texture == nullptr)
+		{
+			MIMIC_LOG_WARNING("[Mimic::Material] Unable to set unitialised texture.");
+			return;
+		}
+		_sourceTexture = texture;
+	}
+
+	void CubeMapMaterial::OnDraw()
+	{
+
 	}
 }

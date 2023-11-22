@@ -53,17 +53,13 @@ namespace Mimic
 	};
 
 	// #############################################################################
-	// pbr stuct:
+	// pbr material stuct:
 	// #############################################################################
 	struct PBRMaterial : Material
 	{
 		PBRMaterial();
 
 		void SetTextureMap(const std::shared_ptr<Texture>& texture) override;
-		void SetAlbedoTexture(const std::shared_ptr<Texture>& albedo);
-		void SetMetallicTexture(const std::shared_ptr<Texture>& metallic);
-		void SetRoughnessTexture(const std::shared_ptr<Texture>& roughness);
-		void SetNormalTexture(const std::shared_ptr<Texture>& normal);
 
 		void SetAlbedo(const glm::vec3& albedo);
 		void SetEmissive(const glm::vec3& emissive);
@@ -107,5 +103,19 @@ namespace Mimic
 		unsigned int _autoMetallic;
 		unsigned int _manualMetallic;
 		void OnDraw() override;
+	};
+
+
+	// #############################################################################
+	// cubemap stuct:
+	// #############################################################################
+	struct CubeMapMaterial : Material
+	{
+		CubeMapMaterial();
+		void SetSourceTexture(const std::shared_ptr<Texture>& texture);
+	private:
+		void OnDraw() override;
+
+		std::weak_ptr<Texture> _sourceTexture;
 	};
 }

@@ -48,6 +48,7 @@ namespace Mimic
 
 	private:
 		friend struct ModelRenderer; // needs renderer
+		friend struct PBRMaterial; // needs renderer
 
 		static std::vector<std::shared_ptr<GameObject>> _gameObjects;
 		static std::vector<std::shared_ptr<Camera>> _cameras;

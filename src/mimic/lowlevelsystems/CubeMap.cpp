@@ -9,6 +9,7 @@
 #include <utility/Logger.h>
 #include <stb_image.h>
 #include <GL/glew.h>
+#include <functional>
 
 namespace Mimic
 {

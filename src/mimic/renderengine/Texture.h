@@ -16,7 +16,8 @@ namespace Mimic
 		MIMIC_HEIGHT = 0x08,
 		MIMIC_ALBEDO = 0x10,
 		MIMIC_ROUGHNESS = 0x20,
-		MIMIC_METALLIC = 0x40
+		MIMIC_METALLIC = 0x40,
+		MIMIC_HDRCUBEMAP = 0x80
 	};
 
 	enum class TextureTarget

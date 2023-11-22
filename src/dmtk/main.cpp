@@ -143,7 +143,7 @@ int main(int argc, char* argv[])
 
 			// model controls:
 			ImGui::Begin("Model");
-			ImGui::SliderFloat3("Position##m1", &(mushroomGameObject->Position[0]), -5.0f, 5.0f);
+			ImGui::SliderFloat3("Position##m1", &(mushroomGameObject->Position[0]), -250.0f, 250.0f);
 			ImGui::SliderFloat3("Rotation##m2", &(mushroomGameObject->Rotation[0]), -5.0f, 5.0f);
 			ImGui::End();
 
