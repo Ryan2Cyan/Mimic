@@ -51,7 +51,7 @@ namespace Mimic
 	// Source: https://learnopengl.com/PBR/IBL/Diffuse-irradiance
 
 	struct Texture;
-	struct Framebuffer;
+	struct RenderTexture;
 	struct RenderbufferObject;
 
 	struct EnvironmentCubeMap
@@ -79,10 +79,6 @@ namespace Mimic
 		glm::mat4 _captureProjection;
 
 		std::shared_ptr<Texture> _equirectangularTexture;
-		std::shared_ptr<Texture> _environmentMapTexture;
-		std::shared_ptr<Texture> _irradianceMapTexture;
-		std::shared_ptr<Texture> _prefilteredMapTexture;
-		std::shared_ptr<Texture> _brdfConvolutedTexture;
 
 		std::shared_ptr<Shader> _brdfConvolutionShader;
 		std::shared_ptr<Shader> _preFilteredShader;
@@ -90,8 +86,10 @@ namespace Mimic
 		std::shared_ptr<Shader> _convolutionShader;
 		std::shared_ptr<Shader> _cubeMapShader;
 
-		std::shared_ptr<Framebuffer> _framebuffer;
-		std::shared_ptr<RenderbufferObject> _renderbufferObject;
+		std::shared_ptr<RenderTexture> _environmentMapRenderTexture;
+		std::shared_ptr<RenderTexture> _irradianceRenderTexture;
+		std::shared_ptr<RenderTexture> _prefilteredMapRenderTexture;
+		std::shared_ptr<RenderTexture> _brdfConvolutedRenderTexture;
 
 		unsigned int _unitQuadVertexArrayId;
 		unsigned int _unitCubeVertexArrayId;

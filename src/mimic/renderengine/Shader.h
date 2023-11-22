@@ -26,9 +26,9 @@ namespace Mimic
 		friend struct PBRMaterial;
 
 		void UseShader() const noexcept;
-		const std::string ReadShaderFile(const std::string& path);
+		static const std::string ReadShaderFile(const std::string& path);
 		static GLenum ShaderTypeFromString(const std::string& type);
-		const std::unordered_map<GLuint, std::string> PreProcess(const std::string& source);
+		static const std::unordered_map<GLuint, std::string> PreProcess(const std::string& source);
 		void CompileShaderText(const std::unordered_map<GLenum, std::string>& shaderSources);
 
 		void SetModelMatrix(const glm::mat4& value) noexcept;

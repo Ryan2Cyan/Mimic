@@ -19,14 +19,6 @@ namespace Mimic
 		MIMIC_METALLIC = 0x40
 	};
 
-	enum class TextureAttachment
-	{
-		MIMIC_COLOR0,
-		MIMIC_DEPTH,
-		MIMIC_STENCIL,
-		MIMIC_DEPTH_STENCIL
-	};
-
 	enum class TextureTarget
 	{
 		MIMIC_TEXTURE_2D = 0,
@@ -54,6 +46,7 @@ namespace Mimic
 		friend struct EnvironmentCubeMap;
 		friend struct BasicMaterial;
 		friend struct PBRMaterial;
+		friend struct RenderTexture;
 
 		// texture type
 		static const std::uint16_t MIMIC_2D_TEXTURE =		 0b0000'0000'0000'0001;

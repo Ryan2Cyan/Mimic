@@ -12,9 +12,9 @@ namespace Mimic
 	// render object member functions:
 	// #############################################################################
 	RenderObject::RenderObject(const unsigned int& vaoId, std::vector<unsigned int>& indices, const std::shared_ptr<Shader>& shader, const glm::mat4& modelMatrix, 
-		                        std::function<void()>& materialOnDraw)
+		                        std::function<void()>& onDrawLambda)
 								: _vertexArrayId(vaoId), _indices(indices), _shader(shader), _modelMatrix(modelMatrix),
-								_materialOnDraw(materialOnDraw) { }
+								_materialOnDraw(onDrawLambda) { }
 
 	// #############################################################################
 	// renderer functions:
@@ -41,9 +41,6 @@ namespace Mimic
 			renderObject._shader->SetViewMatrix(viewMatrix);
 			renderObject._shader->SetProjectionMatrix(projectionMatrix);
 			renderObject._materialOnDraw();
-
-			glBindVertexArray(renderObject._vertexArrayId);
-
 
 			// direct lights:
 			for (int i = 0; i < directLights.size(); i++)

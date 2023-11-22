@@ -5,7 +5,7 @@
 #include <utility/FileLoader.h>
 #include <renderengine/Shader.h>
 #include <renderengine/Model.h>
-#include <renderengine/Framebuffer.h>
+#include <renderengine/RenderTexture.h>
 #include <utility/Logger.h>
 #include <stb_image.h>
 #include <GL/glew.h>
@@ -176,28 +176,37 @@ namespace Mimic
 
 			const glm::vec2 aspectRatio = MimicCore::Window->GetAspectRatio();
 
-			// set up framebuffer & renderbuffer object:
-			if (_framebuffer == nullptr) _framebuffer = MimicCore::ResourceManager->CreateResource<Framebuffer>();
-			if (_renderbufferObject == nullptr) _renderbufferObject = MimicCore::ResourceManager->CreateResource<RenderbufferObject>(TextureAttachment::MIMIC_DEPTH);
-			
-			_framebuffer->AttachRenderObject(_renderbufferObject);
-
-			// hdr environment map:
-			 _environmentMapTexture = MimicCore::ResourceManager->CreateResource<Texture>(aspectRatio, Texture::MIMIC_CUBEMAP_TEXTURE_PARAMS, Texture::MIMIC_RGB16F, Texture::MIMIC_RGB);
+			// environment map render texture:
+			if (_environmentMapRenderTexture == nullptr)
+			{
+				_environmentMapRenderTexture = RenderTexture::Initialise();
+				_environmentMapRenderTexture->SetTexture(MimicCore::ResourceManager->CreateResource<Texture>(aspectRatio, Texture::MIMIC_CUBEMAP_TEXTURE_PARAMS, Texture::MIMIC_RGB16F, Texture::MIMIC_RGB));
+			}
 			LoadEnvironmentMap();
 
-			// convolute cubemap:
-			_irradianceMapTexture = MimicCore::ResourceManager->CreateResource<Texture>(glm::ivec2(32, 32), Texture::MIMIC_CUBEMAP_TEXTURE_PARAMS, Texture::MIMIC_RGB16F, Texture::MIMIC_RGB);
+			// irradiance map render texture:
+			if (_irradianceRenderTexture == nullptr) 
+			{
+				_irradianceRenderTexture = RenderTexture::Initialise();
+				_irradianceRenderTexture->SetTexture(MimicCore::ResourceManager->CreateResource<Texture>(glm::ivec2(32, 32), Texture::MIMIC_CUBEMAP_TEXTURE_PARAMS, Texture::MIMIC_RGB16F, Texture::MIMIC_RGB));
+			}
 			LoadIrradianceMapTexture();
 
-			// pre-filtred map:
-			_prefilteredMapTexture = MimicCore::ResourceManager->CreateResource<Texture>(glm::ivec2(32, 32), Texture::MIMIC_CUBEMAP_TEXTURE_PARAMS | Texture::MIMIC_GEN_MIPMAP, Texture::MIMIC_RGB16F, Texture::MIMIC_RGB);
+			// prefiltered map render texture:
+			if (_prefilteredMapRenderTexture == nullptr)
+			{
+				_prefilteredMapRenderTexture = RenderTexture::Initialise();
+				_prefilteredMapRenderTexture->SetTexture(MimicCore::ResourceManager->CreateResource<Texture>(glm::ivec2(32, 32), Texture::MIMIC_CUBEMAP_TEXTURE_PARAMS, Texture::MIMIC_RGB16F, Texture::MIMIC_RGB));
+			}
 			LoadPrefilteredMapTexture();
 
-			// BRDF convolution:
-			_brdfConvolutedTexture = MimicCore::ResourceManager->CreateResource<Texture>(glm::ivec2(512, 512), Texture::MIMIC_BRDF_TEXTURE_PARAMS, Texture::MIMIC_RG16F, Texture::MIMIC_RG);
+			// brdf map render texture:
+			if (_brdfConvolutedRenderTexture == nullptr)
+			{
+				_brdfConvolutedRenderTexture = RenderTexture::Initialise();
+				_brdfConvolutedRenderTexture->SetTexture(MimicCore::ResourceManager->CreateResource<Texture>(glm::ivec2(512, 512), Texture::MIMIC_BRDF_TEXTURE_PARAMS, Texture::MIMIC_RG16F, Texture::MIMIC_RG));
+			}
 			LoadBRDFConvolutedTexture();
-
 			glViewport(0, 0, aspectRatio.x, aspectRatio.y);
 		}
 	}
@@ -217,7 +226,7 @@ namespace Mimic
 		_cubeMapShader->SetMat4("u_Projection", projectionMatrix);
 
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, _environmentMapTexture->_id);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, _environmentMapRenderTexture->_texture->_id);
 		RenderUnitCube();		
 		glBindVertexArray(0);
 
@@ -268,7 +277,7 @@ namespace Mimic
 
 	void EnvironmentCubeMap::LoadEnvironmentMap()
 	{
-		_framebuffer->UseRenderObject(MimicCore::Window->GetAspectRatio());
+		_environmentMapRenderTexture->UseRenderObject(MimicCore::Window->GetAspectRatio());
 
 		// convert HDR equirectangular environment map into an environment cubemap equivalent:
 		_equirectangularToCubemapShader->UseShader();
@@ -282,47 +291,47 @@ namespace Mimic
 		for (unsigned int i = 0; i < 6; i++)
 		{
 			_equirectangularToCubemapShader->SetMat4("u_View", _captureViews[i]);
-			_framebuffer->RenderToTexture(_environmentMapTexture->_id, TextureAttachment::MIMIC_COLOR0, (TextureTarget)(startTargetIndex + i));
+			_environmentMapRenderTexture->BindTextureForRender((TextureTarget)(startTargetIndex + i));
 
 			// render unit cube:
 			RenderUnitCube();
 		}
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		_environmentMapRenderTexture->Unbind();
 	}
 
 	void EnvironmentCubeMap::LoadIrradianceMapTexture()
 	{
-		_framebuffer->UseRenderObject(glm::ivec2(32, 32));
+		_irradianceRenderTexture->UseRenderObject(glm::ivec2(32, 32));
 
 		// convert cubemap to irradiance map:
 		_convolutionShader->UseShader();
 		_convolutionShader->SetInt("u_EnvironmentMap", 1);
 		_convolutionShader->SetMat4("u_Projection", _captureProjection);
 		glActiveTexture(GL_TEXTURE0 + 1);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, _environmentMapTexture->_id);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, _environmentMapRenderTexture->_texture->_id);
 
 		constexpr int startTargetIndex = (int)TextureTarget::MIMIC_CUBE_MAP_POSITIVE_X;
 		for (unsigned int i = 0; i < 6; i++)
 		{
 			_convolutionShader->SetMat4("u_View", _captureViews[i]);
-			_framebuffer->RenderToTexture(_irradianceMapTexture->_id, TextureAttachment::MIMIC_COLOR0, (TextureTarget)(startTargetIndex + i));
+			_irradianceRenderTexture->BindTextureForRender((TextureTarget)(startTargetIndex + i));
 
 			RenderUnitCube();
 		}
 		glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
-		_framebuffer->Unbind();
+		_irradianceRenderTexture->Unbind();
 	}
 
 	void EnvironmentCubeMap::LoadPrefilteredMapTexture()
 	{
-		glBindFramebuffer(GL_FRAMEBUFFER, _framebuffer->_id);
+		_prefilteredMapRenderTexture->Bind();
 
 		// convert cubemap to pre-convoluted map:
 		_preFilteredShader->UseShader();
 		_preFilteredShader->SetInt("u_EnvironmentMap", 1);
 		_preFilteredShader->SetMat4("u_Projection", _captureProjection);
 		glActiveTexture(GL_TEXTURE0 + 1);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, _environmentMapTexture->_id);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, _environmentMapRenderTexture->_texture->_id);
 	
 		constexpr int startTargetIndex = (int)TextureTarget::MIMIC_CUBE_MAP_POSITIVE_X;
 		constexpr unsigned int maxMipLevels = 5;
@@ -332,7 +341,7 @@ namespace Mimic
 			const unsigned int mipWidth = 128 * std::pow(0.5f, mip);
 			const unsigned int mipHeight = mipWidth;
 
-			_framebuffer->UseRenderObject(glm::ivec2(mipWidth, mipHeight));
+			_prefilteredMapRenderTexture->UseRenderObject(glm::ivec2(mipWidth, mipHeight));
 
 			float roughness = (float)mip / (float)(maxMipLevels - 1);
 			_preFilteredShader->SetFloat("u_Roughness", roughness);
@@ -340,25 +349,25 @@ namespace Mimic
 			for (unsigned int i = 0; i < 6; i++)
 			{
 				_preFilteredShader->SetMat4("u_View", _captureViews[i]);
-				_framebuffer->RenderToTexture(_prefilteredMapTexture->_id, TextureAttachment::MIMIC_COLOR0, (TextureTarget)(startTargetIndex + i), mip);
+				_prefilteredMapRenderTexture->BindTextureForRender((TextureTarget)(startTargetIndex + i), mip);
 				RenderUnitCube();
 			}
 		}
 		glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
-		_framebuffer->Unbind();
+		_prefilteredMapRenderTexture->Unbind();
 	}
 
 	void EnvironmentCubeMap::LoadBRDFConvolutedTexture()
 	{
-		_framebuffer->UseRenderObject(glm::ivec2(512, 512));
-		_framebuffer->RenderToTexture(_brdfConvolutedTexture->_id, TextureAttachment::MIMIC_COLOR0, TextureTarget::MIMIC_TEXTURE_2D);
+		_brdfConvolutedRenderTexture->UseRenderObject(glm::ivec2(512, 512));
+		_brdfConvolutedRenderTexture->BindTextureForRender(TextureTarget::MIMIC_TEXTURE_2D);
 
 		_brdfConvolutionShader->UseShader();
 
 		RenderQuad();
 
 		glBindTexture(GL_TEXTURE_2D, 0);
-		_framebuffer->Unbind();
+		_brdfConvolutedRenderTexture->Unbind();
 	}
 
 	void EnvironmentCubeMap::RenderUnitCube() const noexcept

@@ -5,6 +5,7 @@
 #include <lowlevelsystems/CubeMap.h>
 #include <renderengine/Shader.h>
 #include <renderengine/Texture.h>
+#include <renderengine/RenderTexture.h>
 #include <algorithm>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -226,15 +227,15 @@ namespace Mimic
 
 		shader->SetInt("u_IrradianceMap", 5);
 		glActiveTexture(GL_TEXTURE5);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, MimicCore::EnvironmentCubeMap->_irradianceMapTexture->_id);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, MimicCore::EnvironmentCubeMap->_irradianceRenderTexture->_texture->_id);
 
 		shader->SetInt("u_PrefilterMap", 6);
 		glActiveTexture(GL_TEXTURE6);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, MimicCore::EnvironmentCubeMap->_prefilteredMapTexture->_id);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, MimicCore::EnvironmentCubeMap->_prefilteredMapRenderTexture->_texture->_id);
 
 		shader->SetInt("u_BRDFLookupTexture", 7);
 		glActiveTexture(GL_TEXTURE7);
-		glBindTexture(GL_TEXTURE_2D, MimicCore::EnvironmentCubeMap->_brdfConvolutedTexture->_id);
+		glBindTexture(GL_TEXTURE_2D, MimicCore::EnvironmentCubeMap->_brdfConvolutedRenderTexture->_texture->_id);
 		
 		shader->SetVector3("u_Emissive", Emissive);
 		shader->SetFloat("u_Alpha", Alpha);

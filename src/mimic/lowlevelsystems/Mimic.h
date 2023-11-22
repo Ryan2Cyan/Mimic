@@ -21,6 +21,7 @@
 #include <renderengine/Texture.h>
 #include <renderengine/Renderer.h>
 #include <renderengine/Light.h>
+#include <renderengine/RenderTexture.h>
 
 #include <utility/PerformanceCounter.h>
 #include <utility/Logger.h>
