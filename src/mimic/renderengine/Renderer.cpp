@@ -7,7 +7,7 @@
 #include <string>
 #include <GL/glew.h>
 
-namespace Mimic
+namespace MimicRender
 {
 	// #############################################################################
 	// render object member functions:

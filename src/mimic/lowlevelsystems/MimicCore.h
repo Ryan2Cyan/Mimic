@@ -3,6 +3,7 @@
 #include <GLM/glm.hpp>
 #include <memory>
 #include <string>
+#include <renderengine/Window.h>
 
 namespace Mimic
 {
@@ -21,6 +22,7 @@ namespace Mimic
 	// #############################################################################
 	// mimic core struct:
 	// #############################################################################
+	using namespace MimicRender;
 	struct MimicCore 
 	{
 		explicit MimicCore();
@@ -41,7 +43,7 @@ namespace Mimic
 
 		static std::shared_ptr<Camera> CurrentCamera;
 		static std::shared_ptr<ResourceManager> ResourceManager;
-		static std::shared_ptr<Window> Window;
+		static std::shared_ptr<MimicRender::Window> Window;
 		static std::shared_ptr<CubeMap> CubeMap;
 		static std::shared_ptr<EnvironmentCubeMap> EnvironmentCubeMap;
 		bool ApplicationRunning;

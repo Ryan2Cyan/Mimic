@@ -8,18 +8,18 @@
 // window struct:
 // #############################################################################
 
-namespace Mimic
+namespace MimicRender
 {
 	struct Window
 	{
 		Window(const std::string& windowName);
 		~Window();
+		static std::shared_ptr<Window> Initialise(const std::string& windowName);
 		const glm::vec2 GetAspectRatio() const noexcept;
 		void SwapWindow();
+
 	private:
 		friend struct MimicCore;
-
-		static std::shared_ptr<Window> Initialise(const std::string& windowName);
 
 		glm::ivec2 _aspectRatio;
 		std::string _windowName;

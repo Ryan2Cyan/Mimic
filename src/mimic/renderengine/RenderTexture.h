@@ -4,7 +4,7 @@
 #include <GLM/glm.hpp>
 #include <memory>
 
-namespace Mimic
+namespace MimicRender
 {
 	// #############################################################################
 	// framebuffer stuct:

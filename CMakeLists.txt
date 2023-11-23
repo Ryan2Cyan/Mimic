@@ -42,8 +42,6 @@ add_library(mimic
     src/mimic/lowlevelsystems/GameObject.h
     src/mimic/lowlevelsystems/Component.cpp
     src/mimic/lowlevelsystems/Component.h
-    src/mimic/lowlevelsystems/Window.cpp
-    src/mimic/lowlevelsystems/Window.h
     src/mimic/lowlevelsystems/Environment.cpp
     src/mimic/lowlevelsystems/Environment.h
     src/mimic/lowlevelsystems/Camera.cpp
@@ -85,6 +83,8 @@ add_library(mimicrenderer
     src/mimic/renderengine/Light.h
     src/mimic/renderengine/RenderTexture.cpp
     src/mimic/renderengine/RenderTexture.h
+    src/mimic/renderengine/Window.cpp
+    src/mimic/renderengine/Window.h
 
     SDKs/stbi/include/stb_image.h
 )

@@ -1,12 +1,12 @@
 #include "CubeMap.h"
 #include <lowlevelsystems/MimicCore.h>
 #include <lowlevelsystems/ResourceManager.h>
-#include <lowlevelsystems/Window.h>
 #include <utility/FileLoader.h>
 #include <renderengine/Shader.h>
 #include <renderengine/Model.h>
 #include <renderengine/RenderTexture.h>
 #include <renderengine/Renderer.h>
+#include <renderengine/Window.h>
 #include <utility/Logger.h>
 #include <stb_image.h>
 #include <GL/glew.h>

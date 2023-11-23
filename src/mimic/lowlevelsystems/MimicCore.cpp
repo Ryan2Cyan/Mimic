@@ -1,6 +1,5 @@
 #include "MimicCore.h"
 #include <utility/Logger.h>
-#include <lowlevelsystems/Window.h>
 #include <lowlevelsystems/ResourceManager.h>
 #include <lowlevelsystems/GameObject.h>
 #include <lowlevelsystems/Environment.h>
@@ -8,7 +7,6 @@
 #include <renderengine/Renderer.h>
 #include <renderengine/Light.h>
 #include <GL/glew.h>
-
 
 namespace Mimic
 {
@@ -21,7 +19,7 @@ namespace Mimic
 	std::shared_ptr<Renderer> MimicCore::_renderer;
 	std::shared_ptr<CubeMap> MimicCore::CubeMap;
 	std::shared_ptr<EnvironmentCubeMap> MimicCore::EnvironmentCubeMap;
-	std::shared_ptr<Window> MimicCore::Window;
+	std::shared_ptr<MimicRender::Window> MimicCore::Window;
 	std::shared_ptr<Environment> MimicCore::_environment;
 
 	MimicCore::MimicCore()
@@ -29,7 +27,7 @@ namespace Mimic
 		Mimic::Logger::Init();
 
 		// initialise SDL_Window, SDL_Renderer, & GL_Context:
-		Window = Window::Initialise("[Mimic Engine] Dungeon Master's Tool Kit");
+		Window = MimicRender::Window::Initialise("[Mimic Engine] Dungeon Master's Tool Kit");
 
 		// init glew:
 		glewExperimental = GL_TRUE;

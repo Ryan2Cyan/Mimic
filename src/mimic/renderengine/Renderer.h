@@ -6,7 +6,7 @@
 #include <array>
 
 
-namespace Mimic
+namespace MimicRender
 {
 	// #############################################################################
 	// render object class:

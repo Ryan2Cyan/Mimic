@@ -6,7 +6,7 @@
 #include <GLM/glm.hpp>
 #include <vector>
 
-namespace Mimic
+namespace MimicRender
 {
 	enum TextureType
 	{
@@ -36,7 +36,7 @@ namespace Mimic
 	// #############################################################################
 	// Source: https://www.learncpp.com/cpp-tutorial/bit-manipulation-with-bitwise-operators-and-bit-masks/
 	// Source: https://cplusplus.com/forum/general/1590/
-	struct Texture : Resource
+	struct Texture
 	{
 	private:
 		friend struct ModelRenderer;
@@ -87,7 +87,8 @@ namespace Mimic
 			MIMIC_RG16F = 0x20
 		};
 
-		const int Load(const std::string& path) override;
+		// const int Load(const std::string& path) override;
+		const int Create(const std::string& fullPath);
 		const int Create(const glm::ivec2& aspectRatio, const std::uint16_t& textureParams, const TextureFormats& internalFormat, const TextureFormats& format);
 		void SetType(const int& type);
 		// user texture parameters:

@@ -6,9 +6,9 @@
 
 // Source: https://www.youtube.com/watch?v=8wFEzIYRZXg
 
-namespace Mimic
+namespace MimicRender
 {
-	const int Shader::Load(const std::string& path)
+	/*const int Shader::Load(const std::string& path)
 	{
 		const std::string sourceCode = ReadShaderFile(path);
 		if (sourceCode.empty()) return -1;
@@ -17,11 +17,17 @@ namespace Mimic
 		CompileShaderText(shaderSources);
 	
 		return _initialised ? 0 : -1;
-	}
+	}*/
 
-	const int Shader::Create()
+	const bool Shader::Create(const std::string& path)
 	{
-		return 0;
+		const std::string sourceCode = ReadShaderFile(path);
+		if (sourceCode.empty()) false;
+
+		auto shaderSources = PreProcess(sourceCode);
+		CompileShaderText(shaderSources);
+
+		return _initialised;
 	}
 
 	void Shader::UseShader() const noexcept

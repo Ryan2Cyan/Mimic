@@ -1,22 +1,21 @@
 #pragma once
 #include <string>
 #include <memory>
-#include <lowlevelsystems/Resource.h>
 #include <unordered_map>
 #include <GL/glew.h>
 #include <GLM/glm.hpp>
 
 // Source: https://learnopengl.com/Getting-started/Shaders
 
-namespace Mimic
+namespace MimicRender
 {
 	// #############################################################################
 	// shader stuct:
 	// #############################################################################
-	struct Shader : Resource
+	struct Shader
 	{
-		const int Load(const std::string& path) override;
-		const int Create();
+		// const int Load(const std::string& path) override;
+		const bool Create(const std::string& path);
 	private:
 		friend struct Renderer;
 		friend struct Material;

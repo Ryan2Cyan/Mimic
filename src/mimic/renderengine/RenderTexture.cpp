@@ -1,7 +1,7 @@
 #include "RenderTexture.h"
 #include <utility/Logger.h>
 
-namespace Mimic
+namespace MimicRender
 {
 	// #############################################################################
 	// framebuffer functions:
