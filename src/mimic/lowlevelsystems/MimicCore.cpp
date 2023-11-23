@@ -115,9 +115,7 @@ namespace Mimic
 			_renderer->Draw(
 				camera->GetGameObject()->Position, 
 				camera->_viewMatrix, 
-				camera->_projectionMatrix,
-				_directLights,
-				_pointLights
+				camera->_projectionMatrix
 			);
 		}
 		_renderer->_renderQue.clear();
@@ -193,8 +191,6 @@ namespace Mimic
 
 		if (!setToCurrent) return;
 		CurrentCamera = camera;
-		_renderer->_cachedViewMatrix = CurrentCamera->_viewMatrix;
-		_renderer->_cachedProjectionMatrix = CurrentCamera->_projectionMatrix;
 		MIMIC_LOG_INFO("[Mimic::MimicCore] Added Mimic::Camera: \"%\".", camera->GetGameObject()->Name);
 	}
 }

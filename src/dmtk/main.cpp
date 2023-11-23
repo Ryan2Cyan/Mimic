@@ -62,14 +62,14 @@ int main(int argc, char* argv[])
 		mushroomGameObject->Scale = glm::vec3(1.0f, 1.0f, 1.0f);
 		mushroomGameObject->Position = glm::vec3(0.0f, 0.0f, -3.0f);
 		std::shared_ptr<ModelRenderer> mushroomRenderer = mushroomGameObject->AddComponent<ModelRenderer>();
-		mushroomRenderer->Initialise("normal_rock_sphere.obj");
+		mushroomRenderer->Initialise("cube.obj");
 		auto mushroomMaterial = mushroomRenderer->GetMaterial<PBRMaterial>();
 
 		// manually load in texture maps:
 		auto metallicTexture = MimicCore::ResourceManager->LoadResource<Texture>("rustediron2_metallic.png");
 		metallicTexture->SetType(TextureType::MIMIC_METALLIC);
 		mushroomMaterial->SetTextureMap(metallicTexture);
-		//mushroomMaterial->ManualMode = true;
+		mushroomMaterial->ManualMode = true;
 
 		constexpr float maxRotAngle = 2.0f * 3.141592653589793238462643383f;
 		std::shared_ptr<PerformanceCounter> performanceCounter = PerformanceCounter::Initialise();

@@ -6,6 +6,7 @@
 #include <renderengine/Shader.h>
 #include <renderengine/Model.h>
 #include <renderengine/RenderTexture.h>
+#include <renderengine/Renderer.h>
 #include <utility/Logger.h>
 #include <stb_image.h>
 #include <GL/glew.h>
@@ -141,7 +142,7 @@ namespace Mimic
 	// hdr cubemap functions:
 	// #############################################################################
 
-	EnvironmentCubeMap::EnvironmentCubeMap() : _initialised(false), _skipDraw(false), _unitCubeVertexArrayId(0), _captureProjection(glm::mat4(1.0f)), _unitQuadVertexArrayId(0)
+	EnvironmentCubeMap::EnvironmentCubeMap() : _initialised(false), _skipDraw(false), _captureProjection(glm::mat4(1.0f))
 	{
 		// set up 6 view matrices (facing each side of the cube), set a projection matrix to 90 fov, and capture each face of the cubemap:
 		_captureProjection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f);
@@ -168,8 +169,8 @@ namespace Mimic
 			LoadShader("CubeMaptoConvolutedCubeMap.glsl", _convolutionShader) &&
 			LoadShader("EnvironmentCubeMapShader.glsl", _cubeMapShader) &&
 			LoadShader("PreFilteredCubeMapShader.glsl", _preFilteredShader) &&
-			LoadShader("BRDFConvolutionShader.glsl", _brdfConvolutionShader) &&
-			LoadUnitCube();
+			LoadShader("BRDFConvolutionShader.glsl", _brdfConvolutionShader);
+			// LoadUnitCube();
 
 		if (_initialised)
 		{
@@ -228,7 +229,7 @@ namespace Mimic
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, _environmentMapRenderTexture->_texture->_id);
-		RenderUnitCube();		
+		MimicCore::_renderer->DrawUnitCube();
 		glBindVertexArray(0);
 
 		glDepthFunc(GL_LESS);
@@ -259,69 +260,40 @@ namespace Mimic
 		return shader != nullptr;
 	}
 
-	const bool EnvironmentCubeMap::LoadUnitCube()
-	{
-		std::shared_ptr<Model> unitCube = MimicCore::ResourceManager->LoadResource<Model>("cube.obj");
-		if (unitCube == nullptr)
-		{
-			MIMIC_LOG_WARNING("[Mimic::EnvironmentCubeMap] Unable to load cubemap unit cube with filename: \"%\"", "cube.obj");
-			return false;
-		}
-		if (unitCube->_meshes.empty())
-		{
-			MIMIC_LOG_WARNING("[Mimic::EnvironmentCubeMap] Unable to load cubemap unit cube with filename: \"%\", the model contains no loaded meshes.", "cube.obj");
-			return false;
-		}
-		_unitCubeVertexArrayId = unitCube->_meshes[0]->_vertexArrayId;
-
-		return true;
-	}
-
 	void EnvironmentCubeMap::LoadEnvironmentMap()
 	{
-		_environmentMapRenderTexture->UseRenderObject(glm::ivec2(512, 512));
+		std::function<void()> onDrawLambda = [&]() 
+		{ 
+			_equirectangularToCubemapShader->SetInt("u_EquirectangularMap", 1);
+			glActiveTexture(GL_TEXTURE0 + 1);
+			glBindTexture(GL_TEXTURE_2D, _equirectangularTexture->_id);
+		};
 
-		// convert HDR equirectangular environment map into an environment cubemap equivalent:
-		_equirectangularToCubemapShader->UseShader();
-		_equirectangularToCubemapShader->SetInt("u_EquirectangularMap", 1);
-		_equirectangularToCubemapShader->SetMat4("u_Projection", _captureProjection);
-		glActiveTexture(GL_TEXTURE0 + 1);
-		glBindTexture(GL_TEXTURE_2D, _equirectangularTexture->_id);
-
-		// glBindFramebuffer(GL_FRAMEBUFFER, _framebufferId);
-		constexpr int startTargetIndex = (int)TextureTarget::MIMIC_CUBE_MAP_POSITIVE_X;
-		for (unsigned int i = 0; i < 6; i++)
-		{
-			_equirectangularToCubemapShader->SetMat4("u_View", _captureViews[i]);
-			_environmentMapRenderTexture->BindTextureForRender((TextureTarget)(startTargetIndex + i));
-
-			// render unit cube:
-			RenderUnitCube();
-		}
-		_environmentMapRenderTexture->Unbind();
+		MimicCore::_renderer->CaptureCubeMap
+		(
+			onDrawLambda,
+			_equirectangularToCubemapShader,
+			_environmentMapRenderTexture,
+			glm::ivec2(512, 512)
+		);
 	}
 
 	void EnvironmentCubeMap::LoadIrradianceMapTexture()
 	{
-		_irradianceRenderTexture->UseRenderObject(glm::ivec2(32, 32));
-
-		// convert cubemap to irradiance map:
-		_convolutionShader->UseShader();
-		_convolutionShader->SetInt("u_EnvironmentMap", 1);
-		_convolutionShader->SetMat4("u_Projection", _captureProjection);
-		glActiveTexture(GL_TEXTURE0 + 1);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, _environmentMapRenderTexture->_texture->_id);
-
-		constexpr int startTargetIndex = (int)TextureTarget::MIMIC_CUBE_MAP_POSITIVE_X;
-		for (unsigned int i = 0; i < 6; i++)
+		std::function<void()> onDrawLambda = [&]()
 		{
-			_convolutionShader->SetMat4("u_View", _captureViews[i]);
-			_irradianceRenderTexture->BindTextureForRender((TextureTarget)(startTargetIndex + i));
+			_convolutionShader->SetInt("u_EnvironmentMap", 1);
+			glActiveTexture(GL_TEXTURE0 + 1);
+			glBindTexture(GL_TEXTURE_CUBE_MAP, _environmentMapRenderTexture->_texture->_id);
+		};
 
-			RenderUnitCube();
-		}
-		glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
-		_irradianceRenderTexture->Unbind();
+		MimicCore::_renderer->CaptureCubeMap
+		(
+			onDrawLambda,
+			_convolutionShader,
+			_irradianceRenderTexture,
+			glm::ivec2(32, 32)
+		);
 	}
 
 	void EnvironmentCubeMap::LoadPrefilteredMapTexture()
@@ -352,7 +324,7 @@ namespace Mimic
 			{
 				_preFilteredShader->SetMat4("u_View", _captureViews[i]);
 				_prefilteredMapRenderTexture->BindTextureForRender((TextureTarget)(startTargetIndex + i), mip);
-				RenderUnitCube();
+				MimicCore::_renderer->DrawUnitCube();
 			}
 		}
 		glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
@@ -366,44 +338,9 @@ namespace Mimic
 
 		_brdfConvolutionShader->UseShader();
 
-		RenderQuad();
+		MimicCore::_renderer->DrawUnitQuad();
 
 		glBindTexture(GL_TEXTURE_2D, 0);
 		_brdfConvolutedRenderTexture->Unbind();
-	}
-
-	void EnvironmentCubeMap::RenderUnitCube() const noexcept
-	{
-		glBindVertexArray(_unitCubeVertexArrayId);
-		glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
-		glBindVertexArray(0);
-	}
-
-	void EnvironmentCubeMap::RenderQuad()
-	{
-		if (_unitQuadVertexArrayId == 0)
-		{
-			unsigned int quadVBO;
-			float quadVertices[] = {
-				// positions          // texture Coords
-				-1.0f,  1.0f, 0.0f,   0.0f, 1.0f,
-				-1.0f, -1.0f, 0.0f,   0.0f, 0.0f,
-				 1.0f,  1.0f, 0.0f,   1.0f, 1.0f,
-				 1.0f, -1.0f, 0.0f,   1.0f, 0.0f,
-			};
-			// setup plane VAO
-			glGenVertexArrays(1, &_unitQuadVertexArrayId);
-			glGenBuffers(1, &quadVBO);
-			glBindVertexArray(_unitQuadVertexArrayId);
-			glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
-			glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
-			glEnableVertexAttribArray(0);
-			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-			glEnableVertexAttribArray(1);
-			glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-		}
-		glBindVertexArray(_unitQuadVertexArrayId);
-		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-		glBindVertexArray(0);
 	}
 }

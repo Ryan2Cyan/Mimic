@@ -65,15 +65,11 @@ namespace Mimic
 		friend struct PBRMaterial;
 
 		const bool LoadEquirectangular(const std::string& fileName);
-		const bool LoadUnitCube();
 		void LoadEnvironmentMap();
 		void LoadIrradianceMapTexture();
 		void LoadPrefilteredMapTexture();
 		void LoadBRDFConvolutedTexture();
 		const bool LoadShader(const std::string& fileName, std::shared_ptr<Shader>& shader);
-
-		void RenderUnitCube() const noexcept;
-		void RenderQuad();
 
 		std::array<glm::mat4, 6> _captureViews;
 		glm::mat4 _captureProjection;
@@ -90,9 +86,6 @@ namespace Mimic
 		std::shared_ptr<RenderTexture> _irradianceRenderTexture;
 		std::shared_ptr<RenderTexture> _prefilteredMapRenderTexture;
 		std::shared_ptr<RenderTexture> _brdfConvolutedRenderTexture;
-
-		unsigned int _unitQuadVertexArrayId;
-		unsigned int _unitCubeVertexArrayId;
 
 		bool _skipDraw;
 		bool _initialised;

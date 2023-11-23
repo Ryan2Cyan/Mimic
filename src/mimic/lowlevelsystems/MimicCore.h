@@ -47,8 +47,9 @@ namespace Mimic
 		bool ApplicationRunning;
 
 	private:
-		friend struct ModelRenderer; // needs renderer
-		friend struct PBRMaterial; // needs renderer
+		friend struct ModelRenderer; 
+		friend struct PBRMaterial; 
+		friend struct EnvironmentCubeMap;
 
 		static std::vector<std::shared_ptr<GameObject>> _gameObjects;
 		static std::vector<std::shared_ptr<Camera>> _cameras;

@@ -3,6 +3,7 @@
 #include <vector>
 #include <functional>
 #include <memory>
+#include <array>
 
 
 namespace Mimic
@@ -12,8 +13,7 @@ namespace Mimic
 	// #############################################################################
 	struct Texture;
 	struct Shader;
-	struct DirectLight;
-	struct PointLight;
+	struct RenderTexture;
 
 	class RenderObject
 	{
@@ -40,13 +40,24 @@ namespace Mimic
 	private:
 		friend struct MimicCore;
 		friend struct ModelRenderer;
+		friend struct EnvironmentCubeMap;
 
 		static std::shared_ptr<Renderer> Initialise();
 		void AddToDrawQue(const RenderObject& renderObject);
-		void Draw(const glm::vec3& viewPosition, const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, const std::vector<std::shared_ptr<DirectLight>>& directLights, const std::vector<std::shared_ptr<PointLight>>& pointLights);
+		void Draw(const glm::vec3& viewPosition, const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix);
 
-		glm::mat4 _cachedViewMatrix;
-		glm::mat4 _cachedProjectionMatrix;
+		void CaptureCubeMap(std::function<void()>& onDrawLambda, const std::shared_ptr<Shader>& shader, std::shared_ptr<RenderTexture>& renderTexture, const glm::ivec2& aspectRatio);
+		/*void CapturePrefilteredCubeMap(std::function<void()>& onDrawLambda, const std::shared_ptr<Shader>& shader, std::shared_ptr<RenderTexture>& renderTexture, const glm::ivec2& aspectRatio, const unsigned int& mipLevels);*/
+		void DrawUnitCube() noexcept;
+		void DrawUnitQuad() noexcept;
+
+
+		std::array<glm::mat4, 6> _captureViews;
+		glm::mat4 _captureProjection;
+
 		std::vector<RenderObject> _renderQue;
+
+		unsigned int _unitQuadVertexArrayId;
+		unsigned int _unitCubeVertexArrayId;
 	};
 }
