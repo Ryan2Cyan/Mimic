@@ -13,7 +13,7 @@ namespace MimicRender
 	struct Model;
 	struct Vertex;
 
-	typedef std::vector<std::shared_ptr<Vertex>> vertex_vector;
+	typedef std::vector<Vertex> vertex_vector;
 
 	struct Mesh
 	{

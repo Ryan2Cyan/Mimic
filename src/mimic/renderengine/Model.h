@@ -7,10 +7,10 @@
 #include <vector>
 #include <functional>
 #include <GLM/glm.hpp>
-// #include <string>
-// #include <assimp/Importer.hpp>
-// #include <assimp/scene.h>
-// #include <assimp/postprocess.h>
+ #include <string>
+ #include <assimp/Importer.hpp>
+ #include <assimp/scene.h>
+ #include <assimp/postprocess.h>
 
 namespace MimicRender
 {
@@ -36,6 +36,7 @@ namespace MimicRender
 
 		void AddMesh(const std::shared_ptr<Mesh>& mesh);
 		void AddTexture(const std::shared_ptr<Texture>& texture);
+		const int LoadMeshesFromFile(const std::string& path);
 		void UpdateModelMatrix(const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& scale);
 		void QueMeshesToDraw(const std::shared_ptr<Shader>& shader, std::function<void()> onDrawLambda, std::shared_ptr<Renderer>& renderer);
 
@@ -49,9 +50,8 @@ namespace MimicRender
 		friend struct EnvironmentCubeMap;*/
 
 		//// const int Load(const std::string& path) override;
-		//const int Create(const std::string& path);
-		//void ProcessNode(aiNode* node, const aiScene* scene);
-		//const std::shared_ptr<Mesh> ProcessMesh(aiMesh* mesh, const aiScene* scene);
-		//const void LoadMaterialTextures(const aiMaterial* material, const aiTextureType& type, const int& typeName);
+		void ProcessNode(aiNode* node, const aiScene* scene);
+		const std::shared_ptr<Mesh> ProcessMesh(aiMesh* mesh, const aiScene* scene);
+		// const void LoadMaterialTextures(const aiMaterial* material, const aiTextureType& type, const int& typeName);
 	};
 }

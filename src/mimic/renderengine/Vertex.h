@@ -8,7 +8,7 @@ namespace MimicRender
 	// #############################################################################
 	struct Vertex
 	{
-		static const std::shared_ptr<Vertex> Initialise(const glm::vec3& position, const glm::vec3& normal, const glm::vec3& tangent, const glm::vec3& biTangent, const glm::vec2& textureCoordinates);
+		static const Vertex Initialise(const glm::vec3& position, const glm::vec3& normal, const glm::vec3& tangent, const glm::vec3& biTangent, const glm::vec2& textureCoordinates);
 	private:
 		friend struct Mesh;
 		friend struct Model;

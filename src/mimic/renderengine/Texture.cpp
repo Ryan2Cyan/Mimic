@@ -173,4 +173,9 @@ namespace MimicRender
 	{
 		_type = type;
 	}
+
+	const unsigned int Texture::GetId() const noexcept
+	{
+		return _id;
+	}
 }

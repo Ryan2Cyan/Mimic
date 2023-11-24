@@ -22,7 +22,7 @@ namespace MimicRender
 		renderObject->_dataSize = dataSize;
 		renderObject->_shader = shader;
 		renderObject->_modelMatrix = modelMatrix;
-		renderObject->_onDraw;
+		renderObject->_onDraw = onDrawLambda;
 
 		return renderObject;
 	}

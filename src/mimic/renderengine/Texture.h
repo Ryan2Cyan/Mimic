@@ -85,6 +85,7 @@ namespace MimicRender
 		static const std::shared_ptr<Texture> Initialise(const std::string& fullPath, const TextureType& type);
 		static const std::shared_ptr<Texture> Initialise(const glm::ivec2& aspectRatio, const TextureType& type, const std::uint16_t& textureParams, const TextureFormats& internalFormat, const TextureFormats& format);
 		void SetType(const int& type);
+		const unsigned int GetId() const noexcept;
 
 		// user texture parameters:
 		static const std::uint16_t MIMIC_MODEL_TEXTURE_PARAMS = MIMIC_2D_TEXTURE | MIMIC_UNSIGNED_BYTE | MIMIC_WRAPS_REPEAT | MIMIC_WRAPT_REPEAT | MIMIC_MIN_MIPMAP_LINEAR | MIMIC_MAG_LINEAR | MIMIC_GEN_MIPMAP;
