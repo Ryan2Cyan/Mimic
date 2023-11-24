@@ -26,8 +26,10 @@ namespace MimicRender
 
 		auto shaderSources = PreProcess(sourceCode);
 		const std::shared_ptr<Shader> shader = CompileShaderText(shaderSources);
-		if(shader != nullptr) MIMIC_LOG_INFO("[MimicRender::Shader] Successfully initialised shader from filepath: \"%\"", path);
+
+		if (shader == nullptr) return nullptr;
 		
+		MIMIC_LOG_INFO("[MimicRender::Shader] Successfully initialised shader from filepath: \"%\"", path);
 		return shader;
 	}
 

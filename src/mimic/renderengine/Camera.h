@@ -12,6 +12,7 @@ namespace MimicRender
 	struct Camera
 	{
 		static const std::shared_ptr<Camera> Initialise(const glm::vec2& aspectRatio, const float& fov);
+		void Update();
 
 		glm::vec3 Position;
 		glm::vec3 Right;
@@ -24,9 +25,6 @@ namespace MimicRender
 		float Fov;
 		
 	private:
-
-		void Update();
-
 		glm::mat4 _projectionMatrix;
 		glm::mat4 _viewMatrix;
 	};

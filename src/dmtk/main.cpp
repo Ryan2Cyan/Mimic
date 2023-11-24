@@ -26,11 +26,12 @@ using namespace MimicRender;
 int main(int argc, char* argv[])
 {
 	{
+		const std::string assetPath = "../assets/";
 		// render engine code:
 		std::shared_ptr<Window> window = Window::Initialise("Mimic Render Library Test");
 
 		// create shader:
-		const std::shared_ptr<Shader> pbrShader = Shader::Initialise("../assets/shaders/PBRShader.glsl");
+		const std::shared_ptr<Shader> pbrShader = Shader::Initialise(assetPath + "shaders/PBRShader.glsl");
 
 		// create camera:
 		std::shared_ptr<Camera> camera = Camera::Initialise(window->GetAspectRatio(), 45.0f);
@@ -72,6 +73,9 @@ int main(int argc, char* argv[])
 		std::shared_ptr<Model> cubeModel = Model::Initialise();
 		cubeModel->AddMesh(cubeMesh);
 
+		// create textures:
+		std::shared_ptr<Texture> albedoTexture = Texture::Initialise(assetPath + "models/Normal_Rock_Sphere/rustediron2_basecolor.png", TextureType::MIMIC_ALBEDO);
+
 		bool applicationRunning = true;
 		while (applicationRunning)
 		{
@@ -101,6 +105,13 @@ int main(int argc, char* argv[])
 					case SDL_KEYUP: { break; }
 				}
 			}
+		
+			glClearColor(0.37f, 0.33f, 0.17f, 1.0f);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+			camera->Update();
+
+
 			window->SwapWindow();
 		}
 	}

@@ -1,10 +1,10 @@
 #pragma once
-#include <lowlevelsystems/Resource.h>
-#include <string>
 #include <GL/glew.h>
-#include <cstdint>
 #include <GLM/glm.hpp>
+#include <string>
+#include <cstdint>
 #include <vector>
+#include <memory>
 
 namespace MimicRender
 {
@@ -39,14 +39,9 @@ namespace MimicRender
 	struct Texture
 	{
 	private:
-		friend struct ModelRenderer;
 		friend struct Renderer;
 		friend struct Mesh;
 		friend struct Model;
-		friend struct Material;
-		friend struct EnvironmentCubeMap;
-		friend struct BasicMaterial;
-		friend struct PBRMaterial;
 		friend struct RenderTexture;
 
 		// texture type
@@ -87,10 +82,10 @@ namespace MimicRender
 			MIMIC_RG16F = 0x20
 		};
 
-		// const int Load(const std::string& path) override;
-		const int Create(const std::string& fullPath);
-		const int Create(const glm::ivec2& aspectRatio, const std::uint16_t& textureParams, const TextureFormats& internalFormat, const TextureFormats& format);
+		static const std::shared_ptr<Texture> Initialise(const std::string& fullPath, const TextureType& type);
+		static const std::shared_ptr<Texture> Initialise(const glm::ivec2& aspectRatio, const TextureType& type, const std::uint16_t& textureParams, const TextureFormats& internalFormat, const TextureFormats& format);
 		void SetType(const int& type);
+
 		// user texture parameters:
 		static const std::uint16_t MIMIC_MODEL_TEXTURE_PARAMS = MIMIC_2D_TEXTURE | MIMIC_UNSIGNED_BYTE | MIMIC_WRAPS_REPEAT | MIMIC_WRAPT_REPEAT | MIMIC_MIN_MIPMAP_LINEAR | MIMIC_MAG_LINEAR | MIMIC_GEN_MIPMAP;
 	};

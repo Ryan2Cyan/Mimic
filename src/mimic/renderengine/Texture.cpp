@@ -10,61 +10,10 @@ namespace MimicRender
 	// #############################################################################
 	// texture functions:
 	// #############################################################################
-	/*const int Texture::Load(const std::string& path)
+	const std::shared_ptr<Texture> Texture::Initialise(const std::string& fullPath, const TextureType& type)
 	{
-		glGenTextures(1, &_id);
-
-		int width;
-		int height;
-		int componentsN;
-		unsigned char* data = stbi_load(path.c_str(), &width, &height, &componentsN, 0);
-		if (data == nullptr)
-		{
-			MIMIC_LOG_WARNING("[Mimic::Texture] Texture data could not be loaded by stbi, at path: \"%\"", path);
-			stbi_image_free(data);
-			return -1;
-		}
-
-		GLenum format = GL_RGBA;
-		switch (componentsN)
-		{
-			case 1:
-			{
-				format = GL_RED;
-			}break;
-			case 3:
-			{
-				format = GL_RGB;
-			}break;
-			case 4:
-			{
-				format = GL_RGBA;
-			}break;
-			default:
-			{
-				MIMIC_LOG_WARNING("[Mimic::Texture] No pixel data format was found at path: \"%\"", path);
-				stbi_image_free(data);
-				return -1;
-			}break;
-		}
-
-		glBindTexture(GL_TEXTURE_2D, _id);
-		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
-
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glBindTexture(GL_TEXTURE_2D, 0);
-
-		stbi_image_free(data);
-		return 0;
-	}*/
-
-	const int Texture::Create(const std::string& fullPath)
-	{
-		glGenTextures(1, &_id);
+		unsigned int textureId;
+		glGenTextures(1, &textureId);
 
 		int width;
 		int height;
@@ -72,9 +21,9 @@ namespace MimicRender
 		unsigned char* data = stbi_load(fullPath.c_str(), &width, &height, &componentsN, 0);
 		if (data == nullptr)
 		{
-			// MIMIC_LOG_WARNING("[Mimic::Texture] Texture data could not be loaded by stbi, at path: \"%\"", path);
+			MIMIC_LOG_WARNING("[MimicRender::Texture] Texture data could not be loaded by stbi, at path: \"%\"", fullPath);
 			stbi_image_free(data);
-			return -1;
+			return nullptr;
 		}
 
 		GLenum format = GL_RGBA;
@@ -94,13 +43,13 @@ namespace MimicRender
 		}break;
 		default:
 		{
-			// MIMIC_LOG_WARNING("[Mimic::Texture] No pixel data format was found at path: \"%\"", path);
+			MIMIC_LOG_WARNING("[MimicRender::Texture] No pixel data format was found at path: \"%\"", fullPath);
 			stbi_image_free(data);
-			return -1;
+			return nullptr;
 		}break;
 		}
 
-		glBindTexture(GL_TEXTURE_2D, _id);
+		glBindTexture(GL_TEXTURE_2D, textureId);
 		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
 		glGenerateMipmap(GL_TEXTURE_2D);
 
@@ -111,10 +60,17 @@ namespace MimicRender
 		glBindTexture(GL_TEXTURE_2D, 0);
 
 		stbi_image_free(data);
-		return 0;
+
+		if (textureId == 0) return nullptr;
+
+		std::shared_ptr<Texture> texture = std::make_shared<Texture>();
+		texture->_id = textureId;
+		texture->_type = type;
+		MIMIC_LOG_INFO("[MimicRender::Texture] Successfully initialised shader from filepath: \"%\"", fullPath);
+		return texture;
 	}
 
-	const int Texture::Create(const glm::ivec2& aspectRatio, const std::uint16_t& textureParams, const TextureFormats& internalFormat, const TextureFormats& format)
+	const std::shared_ptr<Texture> Texture::Initialise(const glm::ivec2& aspectRatio, const TextureType& textureType, const std::uint16_t& textureParams, const TextureFormats& internalFormat, const TextureFormats& format)
 	{
 		// decide target:
 		GLenum target = 0;
@@ -124,7 +80,7 @@ namespace MimicRender
 		{
 			MIMIC_LOG_WARNING("[Mimic::Texture] Could not create texture, no valid texture type arguement.");
 			MIMIC_LOG_OPENGL("Texture");
-			return -1;
+			return nullptr;
 		}
 
 		// decide type:
@@ -135,7 +91,7 @@ namespace MimicRender
 		{
 			MIMIC_LOG_WARNING("[Mimic::Texture] Could not create texture, no valid texture type arguement.");
 			MIMIC_LOG_OPENGL("Texture");
-			return -1;
+			return nullptr;
 		}
 
 		// decide internal format:
@@ -150,7 +106,7 @@ namespace MimicRender
 		{
 			MIMIC_LOG_WARNING("[Mimic::Texture] Could not create texture, no valid texture internal format arguement.");
 			MIMIC_LOG_OPENGL("Texture");
-			return -1;
+			return nullptr;
 		}
 
 		// decide format:
@@ -165,12 +121,12 @@ namespace MimicRender
 		{
 			MIMIC_LOG_WARNING("[Mimic::Texture] Could not create texture, no valid texture format arguement.");
 			MIMIC_LOG_OPENGL("Texture");
-			return -1;
+			return nullptr;
 		}
 
-
-		glGenTextures(1, &_id);
-		glBindTexture(target, _id);
+		unsigned int textureId;
+		glGenTextures(1, &textureId);
+		glBindTexture(target, textureId);
 
 		if (textureParams & MIMIC_2D_TEXTURE)
 		{
@@ -187,7 +143,7 @@ namespace MimicRender
 		{
 			MIMIC_LOG_WARNING("[Mimic::Texture] Could not create texture, no valid texture target arguement.");
 			MIMIC_LOG_OPENGL("Texture");
-			return -1;
+			return nullptr;
 		}
 		
 		if (textureParams & MIMIC_WRAPS_REPEAT) glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -206,7 +162,11 @@ namespace MimicRender
 		if (textureParams & MIMIC_GEN_MIPMAP) glGenerateMipmap(target); 
 
 		glBindTexture(target, 0);
-		return 0;
+
+		std::shared_ptr<Texture> texture = std::make_shared<Texture>();
+		texture->_id = textureId;
+		texture->_type = textureType;
+		return texture;
 	}
 
 	void Texture::SetType(const int& type)
