@@ -2,8 +2,11 @@
 #include <utility/Logger.h>
 #include <renderengine/Vertex.h>
 #include <renderengine/Texture.h>
+#include <glm/gtc/matrix_transform.hpp> 
+#include <glm/gtc/type_ptr.hpp> 
 // #include <lowlevelsystems/ResourceManager.h>
 // #include <iostream>
+#include <renderengine/Renderer.h>
 
 // Source: https://learnopengl.com/Model-Loading/Model
 
@@ -34,6 +37,25 @@ namespace MimicRender
 		model->_textures = textures;
 		model->_meshes = meshes;
 		return model;
+	}
+
+	void Model::UpdateModelMatrix(const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& scale)
+	{
+		_modelMatrix = glm::translate(glm::mat4(1.0f), position) * glm::mat4_cast(glm::quat(rotation)) * glm::scale(glm::mat4(1.0f), scale);
+	}
+
+	void Model::QueMeshesToDraw(const std::shared_ptr<Shader>& shader, std::function<void()> onDrawLambda, std::shared_ptr<Renderer>& renderer)
+	{
+		for (auto mesh : _meshes)
+		{
+			renderer->AddToDrawQue(RenderObject::Initialise(
+				mesh->_vertexArrayId,
+				mesh->_dataSize,
+				shader,
+				_modelMatrix,
+				onDrawLambda
+			));
+		}
 	}
 
 	void Model::AddMesh(const std::shared_ptr<Mesh>& mesh)

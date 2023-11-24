@@ -1,7 +1,8 @@
 #include "Renderer.h"
-#include <utility/Logger.h>
 #include <renderengine/Shader.h>
 #include <renderengine/RenderTexture.h>
+#include <renderengine/Camera.h>
+#include <utility/Logger.h>
 #include <glm/gtc/matrix_transform.hpp> 
 #include <glm/gtc/type_ptr.hpp>
 #include <string>
@@ -12,10 +13,19 @@ namespace MimicRender
 	// #############################################################################
 	// render object member functions:
 	// #############################################################################
-	RenderObject::RenderObject(const unsigned int& vaoId, std::vector<unsigned int>& indices, const std::shared_ptr<Shader>& shader, const glm::mat4& modelMatrix, 
-		                        std::function<void()>& onDrawLambda)
-								: _vertexArrayId(vaoId), _indices(indices), _shader(shader), _modelMatrix(modelMatrix),
-								_materialOnDraw(onDrawLambda) { }
+
+	const std::shared_ptr<RenderObject> RenderObject::Initialise(const unsigned int& vaoId, const unsigned int& dataSize, const std::shared_ptr<Shader>& shader,
+		const glm::mat4& modelMatrix, std::function<void()>& onDrawLambda)
+	{
+		std::shared_ptr<RenderObject> renderObject = std::make_shared<RenderObject>();
+		renderObject->_vertexArrayId = vaoId;
+		renderObject->_dataSize = dataSize;
+		renderObject->_shader = shader;
+		renderObject->_modelMatrix = modelMatrix;
+		renderObject->_onDraw;
+
+		return renderObject;
+	}
 
 	// #############################################################################
 	// renderer functions:
@@ -38,29 +48,30 @@ namespace MimicRender
 		return renderer;
 	}
 
-	void Renderer::AddToDrawQue(const RenderObject& renderObject)
+	void Renderer::AddToDrawQue(const std::shared_ptr<RenderObject>& renderObject)
 	{
 		_renderQue.push_back(renderObject);
 	}
 
-	void Renderer::Draw(const glm::vec3& viewPosition, const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix)
+	void Renderer::Draw(const std::shared_ptr<Camera>& camera)
 	{
-		for (RenderObject renderObject : _renderQue)
+		for (std::shared_ptr<RenderObject> renderObject : _renderQue)
 		{
 			// set uniforms:
-			renderObject._shader->UseShader();
-			renderObject._shader->SetVector3("u_CameraPosition", viewPosition);
-			renderObject._shader->SetModelMatrix(renderObject._modelMatrix);
-			renderObject._shader->SetViewMatrix(viewMatrix);
-			renderObject._shader->SetProjectionMatrix(projectionMatrix);
-			renderObject._materialOnDraw();
+			renderObject->_shader->UseShader();
+			renderObject->_shader->SetVector3("u_CameraPosition", camera->Position);
+			renderObject->_shader->SetModelMatrix(renderObject->_modelMatrix);
+			renderObject->_shader->SetViewMatrix(camera->_viewMatrix);
+			renderObject->_shader->SetProjectionMatrix(camera->_projectionMatrix);
+			renderObject->_onDraw();
 
 			// draw mesh:
-			glBindVertexArray(renderObject._vertexArrayId);
-			glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(renderObject._indices.size()), GL_UNSIGNED_INT, 0);
+			glBindVertexArray(renderObject->_vertexArrayId);
+			glDrawElements(GL_TRIANGLES, renderObject->_dataSize, GL_UNSIGNED_INT, 0);
 			glBindVertexArray(0);
 			glUseProgram(0);
 		}
+		_renderQue.clear();
 	}
 
 	void Renderer::CaptureCubeMap(std::function<void()>& onDrawLambda, const std::shared_ptr<Shader>& shader, std::shared_ptr<RenderTexture>& renderTexture, const glm::ivec2& aspectRatio)

@@ -45,6 +45,8 @@ namespace MimicRender
 
 		glBindVertexArray(0);
 		mesh->_intialised = true;
+		mesh->_dataSize = static_cast<unsigned int>(indices.size());
+
 		return mesh;
 	}
 

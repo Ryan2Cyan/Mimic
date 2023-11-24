@@ -21,7 +21,6 @@ namespace MimicRender
 		const unsigned int GetVertexArrayId() const noexcept;
 	private:
 		/*friend struct ModelRenderer;
-		friend struct Model;
 		friend struct CubeMap;
 		friend struct EnvironmentCubeMap;*/
 
@@ -35,8 +34,10 @@ namespace MimicRender
 		std::shared_ptr<Texture> _specularTexture;
 		std::shared_ptr<Texture> _normalTexture;
 		std::shared_ptr<Texture> _heightTexture;*/
+		friend struct Model;
 
 		unsigned int _vertexArrayId = 0;
+		unsigned int _dataSize = 0;
 		bool _intialised = false;
 	};
 }

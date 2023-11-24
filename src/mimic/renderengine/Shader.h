@@ -14,21 +14,7 @@ namespace MimicRender
 	// #############################################################################
 	struct Shader
 	{
-		// const int Load(const std::string& path) override;
 		static const std::shared_ptr<Shader> Initialise(const std::string& path);
-	private:
-		friend struct Renderer;
-		friend struct Material;
-		friend struct CubeMap;
-		friend struct EnvironmentCubeMap;
-		friend struct BasicMaterial;
-		friend struct PBRMaterial;
-
-		void UseShader() const noexcept;
-		static const std::string ReadShaderFile(const std::string& path);
-		static GLenum ShaderTypeFromString(const std::string& type);
-		static const std::unordered_map<GLuint, std::string> PreProcess(const std::string& source);
-		static const std::shared_ptr<Shader> CompileShaderText(const std::unordered_map<GLenum, std::string>& shaderSources);
 
 		void SetModelMatrix(const glm::mat4& value) noexcept;
 		void SetViewMatrix(const glm::mat4& value) noexcept;
@@ -41,6 +27,17 @@ namespace MimicRender
 		void SetVector4(const char* name, glm::vec4 value) const noexcept;
 		void SetMat3(const char* name, const glm::mat3 value) const noexcept;
 		void SetMat4(const char* name, const glm::mat4 value) const noexcept;
+		const unsigned int GetSubroutineUniform(const GLenum& shaderType, const std::string& subroutineName);
+		const unsigned int GetSubroutineIndex(const GLenum& shaderType, const std::string& subroutineFuncName);
+
+	private:
+		friend struct Renderer;
+
+		void UseShader() const noexcept;
+		static const std::string ReadShaderFile(const std::string& path);
+		static GLenum ShaderTypeFromString(const std::string& type);
+		static const std::unordered_map<GLuint, std::string> PreProcess(const std::string& source);
+		static const std::shared_ptr<Shader> CompileShaderText(const std::unordered_map<GLenum, std::string>& shaderSources);
 
 		int _modelMatrixUniformLocation = -1;
 		int _viewMatrixUniformLocation = -1;

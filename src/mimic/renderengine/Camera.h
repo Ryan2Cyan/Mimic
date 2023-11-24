@@ -25,6 +25,8 @@ namespace MimicRender
 		float Fov;
 		
 	private:
+		friend struct Renderer;
+
 		glm::mat4 _projectionMatrix;
 		glm::mat4 _viewMatrix;
 	};

@@ -8,16 +8,6 @@
 
 namespace MimicRender
 {
-	/*const int Shader::Load(const std::string& path)
-	{
-		const std::string sourceCode = ReadShaderFile(path);
-		if (sourceCode.empty()) return -1;
-
-		auto shaderSources = PreProcess(sourceCode);
-		CompileShaderText(shaderSources);
-	
-		return _initialised ? 0 : -1;
-	}*/
 
 	const std::shared_ptr<Shader> Shader::Initialise(const std::string& path)
 	{
@@ -286,4 +276,17 @@ namespace MimicRender
 		glUniformMatrix4fv(_projectionMatrixUniformLocation, 1, GL_FALSE, glm::value_ptr(value));
 	}
 	
+	const unsigned int Shader::GetSubroutineUniform(const GLenum& shaderType, const std::string& subroutineName)
+	{
+		const unsigned int subroutineLocation = glGetSubroutineUniformLocation(_shaderProgramId, shaderType, subroutineName.c_str());
+		if (subroutineLocation == -1) MIMIC_LOG_WARNING("[MimicRender::Shader] Uniform subroutine location cannot be found.");
+		return subroutineLocation;
+	}
+
+	const unsigned int Shader::GetSubroutineIndex(const GLenum& shaderType, const std::string& subroutineFuncName)
+	{
+		const unsigned int subroutineIndex = glGetSubroutineIndex(_shaderProgramId, shaderType, subroutineFuncName.c_str());
+		if (subroutineIndex == -1) MIMIC_LOG_WARNING("[MimicRender::Shader] Subroutine index location cannot be found.");
+		return subroutineIndex;
+	}
 }

@@ -30,8 +30,125 @@ int main(int argc, char* argv[])
 		// render engine code:
 		std::shared_ptr<Window> window = Window::Initialise("Mimic Render Library Test");
 
+		// initialise renderer:
+		std::shared_ptr<Renderer> renderer = Renderer::Initialise();
+
 		// create shader:
 		const std::shared_ptr<Shader> pbrShader = Shader::Initialise(assetPath + "shaders/PBRShader.glsl");
+
+		// load shader subroutine uniforms:
+		const unsigned int albedoSubroutineUniform = pbrShader->GetSubroutineUniform(GL_FRAGMENT_SHADER, "AlbedoMode");
+		const unsigned int normalSubroutineUniform = pbrShader->GetSubroutineUniform(GL_FRAGMENT_SHADER, "NormalMode");
+		const unsigned int roughnessSubroutineUniform = pbrShader->GetSubroutineUniform(GL_FRAGMENT_SHADER, "RoughnessMode");
+		const unsigned int metallicSubroutineUniform = pbrShader->GetSubroutineUniform(GL_FRAGMENT_SHADER, "MetallicMode");
+		std::vector<unsigned int> _subroutineUniformIndices = { albedoSubroutineUniform, normalSubroutineUniform, roughnessSubroutineUniform, metallicSubroutineUniform };
+		
+		// load shader subroutine indices (functions):
+		const unsigned int albedoAuto = pbrShader->GetSubroutineIndex(GL_FRAGMENT_SHADER, "CalculateAlbedoAutoTexture");
+		const unsigned int albedoManual = pbrShader->GetSubroutineIndex(GL_FRAGMENT_SHADER, "CalculateAlbedoManual");
+
+		const unsigned int normalAuto = pbrShader->GetSubroutineIndex(GL_FRAGMENT_SHADER, "CalculateNormalAutoTexture");
+		const unsigned int normalManual = pbrShader->GetSubroutineIndex(GL_FRAGMENT_SHADER, "CalculateNormalManual");
+
+		const unsigned int roughnessAuto = pbrShader->GetSubroutineIndex(GL_FRAGMENT_SHADER, "CalculateRoughnessAutoTexture");
+		const unsigned int roughnessManual = pbrShader->GetSubroutineIndex(GL_FRAGMENT_SHADER, "CalculateRoughnessManual");
+
+		const unsigned int metallicAuto = pbrShader->GetSubroutineIndex(GL_FRAGMENT_SHADER, "CalculateMetallicAutoTexture");
+		const unsigned int metallicManual = pbrShader->GetSubroutineIndex(GL_FRAGMENT_SHADER, "CalculateMetallicManual");
+
+		//std::function<void()> materialOnDrawLambda = [&]()
+		//{
+		//	// load albedo (map_kd):
+		//	if (!_albedoTexture.expired() && !ManualMode)
+		//	{
+		//		_subroutineIndices[_albedoSubroutineUniform] = _autoAlbedo;
+		//		shader->SetTexture("u_AlbedoMap", _albedoTexture.lock()->_id, 1); // texture unit slots start at 1.
+		//	}
+		//	else
+		//	{
+		//		_subroutineIndices[_albedoSubroutineUniform] = _manualAlbedo;
+		//		shader->SetVector3("u_Albedo", Albedo);
+		//	}
+
+		//	// load roughness(map_ks):
+		//	if (!_roughnessTexture.expired() && !ManualMode)
+		//	{
+		//		_subroutineIndices[_roughnessSubroutineUniform] = _autoRoughness;
+		//		shader->SetTexture("u_RoughnessMap", _roughnessTexture.lock()->_id, 2);
+		//	}
+		//	else
+		//	{
+		//		_subroutineIndices[_roughnessSubroutineUniform] = _manualRoughness;
+		//		shader->SetFloat("u_Roughness", Roughness);
+		//	}
+
+
+		//	// load normals (map_Bump):
+		//	if (!_normalTexture.expired() && !ManualMode)
+		//	{
+		//		_subroutineIndices[_normalSubroutineUniform] = _autoNormal;
+		//		shader->SetTexture("u_NormalMap", _normalTexture.lock()->_id, 3);
+		//	}
+		//	else _subroutineIndices[_normalSubroutineUniform] = _manualNormal;
+
+		//	// load metallic (must be specified by user):
+		//	if (!_metallicTexture.expired() && !ManualMode)
+		//	{
+		//		_subroutineIndices[_metallicSubroutineUniform] = _autoMetallic;
+		//		shader->SetTexture("u_MetallicMap", _metallicTexture.lock()->_id, 4);
+		//	}
+		//	else
+		//	{
+		//		_subroutineIndices[_metallicSubroutineUniform] = _manualMetallic;
+		//		shader->SetFloat("u_Metallic", Metallic);
+		//	}
+
+		//	glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, _subroutineIndices.size(), _subroutineIndices.data());
+
+		//	/*shader->SetInt("u_IrradianceMap", 5);
+		//	glActiveTexture(GL_TEXTURE5);
+		//	glBindTexture(GL_TEXTURE_CUBE_MAP, MimicCore::EnvironmentCubeMap->_irradianceRenderTexture->_texture->_id);
+
+		//	shader->SetInt("u_PrefilterMap", 6);
+		//	glActiveTexture(GL_TEXTURE6);
+		//	glBindTexture(GL_TEXTURE_CUBE_MAP, MimicCore::EnvironmentCubeMap->_prefilteredMapRenderTexture->_texture->_id);
+
+		//	shader->SetInt("u_BRDFLookupTexture", 7);
+		//	glActiveTexture(GL_TEXTURE7);
+		//	glBindTexture(GL_TEXTURE_2D, MimicCore::EnvironmentCubeMap->_brdfConvolutedRenderTexture->_texture->_id);*/
+
+		//	shader->SetVector3("u_Emissive", Emissive);
+		//	shader->SetFloat("u_Alpha", Alpha);
+		//	shader->SetFloat("u_AmbientOcclusion", AmbientOcclusion);
+
+		//	// direct lights:
+		//	//const std::vector<std::shared_ptr<DirectLight>> directLights = MimicCore::_directLights;
+		//	//for (int i = 0; i < directLights.size(); i++)
+		//	//{
+		//	//	const std::string currentLight = "u_DirectLights[" + std::to_string(i) + "]";
+
+		//	//	shader->SetVector3((currentLight + ".direction").c_str(), glm::normalize(-directLights[i]->Direction));
+		//	//	const glm::vec4 colour = glm::vec4(directLights[i]->Colour.x, directLights[i]->Colour.y, directLights[i]->Colour.z, 1.0f);
+		//	//	shader->SetVector4((currentLight + ".colour").c_str(), colour);
+		//	//}
+		//	//shader->SetInt("u_DirectLightsCount", directLights.size());
+
+
+		//	//// point lights:
+		//	//const std::vector<std::shared_ptr<PointLight>> pointLights = MimicCore::_pointLights;
+		//	//for (int i = 0; i < pointLights.size(); i++)
+		//	//{
+		//	//	const std::string currentLight = "u_PointLights[" + std::to_string(i) + "]";
+
+		//	//	shader->SetVector3((currentLight + ".position").c_str(), pointLights[i]->Position);
+		//	//	const glm::vec4 colour = glm::vec4(pointLights[i]->Colour.x, pointLights[i]->Colour.y, pointLights[i]->Colour.z, 1.0f);
+		//	//	shader->SetVector4((currentLight + ".colour").c_str(), colour);
+		//	//	shader->SetFloat((currentLight + ".constant").c_str(), pointLights[i]->Constant);
+		//	//	shader->SetFloat((currentLight + ".linear").c_str(), pointLights[i]->Linear);
+		//	//	shader->SetFloat((currentLight + ".quadratic").c_str(), pointLights[i]->Quadratic);
+		//	//}
+		//	//shader->SetInt("u_PointLightsCount", pointLights.size());
+		//};
 
 		// create camera:
 		std::shared_ptr<Camera> camera = Camera::Initialise(window->GetAspectRatio(), 45.0f);
@@ -76,6 +193,7 @@ int main(int argc, char* argv[])
 		// create textures:
 		std::shared_ptr<Texture> albedoTexture = Texture::Initialise(assetPath + "models/Normal_Rock_Sphere/rustediron2_basecolor.png", TextureType::MIMIC_ALBEDO);
 
+		// render loop:
 		bool applicationRunning = true;
 		while (applicationRunning)
 		{
@@ -111,6 +229,11 @@ int main(int argc, char* argv[])
 
 			camera->Update();
 
+			// send meshes to renderer:
+			// cubeModel->QueMeshesToDraw(pbrShader, materialOnDrawLambda, renderer);
+			
+			// draw:
+			renderer->Draw(camera);
 
 			window->SwapWindow();
 		}

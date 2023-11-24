@@ -14,37 +14,37 @@ namespace MimicRender
 	struct Texture;
 	struct Shader;
 	struct RenderTexture;
+	struct Camera;
 
-	class RenderObject
+	struct RenderObject
 	{
-		friend struct ModelRenderer;
-		friend struct Renderer;
+		static const std::shared_ptr<RenderObject> Initialise(const unsigned int& vaoId, const unsigned int& dataSize, const std::shared_ptr<Shader>& shader,
+			const glm::mat4& modelMatrix, std::function<void()>& onDrawLambda);
 
-		RenderObject(const unsigned int& vaoId, std::vector<unsigned int>& indices, const std::shared_ptr<Shader>& shader, 
-			         const glm::mat4& modelMatrix, std::function<void()>& onDrawLambda);
+	private:
+		friend struct Renderer;
 
 		glm::mat4 _modelMatrix;
 		std::vector<std::shared_ptr<Texture>> _textures;
-		std::vector<unsigned int> _indices;
-		std::function<void()> _materialOnDraw;
+		unsigned int _dataSize;
+		std::function<void()> _onDraw;
 		std::shared_ptr<Shader> _shader;
 		unsigned int _vertexArrayId;
 	
 	};
+
+	typedef std::vector<std::shared_ptr<RenderObject>> render_object_vector;
 
 	// #############################################################################
 	// renderer stuct:
 	// #############################################################################
 	struct Renderer 
 	{
-	private:
-		friend struct MimicCore;
-		friend struct ModelRenderer;
-		friend struct EnvironmentCubeMap;
-
 		static std::shared_ptr<Renderer> Initialise();
-		void AddToDrawQue(const RenderObject& renderObject);
-		void Draw(const glm::vec3& viewPosition, const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix);
+		void AddToDrawQue(const std::shared_ptr<RenderObject>& renderObject);
+		void Draw(const std::shared_ptr<Camera>& camera);
+
+	private:
 
 		void CaptureCubeMap(std::function<void()>& onDrawLambda, const std::shared_ptr<Shader>& shader, std::shared_ptr<RenderTexture>& renderTexture, const glm::ivec2& aspectRatio);
 		/*void CapturePrefilteredCubeMap(std::function<void()>& onDrawLambda, const std::shared_ptr<Shader>& shader, std::shared_ptr<RenderTexture>& renderTexture, const glm::ivec2& aspectRatio, const unsigned int& mipLevels);*/
@@ -55,7 +55,7 @@ namespace MimicRender
 		std::array<glm::mat4, 6> _captureViews;
 		glm::mat4 _captureProjection;
 
-		std::vector<RenderObject> _renderQue;
+		render_object_vector _renderQue;
 
 		unsigned int _unitQuadVertexArrayId;
 		unsigned int _unitCubeVertexArrayId;
