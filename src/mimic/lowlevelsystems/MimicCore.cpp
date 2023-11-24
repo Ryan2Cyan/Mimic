@@ -64,7 +64,7 @@ namespace Mimic
 		if(newMimicCore != nullptr) MIMIC_LOG_INFO("[Mimic::MimicCore] Initialisation successful.");
 
 		// init renderer:
-		newMimicCore->_renderer = Renderer::Initialise();
+		// newMimicCore->_renderer = Renderer::Initialise();
 		MIMIC_LOG_INFO("[Mimic::Renderer] Initialisation successful.");
 
 		/*_cubeMap = std::make_shared<CubeMap>();
@@ -110,13 +110,13 @@ namespace Mimic
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);*/
 		for (auto camera : _cameras)
 		{
-			_renderer->Draw(
+			/*_renderer->Draw(
 				camera->GetGameObject()->Position, 
 				camera->_viewMatrix, 
 				camera->_projectionMatrix
-			);
+			);*/
 		}
-		_renderer->_renderQue.clear();
+		// _renderer->_renderQue.clear();
 		// _cubeMap->Draw(CurrentCamera->_viewMatrix, CurrentCamera->_projectionMatrix);
 		EnvironmentCubeMap->Draw(CurrentCamera->_viewMatrix, CurrentCamera->_projectionMatrix);
 	}

@@ -20,7 +20,7 @@ namespace Mimic
 		FaceBack = 5
 	};
 
-	struct Shader;
+	// struct Shader;
 
 	struct CubeMap
 	{
@@ -36,7 +36,7 @@ namespace Mimic
 
 		const bool LoadUnitCube();
 		const bool LoadCubeMapTexture();
-		const bool LoadShader(const std::string& fileName);
+		// const bool LoadShader(const std::string& fileName);
 		std::array<std::string, 6> _faceTextures;
 		std::shared_ptr<Shader> _shader;
 		unsigned int _cubeMapTextureId;

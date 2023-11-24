@@ -15,7 +15,7 @@ namespace MimicRender
 	struct Shader
 	{
 		// const int Load(const std::string& path) override;
-		const bool Create(const std::string& path);
+		static const std::shared_ptr<Shader> Initialise(const std::string& path);
 	private:
 		friend struct Renderer;
 		friend struct Material;
@@ -28,7 +28,7 @@ namespace MimicRender
 		static const std::string ReadShaderFile(const std::string& path);
 		static GLenum ShaderTypeFromString(const std::string& type);
 		static const std::unordered_map<GLuint, std::string> PreProcess(const std::string& source);
-		void CompileShaderText(const std::unordered_map<GLenum, std::string>& shaderSources);
+		static const std::shared_ptr<Shader> CompileShaderText(const std::unordered_map<GLenum, std::string>& shaderSources);
 
 		void SetModelMatrix(const glm::mat4& value) noexcept;
 		void SetViewMatrix(const glm::mat4& value) noexcept;

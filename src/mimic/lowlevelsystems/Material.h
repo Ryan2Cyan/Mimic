@@ -23,7 +23,7 @@ namespace Mimic
 	protected:
 		friend struct ModelRenderer;
 
-		void SetShader(const std::shared_ptr<Shader>& shader);
+		// void SetShader(const std::shared_ptr<Shader>& shader);
 		virtual void SetTextureMap(const std::shared_ptr<Texture>& diffuse) = 0;
 		std::weak_ptr<Shader> _shader;
 		std::weak_ptr<GameObject> _gameObject;
@@ -59,7 +59,7 @@ namespace Mimic
 	{
 		PBRMaterial();
 
-		void SetTextureMap(const std::shared_ptr<Texture>& texture) override;
+		// void SetTextureMap(const std::shared_ptr<Texture>& texture) override;
 
 		void SetAlbedo(const glm::vec3& albedo);
 		void SetEmissive(const glm::vec3& emissive);
@@ -102,7 +102,7 @@ namespace Mimic
 		unsigned int _metallicSubroutineUniform;
 		unsigned int _autoMetallic;
 		unsigned int _manualMetallic;
-		void OnDraw() override;
+		// void OnDraw() override;
 	};
 
 

@@ -1,19 +1,19 @@
 #pragma once
-#include <lowlevelsystems/Component.h>
 #include <GLM/glm.hpp>
+#include <memory>
 
 // Source: https://learnopengl.com/Getting-started/Camera
 
-namespace Mimic
+namespace MimicRender
 {
 	// #############################################################################
 	// camera stuct:
 	// #############################################################################
-	struct MimicCore;
-	struct Camera : Component
+	struct Camera
 	{
-		void Initialise(const glm::vec2& aspectRatio, const float& fov);
+		static const std::shared_ptr<Camera> Initialise(const glm::vec2& aspectRatio, const float& fov);
 
+		glm::vec3 Position;
 		glm::vec3 Right;
 		glm::vec3 Up;
 		glm::vec3 Direction; // needs to be reversed.
@@ -24,10 +24,8 @@ namespace Mimic
 		float Fov;
 		
 	private:
-		friend struct MimicCore;
-		friend struct GameObject;
 
-		void Update() override;
+		void Update();
 
 		glm::mat4 _projectionMatrix;
 		glm::mat4 _viewMatrix;

@@ -141,7 +141,7 @@ namespace Mimic
 		Alpha = std::clamp(alpha, 0.0f, 1.0f);
 	}
 
-	void PBRMaterial::SetTextureMap(const std::shared_ptr<Texture>& texture)
+	/*void PBRMaterial::SetTextureMap(const std::shared_ptr<Texture>& texture)
 	{
 		const int type = texture->_type;
 
@@ -150,104 +150,104 @@ namespace Mimic
 		else if (type & TextureType::MIMIC_METALLIC) _metallicTexture = texture;
 		else if (type & TextureType::MIMIC_NORMAL) _normalTexture = texture;
 		else MIMIC_LOG_WARNING("[Mimic::Material] Unable to set texture as it has no value type.");
-	};
+	};*/
 
-	void PBRMaterial::OnDraw()
-	{
-		if (_shader.expired()) return;
-		const std::shared_ptr<Shader> shader = _shader.lock();
+	//void PBRMaterial::OnDraw()
+	//{
+	//	if (_shader.expired()) return;
+	//	const std::shared_ptr<Shader> shader = _shader.lock();
 
-		// load albedo (map_kd):
-		if (!_albedoTexture.expired() && !ManualMode)
-		{
-			_subroutineIndices[_albedoSubroutineUniform] = _autoAlbedo;
-			shader->SetTexture("u_AlbedoMap", _albedoTexture.lock()->_id, 1); // texture unit slots start at 1.
-		}
-		else
-		{
-			_subroutineIndices[_albedoSubroutineUniform] = _manualAlbedo;
-			shader->SetVector3("u_Albedo", Albedo);
-		}
+	//	// load albedo (map_kd):
+	//	if (!_albedoTexture.expired() && !ManualMode)
+	//	{
+	//		_subroutineIndices[_albedoSubroutineUniform] = _autoAlbedo;
+	//		shader->SetTexture("u_AlbedoMap", _albedoTexture.lock()->_id, 1); // texture unit slots start at 1.
+	//	}
+	//	else
+	//	{
+	//		_subroutineIndices[_albedoSubroutineUniform] = _manualAlbedo;
+	//		shader->SetVector3("u_Albedo", Albedo);
+	//	}
 
-		// load roughness(map_ks):
-		if (!_roughnessTexture.expired() && !ManualMode)
-		{
-			_subroutineIndices[_roughnessSubroutineUniform] = _autoRoughness;
-			shader->SetTexture("u_RoughnessMap", _roughnessTexture.lock()->_id, 2);
-		}
-		else
-		{
-			_subroutineIndices[_roughnessSubroutineUniform] = _manualRoughness;
-			shader->SetFloat("u_Roughness", Roughness);
-		}
-
-
-		// load normals (map_Bump):
-		if (!_normalTexture.expired() && !ManualMode)
-		{
-			_subroutineIndices[_normalSubroutineUniform] = _autoNormal;
-			shader->SetTexture("u_NormalMap", _normalTexture.lock()->_id, 3);
-		}
-		else _subroutineIndices[_normalSubroutineUniform] = _manualNormal;
-
-		// load metallic (must be specified by user):
-		if (!_metallicTexture.expired() && !ManualMode)
-		{
-			_subroutineIndices[_metallicSubroutineUniform] = _autoMetallic;
-			shader->SetTexture("u_MetallicMap", _metallicTexture.lock()->_id, 4);
-		}
-		else
-		{
-			_subroutineIndices[_metallicSubroutineUniform] = _manualMetallic;
-			shader->SetFloat("u_Metallic", Metallic);
-		}
-
-		glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, _subroutineIndices.size(), _subroutineIndices.data());
-
-		shader->SetInt("u_IrradianceMap", 5);
-		glActiveTexture(GL_TEXTURE5);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, MimicCore::EnvironmentCubeMap->_irradianceRenderTexture->_texture->_id);
-
-		shader->SetInt("u_PrefilterMap", 6);
-		glActiveTexture(GL_TEXTURE6);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, MimicCore::EnvironmentCubeMap->_prefilteredMapRenderTexture->_texture->_id);
-
-		shader->SetInt("u_BRDFLookupTexture", 7);
-		glActiveTexture(GL_TEXTURE7);
-		glBindTexture(GL_TEXTURE_2D, MimicCore::EnvironmentCubeMap->_brdfConvolutedRenderTexture->_texture->_id);
-		
-		shader->SetVector3("u_Emissive", Emissive);
-		shader->SetFloat("u_Alpha", Alpha);
-		shader->SetFloat("u_AmbientOcclusion", AmbientOcclusion);
-
-		// direct lights:
-		const std::vector<std::shared_ptr<DirectLight>> directLights = MimicCore::_directLights;
-		for (int i = 0; i < directLights.size(); i++)
-		{
-			const std::string currentLight = "u_DirectLights[" + std::to_string(i) + "]";
-
-			shader->SetVector3((currentLight + ".direction").c_str(), glm::normalize(-directLights[i]->Direction));
-			const glm::vec4 colour = glm::vec4(directLights[i]->Colour.x, directLights[i]->Colour.y, directLights[i]->Colour.z, 1.0f);
-			shader->SetVector4((currentLight + ".colour").c_str(), colour);
-		}
-		shader->SetInt("u_DirectLightsCount", directLights.size());
+	//	// load roughness(map_ks):
+	//	if (!_roughnessTexture.expired() && !ManualMode)
+	//	{
+	//		_subroutineIndices[_roughnessSubroutineUniform] = _autoRoughness;
+	//		shader->SetTexture("u_RoughnessMap", _roughnessTexture.lock()->_id, 2);
+	//	}
+	//	else
+	//	{
+	//		_subroutineIndices[_roughnessSubroutineUniform] = _manualRoughness;
+	//		shader->SetFloat("u_Roughness", Roughness);
+	//	}
 
 
-		// point lights:
-		const std::vector<std::shared_ptr<PointLight>> pointLights = MimicCore::_pointLights;
-		for (int i = 0; i < pointLights.size(); i++)
-		{
-			const std::string currentLight = "u_PointLights[" + std::to_string(i) + "]";
+	//	// load normals (map_Bump):
+	//	if (!_normalTexture.expired() && !ManualMode)
+	//	{
+	//		_subroutineIndices[_normalSubroutineUniform] = _autoNormal;
+	//		shader->SetTexture("u_NormalMap", _normalTexture.lock()->_id, 3);
+	//	}
+	//	else _subroutineIndices[_normalSubroutineUniform] = _manualNormal;
 
-			shader->SetVector3((currentLight + ".position").c_str(), pointLights[i]->Position);
-			const glm::vec4 colour = glm::vec4(pointLights[i]->Colour.x, pointLights[i]->Colour.y, pointLights[i]->Colour.z, 1.0f);
-			shader->SetVector4((currentLight + ".colour").c_str(), colour);
-			shader->SetFloat((currentLight + ".constant").c_str(), pointLights[i]->Constant);
-			shader->SetFloat((currentLight + ".linear").c_str(), pointLights[i]->Linear);
-			shader->SetFloat((currentLight + ".quadratic").c_str(), pointLights[i]->Quadratic);
-		}
-		shader->SetInt("u_PointLightsCount", pointLights.size());
-	}
+	//	// load metallic (must be specified by user):
+	//	if (!_metallicTexture.expired() && !ManualMode)
+	//	{
+	//		_subroutineIndices[_metallicSubroutineUniform] = _autoMetallic;
+	//		shader->SetTexture("u_MetallicMap", _metallicTexture.lock()->_id, 4);
+	//	}
+	//	else
+	//	{
+	//		_subroutineIndices[_metallicSubroutineUniform] = _manualMetallic;
+	//		shader->SetFloat("u_Metallic", Metallic);
+	//	}
+
+	//	glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, _subroutineIndices.size(), _subroutineIndices.data());
+
+	//	shader->SetInt("u_IrradianceMap", 5);
+	//	glActiveTexture(GL_TEXTURE5);
+	//	glBindTexture(GL_TEXTURE_CUBE_MAP, MimicCore::EnvironmentCubeMap->_irradianceRenderTexture->_texture->_id);
+
+	//	shader->SetInt("u_PrefilterMap", 6);
+	//	glActiveTexture(GL_TEXTURE6);
+	//	glBindTexture(GL_TEXTURE_CUBE_MAP, MimicCore::EnvironmentCubeMap->_prefilteredMapRenderTexture->_texture->_id);
+
+	//	shader->SetInt("u_BRDFLookupTexture", 7);
+	//	glActiveTexture(GL_TEXTURE7);
+	//	glBindTexture(GL_TEXTURE_2D, MimicCore::EnvironmentCubeMap->_brdfConvolutedRenderTexture->_texture->_id);
+	//	
+	//	shader->SetVector3("u_Emissive", Emissive);
+	//	shader->SetFloat("u_Alpha", Alpha);
+	//	shader->SetFloat("u_AmbientOcclusion", AmbientOcclusion);
+
+	//	// direct lights:
+	//	const std::vector<std::shared_ptr<DirectLight>> directLights = MimicCore::_directLights;
+	//	for (int i = 0; i < directLights.size(); i++)
+	//	{
+	//		const std::string currentLight = "u_DirectLights[" + std::to_string(i) + "]";
+
+	//		shader->SetVector3((currentLight + ".direction").c_str(), glm::normalize(-directLights[i]->Direction));
+	//		const glm::vec4 colour = glm::vec4(directLights[i]->Colour.x, directLights[i]->Colour.y, directLights[i]->Colour.z, 1.0f);
+	//		shader->SetVector4((currentLight + ".colour").c_str(), colour);
+	//	}
+	//	shader->SetInt("u_DirectLightsCount", directLights.size());
+
+
+	//	// point lights:
+	//	const std::vector<std::shared_ptr<PointLight>> pointLights = MimicCore::_pointLights;
+	//	for (int i = 0; i < pointLights.size(); i++)
+	//	{
+	//		const std::string currentLight = "u_PointLights[" + std::to_string(i) + "]";
+
+	//		shader->SetVector3((currentLight + ".position").c_str(), pointLights[i]->Position);
+	//		const glm::vec4 colour = glm::vec4(pointLights[i]->Colour.x, pointLights[i]->Colour.y, pointLights[i]->Colour.z, 1.0f);
+	//		shader->SetVector4((currentLight + ".colour").c_str(), colour);
+	//		shader->SetFloat((currentLight + ".constant").c_str(), pointLights[i]->Constant);
+	//		shader->SetFloat((currentLight + ".linear").c_str(), pointLights[i]->Linear);
+	//		shader->SetFloat((currentLight + ".quadratic").c_str(), pointLights[i]->Quadratic);
+	//	}
+	//	shader->SetInt("u_PointLightsCount", pointLights.size());
+	//}
 
 	// #############################################################################
 	// cubemap material functions:

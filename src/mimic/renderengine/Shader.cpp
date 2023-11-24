@@ -19,15 +19,16 @@ namespace MimicRender
 		return _initialised ? 0 : -1;
 	}*/
 
-	const bool Shader::Create(const std::string& path)
+	const std::shared_ptr<Shader> Shader::Initialise(const std::string& path)
 	{
 		const std::string sourceCode = ReadShaderFile(path);
-		if (sourceCode.empty()) false;
+		if (sourceCode.empty()) return nullptr;
 
 		auto shaderSources = PreProcess(sourceCode);
-		CompileShaderText(shaderSources);
-
-		return _initialised;
+		const std::shared_ptr<Shader> shader = CompileShaderText(shaderSources);
+		if(shader != nullptr) MIMIC_LOG_INFO("[MimicRender::Shader] Successfully initialised shader from filepath: \"%\"", path);
+		
+		return shader;
 	}
 
 	void Shader::UseShader() const noexcept
@@ -47,7 +48,7 @@ namespace MimicRender
 			in.read(&result[0], result.size());
 			in.close();
 		}
-		else MIMIC_LOG_WARNING("[Mimic::Shader] Could not open shader from filepath: %", path);
+		else MIMIC_LOG_WARNING("[MimicRender::Shader] Could not open shader from filepath: %", path);
 	
 		return result;
 	}
@@ -82,7 +83,7 @@ namespace MimicRender
 			const GLenum glEnumType = ShaderTypeFromString(type);
 			if (glEnumType == 0)
 			{
-				MIMIC_LOG_WARNING("[Mimic::Shader] Shader source type token \"%\" is invalid", type);
+				MIMIC_LOG_WARNING("[MimicRender::Shader] Shader source type token \"%\" is invalid", type);
 				return shaderSources;
 			}
 			shaderSources[ShaderTypeFromString(type)] = source.substr(nextLinePosition, currentPosition - (nextLinePosition == std::string::npos ? source.size() - 1 : nextLinePosition));
@@ -90,8 +91,9 @@ namespace MimicRender
 		return shaderSources;
 	}
 	
-	void Shader::CompileShaderText(const std::unordered_map<GLenum, std::string>& shaderSources)
+	const std::shared_ptr<Shader> Shader::CompileShaderText(const std::unordered_map<GLenum, std::string>& shaderSources)
 	{
+		std::shared_ptr<Shader> shader = std::make_shared<Shader>();
 		GLuint programId = glCreateProgram();
 
 		const int numberOfShaders = shaderSources.size();
@@ -116,8 +118,8 @@ namespace MimicRender
 			if (!success)
 			{
 				glGetShaderInfoLog(shaderId, 512, NULL, infoLog);
-				MIMIC_LOG_WARNING("[Mimic::Shader] Shader(s) have failed to compile: %", infoLog);
-				return;
+				MIMIC_LOG_WARNING("[MimicRender::Shader] Shader(s) have failed to compile: %", infoLog);
+				return nullptr;
 			}
 
 			glAttachShader(programId, shaderId);
@@ -133,37 +135,38 @@ namespace MimicRender
 		if (!success)
 		{
 			glGetProgramInfoLog(programId, 512, NULL, infoLog);
-			MIMIC_LOG_WARNING("[Mimic::Shader] Shader(s) have failed to link to the ShaderProgram: %", infoLog);
+			MIMIC_LOG_WARNING("[MimicRender::Shader] Shader(s) have failed to link to the ShaderProgram: %", infoLog);
 
 			glDeleteProgram(programId);
 			for (auto shaderId : glShaderIds) glDeleteShader(shaderId);
-			return;
+			return nullptr;
 		}
 
-		_shaderProgramId = programId;
-		_initialised = true;
-
 		// assign uniforms:
-		_modelMatrixUniformLocation = glGetUniformLocation(_shaderProgramId, "u_Model");
-		if (_modelMatrixUniformLocation == -1)
+		shader->_modelMatrixUniformLocation = glGetUniformLocation(programId, "u_Model");
+		if (shader->_modelMatrixUniformLocation == -1)
 		{
 			MIMIC_LOG_WARNING("[Mimic::Shader] Unable to locate model matrix uniform location.");
 			// _initialised = false;
 		}
-		_viewMatrixUniformLocation = glGetUniformLocation(_shaderProgramId, "u_View");
-		if (_viewMatrixUniformLocation == -1)
+		shader->_viewMatrixUniformLocation = glGetUniformLocation(programId, "u_View");
+		if (shader->_viewMatrixUniformLocation == -1)
 		{
 			MIMIC_LOG_WARNING("[Mimic::Shader] Unable to locate view matrix uniform location.");
 			// _initialised = false;
 		}
-		_projectionMatrixUniformLocation = glGetUniformLocation(_shaderProgramId, "u_Projection");
-		if (_projectionMatrixUniformLocation == -1)
+		shader->_projectionMatrixUniformLocation = glGetUniformLocation(programId, "u_Projection");
+		if (shader->_projectionMatrixUniformLocation == -1)
 		{
 			MIMIC_LOG_WARNING("[Mimic::Shader] Unable to locate projection matrix uniform location.");
 			// _initialised = false;
 		}
 
-		for (auto shaderId : glShaderIds) glDetachShader(_shaderProgramId, shaderId);
+		for (auto shaderId : glShaderIds) glDetachShader(programId, shaderId);
+
+		shader->_shaderProgramId = programId;
+		shader->_initialised = true;
+		return shader;
 	}
 
 

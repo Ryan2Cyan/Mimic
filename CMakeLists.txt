@@ -35,27 +35,25 @@ link_directories(
 # DMTK engine
 #############################################################################
 add_library(mimic
-    src/mimic/lowlevelsystems/Mimic.h
-    src/mimic/lowlevelsystems/MimicCore.cpp
-    src/mimic/lowlevelsystems/MimicCore.h
-    src/mimic/lowlevelsystems/GameObject.cpp
-    src/mimic/lowlevelsystems/GameObject.h
-    src/mimic/lowlevelsystems/Component.cpp
-    src/mimic/lowlevelsystems/Component.h
-    src/mimic/lowlevelsystems/Environment.cpp
-    src/mimic/lowlevelsystems/Environment.h
-    src/mimic/lowlevelsystems/Camera.cpp
-    src/mimic/lowlevelsystems/Camera.h
-    src/mimic/lowlevelsystems/ResourceManager.cpp
-    src/mimic/lowlevelsystems/ResourceManager.h
-    src/mimic/lowlevelsystems/ModelRenderer.cpp
-    src/mimic/lowlevelsystems/ModelRenderer.h
-    src/mimic/lowlevelsystems/Resource.cpp
-    src/mimic/lowlevelsystems/Resource.h
-    src/mimic/lowlevelsystems/CubeMap.cpp
-    src/mimic/lowlevelsystems/CubeMap.h
-    src/mimic/lowlevelsystems/Material.cpp
-    src/mimic/lowlevelsystems/Material.h
+    # src/mimic/lowlevelsystems/Mimic.h
+    # src/mimic/lowlevelsystems/MimicCore.cpp
+    # src/mimic/lowlevelsystems/MimicCore.h
+    # src/mimic/lowlevelsystems/GameObject.cpp
+    # src/mimic/lowlevelsystems/GameObject.h
+    # src/mimic/lowlevelsystems/Component.cpp
+    # src/mimic/lowlevelsystems/Component.h
+    # src/mimic/lowlevelsystems/Environment.cpp
+    # src/mimic/lowlevelsystems/Environment.h
+    # src/mimic/lowlevelsystems/ResourceManager.cpp
+    # src/mimic/lowlevelsystems/ResourceManager.h
+    # src/mimic/lowlevelsystems/ModelRenderer.cpp
+    # src/mimic/lowlevelsystems/ModelRenderer.h
+    # src/mimic/lowlevelsystems/Resource.cpp
+    # src/mimic/lowlevelsystems/Resource.h
+    # src/mimic/lowlevelsystems/CubeMap.cpp
+    # src/mimic/lowlevelsystems/CubeMap.h
+    # src/mimic/lowlevelsystems/Material.cpp
+    # src/mimic/lowlevelsystems/Material.h
 
     src/mimic/utility/Logger.cpp
     src/mimic/utility/Logger.h
@@ -85,6 +83,8 @@ add_library(mimicrenderer
     src/mimic/renderengine/RenderTexture.h
     src/mimic/renderengine/Window.cpp
     src/mimic/renderengine/Window.h
+    src/mimic/renderengine/Camera.cpp
+    src/mimic/renderengine/Camera.h
 
     SDKs/stbi/include/stb_image.h
 )

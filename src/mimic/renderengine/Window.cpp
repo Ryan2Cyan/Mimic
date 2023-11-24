@@ -3,6 +3,7 @@
 #include <imgui.h>
 #include <imgui_impl_opengl3.h>
 #include <imgui_impl_sdl2.h>
+#include <GL/glew.h>
 
 namespace MimicRender
 {
@@ -10,30 +11,30 @@ namespace MimicRender
 	{
 		if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) < 0)
 		{
-			MIMIC_LOG_FATAL("Failed to initialize SDL: %", SDL_GetError());
+			MIMIC_LOG_FATAL("[MimicRender::Window] Failed to initialize SDL: %", SDL_GetError());
 			throw;
 		}
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-		MIMIC_LOG_INFO("[Mimic::Window] SDL initialisation successful.");
+		MIMIC_LOG_INFO("[MimicRender::Window] SDL initialisation successful.");
 
-		SDL_DisplayMode displayMode;
-		SDL_GetCurrentDisplayMode(0, &displayMode);
-		_aspectRatio = glm::ivec2(displayMode.w, displayMode.h);
+		// SDL_DisplayMode displayMode;
+		// SDL_GetCurrentDisplayMode(0, &displayMode);
+		_aspectRatio = glm::ivec2(800, 800);
 
-		_window = SDL_CreateWindow(windowName.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, _aspectRatio.x, _aspectRatio.y, SDL_WINDOW_FULLSCREEN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL);
+		_window = SDL_CreateWindow(windowName.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, _aspectRatio.x, _aspectRatio.y, SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL);
 		if (_window == nullptr)
 		{
-			MIMIC_LOG_FATAL("Failed to initialize SDL_Window: %", SDL_GetError());
+			MIMIC_LOG_FATAL("[MimicRender::Window] Failed to initialize SDL_Window: %", SDL_GetError());
 			throw;
 		}
-		MIMIC_LOG_INFO("[Mimic::Window] SDL_Window initialisation successful.");
+		MIMIC_LOG_INFO("[MimicRender::Window] SDL_Window initialisation successful.");
 
 		_renderer = SDL_CreateRenderer(_window, -1, SDL_RENDERER_ACCELERATED);
 		if (_renderer == nullptr)
 		{
-			MIMIC_LOG_FATAL("Failed to initialize SDL_Renderer: %", SDL_GetError());
+			MIMIC_LOG_FATAL("[MimicRender::Window] Failed to initialize SDL_Renderer: %", SDL_GetError());
 			throw;
 		}
 		MIMIC_LOG_INFO("[Mimic::Window] SDL_Renderer initialisation successful.");
@@ -41,10 +42,10 @@ namespace MimicRender
 		_glContext = SDL_GL_CreateContext(_window);
 		if (_glContext == nullptr)
 		{
-			MIMIC_LOG_FATAL("Failed to initialize SDL_GL_Context: %", SDL_GetError());
+			MIMIC_LOG_FATAL("[MimicRender::Window] Failed to initialize SDL_GL_Context: %", SDL_GetError());
 			throw;
 		}
-		MIMIC_LOG_INFO("[Mimic::Window] SDL_GL_Context initialisation successful.");
+		MIMIC_LOG_INFO("[MimicRender::Window] SDL_GL_Context initialisation successful.");
 
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
@@ -54,9 +55,20 @@ namespace MimicRender
 		const char* glslVersion = "#version 130";
 		ImGui_ImplSDL2_InitForOpenGL(_window, _glContext);
 		ImGui_ImplOpenGL3_Init(glslVersion);
-		MIMIC_LOG_INFO("[Mimic::Window] ImGui initialisation successful.");
+		MIMIC_LOG_INFO("[MimicRender::Window] ImGui initialisation successful.");
 
-		MIMIC_LOG_INFO("[Mimic::Window] Initialisation successful.");
+		// init glew:
+		glewExperimental = GL_TRUE;
+		GLenum err = glewInit();
+		if (GLEW_OK != err)
+		{
+			MIMIC_LOG_FATAL("GLEW failed to initialise with message: %", glewGetErrorString(err));
+			throw;
+		}
+		MIMIC_LOG_INFO("[MimicRender::Window] Initialisation successful.");
+
+		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 	}
 
 	Window::~Window() 

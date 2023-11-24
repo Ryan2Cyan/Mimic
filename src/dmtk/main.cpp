@@ -8,6 +8,7 @@
 #include <renderengine/Texture.h>
 #include <renderengine/Vertex.h>
 #include <renderengine/Window.h>
+#include <renderengine/Camera.h>
 #include <vector>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp> 
@@ -27,6 +28,12 @@ int main(int argc, char* argv[])
 	{
 		// render engine code:
 		std::shared_ptr<Window> window = Window::Initialise("Mimic Render Library Test");
+
+		// create shader:
+		const std::shared_ptr<Shader> pbrShader = Shader::Initialise("../assets/shaders/PBRShader.glsl");
+
+		// create camera:
+		std::shared_ptr<Camera> camera = Camera::Initialise(window->GetAspectRatio(), 45.0f);
 
 		// create mesh:
 		const std::vector<unsigned int> indices{
@@ -58,15 +65,16 @@ int main(int argc, char* argv[])
 			Vertex::Initialise(glm::vec3(-1.0f, 1.0f, -0.5f), glm::vec3(0.0), glm::vec3(0.0), glm::vec3(0.0), glm::vec2(0.0)),
 			Vertex::Initialise(glm::vec3(1.0f, 1.0f, -0.5f), glm::vec3(0.0), glm::vec3(0.0), glm::vec3(0.0), glm::vec2(0.0)),
 		};
-		
+
 		std::shared_ptr<Mesh> cubeMesh = Mesh::Initialise(vertices, indices);
-		
+
 		// create model:
 		std::shared_ptr<Model> cubeModel = Model::Initialise();
 		cubeModel->AddMesh(cubeMesh);
 
 		bool applicationRunning = true;
-		while (applicationRunning) {
+		while (applicationRunning)
+		{
 			// handle human interface devices:
 			SDL_Event event;
 			while (SDL_PollEvent(&event))
@@ -74,27 +82,30 @@ int main(int argc, char* argv[])
 				ImGui_ImplSDL2_ProcessEvent(&event);
 				switch (event.type)
 				{
-				case SDL_QUIT:
-				{
-					applicationRunning = false;
-					break;
-				}
-
-				case SDL_KEYDOWN: {
-					switch (event.key.keysym.sym)
+					case SDL_QUIT:
 					{
-					case SDLK_ESCAPE:
 						applicationRunning = false;
 						break;
 					}
-					break;
-				}
-				case SDL_KEYUP: { break; }
+
+					case SDL_KEYDOWN:
+					{
+						switch (event.key.keysym.sym)
+						{
+							case SDLK_ESCAPE:
+							applicationRunning = false;
+							break;
+						}
+						break;
+					}
+					case SDL_KEYUP: { break; }
 				}
 			}
 			window->SwapWindow();
 		}
-
+	}
+	return 0;
+}
 
 
 		// game engine code:
@@ -251,6 +262,6 @@ int main(int argc, char* argv[])
 		//	MimicCore::Window->SwapWindow();
 		//	/*MIMIC_LOG_INFO("FPS: %", performanceCounter->GetFPS());*/
 		//}
-	}
-	return 0;
-}
+	//}
+//	return 0;
+//}

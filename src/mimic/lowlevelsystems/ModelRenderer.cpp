@@ -62,17 +62,17 @@ namespace Mimic
 			return false;
 		}
 
-		if (model->_materialTextures.size() <= 0) MIMIC_LOG_WARNING("[Mimic::ModelRenderer] \"%\" Model has no loaded textures.", GetGameObject()->Name);
-		else
-		{
-			for (auto texture : model->_materialTextures) Material->SetTextureMap(texture);
-		}
+		//if (model->_materialTextures.size() <= 0) MIMIC_LOG_WARNING("[Mimic::ModelRenderer] \"%\" Model has no loaded textures.", GetGameObject()->Name);
+		//else
+		//{
+		//	for (auto texture : model->_materialTextures) Material->SetTextureMap(texture);
+		//}
 
-		if (Material->_shader.expired())
-		{
-			MIMIC_LOG_WARNING("[Mimic::ModelRenderer] \"%\" material failed to load shader.", GetGameObject()->Name);
-			return false;
-		}
+		//if (Material->_shader.expired())
+		//{
+		//	MIMIC_LOG_WARNING("[Mimic::ModelRenderer] \"%\" material failed to load shader.", GetGameObject()->Name);
+		//	return false;
+		//}
 
 		return true;
 	}

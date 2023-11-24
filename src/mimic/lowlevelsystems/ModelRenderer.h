@@ -16,7 +16,7 @@ namespace Mimic
 	{
 		static std::shared_ptr<ModelRenderer> Initialise();
 		void Initialise(const std::string& modelFileName);
-		void Initialise(const std::shared_ptr<Model>& model);
+		// void Initialise(const std::shared_ptr<Model>& model);
 
 		template <typename T> const std::shared_ptr<T> ReplaceMaterial()
 		{
