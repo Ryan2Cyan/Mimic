@@ -21,12 +21,38 @@ namespace MimicRender
 	const std::shared_ptr<EnvironmentCubeMap> EnvironmentCubeMap::Initialise(const std::string& hdrFileName, const glm::vec2& aspectRatio, std::shared_ptr<Renderer>& renderer) 
 	{
 		std::shared_ptr<EnvironmentCubeMap> environementMap = std::make_shared<EnvironmentCubeMap>();
-		//environementMap->Load(hdrFileName, aspectRatio, renderer);
+		environementMap->Load(hdrFileName, aspectRatio, renderer);
 
 		// initialise capture capture views & projection matrices, these will be used to capture each face of a cube
 		// map texture rendered to the inside of a cube:
-		const glm::mat4 captureProjection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f);
-		const std::array<glm::mat4, 6> captureViews =
+		//const glm::mat4 captureProjection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f);
+		//const std::array<glm::mat4, 6> captureViews =
+		//{
+		//	glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
+		//	glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f, 0.0f)),
+		//	glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f,  1.0f,  0.0f), glm::vec3(0.0f,  0.0f,  1.0f)),
+		//	glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f,  0.0f), glm::vec3(0.0f,  0.0f, -1.0f)),
+		//	glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f,  0.0f,  1.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
+		//	glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f,  0.0f, -1.0f), glm::vec3(0.0f, -1.0f,  0.0f))
+		//};
+
+		//// initialise file loader:
+		//const std::shared_ptr<Mimic::FileLoader> fileLoader = Mimic::FileLoader::Initialise();
+		//const std::string assetsDirectory = fileLoader->LocateDirectory("assets").generic_string();
+
+		//// load hdr texture:
+		//stbi_set_flip_vertically_on_load(true);
+		//const std::shared_ptr<Texture> equirectangularTexture = Texture::Initialise(fileLoader->LocateFileInDirectory(assetsDirectory, equirectangularTextureFileName), TextureType::MIMIC_HDRCUBEMAP);
+		//stbi_set_flip_vertically_on_load(false);
+
+		return environementMap;
+	}
+
+	void EnvironmentCubeMap::Load(const std::string& equirectangularTextureFileName, const glm::vec2& aspectRatio, std::shared_ptr<Renderer>& renderer)
+	{
+		_captureProjection = glm::mat4(1.0f);
+		_captureProjection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f);
+		_captureViews =
 		{
 			glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
 			glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f, 0.0f)),
@@ -37,38 +63,12 @@ namespace MimicRender
 		};
 
 		// initialise file loader:
-		const std::shared_ptr<Mimic::FileLoader> fileLoader = Mimic::FileLoader::Initialise();
+		std::shared_ptr<Mimic::FileLoader> fileLoader = Mimic::FileLoader::Initialise();
 		const std::string assetsDirectory = fileLoader->LocateDirectory("assets").generic_string();
 
 		// load hdr texture:
 		stbi_set_flip_vertically_on_load(true);
-		const std::shared_ptr<Texture> equirectangularTexture = Texture::Initialise(fileLoader->LocateFileInDirectory(assetsDirectory, equirectangularTextureFileName), TextureType::MIMIC_HDRCUBEMAP);
-		stbi_set_flip_vertically_on_load(false);
-
-		return environementMap;
-	}
-
-	void EnvironmentCubeMap::Load(const std::string& equirectangularTextureFileName, const glm::vec2& aspectRatio, std::shared_ptr<Renderer>& renderer)
-	{
-		/*_captureProjection = glm::mat4(1.0f);
-		_captureProjection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f);
-		_captureViews =
-		{
-			glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
-			glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f, 0.0f)),
-			glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f,  1.0f,  0.0f), glm::vec3(0.0f,  0.0f,  1.0f)),
-			glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f,  0.0f), glm::vec3(0.0f,  0.0f, -1.0f)),
-			glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f,  0.0f,  1.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
-			glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f,  0.0f, -1.0f), glm::vec3(0.0f, -1.0f,  0.0f))
-		};*/
-
-		//// initialise file loader:
-		//std::shared_ptr<Mimic::FileLoader> fileLoader = Mimic::FileLoader::Initialise();
-		//const std::string assetsDirectory = fileLoader->LocateDirectory("assets").generic_string();
-
-		// load hdr texture:
-		stbi_set_flip_vertically_on_load(true);
-		_equirectangularTexture = Texture::Initialise(fileLoader->LocateFileInDirectory(assetsDirectory, equirectangularTextureFileName), TextureType::MIMIC_HDRCUBEMAP);
+		_equirectangularTexture = Texture::Initialise(fileLoader->LocateFileInDirectory(assetsDirectory, equirectangularTextureFileName), aspectRatio, Texture::MIMIC_2D_TEXTURE_PARAMS);
 		stbi_set_flip_vertically_on_load(false);
 
 		// load shaders:
@@ -84,7 +84,7 @@ namespace MimicRender
 		if (_environmentMapRenderTexture == nullptr)
 		{
 			_environmentMapRenderTexture = RenderTexture::Initialise();
-			_environmentMapRenderTexture->SetTexture(Texture::Initialise(glm::ivec2(512, 512), TextureType::MIMIC_HDRCUBEMAP, Texture::MIMIC_CUBEMAP_TEXTURE_PARAMS, Texture::MIMIC_RGB16F, Texture::MIMIC_RGB));
+			_environmentMapRenderTexture->SetTexture(Texture::Initialise(glm::ivec2(512, 512), Texture::MIMIC_CUBEMAP_TEXTURE_PARAMS, Texture::MIMIC_RGB16F, Texture::MIMIC_RGB, TextureType::MIMIC_HDRCUBEMAP));
 		}
 		LoadEnvironmentMap(renderer);
 
@@ -92,7 +92,7 @@ namespace MimicRender
 		if (_irradianceRenderTexture == nullptr) 
 		{
 			_irradianceRenderTexture = RenderTexture::Initialise();
-			_irradianceRenderTexture->SetTexture(Texture::Initialise(glm::ivec2(32, 32), TextureType::MIMIC_HDRCUBEMAP, Texture::MIMIC_CUBEMAP_TEXTURE_PARAMS, Texture::MIMIC_RGB16F, Texture::MIMIC_RGB));
+			_irradianceRenderTexture->SetTexture(Texture::Initialise(glm::ivec2(32, 32), Texture::MIMIC_CUBEMAP_TEXTURE_PARAMS, Texture::MIMIC_RGB16F, Texture::MIMIC_RGB, TextureType::MIMIC_HDRCUBEMAP));
 		}
 		LoadIrradianceMapTexture(renderer);
 
@@ -100,7 +100,7 @@ namespace MimicRender
 		if (_prefilteredMapRenderTexture == nullptr)
 		{
 			_prefilteredMapRenderTexture = RenderTexture::Initialise();
-			_prefilteredMapRenderTexture->SetTexture(Texture::Initialise(glm::ivec2(32, 32), TextureType::MIMIC_HDRCUBEMAP, Texture::MIMIC_CUBEMAP_TEXTURE_PARAMS, Texture::MIMIC_RGB16F, Texture::MIMIC_RGB));
+			_prefilteredMapRenderTexture->SetTexture(Texture::Initialise(glm::ivec2(32, 32), Texture::MIMIC_CUBEMAP_TEXTURE_PARAMS, Texture::MIMIC_RGB16F, Texture::MIMIC_RGB, TextureType::MIMIC_HDRCUBEMAP));
 		}
 		LoadPrefilteredMapTexture(renderer);
 
@@ -108,7 +108,7 @@ namespace MimicRender
 		if (_brdfConvolutedRenderTexture == nullptr)
 		{
 			_brdfConvolutedRenderTexture = RenderTexture::Initialise();
-			_brdfConvolutedRenderTexture->SetTexture(Texture::Initialise(glm::ivec2(512, 512), TextureType::MIMIC_HDRCUBEMAP, Texture::MIMIC_BRDF_TEXTURE_PARAMS, Texture::MIMIC_RG16F, Texture::MIMIC_RG));
+			_brdfConvolutedRenderTexture->SetTexture(Texture::Initialise(glm::ivec2(512, 512), Texture::MIMIC_BRDF_TEXTURE_PARAMS, Texture::MIMIC_RG16F, Texture::MIMIC_RG, TextureType::MIMIC_HDRCUBEMAP));
 		}
 		LoadBRDFConvolutedTexture(renderer);
 

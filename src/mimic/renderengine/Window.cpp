@@ -16,9 +16,9 @@ namespace MimicRender
 			MIMIC_LOG_FATAL("[MimicRender::Window] Failed to initialize SDL: %", SDL_GetError());
 			throw;
 		}
-		// SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
-		// SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
-		// SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+		 SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
+		 SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+		 SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 		MIMIC_LOG_INFO("[MimicRender::Window] SDL initialisation successful.");
 
 		SDL_DisplayMode displayMode;

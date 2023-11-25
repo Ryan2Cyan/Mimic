@@ -10,7 +10,7 @@ namespace MimicRender
 	// #############################################################################
 	// texture functions:
 	// #############################################################################
-	const std::shared_ptr<Texture> Texture::Initialise(const std::string& fullPath, const TextureType& textureType, const std::uint16_t& textureParams)
+	const std::shared_ptr<Texture> Texture::Initialise(const std::string& fullPath, const glm::ivec2& aspectRatio, const std::uint16_t& textureParams, const TextureType& textureType)
 	{
 		// generate texture ID:
 		unsigned int textureId;
@@ -53,23 +53,16 @@ namespace MimicRender
 
 		// load texture parameters:
 		const GLenum target = GetGLTarget(textureParams);
-		if (target == 0) return;
+		if (target == 0) return nullptr;
 		const GLenum dataType = GetGLDataType(textureParams);
-		if (dataType == 0) return;
+		if (dataType == 0) return nullptr;
 
+		// create texture & send it to the GPU:
 		glBindTexture(target, textureId);
-		glTexImage2D(target, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+		GLSendData(target, format, glm::ivec2(width, height), format, dataType, data);
 		glGenerateMipmap(target);
-
-		glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-		glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glBindTexture(target, 0);
-
+		GLTextureParams(textureParams, target);
 		stbi_image_free(data);
-
-		if (textureId == 0) return nullptr;
 
 		std::shared_ptr<Texture> texture = std::make_shared<Texture>();
 		texture->_id = textureId;
@@ -78,13 +71,13 @@ namespace MimicRender
 		return texture;
 	}
 
-	const std::shared_ptr<Texture> Texture::Initialise(const glm::ivec2& aspectRatio, const TextureType& textureType, const std::uint16_t& textureParams, const TextureFormats& internalFormat, const TextureFormats& format)
+	const std::shared_ptr<Texture> Texture::Initialise(const glm::ivec2& aspectRatio, const std::uint16_t& textureParams, const TextureFormats& internalFormat, const TextureFormats& format, const TextureType& textureType)
 	{
 		// load texture parameters:
 		const GLenum target = GetGLTarget(textureParams);
-		if (target == 0) return;
+		if (target == 0) return nullptr;
 		const GLenum dataType = GetGLDataType(textureParams);
-		if (dataType == 0) return;
+		if (dataType == 0) return nullptr;
 
 		// decide internal format:
 		GLint internalFormatGL = 0;
@@ -120,38 +113,9 @@ namespace MimicRender
 		glGenTextures(1, &textureId);
 		glBindTexture(target, textureId);
 
-		if (textureParams & MIMIC_2D_TEXTURE)
-		{
-			glTexImage2D(target, 0, internalFormatGL, aspectRatio.x, aspectRatio.y, 0, formatGL, dataType, nullptr);
-		}
-		else if (textureParams & MIMIC_CUBEMAP_TEXTURE)
-		{
-			for (unsigned int i = 0; i < 6; i++)
-			{
-				glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, internalFormatGL, aspectRatio.x, aspectRatio.y, 0, formatGL, dataType, nullptr);
-			}
-		}
-		else
-		{
-			MIMIC_LOG_WARNING("[Mimic::Texture] Could not create texture, no valid texture target arguement.");
-			MIMIC_LOG_OPENGL("Texture");
-			return nullptr;
-		}
-		
-		if (textureParams & MIMIC_WRAPS_REPEAT) glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		if (textureParams & MIMIC_WRAPT_REPEAT) glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-		if (textureParams & MIMIC_WRAPS_CLAMP) glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		if (textureParams & MIMIC_WRAPT_CLAMP) glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		if (textureParams & MIMIC_WRAPR_CLAMP) glTexParameteri(target, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-
-		if (textureParams & MIMIC_MIN_LINEAR) glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		if (textureParams & MIMIC_MAG_LINEAR) glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-		if (textureParams & MIMIC_MIN_MIPMAP_LINEAR) glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-		if (textureParams & MIMIC_MAG_MIPMAP_LINEAR) glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-
-		if (textureParams & MIMIC_GEN_MIPMAP) glGenerateMipmap(target); 
+		// create texture & send it to the GPU:
+		GLSendData(target, internalFormat, aspectRatio, format, dataType, nullptr);
+		GLTextureParams(textureParams, target);
 
 		glBindTexture(target, 0);
 
@@ -185,9 +149,49 @@ namespace MimicRender
 		}
 	}
 
-	void Texture::SetType(const int& type)
+	void Texture::GLTextureParams(const std::uint16_t& textureParams, const GLenum& target) noexcept
 	{
-		_type = type;
+		if (textureParams & MIMIC_WRAPS_REPEAT) glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		if (textureParams & MIMIC_WRAPT_REPEAT) glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+		if (textureParams & MIMIC_WRAPS_CLAMP) glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		if (textureParams & MIMIC_WRAPT_CLAMP) glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		if (textureParams & MIMIC_WRAPR_CLAMP) glTexParameteri(target, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+		if (textureParams & MIMIC_MIN_LINEAR) glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		if (textureParams & MIMIC_MAG_LINEAR) glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		if (textureParams & MIMIC_MIN_MIPMAP_LINEAR) glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		if (textureParams & MIMIC_MAG_MIPMAP_LINEAR) glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+
+		if (textureParams & MIMIC_GEN_MIPMAP) glGenerateMipmap(target);
+	}
+
+	const bool Texture::GLSendData(const GLenum& target, const GLint& internalFormat, const glm::ivec2& aspectRatio, const GLenum& format, const GLenum& dataType, const unsigned char* data) noexcept
+	{
+		if (target == GL_TEXTURE_2D)
+		{
+			glTexImage2D(target, 0, internalFormat, aspectRatio.x, aspectRatio.y, 0, format, dataType, data);
+		}
+		else if (target == GL_TEXTURE_CUBE_MAP)
+		{
+			for (unsigned int i = 0; i < 6; i++)
+			{
+				glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, internalFormat, aspectRatio.x, aspectRatio.y, 0, format, dataType, data);
+			}
+		}
+		else
+		{
+			MIMIC_LOG_WARNING("[Mimic::Texture] Could not create texture, no valid texture target arguement.");
+			MIMIC_LOG_OPENGL("Texture");
+			return false;
+		}
+		return true;
+	}
+
+	void Texture::SetType(const TextureType& textureType)
+	{
+		_type = textureType;
 	}
 
 	const unsigned int Texture::GetId() const noexcept
