@@ -3,7 +3,6 @@
 #include <array>
 #include <string>
 #include <memory>
-#include <functional>
 
 namespace MimicRender
 {
@@ -17,7 +16,6 @@ namespace MimicRender
 	struct RenderTexture;
 	struct RenderbufferObject;
 	struct Renderer;
-	struct Shader;
 
 	struct EnvironmentCubeMap
 	{
@@ -35,8 +33,7 @@ namespace MimicRender
 		void LoadIrradianceMapTexture(std::shared_ptr<Renderer>& renderer);
 		void LoadPrefilteredMapTexture(std::shared_ptr<Renderer>& renderer);
 		void LoadBRDFConvolutedTexture(std::shared_ptr<Renderer>& renderer);
-		void CaptureCubeMap(std::function<void()>& onDrawLambda, const std::shared_ptr<Shader>& shader, std::shared_ptr<RenderTexture>& renderTexture, const glm::ivec2& aspectRatio, std::shared_ptr<Renderer>& renderer);
-	//	const bool LoadShader(const std::string& fileName, std::shared_ptr<Shader>& shader);
+		//	const bool LoadShader(const std::string& fileName, std::shared_ptr<Shader>& shader);
 
 		std::array<glm::mat4, 6> _captureViews;
 		glm::mat4 _captureProjection;

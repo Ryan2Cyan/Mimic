@@ -59,8 +59,7 @@ namespace MimicRender
 
 		// create texture & send it to the GPU:
 		glBindTexture(target, textureId);
-		GLSendData(target, format, glm::ivec2(width, height), format, dataType, data);
-		glGenerateMipmap(target);
+		glTexImage2D(target, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
 		GLTextureParams(textureParams, target);
 		stbi_image_free(data);
 
@@ -114,7 +113,19 @@ namespace MimicRender
 		glBindTexture(target, textureId);
 
 		// create texture & send it to the GPU:
-		GLSendData(target, internalFormat, aspectRatio, format, dataType, nullptr);
+		if (textureParams & MIMIC_2D_TEXTURE)
+		{
+			glTexImage2D(target, 0, internalFormatGL, aspectRatio.x, aspectRatio.y, 0, formatGL, dataType, nullptr);
+			
+		}
+		else if (textureParams & MIMIC_CUBEMAP_TEXTURE)
+		{
+			for (unsigned int i = 0; i < 6; i++)
+			{
+				glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, internalFormatGL, aspectRatio.x, aspectRatio.y, 0, formatGL, dataType, nullptr);
+			}
+		}
+		
 		GLTextureParams(textureParams, target);
 
 		glBindTexture(target, 0);
@@ -165,28 +176,6 @@ namespace MimicRender
 		if (textureParams & MIMIC_MAG_MIPMAP_LINEAR) glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 
 		if (textureParams & MIMIC_GEN_MIPMAP) glGenerateMipmap(target);
-	}
-
-	const bool Texture::GLSendData(const GLenum& target, const GLint& internalFormat, const glm::ivec2& aspectRatio, const GLenum& format, const GLenum& dataType, const unsigned char* data) noexcept
-	{
-		if (target == GL_TEXTURE_2D)
-		{
-			glTexImage2D(target, 0, internalFormat, aspectRatio.x, aspectRatio.y, 0, format, dataType, data);
-		}
-		else if (target == GL_TEXTURE_CUBE_MAP)
-		{
-			for (unsigned int i = 0; i < 6; i++)
-			{
-				glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, internalFormat, aspectRatio.x, aspectRatio.y, 0, format, dataType, data);
-			}
-		}
-		else
-		{
-			MIMIC_LOG_WARNING("[Mimic::Texture] Could not create texture, no valid texture target arguement.");
-			MIMIC_LOG_OPENGL("Texture");
-			return false;
-		}
-		return true;
 	}
 
 	void Texture::SetType(const TextureType& textureType)

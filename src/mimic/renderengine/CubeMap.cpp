@@ -18,33 +18,10 @@ namespace MimicRender
 	//// hdr cubemap functions:
 	//// #############################################################################
 
-	const std::shared_ptr<EnvironmentCubeMap> EnvironmentCubeMap::Initialise(const std::string& hdrFileName, const glm::vec2& aspectRatio, std::shared_ptr<Renderer>& renderer) 
+	const std::shared_ptr<EnvironmentCubeMap> EnvironmentCubeMap::Initialise(const std::string& hdrFileName, const glm::vec2& aspectRatio, std::shared_ptr<Renderer>& renderer)
 	{
 		std::shared_ptr<EnvironmentCubeMap> environementMap = std::make_shared<EnvironmentCubeMap>();
 		environementMap->Load(hdrFileName, aspectRatio, renderer);
-
-		// initialise capture capture views & projection matrices, these will be used to capture each face of a cube
-		// map texture rendered to the inside of a cube:
-		//const glm::mat4 captureProjection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f);
-		//const std::array<glm::mat4, 6> captureViews =
-		//{
-		//	glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
-		//	glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f, 0.0f)),
-		//	glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f,  1.0f,  0.0f), glm::vec3(0.0f,  0.0f,  1.0f)),
-		//	glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f,  0.0f), glm::vec3(0.0f,  0.0f, -1.0f)),
-		//	glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f,  0.0f,  1.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
-		//	glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f,  0.0f, -1.0f), glm::vec3(0.0f, -1.0f,  0.0f))
-		//};
-
-		//// initialise file loader:
-		//const std::shared_ptr<Mimic::FileLoader> fileLoader = Mimic::FileLoader::Initialise();
-		//const std::string assetsDirectory = fileLoader->LocateDirectory("assets").generic_string();
-
-		//// load hdr texture:
-		//stbi_set_flip_vertically_on_load(true);
-		//const std::shared_ptr<Texture> equirectangularTexture = Texture::Initialise(fileLoader->LocateFileInDirectory(assetsDirectory, equirectangularTextureFileName), TextureType::MIMIC_HDRCUBEMAP);
-		//stbi_set_flip_vertically_on_load(false);
-
 		return environementMap;
 	}
 
@@ -61,8 +38,7 @@ namespace MimicRender
 			glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f,  0.0f,  1.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
 			glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f,  0.0f, -1.0f), glm::vec3(0.0f, -1.0f,  0.0f))
 		};
-
-		// initialise file loader:
+		// file loader:
 		std::shared_ptr<Mimic::FileLoader> fileLoader = Mimic::FileLoader::Initialise();
 		const std::string assetsDirectory = fileLoader->LocateDirectory("assets").generic_string();
 
@@ -77,22 +53,22 @@ namespace MimicRender
 		_preFilteredShader = Shader::Initialise(fileLoader->LocateFileInDirectory(assetsDirectory, "PreFilteredCubeMapShader.glsl"));
 		_brdfConvolutionShader = Shader::Initialise(fileLoader->LocateFileInDirectory(assetsDirectory, "BRDFConvolutionShader.glsl"));
 		_cubeMapShader = Shader::Initialise(fileLoader->LocateFileInDirectory(assetsDirectory, "EnvironmentCubeMapShader.glsl"));
-		
+
 		_cubeMapShader->SetInt("u_EnvironmentMap", 0);
 
 		// environment map render texture:
 		if (_environmentMapRenderTexture == nullptr)
 		{
 			_environmentMapRenderTexture = RenderTexture::Initialise();
-			_environmentMapRenderTexture->SetTexture(Texture::Initialise(glm::ivec2(512, 512), Texture::MIMIC_CUBEMAP_TEXTURE_PARAMS, Texture::MIMIC_RGB16F, Texture::MIMIC_RGB, TextureType::MIMIC_HDRCUBEMAP));
+			_environmentMapRenderTexture->SetTexture(Texture::Initialise(glm::ivec2(512, 512), Texture::MIMIC_CUBEMAP_TEXTURE_PARAMS, Texture::MIMIC_RGB16F, Texture::MIMIC_RGB));
 		}
 		LoadEnvironmentMap(renderer);
 
 		// irradiance map render texture:
-		if (_irradianceRenderTexture == nullptr) 
+		if (_irradianceRenderTexture == nullptr)
 		{
 			_irradianceRenderTexture = RenderTexture::Initialise();
-			_irradianceRenderTexture->SetTexture(Texture::Initialise(glm::ivec2(32, 32), Texture::MIMIC_CUBEMAP_TEXTURE_PARAMS, Texture::MIMIC_RGB16F, Texture::MIMIC_RGB, TextureType::MIMIC_HDRCUBEMAP));
+			_irradianceRenderTexture->SetTexture(Texture::Initialise(glm::ivec2(32, 32), Texture::MIMIC_CUBEMAP_TEXTURE_PARAMS, Texture::MIMIC_RGB16F, Texture::MIMIC_RGB));
 		}
 		LoadIrradianceMapTexture(renderer);
 
@@ -100,7 +76,7 @@ namespace MimicRender
 		if (_prefilteredMapRenderTexture == nullptr)
 		{
 			_prefilteredMapRenderTexture = RenderTexture::Initialise();
-			_prefilteredMapRenderTexture->SetTexture(Texture::Initialise(glm::ivec2(32, 32), Texture::MIMIC_CUBEMAP_TEXTURE_PARAMS, Texture::MIMIC_RGB16F, Texture::MIMIC_RGB, TextureType::MIMIC_HDRCUBEMAP));
+			_prefilteredMapRenderTexture->SetTexture(Texture::Initialise(glm::ivec2(32, 32), Texture::MIMIC_CUBEMAP_TEXTURE_PARAMS, Texture::MIMIC_RGB16F, Texture::MIMIC_RGB));
 		}
 		LoadPrefilteredMapTexture(renderer);
 
@@ -108,11 +84,11 @@ namespace MimicRender
 		if (_brdfConvolutedRenderTexture == nullptr)
 		{
 			_brdfConvolutedRenderTexture = RenderTexture::Initialise();
-			_brdfConvolutedRenderTexture->SetTexture(Texture::Initialise(glm::ivec2(512, 512), Texture::MIMIC_BRDF_TEXTURE_PARAMS, Texture::MIMIC_RG16F, Texture::MIMIC_RG, TextureType::MIMIC_HDRCUBEMAP));
+			_brdfConvolutedRenderTexture->SetTexture(Texture::Initialise(glm::ivec2(512, 512), Texture::MIMIC_BRDF_TEXTURE_PARAMS, Texture::MIMIC_RG16F, Texture::MIMIC_RG));
 		}
 		LoadBRDFConvolutedTexture(renderer);
 
-		glViewport(0, 0, aspectRatio.x, aspectRatio.y);	
+		glViewport(0, 0, aspectRatio.x, aspectRatio.y);
 	}
 
 	const unsigned int EnvironmentCubeMap::GetIrradianceId() const
@@ -151,13 +127,20 @@ namespace MimicRender
 
 	void EnvironmentCubeMap::LoadEnvironmentMap(std::shared_ptr<Renderer>& renderer)
 	{
-		std::function<void()> onDrawLambda = [&]() 
-		{ 
+		std::function<void()> onDrawLambda = [&]()
+		{
 			_equirectangularToCubemapShader->SetInt("u_EquirectangularMap", 1);
 			glActiveTexture(GL_TEXTURE0 + 1);
 			glBindTexture(GL_TEXTURE_2D, _equirectangularTexture->_id);
 		};
-		CaptureCubeMap(onDrawLambda, _equirectangularToCubemapShader, _environmentMapRenderTexture, glm::ivec2(512, 512), renderer);
+
+		renderer->CaptureCubeMap
+		(
+			onDrawLambda,
+			_equirectangularToCubemapShader,
+			_environmentMapRenderTexture,
+			glm::ivec2(512, 512)
+		);
 	}
 
 	void EnvironmentCubeMap::LoadIrradianceMapTexture(std::shared_ptr<Renderer>& renderer)
@@ -168,7 +151,14 @@ namespace MimicRender
 			glActiveTexture(GL_TEXTURE0 + 1);
 			glBindTexture(GL_TEXTURE_CUBE_MAP, _environmentMapRenderTexture->_texture->_id);
 		};
-		CaptureCubeMap(onDrawLambda, _convolutionShader, _irradianceRenderTexture, glm::ivec2(32, 32), renderer);
+
+		renderer->CaptureCubeMap
+		(
+			onDrawLambda,
+			_convolutionShader,
+			_irradianceRenderTexture,
+			glm::ivec2(32, 32)
+		);
 	}
 
 	void EnvironmentCubeMap::LoadPrefilteredMapTexture(std::shared_ptr<Renderer>& renderer)
@@ -181,7 +171,7 @@ namespace MimicRender
 		_preFilteredShader->SetMat4("u_Projection", _captureProjection);
 		glActiveTexture(GL_TEXTURE0 + 1);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, _environmentMapRenderTexture->_texture->_id);
-	
+
 		constexpr int startTargetIndex = (int)TextureTarget::MIMIC_CUBE_MAP_POSITIVE_X;
 		constexpr unsigned int maxMipLevels = 5;
 		for (unsigned int mip = 0; mip < maxMipLevels; mip++)
@@ -217,24 +207,5 @@ namespace MimicRender
 
 		glBindTexture(GL_TEXTURE_2D, 0);
 		_brdfConvolutedRenderTexture->Unbind();
-	}
-
-	void EnvironmentCubeMap::CaptureCubeMap(std::function<void()>& onDrawLambda, const std::shared_ptr<Shader>& shader, std::shared_ptr<RenderTexture>& renderTexture, const glm::ivec2& aspectRatio, std::shared_ptr<Renderer>& renderer)
-	{
-		 renderTexture->UseRenderObject(aspectRatio);
-		 shader->UseShader();
-		 shader->SetMat4("u_Projection", _captureProjection);
-		 onDrawLambda();
-
-		 constexpr int startTargetIndex = (int)TextureTarget::MIMIC_CUBE_MAP_POSITIVE_X;
-		 for (unsigned int i = 0; i < 6; i++)
-		 {
-			 shader->SetMat4("u_View", _captureViews[i]);
-			 renderTexture->BindTextureForRender((TextureTarget)(startTargetIndex + i));
-
-			 // render unit cube:
-			 renderer->DrawUnitCube();
-		 }
-		 renderTexture->Unbind();
 	}
 }

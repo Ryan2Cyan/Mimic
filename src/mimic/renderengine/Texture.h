@@ -76,7 +76,6 @@ namespace MimicRender
 		static const GLenum GetGLTarget(const std::uint16_t& textureParams) noexcept;
 		static const GLenum GetGLDataType(const std::uint16_t& textureParams) noexcept;
 		static void GLTextureParams(const std::uint16_t& textureParams, const GLenum& target) noexcept;
-		static const bool GLSendData(const GLenum& target, const GLint& internalFormat, const glm::ivec2& aspectRatio, const GLenum& format, const GLenum& dataType, const unsigned char* data) noexcept;
 
 	public:
 		enum TextureFormats
