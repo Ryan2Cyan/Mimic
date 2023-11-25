@@ -47,9 +47,6 @@ namespace MimicRender
 			glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f,  0.0f, -1.0f), glm::vec3(0.0f, -1.0f,  0.0f))
 		};
 		
-	/*	std::shared_ptr<Mimic::FileLoader> fileLoader = Mimic::FileLoader::Initialise();
-		renderer->_cubeMapShader = Shader::Initialise(fileLoader->LocateFileInDirectory(fileLoader->LocateDirectory("assets").generic_string(), "EnvironmentCubeMapShader.glsl"));
-		renderer->_cubeMapShader->SetInt("u_EnvironmentMap", 0);*/
 		return renderer;
 	}
 

@@ -29,10 +29,12 @@ using namespace MimicRender;
 int main(int argc, char* argv[])
 {
 	{
+		// create file loader:
 		std::shared_ptr<FileLoader> fileLoader = FileLoader::Initialise();
 		const std::string assetPath = fileLoader->LocateDirectory("assets").generic_string();
+
 		// render engine code:
-		std::shared_ptr<Window> window = Window::Initialise("Mimic Render Library Test");
+		const std::shared_ptr<Window> window = Window::Initialise("Mimic Render Library Test");
 
 		// initialise renderer:
 		std::shared_ptr<Renderer> renderer = Renderer::Initialise();

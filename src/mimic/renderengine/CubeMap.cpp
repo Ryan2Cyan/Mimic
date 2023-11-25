@@ -21,13 +21,36 @@ namespace MimicRender
 	const std::shared_ptr<EnvironmentCubeMap> EnvironmentCubeMap::Initialise(const std::string& hdrFileName, const glm::vec2& aspectRatio, std::shared_ptr<Renderer>& renderer) 
 	{
 		std::shared_ptr<EnvironmentCubeMap> environementMap = std::make_shared<EnvironmentCubeMap>();
-		environementMap->Load(hdrFileName, aspectRatio, renderer);
+		//environementMap->Load(hdrFileName, aspectRatio, renderer);
+
+		// initialise capture capture views & projection matrices, these will be used to capture each face of a cube
+		// map texture rendered to the inside of a cube:
+		const glm::mat4 captureProjection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f);
+		const std::array<glm::mat4, 6> captureViews =
+		{
+			glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
+			glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f, 0.0f)),
+			glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f,  1.0f,  0.0f), glm::vec3(0.0f,  0.0f,  1.0f)),
+			glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f,  0.0f), glm::vec3(0.0f,  0.0f, -1.0f)),
+			glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f,  0.0f,  1.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
+			glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f,  0.0f, -1.0f), glm::vec3(0.0f, -1.0f,  0.0f))
+		};
+
+		// initialise file loader:
+		const std::shared_ptr<Mimic::FileLoader> fileLoader = Mimic::FileLoader::Initialise();
+		const std::string assetsDirectory = fileLoader->LocateDirectory("assets").generic_string();
+
+		// load hdr texture:
+		stbi_set_flip_vertically_on_load(true);
+		const std::shared_ptr<Texture> equirectangularTexture = Texture::Initialise(fileLoader->LocateFileInDirectory(assetsDirectory, equirectangularTextureFileName), TextureType::MIMIC_HDRCUBEMAP);
+		stbi_set_flip_vertically_on_load(false);
+
 		return environementMap;
 	}
 
 	void EnvironmentCubeMap::Load(const std::string& equirectangularTextureFileName, const glm::vec2& aspectRatio, std::shared_ptr<Renderer>& renderer)
 	{
-		_captureProjection = glm::mat4(1.0f);
+		/*_captureProjection = glm::mat4(1.0f);
 		_captureProjection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f);
 		_captureViews =
 		{
@@ -37,10 +60,11 @@ namespace MimicRender
 			glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f,  0.0f), glm::vec3(0.0f,  0.0f, -1.0f)),
 			glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f,  0.0f,  1.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
 			glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f,  0.0f, -1.0f), glm::vec3(0.0f, -1.0f,  0.0f))
-		};
-		// file loader:
-		std::shared_ptr<Mimic::FileLoader> fileLoader = Mimic::FileLoader::Initialise();
-		const std::string assetsDirectory = fileLoader->LocateDirectory("assets").generic_string();
+		};*/
+
+		//// initialise file loader:
+		//std::shared_ptr<Mimic::FileLoader> fileLoader = Mimic::FileLoader::Initialise();
+		//const std::string assetsDirectory = fileLoader->LocateDirectory("assets").generic_string();
 
 		// load hdr texture:
 		stbi_set_flip_vertically_on_load(true);
@@ -133,14 +157,7 @@ namespace MimicRender
 			glActiveTexture(GL_TEXTURE0 + 1);
 			glBindTexture(GL_TEXTURE_2D, _equirectangularTexture->_id);
 		};
-
-		renderer->CaptureCubeMap
-		(
-			onDrawLambda,
-			_equirectangularToCubemapShader,
-			_environmentMapRenderTexture,
-			glm::ivec2(512, 512)
-		);
+		CaptureCubeMap(onDrawLambda, _equirectangularToCubemapShader, _environmentMapRenderTexture, glm::ivec2(512, 512), renderer);
 	}
 
 	void EnvironmentCubeMap::LoadIrradianceMapTexture(std::shared_ptr<Renderer>& renderer)
@@ -151,14 +168,7 @@ namespace MimicRender
 			glActiveTexture(GL_TEXTURE0 + 1);
 			glBindTexture(GL_TEXTURE_CUBE_MAP, _environmentMapRenderTexture->_texture->_id);
 		};
-
-		renderer->CaptureCubeMap
-		(
-			onDrawLambda,
-			_convolutionShader,
-			_irradianceRenderTexture,
-			glm::ivec2(32, 32)
-		);
+		CaptureCubeMap(onDrawLambda, _convolutionShader, _irradianceRenderTexture, glm::ivec2(32, 32), renderer);
 	}
 
 	void EnvironmentCubeMap::LoadPrefilteredMapTexture(std::shared_ptr<Renderer>& renderer)
@@ -207,5 +217,24 @@ namespace MimicRender
 
 		glBindTexture(GL_TEXTURE_2D, 0);
 		_brdfConvolutedRenderTexture->Unbind();
+	}
+
+	void EnvironmentCubeMap::CaptureCubeMap(std::function<void()>& onDrawLambda, const std::shared_ptr<Shader>& shader, std::shared_ptr<RenderTexture>& renderTexture, const glm::ivec2& aspectRatio, std::shared_ptr<Renderer>& renderer)
+	{
+		 renderTexture->UseRenderObject(aspectRatio);
+		 shader->UseShader();
+		 shader->SetMat4("u_Projection", _captureProjection);
+		 onDrawLambda();
+
+		 constexpr int startTargetIndex = (int)TextureTarget::MIMIC_CUBE_MAP_POSITIVE_X;
+		 for (unsigned int i = 0; i < 6; i++)
+		 {
+			 shader->SetMat4("u_View", _captureViews[i]);
+			 renderTexture->BindTextureForRender((TextureTarget)(startTargetIndex + i));
+
+			 // render unit cube:
+			 renderer->DrawUnitCube();
+		 }
+		 renderTexture->Unbind();
 	}
 }

@@ -7,40 +7,41 @@
 
 namespace MimicRender
 {
-	Window::Window(const std::string& windowName) : _windowName(windowName)
+	std::shared_ptr<Window> Window::Initialise(const std::string& windowName)
 	{
+		std::shared_ptr<Window> window = std::make_shared<Window>();
+
 		if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) < 0)
 		{
 			MIMIC_LOG_FATAL("[MimicRender::Window] Failed to initialize SDL: %", SDL_GetError());
 			throw;
 		}
-		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
-		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
-		SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+		// SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
+		// SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+		// SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 		MIMIC_LOG_INFO("[MimicRender::Window] SDL initialisation successful.");
 
-		// SDL_DisplayMode displayMode;
-		// SDL_GetCurrentDisplayMode(0, &displayMode);
-		_aspectRatio = glm::ivec2(800, 800);
+		SDL_DisplayMode displayMode;
+		SDL_GetCurrentDisplayMode(0, &displayMode);
 
-		_window = SDL_CreateWindow(windowName.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, _aspectRatio.x, _aspectRatio.y, SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL);
-		if (_window == nullptr)
+		window->_window = SDL_CreateWindow(windowName.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, displayMode.w, displayMode.h, SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL);
+		if (window->_window == nullptr)
 		{
 			MIMIC_LOG_FATAL("[MimicRender::Window] Failed to initialize SDL_Window: %", SDL_GetError());
 			throw;
 		}
 		MIMIC_LOG_INFO("[MimicRender::Window] SDL_Window initialisation successful.");
 
-		_renderer = SDL_CreateRenderer(_window, -1, SDL_RENDERER_ACCELERATED);
-		if (_renderer == nullptr)
+		window->_renderer = SDL_CreateRenderer(window->_window, -1, SDL_RENDERER_ACCELERATED);
+		if (window->_renderer == nullptr)
 		{
 			MIMIC_LOG_FATAL("[MimicRender::Window] Failed to initialize SDL_Renderer: %", SDL_GetError());
 			throw;
 		}
 		MIMIC_LOG_INFO("[Mimic::Window] SDL_Renderer initialisation successful.");
 
-		_glContext = SDL_GL_CreateContext(_window);
-		if (_glContext == nullptr)
+		window->_glContext = SDL_GL_CreateContext(window->_window);
+		if (window->_glContext == nullptr)
 		{
 			MIMIC_LOG_FATAL("[MimicRender::Window] Failed to initialize SDL_GL_Context: %", SDL_GetError());
 			throw;
@@ -53,7 +54,7 @@ namespace MimicRender
 		ImGui::StyleColorsDark();
 
 		const char* glslVersion = "#version 130";
-		ImGui_ImplSDL2_InitForOpenGL(_window, _glContext);
+		ImGui_ImplSDL2_InitForOpenGL(window->_window, window->_glContext);
 		ImGui_ImplOpenGL3_Init(glslVersion);
 		MIMIC_LOG_INFO("[MimicRender::Window] ImGui initialisation successful.");
 
@@ -69,6 +70,10 @@ namespace MimicRender
 
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+
+		window->_aspectRatio = glm::ivec2(displayMode.w, displayMode.h);
+		window->_initialised = true;
+		return window;
 	}
 
 	Window::~Window() 
@@ -102,13 +107,9 @@ namespace MimicRender
 		return _aspectRatio;
 	}
 
-	void Window::SwapWindow()
+	void Window::SwapWindow() const
 	{
+		if(!_initialised) return;
 		SDL_GL_SwapWindow(_window);
-	}
-
-	std::shared_ptr<Window> Window::Initialise(const std::string& windowName)
-	{
-		return std::make_shared<Window>(windowName);
 	}
 }

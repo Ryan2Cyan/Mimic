@@ -72,6 +72,8 @@ namespace MimicRender
 		unsigned int _id;
 		int _type;
 
+		static const GLenum GetGLTarget(const std::uint16_t& textureParams) noexcept;
+
 	public:
 		enum TextureFormats
 		{
@@ -83,7 +85,7 @@ namespace MimicRender
 			MIMIC_RG16F = 0x20
 		};
 
-		static const std::shared_ptr<Texture> Initialise(const std::string& fullPath, const TextureType& type);
+		static const std::shared_ptr<Texture> Initialise(const std::string& fullPath, const TextureType& type, const std::uint16_t& textureParams);
 		static const std::shared_ptr<Texture> Initialise(const glm::ivec2& aspectRatio, const TextureType& type, const std::uint16_t& textureParams, const TextureFormats& internalFormat, const TextureFormats& format);
 		void SetType(const int& type);
 		const unsigned int GetId() const noexcept;
