@@ -5,28 +5,49 @@ namespace Mimic
 	// #############################################################################
 	// direct light functions:
 	// #############################################################################
-	DirectLight::DirectLight() : Position(glm::vec3(0.0f)), Direction(glm::vec3(0.0f, 0.0f, -1.0f)), Colour(glm::vec3(0.0f))
+	const std::shared_ptr<DirectLight> DirectLight::Initialise() noexcept
 	{
-
+		return std::make_shared<DirectLight>();
 	}
 
-	DirectLight::DirectLight(const glm::vec3& position, const glm::vec3& direction, const glm::vec3& colour) 
-		: Position(glm::vec3(position)), Direction(glm::vec3(direction)), Colour(glm::vec3(colour))
+	const std::shared_ptr<DirectLight> DirectLight::Initialise(const glm::vec3& position, const glm::vec3& direction, const glm::vec3& colour) noexcept
 	{
-
+		std::shared_ptr<DirectLight> directLight = std::make_shared<DirectLight>();
+		directLight->Position = position;
+		directLight->Direction = direction;
+		directLight->Colour = colour;
+		return directLight;
 	}
 
 
 	// #############################################################################
 	// point light functions:
 	// #############################################################################
-	PointLight::PointLight() : Position(glm::vec3(0.0f)), Colour(glm::vec3(0.0f)), Constant(1.0f), Linear(0.35), Quadratic(0.44)
+	const std::shared_ptr<PointLight> PointLight::Initialise() noexcept
 	{
-
+		return std::make_shared<PointLight>();
 	}
 
-	PointLight::PointLight(const glm::vec3& position, const glm::vec3& colour) : Position(position), Colour(colour), Constant(1.0f), Linear(0.35), Quadratic(0.44)
+	const std::shared_ptr<PointLight> PointLight::Initialise(const glm::vec3& position, const glm::vec3& colour) noexcept
 	{
+		std::shared_ptr<PointLight> pointLight = std::make_shared<PointLight>();
+		pointLight->Position = position;
+		pointLight->Colour = colour;
+		return pointLight;
+	}
 
+	const float PointLight::GetConstant() const noexcept
+	{
+		return _constant;
+	}
+
+	const float PointLight::GetLinear() const noexcept
+	{
+		return _linear;
+	}
+
+	const float PointLight::GetQuadratic() const noexcept
+	{
+		return _quadratic;
 	}
 }

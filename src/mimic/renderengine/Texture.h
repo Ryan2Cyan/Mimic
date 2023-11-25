@@ -43,6 +43,7 @@ namespace MimicRender
 		friend struct Mesh;
 		friend struct Model;
 		friend struct RenderTexture;
+		friend struct EnvironmentCubeMap;
 
 		// texture type
 		static const std::uint16_t MIMIC_2D_TEXTURE =		 0b0000'0000'0000'0001;

@@ -23,9 +23,8 @@ namespace MimicRender
 		void SetTexture(const std::shared_ptr<Texture>& texture);
 
 	private:
-		friend struct ResourceManager;
+		friend struct Renderer;
 		friend struct EnvironmentCubeMap;
-		friend struct PBRMaterial;
 
 		std::shared_ptr<Texture> _texture;
 		unsigned int _id = 0;

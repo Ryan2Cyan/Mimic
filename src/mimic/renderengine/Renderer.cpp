@@ -2,6 +2,8 @@
 #include <renderengine/Shader.h>
 #include <renderengine/RenderTexture.h>
 #include <renderengine/Camera.h>
+#include <renderengine/CubeMap.h>
+#include <utility/FileLoader.h>
 #include <utility/Logger.h>
 #include <glm/gtc/matrix_transform.hpp> 
 #include <glm/gtc/type_ptr.hpp>
@@ -45,6 +47,9 @@ namespace MimicRender
 			glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f,  0.0f, -1.0f), glm::vec3(0.0f, -1.0f,  0.0f))
 		};
 		
+	/*	std::shared_ptr<Mimic::FileLoader> fileLoader = Mimic::FileLoader::Initialise();
+		renderer->_cubeMapShader = Shader::Initialise(fileLoader->LocateFileInDirectory(fileLoader->LocateDirectory("assets").generic_string(), "EnvironmentCubeMapShader.glsl"));
+		renderer->_cubeMapShader->SetInt("u_EnvironmentMap", 0);*/
 		return renderer;
 	}
 
@@ -74,6 +79,25 @@ namespace MimicRender
 		_renderQue.clear();
 	}
 
+	void Renderer::DrawCubeMap(const std::shared_ptr<Camera>& camera, const std::shared_ptr<EnvironmentCubeMap>& environmentCubeMap)
+	{
+		glDepthFunc(GL_LEQUAL);
+		environmentCubeMap->_cubeMapShader->UseShader();
+		environmentCubeMap->_cubeMapShader->SetMat4("u_View", camera->_viewMatrix);
+		environmentCubeMap->_cubeMapShader->SetMat4("u_Projection", camera->_projectionMatrix);
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, environmentCubeMap->_environmentMapRenderTexture->_texture->_id);
+		DrawUnitCube();
+		glBindVertexArray(0);
+
+		glDepthFunc(GL_LESS);
+
+		// render the BRDF 2D lookup texture to the screen:
+		/*_brdfConvolutionShader->UseShader();
+		RenderQuad();*/
+	}
+
 	void Renderer::CaptureCubeMap(std::function<void()>& onDrawLambda, const std::shared_ptr<Shader>& shader, std::shared_ptr<RenderTexture>& renderTexture, const glm::ivec2& aspectRatio)
 	{
 		 renderTexture->UseRenderObject(aspectRatio);
@@ -92,33 +116,6 @@ namespace MimicRender
 		 }
 		 renderTexture->Unbind();
 	}
-
-	//void Renderer::CapturePrefilteredCubeMap(std::function<void()>& onDrawLambda, const std::shared_ptr<Shader>& shader, std::shared_ptr<RenderTexture>& renderTexture, const glm::ivec2& aspectRatio, const unsigned int& mipLevels)
-	//{
-	//	shader->UseShader();
-	//	shader->SetMat4("u_Projection", _captureProjection);
-	//	onDrawLambda();
-
-	//	constexpr int startTargetIndex = (int)TextureTarget::MIMIC_CUBE_MAP_POSITIVE_X;
-	//	for (unsigned int mip = 0; mip < mipLevels; mip++)
-	//	{
-	//		// resize framebuffer according to mip-level size:
-	//		const unsigned int mipWidth = aspectRatio.x * std::pow(0.5f, mip);
-	//		const unsigned int mipHeight = aspectRatio.y * std::pow(0.5f, mip);;
-	//		renderTexture->UseRenderObject(glm::ivec2(mipWidth, mipHeight));
-	//		float roughness = (float)mip / (float)(mipLevels - 1);
-
-	//		for (unsigned int i = 0; i < 6; i++)
-	//		{
-	//			shader->SetMat4("u_View", _captureViews[i]);
-	//			renderTexture->BindTextureForRender((TextureTarget)(startTargetIndex + i));
-
-	//			// render unit cube:
-	//			DrawUnitCube();
-	//		}
-	//	}
-	//	renderTexture->Unbind();
-	//}
 
 	void Renderer::DrawUnitCube() noexcept
 	{

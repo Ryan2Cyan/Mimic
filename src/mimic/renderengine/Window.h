@@ -19,7 +19,6 @@ namespace MimicRender
 		void SwapWindow();
 
 	private:
-		friend struct MimicCore;
 
 		glm::ivec2 _aspectRatio;
 		std::string _windowName;

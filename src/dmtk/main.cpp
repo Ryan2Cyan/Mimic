@@ -9,7 +9,10 @@
 #include <renderengine/Vertex.h>
 #include <renderengine/Window.h>
 #include <renderengine/Camera.h>
+#include <renderengine/CubeMap.h>
+#include <utility/FileLoader.h>
 #include <vector>
+#include <filesystem>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp> 
 #include <glm/gtc/type_ptr.hpp>
@@ -26,7 +29,8 @@ using namespace MimicRender;
 int main(int argc, char* argv[])
 {
 	{
-		const std::string assetPath = "../assets/";
+		std::shared_ptr<FileLoader> fileLoader = FileLoader::Initialise();
+		const std::string assetPath = fileLoader->LocateDirectory("assets").generic_string();
 		// render engine code:
 		std::shared_ptr<Window> window = Window::Initialise("Mimic Render Library Test");
 
@@ -34,7 +38,7 @@ int main(int argc, char* argv[])
 		std::shared_ptr<Renderer> renderer = Renderer::Initialise();
 
 		// create shader:
-		const std::shared_ptr<Shader> pbrShader = Shader::Initialise("H:/Mimic/assets/shaders/PBRShader.glsl");
+		const std::shared_ptr<Shader> pbrShader = Shader::Initialise(fileLoader->LocateFileInDirectory(assetPath, "PBRShader.glsl"));
 
 		// load shader subroutine uniforms:
 		const unsigned int albedoSubroutineUniform = pbrShader->GetSubroutineUniform(GL_FRAGMENT_SHADER, "AlbedoMode");
@@ -58,10 +62,10 @@ int main(int argc, char* argv[])
 
 		// pbr properties:
 		glm::vec3 albedo = glm::vec3(1.0f, 0.0f, 0.0f);
-		glm::vec3 emissive = glm::vec3(1.0f, 0.0f, 0.0f);
+		glm::vec3 emissive = glm::vec3(0.0f, 0.0f, 0.0f);
 		float metallic = 0.25f;
 		float roughness = 0.6f;
-		float ambientOcclusion = 0.1f;
+		float ambientOcclusion = 0.7f;
 		float alpha = 1.0f;
 
 		// create camera:
@@ -70,15 +74,34 @@ int main(int argc, char* argv[])
 
 		// create model:
 		std::shared_ptr<Model> cubeModel = Model::Initialise();
-		cubeModel->LoadMeshesFromFile("H:/Mimic/assets/models/Normal_Rock_Sphere/normal_rock_sphere.obj");
-		cubeModel->UpdateModelMatrix(glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f), glm::vec3(1.0f));
+		cubeModel->LoadMeshesFromFile(fileLoader->LocateFileInDirectory(assetPath, "normal_rock_sphere.obj"));
+		glm::vec3 rotation = glm::vec3(0.0f);
 		//cubeModel->AddMesh(cubeMesh);
 
 		// create textures:
-		std::shared_ptr<Texture> albedoTexture = Texture::Initialise(assetPath + "models/Normal_Rock_Sphere/rustediron2_basecolor.png", TextureType::MIMIC_ALBEDO);
-		std::shared_ptr<Texture> normalTexture = Texture::Initialise(assetPath + "models/Normal_Rock_Sphere/rustediron2_normal.png", TextureType::MIMIC_NORMAL);
-		std::shared_ptr<Texture> roughnessTexture = Texture::Initialise(assetPath + "models/Normal_Rock_Sphere/rustediron2_roughness.png", TextureType::MIMIC_ROUGHNESS);
-		std::shared_ptr<Texture> metallicTexture = Texture::Initialise(assetPath + "models/Normal_Rock_Sphere/rustediron2_metallic.png", TextureType::MIMIC_METALLIC);
+		std::shared_ptr<Texture> albedoTexture = Texture::Initialise(fileLoader->LocateFileInDirectory(assetPath, "rustediron2_basecolor.png"), TextureType::MIMIC_ALBEDO);
+		std::shared_ptr<Texture> normalTexture = Texture::Initialise(fileLoader->LocateFileInDirectory(assetPath, "rustediron2_normal.png"), TextureType::MIMIC_NORMAL);
+		std::shared_ptr<Texture> roughnessTexture = Texture::Initialise(fileLoader->LocateFileInDirectory(assetPath, "rustediron2_roughness.png"), TextureType::MIMIC_ROUGHNESS);
+		std::shared_ptr<Texture> metallicTexture = Texture::Initialise(fileLoader->LocateFileInDirectory(assetPath, "rustediron2_metallic.png"), TextureType::MIMIC_METALLIC);
+
+	/*	albedoTexture = nullptr;
+		normalTexture = nullptr;
+		roughnessTexture = nullptr;
+		metallicTexture = nullptr;*/
+
+		// load lights:
+		std::vector<std::shared_ptr<DirectLight>> directLights =
+		{
+			DirectLight::Initialise(glm::vec3(0.5f, 0.0f, 0.5f), glm::vec3(0.5f, 0.1f, -0.5f), glm::vec3(70.0f, 20.0f, 15.0f))
+		};
+
+		std::vector<std::shared_ptr<PointLight>> pointLights =
+		{
+
+		};
+
+		// load hdr environment map:
+		std::shared_ptr<EnvironmentCubeMap> environmentCubeMap = EnvironmentCubeMap::Initialise("rural_asphalt_road_4k.hdr", window->GetAspectRatio(), renderer);
 
 		// render-shader lambdo:
 		std::function<void()> meshOnDrawLamba = [&]()
@@ -95,26 +118,25 @@ int main(int argc, char* argv[])
 				pbrShader->SetVector3("u_Albedo", albedo);
 			}
 
+			// load normals (map_Bump):
+			if (normalTexture)
+			{
+				subroutineUniformIndices[normalSubroutineUniform] = normalAuto;
+				pbrShader->SetTexture("u_NormalMap", normalTexture->GetId(), 2);
+			}
+			else subroutineUniformIndices[normalSubroutineUniform] = normalManual;
+
 			// load roughness(map_ks):
 			if (roughnessTexture)
 			{
 				subroutineUniformIndices[roughnessSubroutineUniform] = roughnessAuto;
-				pbrShader->SetTexture("u_RoughnessMap", roughnessTexture->GetId(), 2);
+				pbrShader->SetTexture("u_RoughnessMap", roughnessTexture->GetId(), 3);
 			}
 			else
 			{
 				subroutineUniformIndices[roughnessSubroutineUniform] = roughnessManual;
 				pbrShader->SetFloat("u_Roughness", roughness);
 			}
-
-
-			// load normals (map_Bump):
-			if (normalTexture)
-			{
-				subroutineUniformIndices[normalSubroutineUniform] = normalAuto;
-				pbrShader->SetTexture("u_NormalMap", normalTexture->GetId(), 3);
-			}
-			else subroutineUniformIndices[normalSubroutineUniform] = normalManual;
 
 			// load metallic (must be specified by user):
 			if (metallicTexture)
@@ -130,49 +152,47 @@ int main(int argc, char* argv[])
 
 			glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, subroutineUniformIndices.size(), subroutineUniformIndices.data());
 
-			/*shader->SetInt("u_IrradianceMap", 5);
+			pbrShader->SetInt("u_IrradianceMap", 5);
 			glActiveTexture(GL_TEXTURE5);
-			glBindTexture(GL_TEXTURE_CUBE_MAP, MimicCore::EnvironmentCubeMap->_irradianceRenderTexture->_texture->_id);
+			glBindTexture(GL_TEXTURE_CUBE_MAP, environmentCubeMap->GetIrradianceId());
 
-			shader->SetInt("u_PrefilterMap", 6);
+			pbrShader->SetInt("u_PrefilterMap", 6);
 			glActiveTexture(GL_TEXTURE6);
-			glBindTexture(GL_TEXTURE_CUBE_MAP, MimicCore::EnvironmentCubeMap->_prefilteredMapRenderTexture->_texture->_id);
+			glBindTexture(GL_TEXTURE_CUBE_MAP, environmentCubeMap->GetPreFilteredId());
 
-			shader->SetInt("u_BRDFLookupTexture", 7);
+			pbrShader->SetInt("u_BRDFLookupTexture", 7);
 			glActiveTexture(GL_TEXTURE7);
-			glBindTexture(GL_TEXTURE_2D, MimicCore::EnvironmentCubeMap->_brdfConvolutedRenderTexture->_texture->_id);*/
+			glBindTexture(GL_TEXTURE_2D, environmentCubeMap->GetBRDFId());
 
 			pbrShader->SetVector3("u_Emissive", emissive);
 			pbrShader->SetFloat("u_Alpha", alpha);
 			pbrShader->SetFloat("u_AmbientOcclusion", ambientOcclusion);
 
-			// direct lights:
-			//const std::vector<std::shared_ptr<DirectLight>> directLights = MimicCore::_directLights;
-			//for (int i = 0; i < directLights.size(); i++)
-			//{
-			//	const std::string currentLight = "u_DirectLights[" + std::to_string(i) + "]";
+			// direct lights
+			for (int i = 0; i < directLights.size(); i++)
+			{
+				const std::string currentLight = "u_DirectLights[" + std::to_string(i) + "]";
 
-			//	shader->SetVector3((currentLight + ".direction").c_str(), glm::normalize(-directLights[i]->Direction));
-			//	const glm::vec4 colour = glm::vec4(directLights[i]->Colour.x, directLights[i]->Colour.y, directLights[i]->Colour.z, 1.0f);
-			//	shader->SetVector4((currentLight + ".colour").c_str(), colour);
-			//}
-			//shader->SetInt("u_DirectLightsCount", directLights.size());
+				pbrShader->SetVector3((currentLight + ".direction").c_str(), glm::normalize(-directLights[i]->Direction));
+				const glm::vec4 colour = glm::vec4(directLights[i]->Colour.x, directLights[i]->Colour.y, directLights[i]->Colour.z, 1.0f);
+				pbrShader->SetVector4((currentLight + ".colour").c_str(), colour);
+			}
+			pbrShader->SetInt("u_DirectLightsCount", directLights.size());
 
 
-			//// point lights:
-			//const std::vector<std::shared_ptr<PointLight>> pointLights = MimicCore::_pointLights;
-			//for (int i = 0; i < pointLights.size(); i++)
-			//{
-			//	const std::string currentLight = "u_PointLights[" + std::to_string(i) + "]";
+			// point lights:
+			for (int i = 0; i < pointLights.size(); i++)
+			{
+				const std::string currentLight = "u_PointLights[" + std::to_string(i) + "]";
 
-			//	shader->SetVector3((currentLight + ".position").c_str(), pointLights[i]->Position);
-			//	const glm::vec4 colour = glm::vec4(pointLights[i]->Colour.x, pointLights[i]->Colour.y, pointLights[i]->Colour.z, 1.0f);
-			//	shader->SetVector4((currentLight + ".colour").c_str(), colour);
-			//	shader->SetFloat((currentLight + ".constant").c_str(), pointLights[i]->Constant);
-			//	shader->SetFloat((currentLight + ".linear").c_str(), pointLights[i]->Linear);
-			//	shader->SetFloat((currentLight + ".quadratic").c_str(), pointLights[i]->Quadratic);
-			//}
-			//shader->SetInt("u_PointLightsCount", pointLights.size());
+				pbrShader->SetVector3((currentLight + ".position").c_str(), pointLights[i]->Position);
+				const glm::vec4 colour = glm::vec4(pointLights[i]->Colour.x, pointLights[i]->Colour.y, pointLights[i]->Colour.z, 1.0f);
+				pbrShader->SetVector4((currentLight + ".colour").c_str(), colour);
+				pbrShader->SetFloat((currentLight + ".constant").c_str(), pointLights[i]->GetConstant());
+				pbrShader->SetFloat((currentLight + ".linear").c_str(), pointLights[i]->GetLinear());
+				pbrShader->SetFloat((currentLight + ".quadratic").c_str(), pointLights[i]->GetQuadratic());
+			}
+			pbrShader->SetInt("u_PointLightsCount", pointLights.size());
 		};
 
 		// render loop:
@@ -210,12 +230,43 @@ int main(int argc, char* argv[])
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 			camera->Update();
-
+			cubeModel->UpdateModelMatrix(glm::vec3(0.0f, 0.0f, -4.0f),rotation, glm::vec3(1.0f));
 			// send meshes to renderer:
 			cubeModel->QueMeshesToDraw(pbrShader, meshOnDrawLamba, renderer);
 			
 			// draw:
 			renderer->Draw(camera);
+			environmentCubeMap->Draw(camera->_viewMatrix, camera->_projectionMatrix, renderer);
+
+			// gui:
+			ImGui_ImplOpenGL3_NewFrame(); 
+			ImGui_ImplSDL2_NewFrame();
+			ImGui::NewFrame();
+
+			// light controls:
+			ImGui::Begin("Light");
+			ImGui::SliderFloat3("Position##l1", &(directLights[0]->Position[0]), -5.0f, 5.0f);
+			ImGui::SliderFloat3("Direction##l2", &(directLights[0]->Direction[0]), -1.0f, 1.0f);
+			ImGui::SliderFloat3("Colour##l3", &(directLights[0]->Colour[0]), 0.0f, 100.0f);
+			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+			ImGui::End();
+
+			//	// material controls:
+			ImGui::Begin("PBR Material");
+			ImGui::ColorEdit3("Albedo##m1", &(albedo[0]));
+			ImGui::ColorEdit3("Emissive##m2", &(emissive[0]));
+			ImGui::SliderFloat("Roughness##m4", &(roughness), 0.001f, 1.0f);
+			ImGui::SliderFloat("Metallic##m5", &(metallic), 0.001f, 1.0f);
+			ImGui::SliderFloat("Ambient Occlusion##m6", &(ambientOcclusion), 0.0f, 1.0f);
+			ImGui::End();
+
+			// model controls:
+			ImGui::Begin("Model");
+			ImGui::SliderFloat3("Rotation##m2", &(rotation[0]), -5.0f, 5.0f);
+			ImGui::End();
+
+			ImGui::Render();
+			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
 			window->SwapWindow();
 		}

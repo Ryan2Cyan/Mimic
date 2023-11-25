@@ -1,5 +1,6 @@
 #pragma once
 #include <filesystem>
+#include <memory>
 
 namespace Mimic 
 {
@@ -8,12 +9,12 @@ namespace Mimic
 	// #############################################################################
 	struct FileLoader
 	{
-		explicit FileLoader();
+		static const std::shared_ptr<FileLoader> Initialise();
 		const std::filesystem::path LocateDirectory(const std::string& directoryName);
 		const std::string LocateFileInDirectory(const std::filesystem::path& directoryPath, const std::string fileName);
 
 	private:
-		const std::filesystem::path _workingDirectory;
-		const std::filesystem::path _directorySeparators[3] = { "", "..", "..\\.." };
+		std::filesystem::path _workingDirectory;
+		std::filesystem::path _directorySeparators[3] = { "", "..", "..\\.." };
 	};
 }

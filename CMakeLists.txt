@@ -50,8 +50,6 @@ add_library(mimic
     # src/mimic/lowlevelsystems/ModelRenderer.h
     # src/mimic/lowlevelsystems/Resource.cpp
     # src/mimic/lowlevelsystems/Resource.h
-    # src/mimic/lowlevelsystems/CubeMap.cpp
-    # src/mimic/lowlevelsystems/CubeMap.h
     # src/mimic/lowlevelsystems/Material.cpp
     # src/mimic/lowlevelsystems/Material.h
 
@@ -85,6 +83,8 @@ add_library(mimicrenderer
     src/mimic/renderengine/Window.h
     src/mimic/renderengine/Camera.cpp
     src/mimic/renderengine/Camera.h
+    src/mimic/renderengine/CubeMap.cpp
+    src/mimic/renderengine/CubeMap.h
 
     SDKs/stbi/include/stb_image.h
 )

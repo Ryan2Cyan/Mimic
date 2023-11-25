@@ -3,7 +3,12 @@
 
 namespace Mimic
 {
-	FileLoader::FileLoader() : _workingDirectory(std::filesystem::current_path()) {}
+	const std::shared_ptr<FileLoader> FileLoader::Initialise()
+	{
+		std::shared_ptr<FileLoader> fileLoader = std::make_shared<FileLoader>();
+		fileLoader->_workingDirectory = std::filesystem::current_path();
+		return fileLoader;
+	}
 
 	const std::filesystem::path FileLoader::LocateDirectory(const std::string& directoryName)
 	{

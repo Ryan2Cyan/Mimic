@@ -15,6 +15,7 @@ namespace MimicRender
 	struct Shader;
 	struct RenderTexture;
 	struct Camera;
+	struct EnvironmentCubeMap;
 
 	struct RenderObject
 	{
@@ -43,8 +44,10 @@ namespace MimicRender
 		static std::shared_ptr<Renderer> Initialise();
 		void AddToDrawQue(const std::shared_ptr<RenderObject>& renderObject);
 		void Draw(const std::shared_ptr<Camera>& camera);
+		void DrawCubeMap(const std::shared_ptr<Camera>& camera, const std::shared_ptr<EnvironmentCubeMap>& environmentCubeMap);
 
 	private:
+		friend struct EnvironmentCubeMap;
 
 		void CaptureCubeMap(std::function<void()>& onDrawLambda, const std::shared_ptr<Shader>& shader, std::shared_ptr<RenderTexture>& renderTexture, const glm::ivec2& aspectRatio);
 		/*void CapturePrefilteredCubeMap(std::function<void()>& onDrawLambda, const std::shared_ptr<Shader>& shader, std::shared_ptr<RenderTexture>& renderTexture, const glm::ivec2& aspectRatio, const unsigned int& mipLevels);*/
@@ -55,6 +58,7 @@ namespace MimicRender
 		std::array<glm::mat4, 6> _captureViews;
 		glm::mat4 _captureProjection;
 
+		std::shared_ptr<Shader> _cubeMapShader;
 		render_object_vector _renderQue;
 
 		unsigned int _unitQuadVertexArrayId;

@@ -23,11 +23,11 @@ namespace MimicRender
 		glm::vec2 AspectRatio;
 		glm::vec2 ClippingPlane;
 		float Fov;
-		
+		glm::mat4 _projectionMatrix;
+		glm::mat4 _viewMatrix;
 	private:
 		friend struct Renderer;
 
-		glm::mat4 _projectionMatrix;
-		glm::mat4 _viewMatrix;
+	
 	};
 }

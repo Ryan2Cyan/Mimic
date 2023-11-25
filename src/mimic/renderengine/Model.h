@@ -37,6 +37,7 @@ namespace MimicRender
 		void AddMesh(const std::shared_ptr<Mesh>& mesh);
 		void AddTexture(const std::shared_ptr<Texture>& texture);
 		const int LoadMeshesFromFile(const std::string& path);
+		void Update();
 		void UpdateModelMatrix(const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& scale);
 		void QueMeshesToDraw(const std::shared_ptr<Shader>& shader, std::function<void()> onDrawLambda, std::shared_ptr<Renderer>& renderer);
 

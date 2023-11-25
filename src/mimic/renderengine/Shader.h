@@ -32,6 +32,7 @@ namespace MimicRender
 
 	private:
 		friend struct Renderer;
+		friend struct EnvironmentCubeMap;
 
 		void UseShader() const noexcept;
 		static const std::string ReadShaderFile(const std::string& path);
