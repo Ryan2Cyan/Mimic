@@ -72,13 +72,13 @@ int main(int argc, char* argv[])
 
 		// create camera:
 		std::shared_ptr<Camera> camera = Camera::Initialise(window->GetAspectRatio(), 45.0f);
-		// std::shared_ptr<Mesh> cubeMesh = Mesh::Initialise(vertices, indices);
 
-		// create model:
-		std::shared_ptr<Model> cubeModel = Model::Initialise();
-		cubeModel->LoadMeshesFromFile(fileLoader->LocateFileInDirectory(assetPath, "normal_rock_sphere.obj"));
+		// create models:
 		glm::vec3 rotation = glm::vec3(0.0f);
-		//cubeModel->AddMesh(cubeMesh);
+		std::shared_ptr<Model> model = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "normal_rock_sphere.obj"));
+		std::shared_ptr<Model> model1 = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "normal_rock_sphere.obj"));
+		std::shared_ptr<Model> model2 = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "normal_rock_sphere.obj"));
+
 
 		// create textures:
 		std::shared_ptr<Texture> albedoTexture = Texture::Initialise(fileLoader->LocateFileInDirectory(assetPath, "rustediron2_basecolor.png"), window->GetAspectRatio(), Texture::MIMIC_2D_TEXTURE_PARAMS, TextureType::MIMIC_ALBEDO);
@@ -232,13 +232,18 @@ int main(int argc, char* argv[])
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 			camera->Update();
-			cubeModel->UpdateModelMatrix(glm::vec3(0.0f, 0.0f, -4.0f),rotation, glm::vec3(1.0f));
+			model->UpdateModelMatrix(glm::vec3(0.0f, 0.0f, -4.0f),rotation, glm::vec3(1.0f));
+			model1->UpdateModelMatrix(glm::vec3(-2.5f, 0.0f, -4.0f), rotation, glm::vec3(1.0f));
+			model2->UpdateModelMatrix(glm::vec3(2.5f, 0.0f, -4.0f), rotation, glm::vec3(1.0f));
+
 			// send meshes to renderer:
-			cubeModel->QueMeshesToDraw(pbrShader, meshOnDrawLamba, renderer);
+			model->QueMeshesToDraw(pbrShader, meshOnDrawLamba, renderer);
+			model1->QueMeshesToDraw(pbrShader, meshOnDrawLamba, renderer);
+			model2->QueMeshesToDraw(pbrShader, meshOnDrawLamba, renderer);
 			
 			// draw:
 			renderer->Draw(camera);
-			environmentCubeMap->Draw(camera->_viewMatrix, camera->_projectionMatrix, renderer);
+			renderer->DrawCubeMap(camera, environmentCubeMap);
 
 			// gui:
 			ImGui_ImplOpenGL3_NewFrame(); 

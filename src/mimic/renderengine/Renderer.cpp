@@ -3,11 +3,8 @@
 #include <renderengine/RenderTexture.h>
 #include <renderengine/Camera.h>
 #include <renderengine/CubeMap.h>
-#include <utility/FileLoader.h>
-#include <utility/Logger.h>
 #include <glm/gtc/matrix_transform.hpp> 
 #include <glm/gtc/type_ptr.hpp>
-#include <string>
 #include <GL/glew.h>
 
 namespace MimicRender
@@ -34,20 +31,7 @@ namespace MimicRender
 	// #############################################################################
 	std::shared_ptr<Renderer> Renderer::Initialise()
 	{
-		std::shared_ptr<Renderer> renderer = std::make_shared<Renderer>();
-		renderer->_captureProjection = glm::mat4(1.0f);
-		renderer->_captureProjection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f);
-		renderer->_captureViews =
-		{
-			glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
-			glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f, 0.0f)),
-			glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f,  1.0f,  0.0f), glm::vec3(0.0f,  0.0f,  1.0f)),
-			glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f,  0.0f), glm::vec3(0.0f,  0.0f, -1.0f)),
-			glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f,  0.0f,  1.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
-			glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f,  0.0f, -1.0f), glm::vec3(0.0f, -1.0f,  0.0f))
-		};
-		
-		return renderer;
+		return std::make_shared<Renderer>();
 	}
 
 	void Renderer::AddToDrawQue(const std::shared_ptr<RenderObject>& renderObject)
@@ -78,6 +62,8 @@ namespace MimicRender
 
 	void Renderer::DrawCubeMap(const std::shared_ptr<Camera>& camera, const std::shared_ptr<EnvironmentCubeMap>& environmentCubeMap)
 	{
+		if (!environmentCubeMap->_initialised) return;
+
 		glDepthFunc(GL_LEQUAL);
 		environmentCubeMap->_cubeMapShader->UseShader();
 		environmentCubeMap->_cubeMapShader->SetMat4("u_View", camera->_viewMatrix);
@@ -89,29 +75,6 @@ namespace MimicRender
 		glBindVertexArray(0);
 
 		glDepthFunc(GL_LESS);
-
-		// render the BRDF 2D lookup texture to the screen:
-		/*_brdfConvolutionShader->UseShader();
-		RenderQuad();*/
-	}
-
-	void Renderer::CaptureCubeMap(std::function<void()>& onDrawLambda, const std::shared_ptr<Shader>& shader, std::shared_ptr<RenderTexture>& renderTexture, const glm::ivec2& aspectRatio)
-	{
-		 renderTexture->UseRenderObject(aspectRatio);
-		 shader->UseShader();
-		 shader->SetMat4("u_Projection", _captureProjection);
-		 onDrawLambda();
-
-		 constexpr int startTargetIndex = (int)TextureTarget::MIMIC_CUBE_MAP_POSITIVE_X;
-		 for (unsigned int i = 0; i < 6; i++)
-		 {
-			 shader->SetMat4("u_View", _captureViews[i]);
-			 renderTexture->BindTextureForRender((TextureTarget)(startTargetIndex + i));
-
-			 // render unit cube:
-			 DrawUnitCube();
-		 }
-		 renderTexture->Unbind();
 	}
 
 	void Renderer::DrawUnitCube() noexcept

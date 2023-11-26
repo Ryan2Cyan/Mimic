@@ -5,8 +5,6 @@
 #include <renderengine/Mesh.h>
 #include <glm/gtc/matrix_transform.hpp> 
 #include <glm/gtc/type_ptr.hpp> 
-// #include <lowlevelsystems/ResourceManager.h>
-// #include <iostream>
 #include <renderengine/Renderer.h>
 
 // Source: https://learnopengl.com/Model-Loading/Model
@@ -16,6 +14,13 @@ namespace MimicRender
 	const std::shared_ptr<Model> Model::Initialise()
 	{
 		return std::make_shared<Model>();
+	}
+
+	const std::shared_ptr<Model> Model::Initialise(const std::string& path)
+	{
+		std::shared_ptr<Model> model = std::make_shared<Model>();
+		model->LoadMeshesFromFile(path);
+		return model;
 	}
 
 	const std::shared_ptr<Model> Model::Initialise(const texture_vector& textures)
@@ -39,7 +44,6 @@ namespace MimicRender
 		model->_meshes = meshes;
 		return model;
 	}
-
 
 	void Model::UpdateModelMatrix(const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& scale)
 	{
@@ -80,30 +84,6 @@ namespace MimicRender
 		_textures.push_back(texture);
 	}
 
-	//const int Model::Load(const std::string& path)
-	//{
-	//	Assimp::Importer importer;
-	//	const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
-
-	//	if (!scene)
-	//	{
-	//		MIMIC_LOG_WARNING("[Model] Assimp importer encountered an error: %", importer.GetErrorString());
-	//		return -1;
-	//	}
-	//	if (scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE)
-	//	{
-	//		MIMIC_LOG_WARNING("[Model] Assimp importer encountered an error: %", importer.GetErrorString());
-	//		return -1;
-	//	}
-	//	if (!scene->mRootNode)
-	//	{
-	//		MIMIC_LOG_WARNING("[Model] Assimp importer encountered an error: %", importer.GetErrorString());
-	//		return -1;
-	//	}
-	//	ProcessNode(scene->mRootNode, scene);
-	//	return 0;
-	//}
-
 	const int Model::LoadMeshesFromFile(const std::string& path)
 	{
 		Assimp::Importer importer;
@@ -111,17 +91,17 @@ namespace MimicRender
 
 		if (!scene)
 		{
-			MIMIC_LOG_WARNING("[Model] Assimp importer encountered an error: %", importer.GetErrorString());
+			MIMIC_LOG_WARNING("[MimicRender::Model] Assimp importer encountered an error: %", importer.GetErrorString());
 			return -1;
 		}
 		if (scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE)
 		{
-			MIMIC_LOG_WARNING("[Model] Assimp importer encountered an error: %", importer.GetErrorString());
+			MIMIC_LOG_WARNING("[MimicRender::Model] Assimp importer encountered an error: %", importer.GetErrorString());
 			return -1;
 		}
 		if (!scene->mRootNode)
 		{
-			MIMIC_LOG_WARNING("[Model] Assimp importer encountered an error: %", importer.GetErrorString());
+			MIMIC_LOG_WARNING("[MimicRender::Model] Assimp importer encountered an error: %", importer.GetErrorString());
 			return -1;
 		}
 		ProcessNode(scene->mRootNode, scene);
@@ -141,7 +121,7 @@ namespace MimicRender
 		for (unsigned int i = 0; i < node->mNumChildren; i++) ProcessNode(node->mChildren[i], scene);
 	}
 
-	const std::shared_ptr<Mesh> Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
+	const std::shared_ptr<Mesh> Model::ProcessMesh(aiMesh* mesh, const aiScene* scene) const
 	{
 		// convert aiMesh into Mimic::Mesh: (vertex, normal, tex coords):
 		vertex_vector vertices;
@@ -184,38 +164,5 @@ namespace MimicRender
 
 		std::shared_ptr<Mesh> newMesh = Mesh::Initialise(vertices, indices);
 		return newMesh;
-
-		//// mesh contains material index - retrieve material from scene:
-		//if (mesh->mMaterialIndex >= 0)
-		//{
-		//	const aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
-
-		//	LoadMaterialTextures(material, aiTextureType_DIFFUSE, MIMIC_DIFFUSE | MIMIC_ALBEDO);
-		//	LoadMaterialTextures(material, aiTextureType_SPECULAR, MIMIC_SPECULAR | MIMIC_ROUGHNESS);
-		//	LoadMaterialTextures(material, aiTextureType_HEIGHT, MIMIC_NORMAL);
-		//	LoadMaterialTextures(material, aiTextureType_AMBIENT, MIMIC_HEIGHT);
-		//}
 	}
-
-	//const void Model::LoadMaterialTextures(const aiMaterial* material, const aiTextureType& type, const int& typeName)
-	//{
-	//	std::shared_ptr<Texture> loadedTexture;
-	//	
-	//	aiString aiPath;
-	//	material->GetTexture(type, 0, &aiPath);
-	//	std::string texturePath = aiPath.C_Str();
-	//	if (texturePath == "") return;
-	//	loadedTexture = GetResourceManager()->LoadResource<Texture>(texturePath);
-	//	if (loadedTexture != nullptr)
-	//	{
-	//		loadedTexture->_type = typeName;
-	//		loadedTexture->Name = texturePath;
-	//		// check for repeats:
-	//		for (auto texture : _materialTextures)
-	//		{
-	//			if (loadedTexture->_type == texture->_type) return;
-	//		}
-	//		_materialTextures.push_back(loadedTexture);
-	//	}
-	//}
 }

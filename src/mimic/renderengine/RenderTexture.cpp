@@ -27,12 +27,12 @@ namespace MimicRender
 	{
 		if (!_initialised)
 		{
-			MIMIC_LOG_WARNING("[Mimic::RenderTexture] Unable to use uninitialised render texture.");
+			MIMIC_LOG_WARNING("[MimicRender::RenderTexture] Unable to use uninitialised render texture.");
 			return;
 		}
 		if (_texture == nullptr)
 		{
-			MIMIC_LOG_WARNING("[Mimic::RenderTexture] Unable to set uninitialised texture.");
+			MIMIC_LOG_WARNING("[MimicRender::RenderTexture] Unable to set uninitialised texture.");
 			return;
 		}
 		glBindFramebuffer(GL_FRAMEBUFFER, _id);
@@ -46,9 +46,9 @@ namespace MimicRender
 
 	void RenderTexture::BindTextureForRender(const TextureTarget& textureTarget, const int level)
 	{
-		if (_texture == nullptr)
+		if (_texture == nullptr || !_initialised)
 		{
-			MIMIC_LOG_WARNING("[Mimic::RenderTexture] Unable to bind uninitialised texture.");
+			MIMIC_LOG_WARNING("[MimicRender::RenderTexture] Unable to bind uninitialised texture.");
 			return;
 		}
 
@@ -64,7 +64,7 @@ namespace MimicRender
 			case TextureTarget::MIMIC_CUBE_MAP_NEGATIVE_Z: { targerGL = GL_TEXTURE_CUBE_MAP_NEGATIVE_Z; } break;
 			default:
 			{
-				MIMIC_LOG_WARNING("[Mimic::RenderbufferObject] Could not render to texture, invalid target type.");
+				MIMIC_LOG_WARNING("[MimicRender::RenderTexture] Could not render to texture, invalid target type.");
 				return;
 			}break;
 		}
@@ -77,12 +77,12 @@ namespace MimicRender
 	{
 		if (!_initialised)
 		{
-			MIMIC_LOG_WARNING("[Mimic::RenderTexture] Unable to use uninitialised render texture.");
+			MIMIC_LOG_WARNING("[MimicRender::RenderTexture] Unable to use uninitialised render texture.");
 			return;
 		}
 		if (_depthRBOId == 0)
 		{
-			MIMIC_LOG_WARNING("[Mimic::Framebuffer] Could not use bound renderbuffer object, ID invalid");
+			MIMIC_LOG_WARNING("[MimicRender::RenderTexture] Could not use bound renderbuffer object, ID invalid");
 			return;
 		}
 		glBindFramebuffer(GL_FRAMEBUFFER, _id);
@@ -95,14 +95,24 @@ namespace MimicRender
 	{
 		if (!_initialised)
 		{
-			MIMIC_LOG_WARNING("[Mimic::RenderTexture] Unable to use uninitialised render texture.");
+			MIMIC_LOG_WARNING("[MimicRender::RenderTexture] Unable to use uninitialised render texture.");
 			return;
 		}
 		if (texture == nullptr)
 		{
-			MIMIC_LOG_WARNING("[Mimic::RenderTexture] Unable to set uninitialised texture.");
+			MIMIC_LOG_WARNING("[MimicRender::RenderTexture] Unable to set uninitialised texture.");
 			return;
 		}
 		_texture = texture;
+	}
+
+	const unsigned int RenderTexture::GetTextureID() const
+	{
+		if (!_initialised)
+		{
+			MIMIC_LOG_WARNING("[MimicRender::RenderTexture] Unable get id of uninitialised texture.");
+			return 0;
+		}
+		return _texture->GetId();
 	}
 }

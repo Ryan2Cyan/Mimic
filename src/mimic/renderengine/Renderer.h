@@ -49,16 +49,9 @@ namespace MimicRender
 	private:
 		friend struct EnvironmentCubeMap;
 
-		void CaptureCubeMap(std::function<void()>& onDrawLambda, const std::shared_ptr<Shader>& shader, std::shared_ptr<RenderTexture>& renderTexture, const glm::ivec2& aspectRatio);
-		/*void CapturePrefilteredCubeMap(std::function<void()>& onDrawLambda, const std::shared_ptr<Shader>& shader, std::shared_ptr<RenderTexture>& renderTexture, const glm::ivec2& aspectRatio, const unsigned int& mipLevels);*/
 		void DrawUnitCube() noexcept;
 		void DrawUnitQuad() noexcept;
 
-
-		std::array<glm::mat4, 6> _captureViews;
-		glm::mat4 _captureProjection;
-
-		std::shared_ptr<Shader> _cubeMapShader;
 		render_object_vector _renderQue;
 
 		unsigned int _unitQuadVertexArrayId;

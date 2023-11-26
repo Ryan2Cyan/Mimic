@@ -1,6 +1,5 @@
 #pragma once
 #include <GLM/glm.hpp>
-#include <string>
 #include <memory>
 
 namespace Mimic

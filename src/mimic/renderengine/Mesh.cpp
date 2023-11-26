@@ -1,4 +1,6 @@
 #include "Mesh.h"
+#include <renderengine/Texture.h>
+#include <renderengine/Vertex.h>
 #include <utility/Logger.h>
 #include <GL/glew.h>
 
@@ -52,48 +54,11 @@ namespace MimicRender
 
 	const unsigned int Mesh::GetVertexArrayId() const noexcept
 	{
-		if (!_intialised) MIMIC_LOG_WARNING("[MimicRender::Mesh] Attempting to access Mesh that is uninitialised.");
+		if (!_intialised)
+		{
+			MIMIC_LOG_WARNING("[MimicRender::Mesh] Attempting to access Mesh that is uninitialised.");
+			return 0;
+		}
 		return _vertexArrayId;
 	}
-
-	/*void Mesh::SetDiffuse(const std::shared_ptr<Texture>& diffuse)
-	{
-		if (diffuse == nullptr) 
-		{ 
-			MIMIC_LOG_WARNING("[Mesh] Unable to assign diffuse texture.");
-			return;
-		}
-		_diffuseTexture = diffuse;
-	}
-
-	void Mesh::SetSpecular(const std::shared_ptr<Texture>& specular)
-	{
-		if (specular == nullptr)
-		{
-			MIMIC_LOG_WARNING("[Mesh] Unable to assign specular texture.");
-			return;
-		}
-		_specularTexture = specular;
-	}
-
-	void Mesh::SetNormal(const std::shared_ptr<Texture>& normal)
-	{
-		if (normal == nullptr)
-		{
-			MIMIC_LOG_WARNING("[Mesh] Unable to assign normal texture.");
-			return;
-		}
-		_normalTexture = normal;
-	}
-
-	void Mesh::SetHeight(const std::shared_ptr<Texture>& height)
-	{
-		if (height == nullptr)
-		{
-			MIMIC_LOG_WARNING("[Mesh] Unable to assign height texture.");
-			return;
-		}
-		_heightTexture = height;
-	}*/
-
 }

@@ -18,7 +18,7 @@ namespace Mimic
 			std::filesystem::path resultPath = _workingDirectory / directorySeparator / directoryName;
 			if (std::filesystem::exists(resultPath)) return resultPath;
 		}
-		MIMIC_LOG_WARNING("[FileLoader] Could not find directory correlating to name: \"%\"", directoryName);
+		MIMIC_LOG_WARNING("[RenderUtil::FileLoader] Could not find directory correlating to name: \"%\"", directoryName);
 		return resultPath;
 	}
 
@@ -30,7 +30,7 @@ namespace Mimic
 			resultPath = dir_entry / fileName;
 			if (std::filesystem::exists(resultPath)) return resultPath.generic_string();
 		}
-		MIMIC_LOG_WARNING("[FileLoader] Could not find file \"%\" in directory correlating to name: \"%\"", fileName, directoryPath.generic_string());
+		MIMIC_LOG_WARNING("[RenderUtil::FileLoader] Could not find file \"%\" in directory correlating to name: \"%\"", fileName, directoryPath.generic_string());
 		return resultPath.generic_string();
 	}
 }

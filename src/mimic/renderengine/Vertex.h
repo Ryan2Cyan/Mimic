@@ -1,6 +1,5 @@
 #pragma once
 #include <GLM/glm.hpp>
-#include <memory>
 namespace MimicRender
 {
 	// #############################################################################

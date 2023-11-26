@@ -20,6 +20,7 @@ namespace MimicRender
 		int width;
 		int height;
 		int componentsN;
+		if(textureParams & MIMIC_FLIP_VERTICAL) stbi_set_flip_vertically_on_load(true);
 		unsigned char* data = stbi_load(fullPath.c_str(), &width, &height, &componentsN, 0);
 		if (data == nullptr)
 		{
@@ -62,6 +63,7 @@ namespace MimicRender
 		glTexImage2D(target, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
 		GLTextureParams(textureParams, target);
 		stbi_image_free(data);
+		stbi_set_flip_vertically_on_load(false);
 
 		std::shared_ptr<Texture> texture = std::make_shared<Texture>();
 		texture->_id = textureId;
@@ -88,7 +90,7 @@ namespace MimicRender
 		else if (internalFormat & TextureFormats::MIMIC_RG16F) internalFormatGL = GL_RG16F;
 		else
 		{
-			MIMIC_LOG_WARNING("[Mimic::Texture] Could not create texture, no valid texture internal format arguement.");
+			MIMIC_LOG_WARNING("[MimicRender::Texture] Could not create texture, no valid texture internal format arguement.");
 			MIMIC_LOG_OPENGL("Texture");
 			return nullptr;
 		}
@@ -103,7 +105,7 @@ namespace MimicRender
 		else if (format & TextureFormats::MIMIC_RG16F) formatGL = GL_RG16F;
 		else
 		{
-			MIMIC_LOG_WARNING("[Mimic::Texture] Could not create texture, no valid texture format arguement.");
+			MIMIC_LOG_WARNING("[MimicRender::Texture] Could not create texture, no valid texture format arguement.");
 			MIMIC_LOG_OPENGL("Texture");
 			return nullptr;
 		}

@@ -63,7 +63,7 @@ namespace MimicRender
 		GLenum err = glewInit();
 		if (GLEW_OK != err)
 		{
-			MIMIC_LOG_FATAL("GLEW failed to initialise with message: %", glewGetErrorString(err));
+			MIMIC_LOG_FATAL("[MimicRender::Window] GLEW failed to initialise with message: %", glewGetErrorString(err));
 			throw;
 		}
 		MIMIC_LOG_INFO("[MimicRender::Window] Initialisation successful.");
@@ -81,21 +81,21 @@ namespace MimicRender
 		if (_glContext)
 		{
 			SDL_GL_DeleteContext(_glContext);
-			MIMIC_LOG_INFO("[Mimic::Window] SDL_GL_Context destruction successful.");
+			MIMIC_LOG_INFO("[MimicRender::Window] SDL_GL_Context destruction successful.");
 		}
-		else MIMIC_LOG_ERROR("[Mimic::Window] SDL_GL_Context null, destruction failed.");
+		else MIMIC_LOG_ERROR("[MimicRender::Window] SDL_GL_Context null, destruction failed.");
 		if (_renderer)
 		{
 			SDL_DestroyRenderer(_renderer);
-			MIMIC_LOG_INFO("[Mimic::Window] SDL_Renderer destruction successful.");
+			MIMIC_LOG_INFO("[MimicRender::Window] SDL_Renderer destruction successful.");
 		}
-		else MIMIC_LOG_ERROR("[Mimic::Window] SDL_Renderer null, destruction failed.");
+		else MIMIC_LOG_ERROR("[MimicRender::Window] SDL_Renderer null, destruction failed.");
 		if (_window)
 		{
 			SDL_DestroyWindow(_window);
-			MIMIC_LOG_INFO("[Mimic::Window] SDL_Window destruction successful.");
+			MIMIC_LOG_INFO("[MimicRender::Window] SDL_Window destruction successful.");
 		}
-		else MIMIC_LOG_ERROR("[Mimic::Window] SDL_Window null, destruction failed.");
+		else MIMIC_LOG_ERROR("[MimicRender::Window] SDL_Window null, destruction failed.");
 
 		ImGui_ImplOpenGL3_Shutdown();
 		ImGui_ImplSDL2_Shutdown();

@@ -65,6 +65,7 @@ namespace MimicRender
 		static const std::uint16_t MIMIC_MIN_MIPMAP_LINEAR = 0b0000'1000'0000'0000;
 		static const std::uint16_t MIMIC_MAG_MIPMAP_LINEAR = 0b0001'0000'0000'0000;
 		static const std::uint16_t MIMIC_GEN_MIPMAP =		 0b0010'0000'0000'0000;
+		static const std::uint16_t MIMIC_FLIP_VERTICAL =     0b0100'0000'0000'0000;
 
 		// engine texture parameters:
 		static const std::uint16_t MIMIC_BRDF_TEXTURE_PARAMS = MIMIC_2D_TEXTURE | MIMIC_FLOAT | MIMIC_WRAPS_CLAMP | MIMIC_WRAPT_CLAMP | MIMIC_MIN_LINEAR | MIMIC_MAG_LINEAR;

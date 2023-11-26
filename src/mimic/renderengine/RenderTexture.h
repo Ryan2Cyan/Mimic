@@ -1,7 +1,7 @@
 #pragma once
-#include <renderengine/Texture.h>
 #include <GL/glew.h>
 #include <GLM/glm.hpp>
+#include <renderengine/Texture.h>
 #include <memory>
 
 namespace MimicRender
@@ -9,7 +9,6 @@ namespace MimicRender
 	// #############################################################################
 	// framebuffer stuct:
 	// #############################################################################
-	struct RenderbufferObject;
 	struct Texture;
 
 	struct RenderTexture
@@ -21,6 +20,7 @@ namespace MimicRender
 		void BindTextureForRender(const TextureTarget& textureTarget, const int level = 0);
 		void UseRenderObject(const glm::ivec2& aspectRatio) const;
 		void SetTexture(const std::shared_ptr<Texture>& texture);
+		const unsigned int GetTextureID() const;
 
 	private:
 		friend struct Renderer;
