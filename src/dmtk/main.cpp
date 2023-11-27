@@ -49,6 +49,7 @@ int main(int argc, char* argv[])
 		glm::vec3 objectColour = glm::vec3(1.0f, 0.0f, 0.0f);
 		glm::vec3 lightColour = glm::vec3(0.3f, 0.3f, 0.3f);
 		float ambientStrength = 0.8f;
+		float diffuseStrength = 0.5f;
 		float specularStrength = 0.5f;
 		float shininess = 32.0f;
 
@@ -80,7 +81,10 @@ int main(int argc, char* argv[])
 		std::shared_ptr<Model> model = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "normal_rock_sphere.obj"));
 		std::shared_ptr<Model> model1 = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "normal_rock_sphere.obj"));
 		std::shared_ptr<Model> model2 = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "normal_rock_sphere.obj"));
-		const glm::mat3 normalMatrix = model2->CalculateNormalMatrix();
+		// model2->UpdateModelMatrix(glm::vec3(2.5f, 0.0f, -4.0f), rotation, glm::vec3(1.0f));
+		// const glm::mat4 normalMatrix = model2->GetNormalMatrix();
+
+		std::shared_ptr<Model> lightModel = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "normal_rock_sphere.obj"));
 
 		// create textures:
 		std::shared_ptr<Texture> albedoTexture = Texture::Initialise(fileLoader->LocateFileInDirectory(assetPath, "rustediron2_basecolor.png"), window->GetAspectRatio(), Texture::MIMIC_2D_TEXTURE_PARAMS, TextureType::MIMIC_ALBEDO);
@@ -101,7 +105,7 @@ int main(int argc, char* argv[])
 
 		std::vector<std::shared_ptr<PointLight>> pointLights =
 		{
-
+			PointLight::Initialise(glm::vec3(0.5f, 0.0f, 0.5f), glm::vec3(70.0f, 20.0f, 15.0f))
 		};
 
 		// load hdr environment map:
@@ -201,11 +205,12 @@ int main(int argc, char* argv[])
 		std::function<void()> phongOnDrawLamba = [&]()
 		{
 			// set uniforms:
-			phongShader->SetMat3("u_NormalMatrix", normalMatrix);
+			// phongShader->SetMat4("u_NormalMatrix", normalMatrix);
 			phongShader->SetVector3("u_ObjectColour", objectColour);
 			phongShader->SetVector3("u_LightColour", lightColour);
-			phongShader->SetVector3("u_LightPosition", directLights[0]->Position);
+			phongShader->SetVector3("u_LightPosition", pointLights[0]->Position);
 			phongShader->SetFloat("u_AmbientStrength", ambientStrength);
+			// phongShader->SetFloat("u_DiffuseStrength", diffuseStrength);
 			phongShader->SetFloat("u_SpecularStrength", specularStrength);
 			phongShader->SetFloat("u_Shininess", shininess);
 		};
@@ -248,6 +253,7 @@ int main(int argc, char* argv[])
 			model->UpdateModelMatrix(glm::vec3(0.0f, 0.0f, -4.0f),rotation, glm::vec3(1.0f));
 			model1->UpdateModelMatrix(glm::vec3(-2.5f, 0.0f, -4.0f), rotation, glm::vec3(1.0f));
 			model2->UpdateModelMatrix(glm::vec3(2.5f, 0.0f, -4.0f), rotation, glm::vec3(1.0f));
+			lightModel->UpdateModelMatrix(pointLights[0]->Position, glm::vec3(0.0f), glm::vec3(0.2f));
 
 			// send meshes to renderer:
 			model->QueMeshesToDraw(pbrShader, pbrOnDrawLamba, renderer);
@@ -264,10 +270,16 @@ int main(int argc, char* argv[])
 			ImGui::NewFrame();
 
 			// light controls:
-			ImGui::Begin("Light");
-			ImGui::SliderFloat3("Position##l1", &(directLights[0]->Position[0]), -5.0f, 5.0f);
-			ImGui::SliderFloat3("Direction##l2", &(directLights[0]->Direction[0]), -1.0f, 1.0f);
-			ImGui::SliderFloat3("Colour##l3", &(directLights[0]->Colour[0]), 0.0f, 100.0f);
+			ImGui::Begin("Point Light");
+			ImGui::SliderFloat3("Position##pl1", &(pointLights[0]->Position[0]), -5.0f, 5.0f);
+			ImGui::SliderFloat3("Colour##pl3", &(pointLights[0]->Colour[0]), 0.0f, 100.0f);
+			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+			ImGui::End();
+
+			ImGui::Begin("Direct Light");
+			ImGui::SliderFloat3("Position##dl1", &(directLights[0]->Position[0]), -5.0f, 5.0f);
+			ImGui::SliderFloat3("Direction##dl2", &(directLights[0]->Direction[0]), -1.0f, 1.0f);
+			ImGui::SliderFloat3("Colour##dl3", &(directLights[0]->Colour[0]), 0.0f, 100.0f);
 			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 			ImGui::End();
 
@@ -285,8 +297,9 @@ int main(int argc, char* argv[])
 			ImGui::ColorEdit3("Object Colour##phong_mat1", &(objectColour[0]));
 			ImGui::ColorEdit3("Light Colouur##phong_mat2", &(lightColour[0]));
 			ImGui::SliderFloat("Ambient Strength##phong_mat3", &(ambientStrength), 0.0f, 1.0f);
-			ImGui::SliderFloat("Specular Strength##phong_mat4", &(specularStrength), 0.0f, 1.0f);
-			ImGui::SliderFloat("Shininess##phong_mat5", &(shininess), 0.0f, 100.0f);
+			ImGui::SliderFloat("Diffuse Strength##phong_mat4", &(diffuseStrength), 0.0f, 1.0f);
+			ImGui::SliderFloat("Specular Strength##phong_mat5", &(specularStrength), 0.0f, 1.0f);
+			ImGui::SliderFloat("Shininess##phong_mat6", &(shininess), 0.0f, 100.0f);
 			ImGui::End();
 
 			// model controls:

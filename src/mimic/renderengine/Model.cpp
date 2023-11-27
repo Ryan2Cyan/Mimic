@@ -48,6 +48,7 @@ namespace MimicRender
 	void Model::UpdateModelMatrix(const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& scale)
 	{
 		_modelMatrix = glm::translate(glm::mat4(1.0f), position) * glm::mat4_cast(glm::quat(rotation)) * glm::scale(glm::mat4(1.0f), scale);
+		// _normalMatrix = glm::inverseTranspose(_modelMatrix);
 	}
 
 	void Model::QueMeshesToDraw(const std::shared_ptr<Shader>& shader, std::function<void()> onDrawLambda, std::shared_ptr<Renderer>& renderer)
@@ -166,10 +167,8 @@ namespace MimicRender
 		return newMesh;
 	}
 
-	const glm::mat3 Model::CalculateNormalMatrix() const noexcept
+	/*const glm::mat4 Model::GetNormalMatrix() const noexcept
 	{
-		glm::mat4 normalMatrix = glm::inverse(_modelMatrix);
-		normalMatrix = glm::transpose(normalMatrix);
-		return glm::mat3(normalMatrix);
-	}
+		return _normalMatrix;
+	}*/
 }

@@ -8,7 +8,7 @@ layout(location = 1) in vec3 aNormal;
 uniform mat4 u_Model;
 uniform mat4 u_View;
 uniform mat4 u_Projection;
-uniform mat3 u_NormalMatrix;
+// uniform mat4 u_NormalMatrix;
 
 out vec3 fragPosition;
 out vec3 normal;
@@ -17,7 +17,7 @@ void main()
 {
 	const vec4 fragmentPositionVec4 = vec4(aPos, 1.0);
 	fragPosition = vec3(u_Model * fragmentPositionVec4);
-	// normal = u_NormalMatrix * normalize(aNormal);
+	// normal = mat3(u_NormalMatrix) * normalize(aNormal);
 	normal = mat3(transpose(inverse(u_Model))) * normalize(aNormal);
 	gl_Position = u_Projection * u_View * u_Model * vec4(aPos, 1.0);
 }
@@ -37,6 +37,7 @@ uniform vec3 u_LightColour;
 uniform vec3 u_LightPosition;
 uniform vec3 u_CameraPosition;
 uniform float u_AmbientStrength;
+// uniform float u_DiffuseStrength;
 uniform float u_SpecularStrength;
 uniform float u_Shininess;
 

@@ -36,10 +36,11 @@ namespace MimicRender
 		void UpdateModelMatrix(const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& scale);
 		void QueMeshesToDraw(const std::shared_ptr<Shader>& shader, std::function<void()> onDrawLambda, std::shared_ptr<Renderer>& renderer);
 		// this will be private eventually:
-		const glm::mat3 CalculateNormalMatrix() const noexcept;
+		// const glm::mat4 GetNormalMatrix() const noexcept;
 
 	private:
 		glm::mat4 _modelMatrix = glm::mat4(1.0f);
+		glm::mat4 _normalMatrix = glm::mat3(1.0f);
 		texture_vector _textures;
 		mesh_vector _meshes;
 
