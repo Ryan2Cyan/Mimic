@@ -47,7 +47,10 @@ int main(int argc, char* argv[])
 
 		const std::shared_ptr<Shader> phongShader = Shader::Initialise(fileLoader->LocateFileInDirectory(assetPath, "PhongShader.glsl"));
 		glm::vec3 objectColour = glm::vec3(1.0f, 0.0f, 0.0f);
-		glm::vec3 lightColour = glm::vec3(1.0f, 1.0f, 1.0f);
+		glm::vec3 lightColour = glm::vec3(0.3f, 0.3f, 0.3f);
+		float ambientStrength = 0.8f;
+		float specularStrength = 0.5f;
+		float shininess = 32.0f;
 
 		// load shader subroutine uniforms:
 		const unsigned int albedoSubroutineUniform = pbrShader->GetSubroutineUniform(GL_FRAGMENT_SHADER, "AlbedoMode");
@@ -202,6 +205,9 @@ int main(int argc, char* argv[])
 			phongShader->SetVector3("u_ObjectColour", objectColour);
 			phongShader->SetVector3("u_LightColour", lightColour);
 			phongShader->SetVector3("u_LightPosition", directLights[0]->Position);
+			phongShader->SetFloat("u_AmbientStrength", ambientStrength);
+			phongShader->SetFloat("u_SpecularStrength", specularStrength);
+			phongShader->SetFloat("u_Shininess", shininess);
 		};
 
 		// render loop:
@@ -278,6 +284,9 @@ int main(int argc, char* argv[])
 			ImGui::Begin("Phong Material");
 			ImGui::ColorEdit3("Object Colour##phong_mat1", &(objectColour[0]));
 			ImGui::ColorEdit3("Light Colouur##phong_mat2", &(lightColour[0]));
+			ImGui::SliderFloat("Ambient Strength##phong_mat3", &(ambientStrength), 0.0f, 1.0f);
+			ImGui::SliderFloat("Specular Strength##phong_mat4", &(specularStrength), 0.0f, 1.0f);
+			ImGui::SliderFloat("Shininess##phong_mat5", &(shininess), 0.0f, 100.0f);
 			ImGui::End();
 
 			// model controls:

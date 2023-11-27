@@ -35,22 +35,29 @@ in vec3 normal;
 uniform vec3 u_ObjectColour;
 uniform vec3 u_LightColour;
 uniform vec3 u_LightPosition;
+uniform vec3 u_CameraPosition;
+uniform float u_AmbientStrength;
+uniform float u_SpecularStrength;
+uniform float u_Shininess;
 
 out vec4 fragColour;
 
 void main()
 {
-	// apply ambient light:
-	const float ambientStrength = 0.8;
-	const vec3 ambient = ambientStrength * u_LightColour;
+	// calculate ambient light:
+	const vec3 ambient = u_AmbientStrength * u_LightColour;
 
-	// apply diffuse light:
+	// calculate diffuse light:
 	const vec3 lightDirection = normalize(u_LightPosition - fragPosition);
-	// const float diff = max(dot(normal, lightDirection), 0.0);
 	const vec3 diffuse = max(dot(normal, lightDirection), 0.0) * u_LightColour;
 
+	// calculate specular light:
+	const vec3 viewDirection = normalize(u_CameraPosition - fragPosition);
+	const vec3 reflectDirection = reflect(-lightDirection, normal);
+	const vec3 specular = u_SpecularStrength * pow(max(dot(viewDirection, reflectDirection), 0.0), u_Shininess) * u_LightColour;
+
 	// generate fragment colour:
-	const vec3 resultColour = (ambient * diffuse) * u_ObjectColour;
+	const vec3 resultColour = (ambient + diffuse + specular) * u_ObjectColour;
 
     fragColour = vec4(resultColour, 1.0);
 }
