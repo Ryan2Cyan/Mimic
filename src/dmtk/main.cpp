@@ -11,12 +11,9 @@
 #include <renderengine/Camera.h>
 #include <renderengine/CubeMap.h>
 #include <utility/FileLoader.h>
-#include <vector>
 #include <filesystem>
+#include <vector>
 #include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp> 
-#include <glm/gtc/type_ptr.hpp>
-#include <cstdio>
 #include <imgui.h>
 #include <imgui_impl_opengl3.h>
 #include <imgui_impl_sdl2.h>
@@ -39,8 +36,18 @@ int main(int argc, char* argv[])
 		// initialise renderer:
 		std::shared_ptr<Renderer> renderer = Renderer::Initialise();
 
-		// create shader:
+		// initialise shaders:
 		const std::shared_ptr<Shader> pbrShader = Shader::Initialise(fileLoader->LocateFileInDirectory(assetPath, "PBRShader.glsl"));
+		glm::vec3 albedo = glm::vec3(1.0f, 0.0f, 0.0f);
+		glm::vec3 emissive = glm::vec3(0.0f, 0.0f, 0.0f);
+		float metallic = 0.25f;
+		float roughness = 0.6f;
+		float ambientOcclusion = 0.7f;
+		float alpha = 1.0f;
+
+		const std::shared_ptr<Shader> phongShader = Shader::Initialise(fileLoader->LocateFileInDirectory(assetPath, "PhongShader.glsl"));
+		glm::vec3 objectColour = glm::vec3(1.0f, 0.0f, 0.0f);
+		glm::vec3 lightColour = glm::vec3(1.0f, 1.0f, 1.0f);
 
 		// load shader subroutine uniforms:
 		const unsigned int albedoSubroutineUniform = pbrShader->GetSubroutineUniform(GL_FRAGMENT_SHADER, "AlbedoMode");
@@ -61,14 +68,6 @@ int main(int argc, char* argv[])
 
 		const unsigned int metallicAuto = pbrShader->GetSubroutineIndex(GL_FRAGMENT_SHADER, "CalculateMetallicAutoTexture");
 		const unsigned int metallicManual = pbrShader->GetSubroutineIndex(GL_FRAGMENT_SHADER, "CalculateMetallicManual");
-
-		// pbr properties:
-		glm::vec3 albedo = glm::vec3(1.0f, 0.0f, 0.0f);
-		glm::vec3 emissive = glm::vec3(0.0f, 0.0f, 0.0f);
-		float metallic = 0.25f;
-		float roughness = 0.6f;
-		float ambientOcclusion = 0.7f;
-		float alpha = 1.0f;
 
 		// create camera:
 		std::shared_ptr<Camera> camera = Camera::Initialise(window->GetAspectRatio(), 45.0f);
@@ -106,7 +105,7 @@ int main(int argc, char* argv[])
 		std::shared_ptr<EnvironmentCubeMap> environmentCubeMap = EnvironmentCubeMap::Initialise("rural_asphalt_road_4k.hdr", window->GetAspectRatio(), renderer);
 
 		// render-shader lambdo:
-		std::function<void()> meshOnDrawLamba = [&]()
+		std::function<void()> pbrOnDrawLamba = [&]()
 		{
 			// load albedo (map_kd):
 			if (albedoTexture)
@@ -196,6 +195,12 @@ int main(int argc, char* argv[])
 			}
 			pbrShader->SetInt("u_PointLightsCount", pointLights.size());
 		};
+		std::function<void()> phongOnDrawLamba = [&]()
+		{
+			// set uniforms:
+			phongShader->SetVector3("u_ObjectColour", objectColour);
+			phongShader->SetVector3("u_LightColour", lightColour);
+		};
 
 		// render loop:
 		bool applicationRunning = true;
@@ -237,9 +242,9 @@ int main(int argc, char* argv[])
 			model2->UpdateModelMatrix(glm::vec3(2.5f, 0.0f, -4.0f), rotation, glm::vec3(1.0f));
 
 			// send meshes to renderer:
-			model->QueMeshesToDraw(pbrShader, meshOnDrawLamba, renderer);
-			model1->QueMeshesToDraw(pbrShader, meshOnDrawLamba, renderer);
-			model2->QueMeshesToDraw(pbrShader, meshOnDrawLamba, renderer);
+			model->QueMeshesToDraw(pbrShader, pbrOnDrawLamba, renderer);
+			model1->QueMeshesToDraw(pbrShader, pbrOnDrawLamba, renderer);
+			model2->QueMeshesToDraw(phongShader, phongOnDrawLamba, renderer);
 			
 			// draw:
 			renderer->Draw(camera);
@@ -258,13 +263,19 @@ int main(int argc, char* argv[])
 			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 			ImGui::End();
 
-			//	// material controls:
+			// pbr material controls:
 			ImGui::Begin("PBR Material");
-			ImGui::ColorEdit3("Albedo##m1", &(albedo[0]));
-			ImGui::ColorEdit3("Emissive##m2", &(emissive[0]));
-			ImGui::SliderFloat("Roughness##m4", &(roughness), 0.001f, 1.0f);
-			ImGui::SliderFloat("Metallic##m5", &(metallic), 0.001f, 1.0f);
+			ImGui::ColorEdit3("Albedo##pbr_mat1", &(albedo[0]));
+			ImGui::ColorEdit3("Emissive##pbr_mat2", &(emissive[0]));
+			ImGui::SliderFloat("Roughness##pbr_mat3", &(roughness), 0.001f, 1.0f);
+			ImGui::SliderFloat("Metallic##pbr_mat4", &(metallic), 0.001f, 1.0f);
 			ImGui::SliderFloat("Ambient Occlusion##m6", &(ambientOcclusion), 0.0f, 1.0f);
+			ImGui::End();
+
+			// phong material controls:
+			ImGui::Begin("Phong Material");
+			ImGui::ColorEdit3("Object Colour##phong_mat1", &(objectColour[0]));
+			ImGui::ColorEdit3("Light Colouur##phong_mat2", &(lightColour[0]));
 			ImGui::End();
 
 			// model controls:
