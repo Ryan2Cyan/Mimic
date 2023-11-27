@@ -77,7 +77,7 @@ int main(int argc, char* argv[])
 		std::shared_ptr<Model> model = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "normal_rock_sphere.obj"));
 		std::shared_ptr<Model> model1 = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "normal_rock_sphere.obj"));
 		std::shared_ptr<Model> model2 = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "normal_rock_sphere.obj"));
-
+		const glm::mat3 normalMatrix = model2->CalculateNormalMatrix();
 
 		// create textures:
 		std::shared_ptr<Texture> albedoTexture = Texture::Initialise(fileLoader->LocateFileInDirectory(assetPath, "rustediron2_basecolor.png"), window->GetAspectRatio(), Texture::MIMIC_2D_TEXTURE_PARAMS, TextureType::MIMIC_ALBEDO);
@@ -198,8 +198,10 @@ int main(int argc, char* argv[])
 		std::function<void()> phongOnDrawLamba = [&]()
 		{
 			// set uniforms:
+			phongShader->SetMat3("u_NormalMatrix", normalMatrix);
 			phongShader->SetVector3("u_ObjectColour", objectColour);
 			phongShader->SetVector3("u_LightColour", lightColour);
+			phongShader->SetVector3("u_LightPosition", directLights[0]->Position);
 		};
 
 		// render loop:

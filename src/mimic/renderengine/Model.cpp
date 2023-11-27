@@ -165,4 +165,11 @@ namespace MimicRender
 		std::shared_ptr<Mesh> newMesh = Mesh::Initialise(vertices, indices);
 		return newMesh;
 	}
+
+	const glm::mat3 Model::CalculateNormalMatrix() const noexcept
+	{
+		glm::mat4 normalMatrix = glm::inverse(_modelMatrix);
+		normalMatrix = glm::transpose(normalMatrix);
+		return glm::mat3(normalMatrix);
+	}
 }
