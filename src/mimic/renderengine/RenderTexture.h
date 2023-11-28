@@ -3,6 +3,7 @@
 #include <GLM/glm.hpp>
 #include <renderengine/Texture.h>
 #include <memory>
+#include <cstdint>
 
 namespace MimicRender
 {
@@ -17,10 +18,16 @@ namespace MimicRender
 
 		void Bind() const noexcept;
 		void Unbind() const noexcept;
-		void BindTextureForRender(const TextureTarget& textureTarget, const int level = 0);
+		void BindTextureForRender(const TextureTarget& textureTarget, const std::uint8_t& params, const int level = 0);
 		void UseRenderObject(const glm::ivec2& aspectRatio) const;
 		void SetTexture(const std::shared_ptr<Texture>& texture);
 		const unsigned int GetTextureID() const;
+
+		// render texture parameters:
+		static const std::uint8_t MIMIC_NO_DRAW			 = 0b1;
+		static const std::uint8_t MIMIC_NO_READ			 = 0b10;
+		static const std::uint8_t MIMIC_COLOR_BUFFER_BIT = 0b100;
+		static const std::uint8_t MIMIC_DEPTH_BUFFER_BIT = 0b1000;
 
 	private:
 		friend struct Renderer;

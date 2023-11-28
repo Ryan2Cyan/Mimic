@@ -101,7 +101,7 @@ namespace MimicRender
 			for (unsigned int i = 0; i < 6; i++)
 			{
 				preFilteredShader->SetMat4("u_View", captureViews[i]);
-				prefilteredMapRenderTexture->BindTextureForRender((TextureTarget)(startTargetIndex + i), mip);
+				prefilteredMapRenderTexture->BindTextureForRender((TextureTarget)(startTargetIndex + i), RenderTexture::MIMIC_COLOR_BUFFER_BIT | RenderTexture::MIMIC_DEPTH_BUFFER_BIT, mip);
 				renderer->DrawUnitCube();
 			}
 		}
@@ -110,7 +110,7 @@ namespace MimicRender
 
 		// initialise 2D BRDF roughness texture:
 		brdfConvolutedRenderTexture->UseRenderObject(glm::ivec2(512, 512));
-		brdfConvolutedRenderTexture->BindTextureForRender(TextureTarget::MIMIC_TEXTURE_2D);
+		brdfConvolutedRenderTexture->BindTextureForRender(TextureTarget::MIMIC_TEXTURE_2D, RenderTexture::MIMIC_COLOR_BUFFER_BIT | RenderTexture::MIMIC_DEPTH_BUFFER_BIT);
 		brdfConvolutionShader->UseShader();
 		renderer->DrawUnitQuad();
 		glBindTexture(GL_TEXTURE_2D, 0);
@@ -140,7 +140,7 @@ namespace MimicRender
 		for (unsigned int i = 0; i < 6; i++)
 		{
 			shader->SetMat4("u_View", captureViews[i]);
-			renderTexture->BindTextureForRender((TextureTarget)(startTargetIndex + i));
+			renderTexture->BindTextureForRender((TextureTarget)(startTargetIndex + i), RenderTexture::MIMIC_COLOR_BUFFER_BIT | RenderTexture::MIMIC_DEPTH_BUFFER_BIT);
 
 			// render unit cube:
 			renderer->DrawUnitCube();

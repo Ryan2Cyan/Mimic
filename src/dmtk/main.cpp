@@ -14,6 +14,7 @@
 #include <filesystem>
 #include <vector>
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 #include <imgui.h>
 #include <imgui_impl_opengl3.h>
 #include <imgui_impl_sdl2.h>
@@ -56,6 +57,8 @@ int main(int argc, char* argv[])
 		const std::shared_ptr<Shader> flatColourShader = Shader::Initialise(fileLoader->LocateFileInDirectory(assetPath, "FlatColourShader.glsl"));
 		constexpr glm::vec3 flatColour = glm::vec3(1.0f);
 
+		const std::shared_ptr<Shader> depthMapShader = Shader::Initialise(fileLoader->LocateFileInDirectory(assetPath, "DepthMapShader.glsl"));
+
 
 		// load shader subroutine uniforms:
 		const unsigned int albedoSubroutineUniform = pbrShader->GetSubroutineUniform(GL_FRAGMENT_SHADER, "AlbedoMode");
@@ -76,10 +79,6 @@ int main(int argc, char* argv[])
 
 		const unsigned int metallicAuto = pbrShader->GetSubroutineIndex(GL_FRAGMENT_SHADER, "CalculateMetallicAutoTexture");
 		const unsigned int metallicManual = pbrShader->GetSubroutineIndex(GL_FRAGMENT_SHADER, "CalculateMetallicManual");
-
-		// shadow mapping:
-		std::shared_ptr<RenderTexture> depthMapRenderTexture = RenderTexture::Initialise();
-		depthMapRenderTexture->SetTexture(Texture::Initialise(glm::ivec2(1024, 1024), Texture::MIMIC_DEPTH_MAP_PARAMS, Texture::MIMIC_DEPTH_COMPONENT, Texture::MIMIC_DEPTH_COMPONENT));
 
 		// create camera:
 		std::shared_ptr<Camera> camera = Camera::Initialise(window->GetAspectRatio(), 45.0f);
@@ -117,10 +116,22 @@ int main(int argc, char* argv[])
 			PointLight::Initialise(glm::vec3(0.5f, 0.0f, 0.5f), glm::vec3(70.0f, 20.0f, 15.0f))
 		};
 
+		// shadow mapping:
+		std::shared_ptr<RenderTexture> depthMapRenderTexture = RenderTexture::Initialise();
+		depthMapRenderTexture->SetTexture(Texture::Initialise(glm::ivec2(1024, 1024), Texture::MIMIC_DEPTH_MAP_PARAMS, Texture::MIMIC_DEPTH_COMPONENT, Texture::MIMIC_DEPTH_COMPONENT));
+		constexpr glm::vec2 lightProjectionClippingPlanes = glm::vec2(1.0f, 25.0f);
+		const glm::mat4 lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, lightProjectionClippingPlanes.x, lightProjectionClippingPlanes.y);
+		const glm::mat4 lightView = glm::lookAt(
+			glm::vec3(-2.0f, 4.0f, -1.0f),
+			glm::vec3(0.0f, 0.0f, 0.0f),
+			glm::vec3(0.0f, 1.0f, 0.0f));
+		const glm::mat4 lightSpaceMatrix = lightProjection * lightView;
+
+
 		// load hdr environment map:
 		std::shared_ptr<EnvironmentCubeMap> environmentCubeMap = EnvironmentCubeMap::Initialise("rural_asphalt_road_4k.hdr", window->GetAspectRatio(), renderer);
 
-		// render-shader lambdo:
+		// render-shader lambdas:
 		std::function<void()> pbrOnDrawLamba = [&]()
 		{
 			// load albedo (map_kd):
@@ -228,6 +239,11 @@ int main(int argc, char* argv[])
 			// set uniforms:
 			flatColourShader->SetVector3("u_Colour", flatColour);
 		};
+		std::function<void()> depthMapOnDrawLamba = [&]()
+		{
+			// set uniforms:
+			// depthMapShader->SetMat4("u_LightSpaceMatrix", lightSpaceMatrix);
+		};
 
 
 		// render loop:
@@ -260,7 +276,8 @@ int main(int argc, char* argv[])
 					case SDL_KEYUP: { break; }
 				}
 			}
-		
+
+			// update scene:
 			glClearColor(0.77f, 0.73f, 0.97f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -271,6 +288,10 @@ int main(int argc, char* argv[])
 			model3->UpdateModelMatrix(glm::vec3(2.5f, 1.0f, -4.0f), rotation, glm::vec3(1.0f));
 			lightModel->UpdateModelMatrix(pointLights[0]->Position, rotation, glm::vec3(0.2f));
 			
+			// update shadow maps:
+			depthMapShader->UseShader();
+			depthMapShader->SetMat4("u_LightSpaceMatrix", lightSpaceMatrix);
+			//depthMapShader->SetMat4("u_Model",)
 
 			// send meshes to renderer:
 			model->QueMeshesToDraw(pbrShader, pbrOnDrawLamba, renderer);

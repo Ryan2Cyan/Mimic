@@ -57,7 +57,26 @@ namespace MimicRender
 			glBindVertexArray(0);
 			glUseProgram(0);
 		}
-		_renderQue.clear();
+	}
+
+	void Renderer::Draw(const glm::mat4& view, const glm::mat4& projection)
+	{
+		for (std::shared_ptr<RenderObject> renderObject : _renderQue)
+		{
+			// set uniforms:
+			renderObject->_shader->UseShader();
+			// renderObject->_shader->SetVector3("u_CameraPosition", camera->Position);
+			renderObject->_shader->SetModelMatrix(renderObject->_modelMatrix);
+			renderObject->_shader->SetViewMatrix(view);
+			renderObject->_shader->SetProjectionMatrix(projection);
+			renderObject->_onDraw();
+
+			// draw mesh:
+			glBindVertexArray(renderObject->_vertexArrayId);
+			glDrawElements(GL_TRIANGLES, renderObject->_dataSize, GL_UNSIGNED_INT, 0);
+			glBindVertexArray(0);
+			glUseProgram(0);
+		}
 	}
 
 	void Renderer::DrawCubeMap(const std::shared_ptr<Camera>& camera, const std::shared_ptr<EnvironmentCubeMap>& environmentCubeMap)

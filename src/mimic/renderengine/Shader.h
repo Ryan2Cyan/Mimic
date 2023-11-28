@@ -33,8 +33,9 @@ namespace MimicRender
 	private:
 		friend struct Renderer;
 		friend struct EnvironmentCubeMap;
+		
+		void UseShader() const noexcept; 
 
-		void UseShader() const noexcept;
 		static const std::string ReadShaderFile(const std::string& path);
 		static GLenum ShaderTypeFromString(const std::string& type);
 		static const std::unordered_map<GLuint, std::string> PreProcess(const std::string& source);

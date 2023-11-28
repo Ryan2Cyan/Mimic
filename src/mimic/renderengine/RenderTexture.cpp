@@ -44,7 +44,7 @@ namespace MimicRender
 	}
 
 
-	void RenderTexture::BindTextureForRender(const TextureTarget& textureTarget, const int level)
+	void RenderTexture::BindTextureForRender(const TextureTarget& textureTarget, const std::uint8_t& params, const int level)
 	{
 		if (_texture == nullptr || !_initialised)
 		{
@@ -70,7 +70,11 @@ namespace MimicRender
 		}
 
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, targerGL, _texture->_id, level);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		if(params & MIMIC_NO_DRAW) glDrawBuffer(GL_NONE);
+		if (params & MIMIC_NO_READ) glReadBuffer(GL_NONE);
+		if (params & MIMIC_COLOR_BUFFER_BIT) glClear(GL_COLOR_BUFFER_BIT);
+		if (params & MIMIC_DEPTH_BUFFER_BIT) glClear(GL_DEPTH_BUFFER_BIT);
 	}
 
 	void RenderTexture::UseRenderObject(const glm::ivec2& aspectRatio) const
