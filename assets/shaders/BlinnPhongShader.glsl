@@ -52,10 +52,14 @@ void main()
 	const vec3 lightDirection = normalize(u_LightPosition - fragPosition);
 	const vec3 diffuse = max(dot(normal, lightDirection), 0.0) * u_LightColour;
 
-	// calculate specular light:
+	// Blinn-Phong specular:
 	const vec3 viewDirection = normalize(u_CameraPosition - fragPosition);
-	const vec3 reflectDirection = reflect(-lightDirection, normal);
-	const vec3 specular = u_SpecularStrength * pow(max(dot(viewDirection, reflectDirection), 0.0), u_Shininess) * u_LightColour;
+	const vec3 halfwayDirection = normalize(lightDirection + viewDirection);
+	const vec3 specular = u_SpecularStrength * pow(max(dot(normal, halfwayDirection), 0.0), u_Shininess) * u_LightColour;
+
+	// Phong specular:
+	// const vec3 reflectDirection = reflect(-lightDirection, normal);
+	// const vec3 specular = u_SpecularStrength * pow(max(dot(viewDirection, reflectDirection), 0.0), u_Shininess) * u_LightColour;
 
 	// generate fragment colour:
 	const vec3 resultColour = (ambient + diffuse + specular) * u_ObjectColour;

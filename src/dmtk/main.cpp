@@ -45,13 +45,17 @@ int main(int argc, char* argv[])
 		float ambientOcclusion = 0.7f;
 		float alpha = 1.0f;
 
-		const std::shared_ptr<Shader> phongShader = Shader::Initialise(fileLoader->LocateFileInDirectory(assetPath, "PhongShader.glsl"));
+		const std::shared_ptr<Shader> blinnPhongShader = Shader::Initialise(fileLoader->LocateFileInDirectory(assetPath, "BlinnPhongShader.glsl"));
 		glm::vec3 objectColour = glm::vec3(1.0f, 0.0f, 0.0f);
 		glm::vec3 lightColour = glm::vec3(0.3f, 0.3f, 0.3f);
 		float ambientStrength = 0.8f;
 		float diffuseStrength = 0.5f;
 		float specularStrength = 0.5f;
 		float shininess = 32.0f;
+
+		const std::shared_ptr<Shader> flatColourShader = Shader::Initialise(fileLoader->LocateFileInDirectory(assetPath, "FlatColourShader.glsl"));
+		constexpr glm::vec3 flatColour = glm::vec3(1.0f);
+
 
 		// load shader subroutine uniforms:
 		const unsigned int albedoSubroutineUniform = pbrShader->GetSubroutineUniform(GL_FRAGMENT_SHADER, "AlbedoMode");
@@ -81,6 +85,7 @@ int main(int argc, char* argv[])
 		std::shared_ptr<Model> model = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "normal_rock_sphere.obj"));
 		std::shared_ptr<Model> model1 = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "normal_rock_sphere.obj"));
 		std::shared_ptr<Model> model2 = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "normal_rock_sphere.obj"));
+		std::shared_ptr<Model> model3 = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "normal_rock_sphere.obj"));
 		// model2->UpdateModelMatrix(glm::vec3(2.5f, 0.0f, -4.0f), rotation, glm::vec3(1.0f));
 		// const glm::mat4 normalMatrix = model2->GetNormalMatrix();
 
@@ -202,18 +207,24 @@ int main(int argc, char* argv[])
 			}
 			pbrShader->SetInt("u_PointLightsCount", pointLights.size());
 		};
-		std::function<void()> phongOnDrawLamba = [&]()
+		std::function<void()> blinnPhongOnDrawLamba = [&]()
 		{
 			// set uniforms:
 			// phongShader->SetMat4("u_NormalMatrix", normalMatrix);
-			phongShader->SetVector3("u_ObjectColour", objectColour);
-			phongShader->SetVector3("u_LightColour", lightColour);
-			phongShader->SetVector3("u_LightPosition", pointLights[0]->Position);
-			phongShader->SetFloat("u_AmbientStrength", ambientStrength);
+			blinnPhongShader->SetVector3("u_ObjectColour", objectColour);
+			blinnPhongShader->SetVector3("u_LightColour", lightColour);
+			blinnPhongShader->SetVector3("u_LightPosition", pointLights[0]->Position);
+			blinnPhongShader->SetFloat("u_AmbientStrength", ambientStrength);
 			// phongShader->SetFloat("u_DiffuseStrength", diffuseStrength);
-			phongShader->SetFloat("u_SpecularStrength", specularStrength);
-			phongShader->SetFloat("u_Shininess", shininess);
+			blinnPhongShader->SetFloat("u_SpecularStrength", specularStrength);
+			blinnPhongShader->SetFloat("u_Shininess", shininess);
 		};
+		std::function<void()> flatColourOnDrawLamba = [&]()
+		{
+			// set uniforms:
+			flatColourShader->SetVector3("u_Colour", flatColour);
+		};
+
 
 		// render loop:
 		bool applicationRunning = true;
@@ -253,12 +264,16 @@ int main(int argc, char* argv[])
 			model->UpdateModelMatrix(glm::vec3(0.0f, 0.0f, -4.0f),rotation, glm::vec3(1.0f));
 			model1->UpdateModelMatrix(glm::vec3(-2.5f, 0.0f, -4.0f), rotation, glm::vec3(1.0f));
 			model2->UpdateModelMatrix(glm::vec3(2.5f, 0.0f, -4.0f), rotation, glm::vec3(1.0f));
-			lightModel->UpdateModelMatrix(pointLights[0]->Position, glm::vec3(0.0f), glm::vec3(0.2f));
+			model3->UpdateModelMatrix(glm::vec3(2.5f, 1.0f, -4.0f), rotation, glm::vec3(1.0f));
+			lightModel->UpdateModelMatrix(pointLights[0]->Position, rotation, glm::vec3(0.2f));
+			
 
 			// send meshes to renderer:
 			model->QueMeshesToDraw(pbrShader, pbrOnDrawLamba, renderer);
 			model1->QueMeshesToDraw(pbrShader, pbrOnDrawLamba, renderer);
-			model2->QueMeshesToDraw(phongShader, phongOnDrawLamba, renderer);
+			model2->QueMeshesToDraw(blinnPhongShader, blinnPhongOnDrawLamba, renderer);
+			
+			lightModel->QueMeshesToDraw(flatColourShader, flatColourOnDrawLamba, renderer);
 			
 			// draw:
 			renderer->Draw(camera);
@@ -271,7 +286,7 @@ int main(int argc, char* argv[])
 
 			// light controls:
 			ImGui::Begin("Point Light");
-			ImGui::SliderFloat3("Position##pl1", &(pointLights[0]->Position[0]), -5.0f, 5.0f);
+			ImGui::SliderFloat3("Position##pl1", &(pointLights[0]->Position[0]), -10.0f, 10.0f);
 			ImGui::SliderFloat3("Colour##pl3", &(pointLights[0]->Colour[0]), 0.0f, 100.0f);
 			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 			ImGui::End();

@@ -251,33 +251,21 @@ namespace MimicRender
 	void Shader::SetModelMatrix(const glm::mat4& value) noexcept
 	{
 		if (!_initialised) return;
-		if (_modelMatrixUniformLocation == -1)
-		{
-			MIMIC_LOG_WARNING("[MimicRender::Shader] Unable to set model matrix as it's location is unfound.");
-			return;
-		}
+		if (_modelMatrixUniformLocation == -1) return;
 		glUniformMatrix4fv(_modelMatrixUniformLocation, 1, GL_FALSE, glm::value_ptr(value));
 	}
 
 	void Shader::SetViewMatrix(const glm::mat4& value) noexcept
 	{
 		if (!_initialised) return;
-		if (_viewMatrixUniformLocation == -1)
-		{
-			MIMIC_LOG_WARNING("[MimicRender::Shader] Unable to set view matrix as it's location is unfound.");
-			return;
-		}
+		if (_viewMatrixUniformLocation == -1) return;
 		glUniformMatrix4fv(_viewMatrixUniformLocation, 1, GL_FALSE, glm::value_ptr(value));
 	}
 
 	void Shader::SetProjectionMatrix(const glm::mat4& value) noexcept
 	{
 		if (!_initialised) return;
-		if (_projectionMatrixUniformLocation == -1)
-		{
-			MIMIC_LOG_WARNING("[MimicRender::Shader] Unable to set projection matrix as it's location is unfound.");
-			return;
-		}
+		if (_projectionMatrixUniformLocation == -1) return;
 		glUniformMatrix4fv(_projectionMatrixUniformLocation, 1, GL_FALSE, glm::value_ptr(value));
 	}
 	
