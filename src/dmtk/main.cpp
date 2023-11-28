@@ -357,7 +357,7 @@ int main(int argc, char* argv[])
 			// draw:
 			renderer->Draw(camera);
 			renderer->ClearRenderQue();
-			// renderer->DrawCubeMap(camera, environmentCubeMap);
+			renderer->DrawCubeMap(camera, environmentCubeMap);
 
 			// gui:
 			ImGui_ImplOpenGL3_NewFrame(); 

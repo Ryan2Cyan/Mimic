@@ -14,7 +14,7 @@ namespace MimicRender
 
 		glBindFramebuffer(GL_FRAMEBUFFER, newFramebuffer->_id);
 		glBindRenderbuffer(GL_RENDERBUFFER, newFramebuffer->_depthRBOId);
-		// glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, newFramebuffer->_depthRBOId);
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, newFramebuffer->_depthRBOId);
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glBindRenderbuffer(GL_RENDERBUFFER, 0);
