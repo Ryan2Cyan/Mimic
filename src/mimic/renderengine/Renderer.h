@@ -44,13 +44,15 @@ namespace MimicRender
 		static std::shared_ptr<Renderer> Initialise();
 		void AddToDrawQue(const std::shared_ptr<RenderObject>& renderObject);
 		void Draw(const std::shared_ptr<Camera>& camera);
+		void Draw(const glm::mat4& view, const glm::mat4& projection);
 		void DrawCubeMap(const std::shared_ptr<Camera>& camera, const std::shared_ptr<EnvironmentCubeMap>& environmentCubeMap);
-
+		void ClearRenderQue() noexcept;
+		void DrawUnitQuad() noexcept; // move to private
 	private:
 		friend struct EnvironmentCubeMap;
 
 		void DrawUnitCube() noexcept;
-		void DrawUnitQuad() noexcept;
+		
 
 		render_object_vector _renderQue;
 

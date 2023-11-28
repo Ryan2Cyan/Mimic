@@ -30,11 +30,11 @@ namespace MimicRender
 		const unsigned int GetSubroutineUniform(const GLenum& shaderType, const std::string& subroutineName);
 		const unsigned int GetSubroutineIndex(const GLenum& shaderType, const std::string& subroutineFuncName);
 
+		void UseShader() const noexcept; // move to private
 	private:
 		friend struct Renderer;
 		friend struct EnvironmentCubeMap;
 		
-		void UseShader() const noexcept; 
 
 		static const std::string ReadShaderFile(const std::string& path);
 		static GLenum ShaderTypeFromString(const std::string& type);

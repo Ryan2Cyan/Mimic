@@ -14,7 +14,7 @@ namespace MimicRender
 
 		glBindFramebuffer(GL_FRAMEBUFFER, newFramebuffer->_id);
 		glBindRenderbuffer(GL_RENDERBUFFER, newFramebuffer->_depthRBOId);
-		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, newFramebuffer->_depthRBOId);
+		// glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, newFramebuffer->_depthRBOId);
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glBindRenderbuffer(GL_RENDERBUFFER, 0);
@@ -44,24 +44,25 @@ namespace MimicRender
 	}
 
 
-	void RenderTexture::BindTextureForRender(const TextureTarget& textureTarget, const std::uint8_t& params, const int level)
+	void RenderTexture::BindTextureForRender(const TextureTarget& textureTarget, const std::uint8_t& params, const int level, const RenderTextureAttachment& attachment)
 	{
 		if (_texture == nullptr || !_initialised)
 		{
 			MIMIC_LOG_WARNING("[MimicRender::RenderTexture] Unable to bind uninitialised texture.");
 			return;
 		}
-
-		GLenum targerGL = 0;
+		
+		// find target:
+		GLenum targetGL = 0;
 		switch (textureTarget)
 		{
-			case TextureTarget::MIMIC_TEXTURE_2D: { targerGL = GL_TEXTURE_2D; } break;
-			case TextureTarget::MIMIC_CUBE_MAP_POSITIVE_X: { targerGL = GL_TEXTURE_CUBE_MAP_POSITIVE_X; } break;
-			case TextureTarget::MIMIC_CUBE_MAP_NEGATIVE_X: { targerGL = GL_TEXTURE_CUBE_MAP_NEGATIVE_X; } break;
-			case TextureTarget::MIMIC_CUBE_MAP_POSITIVE_Y: { targerGL = GL_TEXTURE_CUBE_MAP_POSITIVE_Y; } break;
-			case TextureTarget::MIMIC_CUBE_MAP_NEGATIVE_Y: { targerGL = GL_TEXTURE_CUBE_MAP_NEGATIVE_Y; } break;
-			case TextureTarget::MIMIC_CUBE_MAP_POSITIVE_Z: { targerGL = GL_TEXTURE_CUBE_MAP_POSITIVE_Z; } break;
-			case TextureTarget::MIMIC_CUBE_MAP_NEGATIVE_Z: { targerGL = GL_TEXTURE_CUBE_MAP_NEGATIVE_Z; } break;
+			case TextureTarget::MIMIC_TEXTURE_2D: { targetGL = GL_TEXTURE_2D; } break;
+			case TextureTarget::MIMIC_CUBE_MAP_POSITIVE_X: { targetGL = GL_TEXTURE_CUBE_MAP_POSITIVE_X; } break;
+			case TextureTarget::MIMIC_CUBE_MAP_NEGATIVE_X: { targetGL = GL_TEXTURE_CUBE_MAP_NEGATIVE_X; } break;
+			case TextureTarget::MIMIC_CUBE_MAP_POSITIVE_Y: { targetGL = GL_TEXTURE_CUBE_MAP_POSITIVE_Y; } break;
+			case TextureTarget::MIMIC_CUBE_MAP_NEGATIVE_Y: { targetGL = GL_TEXTURE_CUBE_MAP_NEGATIVE_Y; } break;
+			case TextureTarget::MIMIC_CUBE_MAP_POSITIVE_Z: { targetGL = GL_TEXTURE_CUBE_MAP_POSITIVE_Z; } break;
+			case TextureTarget::MIMIC_CUBE_MAP_NEGATIVE_Z: { targetGL = GL_TEXTURE_CUBE_MAP_NEGATIVE_Z; } break;
 			default:
 			{
 				MIMIC_LOG_WARNING("[MimicRender::RenderTexture] Could not render to texture, invalid target type.");
@@ -69,10 +70,24 @@ namespace MimicRender
 			}break;
 		}
 
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, targerGL, _texture->_id, level);
+		// find attachment:
+		GLenum attachmentGL = 0;
+		switch (attachment)
+		{
+			case RenderTextureAttachment::MIMIC_COLOR: { attachmentGL = GL_COLOR_ATTACHMENT0; } break;
+			case RenderTextureAttachment::MIMIC_DEPTH: { attachmentGL = GL_DEPTH_ATTACHMENT; } break;
+		default:
+		{
+			MIMIC_LOG_WARNING("[MimicRender::RenderTexture] Could not render to texture, invalid target type.");
+			return;
+		}break;
+		}
 
-		if(params & MIMIC_NO_DRAW) glDrawBuffer(GL_NONE);
-		if (params & MIMIC_NO_READ) glReadBuffer(GL_NONE);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, attachmentGL, targetGL, _texture->_id, level);
+
+		// if(params & MIMIC_NO_DRAW) glDrawBuffer(GL_NONE);
+		// if (params & MIMIC_NO_READ) glReadBuffer(GL_NONE);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		if (params & MIMIC_COLOR_BUFFER_BIT) glClear(GL_COLOR_BUFFER_BIT);
 		if (params & MIMIC_DEPTH_BUFFER_BIT) glClear(GL_DEPTH_BUFFER_BIT);
 	}

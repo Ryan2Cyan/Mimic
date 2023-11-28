@@ -75,6 +75,7 @@ namespace MimicRender
 		
 		unsigned int _id;
 		TextureType _type;
+		glm::ivec2 _aspectRatio;
 
 		static const GLenum GetGLTarget(const std::uint32_t& textureParams) noexcept;
 		static const GLenum GetGLDataType(const std::uint32_t& textureParams) noexcept;
@@ -95,10 +96,11 @@ namespace MimicRender
 		static const std::shared_ptr<Texture> Initialise(const std::string& fullPath, const glm::ivec2& aspectRatio, const std::uint32_t& textureParams, const TextureType& type = TextureType::MIMIC_NO_TYPE);
 		static const std::shared_ptr<Texture> Initialise(const glm::ivec2& aspectRatio, const std::uint32_t& textureParams, const TextureFormats& internalFormat, const TextureFormats& format, const TextureType& textureType = TextureType::MIMIC_NO_TYPE);
 		void SetType(const TextureType& textureType);
+		const glm::ivec2 GetAspectRatio() const noexcept;
 		const unsigned int GetId() const noexcept;
 
 		// user texture parameters:
 		static const std::uint32_t MIMIC_2D_TEXTURE_PARAMS = MIMIC_2D_TEXTURE | MIMIC_UNSIGNED_BYTE | MIMIC_WRAPS_REPEAT | MIMIC_WRAPT_REPEAT | MIMIC_MIN_MIPMAP_LINEAR | MIMIC_MAG_LINEAR | MIMIC_GEN_MIPMAP;
-		static const std::uint32_t MIMIC_DEPTH_MAP_PARAMS = MIMIC_2D_TEXTURE | MIMIC_FLOAT | MIMIC_WRAPS_REPEAT | MIMIC_WRAPT_REPEAT | MIMIC_MIN_NEAREST | MIMIC_MAG_NEAREST | MIMIC_GEN_MIPMAP; // NOTE: make private after implementing shadow map class
+		static const std::uint32_t MIMIC_DEPTH_MAP_PARAMS = MIMIC_2D_TEXTURE | MIMIC_FLOAT | MIMIC_WRAPS_REPEAT | MIMIC_WRAPT_REPEAT | MIMIC_MIN_NEAREST | MIMIC_MAG_NEAREST; // NOTE: make private after implementing shadow map class
 	};
 }

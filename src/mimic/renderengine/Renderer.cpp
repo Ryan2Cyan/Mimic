@@ -197,4 +197,8 @@ namespace MimicRender
 		glBindVertexArray(0);
 	}
 
+	void Renderer::ClearRenderQue() noexcept
+	{
+		_renderQue.clear();
+	}
 }

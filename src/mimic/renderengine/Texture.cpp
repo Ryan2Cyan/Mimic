@@ -68,6 +68,7 @@ namespace MimicRender
 		std::shared_ptr<Texture> texture = std::make_shared<Texture>();
 		texture->_id = textureId;
 		texture->_type = textureType;
+		texture->_aspectRatio = aspectRatio;
 		MIMIC_LOG_INFO("[MimicRender::Texture] Successfully initialised shader from filepath: \"%\"", fullPath);
 		return texture;
 	}
@@ -137,6 +138,7 @@ namespace MimicRender
 		std::shared_ptr<Texture> texture = std::make_shared<Texture>();
 		texture->_id = textureId;
 		texture->_type = textureType;
+		texture->_aspectRatio = aspectRatio;
 		return texture;
 	}
 
@@ -193,5 +195,10 @@ namespace MimicRender
 	const unsigned int Texture::GetId() const noexcept
 	{
 		return _id;
+	}
+
+	const glm::ivec2 Texture::GetAspectRatio() const noexcept
+	{
+		return _aspectRatio;
 	}
 }

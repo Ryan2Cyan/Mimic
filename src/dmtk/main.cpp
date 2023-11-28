@@ -16,6 +16,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <imgui.h>
+
 #include <imgui_impl_opengl3.h>
 #include <imgui_impl_sdl2.h>
 #define SDL_MAIN_HANDLED
@@ -58,6 +59,7 @@ int main(int argc, char* argv[])
 		constexpr glm::vec3 flatColour = glm::vec3(1.0f);
 
 		const std::shared_ptr<Shader> depthMapShader = Shader::Initialise(fileLoader->LocateFileInDirectory(assetPath, "DepthMapShader.glsl"));
+		const std::shared_ptr<Shader> depthMapDebugShader = Shader::Initialise(fileLoader->LocateFileInDirectory(assetPath, "DepthMapDebug.glsl"));
 
 
 		// load shader subroutine uniforms:
@@ -89,9 +91,6 @@ int main(int argc, char* argv[])
 		std::shared_ptr<Model> model1 = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "normal_rock_sphere.obj"));
 		std::shared_ptr<Model> model2 = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "normal_rock_sphere.obj"));
 		std::shared_ptr<Model> model3 = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "normal_rock_sphere.obj"));
-		// model2->UpdateModelMatrix(glm::vec3(2.5f, 0.0f, -4.0f), rotation, glm::vec3(1.0f));
-		// const glm::mat4 normalMatrix = model2->GetNormalMatrix();
-
 		std::shared_ptr<Model> lightModel = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "normal_rock_sphere.obj"));
 
 		// create textures:
@@ -117,8 +116,8 @@ int main(int argc, char* argv[])
 		};
 
 		// shadow mapping:
-		std::shared_ptr<RenderTexture> depthMapRenderTexture = RenderTexture::Initialise();
-		depthMapRenderTexture->SetTexture(Texture::Initialise(glm::ivec2(1024, 1024), Texture::MIMIC_DEPTH_MAP_PARAMS, Texture::MIMIC_DEPTH_COMPONENT, Texture::MIMIC_DEPTH_COMPONENT));
+		// std::shared_ptr<RenderTexture> depthMapRenderTexture = RenderTexture::Initialise();
+		// depthMapRenderTexture->SetTexture(Texture::Initialise(glm::ivec2(1024, 1024), Texture::MIMIC_DEPTH_MAP_PARAMS, Texture::MIMIC_DEPTH_COMPONENT, Texture::MIMIC_DEPTH_COMPONENT));
 		constexpr glm::vec2 lightProjectionClippingPlanes = glm::vec2(1.0f, 25.0f);
 		const glm::mat4 lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, lightProjectionClippingPlanes.x, lightProjectionClippingPlanes.y);
 		const glm::mat4 lightView = glm::lookAt(
@@ -242,8 +241,33 @@ int main(int argc, char* argv[])
 		std::function<void()> depthMapOnDrawLamba = [&]()
 		{
 			// set uniforms:
-			// depthMapShader->SetMat4("u_LightSpaceMatrix", lightSpaceMatrix);
+			depthMapShader->SetMat4("u_LightSpaceMatrix", camera->_projectionMatrix * camera->_viewMatrix);
 		};
+
+		// init framebuffer:
+		unsigned int depthMapFBO;
+		glGenFramebuffers(1, &depthMapFBO);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		// init depth texture:
+		const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
+
+		unsigned int depthMap;
+		glGenTextures(1, &depthMap);
+		glBindTexture(GL_TEXTURE_2D, depthMap);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,
+			SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glBindTexture(GL_TEXTURE_2D, 0);
+
+		glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
+		glDrawBuffer(GL_NONE);
+		glReadBuffer(GL_NONE);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 
 		// render loop:
@@ -280,35 +304,68 @@ int main(int argc, char* argv[])
 			// update scene:
 			glClearColor(0.77f, 0.73f, 0.97f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+	
 			camera->Update();
 			model->UpdateModelMatrix(glm::vec3(0.0f, 0.0f, -4.0f),rotation, glm::vec3(1.0f));
 			model1->UpdateModelMatrix(glm::vec3(-2.5f, 0.0f, -4.0f), rotation, glm::vec3(1.0f));
 			model2->UpdateModelMatrix(glm::vec3(2.5f, 0.0f, -4.0f), rotation, glm::vec3(1.0f));
 			model3->UpdateModelMatrix(glm::vec3(2.5f, 1.0f, -4.0f), rotation, glm::vec3(1.0f));
 			lightModel->UpdateModelMatrix(pointLights[0]->Position, rotation, glm::vec3(0.2f));
+
+
 			
-			// update shadow maps:
-			depthMapShader->UseShader();
-			depthMapShader->SetMat4("u_LightSpaceMatrix", lightSpaceMatrix);
-			//depthMapShader->SetMat4("u_Model",)
+			////// update shadow maps:
+			model->QueMeshesToDraw(depthMapShader, depthMapOnDrawLamba, renderer);
+			//
+			///*depthMapRenderTexture->Bind();
+			//depthMapRenderTexture->BindTextureForRender(TextureTarget::MIMIC_TEXTURE_2D, RenderTexture::MIMIC_DEPTH_BUFFER_BIT | RenderTexture::MIMIC_NO_DRAW |
+			//	RenderTexture::MIMIC_NO_READ);*/
+			//glViewport(0, 0, 1024, 1024);
+
+			//renderer->Draw(lightView, lightProjection);
+			//renderer->ClearRenderQue();
+			//depthMapRenderTexture->Unbind();
+			//
+			//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			//glViewport(0, 0, window->GetAspectRatio().x, window->GetAspectRatio().y);
+
+			// 1. first render to depth map
+			glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
+			glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+			glClear(GL_DEPTH_BUFFER_BIT);
+			renderer->Draw(lightView, lightProjection);
+			renderer->ClearRenderQue();
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+			// glBindTexture(GL_TEXTURE_2D, depthMap);
+			//// render depth map to quad:
+			//depthMapDebugShader->UseShader();
+			//depthMapDebugShader->SetFloat("u_NearPlane", lightProjectionClippingPlanes.x);
+			//depthMapDebugShader->SetFloat("u_FarPlane", lightProjectionClippingPlanes.y);
+			//depthMapDebugShader->SetTexture("u_DepthMap", depthMap, 1);
+			//renderer->DrawUnitQuad();
+
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			glViewport(0, 0, window->GetAspectRatio().x, window->GetAspectRatio().y);
 
 			// send meshes to renderer:
 			model->QueMeshesToDraw(pbrShader, pbrOnDrawLamba, renderer);
 			model1->QueMeshesToDraw(pbrShader, pbrOnDrawLamba, renderer);
 			model2->QueMeshesToDraw(blinnPhongShader, blinnPhongOnDrawLamba, renderer);
-			
 			lightModel->QueMeshesToDraw(flatColourShader, flatColourOnDrawLamba, renderer);
-			
+
 			// draw:
 			renderer->Draw(camera);
-			renderer->DrawCubeMap(camera, environmentCubeMap);
+			renderer->ClearRenderQue();
+			// renderer->DrawCubeMap(camera, environmentCubeMap);
 
 			// gui:
 			ImGui_ImplOpenGL3_NewFrame(); 
 			ImGui_ImplSDL2_NewFrame();
 			ImGui::NewFrame();
 
+			// show texture:
+			ImGui::Image((void*)depthMap, ImVec2(800, 800));
 			// light controls:
 			ImGui::Begin("Point Light");
 			ImGui::SliderFloat3("Position##pl1", &(pointLights[0]->Position[0]), -10.0f, 10.0f);

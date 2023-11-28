@@ -12,13 +12,19 @@ namespace MimicRender
 	// #############################################################################
 	struct Texture;
 
+	enum class RenderTextureAttachment
+	{
+		MIMIC_COLOR,
+		MIMIC_DEPTH
+	};
+
 	struct RenderTexture
 	{
 		static std::shared_ptr<RenderTexture> Initialise() noexcept;
 
 		void Bind() const noexcept;
 		void Unbind() const noexcept;
-		void BindTextureForRender(const TextureTarget& textureTarget, const std::uint8_t& params, const int level = 0);
+		void BindTextureForRender(const TextureTarget& textureTarget, const std::uint8_t& params, const int level = 0, const RenderTextureAttachment& attachment = RenderTextureAttachment::MIMIC_COLOR);
 		void UseRenderObject(const glm::ivec2& aspectRatio) const;
 		void SetTexture(const std::shared_ptr<Texture>& texture);
 		const unsigned int GetTextureID() const;
