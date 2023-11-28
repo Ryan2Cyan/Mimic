@@ -47,36 +47,38 @@ namespace MimicRender
 		friend struct EnvironmentCubeMap;
 
 		// texture type
-		static const std::uint16_t MIMIC_2D_TEXTURE =		 0b0000'0000'0000'0001;
-		static const std::uint16_t MIMIC_CUBEMAP_TEXTURE =	 0b0000'0000'0000'0010;
+		static const std::uint32_t MIMIC_2D_TEXTURE =		 0b1;
+		static const std::uint32_t MIMIC_CUBEMAP_TEXTURE =	 0b10;
 
 		// texture parameters:
-		static const std::uint16_t MIMIC_UNSIGNED_BYTE =	 0b0000'0000'0000'0100;
-		static const std::uint16_t MIMIC_FLOAT =			 0b0000'0000'0000'1000;
+		static const std::uint32_t MIMIC_UNSIGNED_BYTE =	 0b100;
+		static const std::uint32_t MIMIC_FLOAT =			 0b1000;
 
-		static const std::uint16_t MIMIC_WRAPT_REPEAT =		 0b0000'0000'0001'0000;
-		static const std::uint16_t MIMIC_WRAPS_REPEAT =		 0b0000'0000'0010'0000;
-		static const std::uint16_t MIMIC_WRAPT_CLAMP =		 0b0000'0000'0100'0000;
-		static const std::uint16_t MIMIC_WRAPS_CLAMP =		 0b0000'0000'1000'0000;
-		static const std::uint16_t MIMIC_WRAPR_CLAMP =		 0b0000'0001'0000'0000;
+		static const std::uint32_t MIMIC_WRAPT_REPEAT =		 0b1'000;
+		static const std::uint32_t MIMIC_WRAPS_REPEAT =		 0b10'0000;
+		static const std::uint32_t MIMIC_WRAPT_CLAMP =		 0b100'0000;
+		static const std::uint32_t MIMIC_WRAPS_CLAMP =		 0b1000'0000;
+		static const std::uint32_t MIMIC_WRAPR_CLAMP =		 0b1'0000'0000;
 		
-		static const std::uint16_t MIMIC_MIN_LINEAR =		 0b0000'0010'0000'0000;
-		static const std::uint16_t MIMIC_MAG_LINEAR =		 0b0000'0100'0000'0000;
-		static const std::uint16_t MIMIC_MIN_MIPMAP_LINEAR = 0b0000'1000'0000'0000;
-		static const std::uint16_t MIMIC_MAG_MIPMAP_LINEAR = 0b0001'0000'0000'0000;
-		static const std::uint16_t MIMIC_GEN_MIPMAP =		 0b0010'0000'0000'0000;
-		static const std::uint16_t MIMIC_FLIP_VERTICAL =     0b0100'0000'0000'0000;
+		static const std::uint32_t MIMIC_MIN_LINEAR =		 0b10'0000'0000;
+		static const std::uint32_t MIMIC_MAG_LINEAR =		 0b100'0000'0000;
+		static const std::uint32_t MIMIC_MIN_NEAREST =		 0b1000'0000'0000;
+		static const std::uint32_t MIMIC_MAG_NEAREST =		 0b1'0000'0000'0000;
+		static const std::uint32_t MIMIC_MIN_MIPMAP_LINEAR = 0b10'0000'0000'0000;
+		static const std::uint32_t MIMIC_MAG_MIPMAP_LINEAR = 0b100'0000'0000'0000;
+		static const std::uint32_t MIMIC_GEN_MIPMAP =		 0b1000'0000'0000'0000;
+		static const std::uint32_t MIMIC_FLIP_VERTICAL =     0b1'0000'0000'0000'0000;
 
 		// engine texture parameters:
-		static const std::uint16_t MIMIC_BRDF_TEXTURE_PARAMS = MIMIC_2D_TEXTURE | MIMIC_FLOAT | MIMIC_WRAPS_CLAMP | MIMIC_WRAPT_CLAMP | MIMIC_MIN_LINEAR | MIMIC_MAG_LINEAR;
-		static const std::uint16_t MIMIC_CUBEMAP_TEXTURE_PARAMS = MIMIC_CUBEMAP_TEXTURE | MIMIC_FLOAT | MIMIC_WRAPS_CLAMP | MIMIC_WRAPT_CLAMP | MIMIC_WRAPR_CLAMP | MIMIC_MIN_LINEAR | MIMIC_MAG_LINEAR;
+		static const std::uint32_t MIMIC_BRDF_TEXTURE_PARAMS = MIMIC_2D_TEXTURE | MIMIC_FLOAT | MIMIC_WRAPS_CLAMP | MIMIC_WRAPT_CLAMP | MIMIC_MIN_LINEAR | MIMIC_MAG_LINEAR;
+		static const std::uint32_t MIMIC_CUBEMAP_TEXTURE_PARAMS = MIMIC_CUBEMAP_TEXTURE | MIMIC_FLOAT | MIMIC_WRAPS_CLAMP | MIMIC_WRAPT_CLAMP | MIMIC_WRAPR_CLAMP | MIMIC_MIN_LINEAR | MIMIC_MAG_LINEAR;
 		
 		unsigned int _id;
 		TextureType _type;
 
-		static const GLenum GetGLTarget(const std::uint16_t& textureParams) noexcept;
-		static const GLenum GetGLDataType(const std::uint16_t& textureParams) noexcept;
-		static void GLTextureParams(const std::uint16_t& textureParams, const GLenum& target) noexcept;
+		static const GLenum GetGLTarget(const std::uint32_t& textureParams) noexcept;
+		static const GLenum GetGLDataType(const std::uint32_t& textureParams) noexcept;
+		static void GLTextureParams(const std::uint32_t& textureParams, const GLenum& target) noexcept;
 
 	public:
 		enum TextureFormats
@@ -86,15 +88,17 @@ namespace MimicRender
 			MIMIC_RGB16F = 0x04,
 			MIMIC_RED = 0x08,
 			MIMIC_RG = 0x10,
-			MIMIC_RG16F = 0x20
+			MIMIC_RG16F = 0x20,
+			MIMIC_DEPTH_COMPONENT = 0x40
 		};
 
-		static const std::shared_ptr<Texture> Initialise(const std::string& fullPath, const glm::ivec2& aspectRatio, const std::uint16_t& textureParams, const TextureType& type = TextureType::MIMIC_NO_TYPE);
-		static const std::shared_ptr<Texture> Initialise(const glm::ivec2& aspectRatio, const std::uint16_t& textureParams, const TextureFormats& internalFormat, const TextureFormats& format, const TextureType& textureType = TextureType::MIMIC_NO_TYPE);
+		static const std::shared_ptr<Texture> Initialise(const std::string& fullPath, const glm::ivec2& aspectRatio, const std::uint32_t& textureParams, const TextureType& type = TextureType::MIMIC_NO_TYPE);
+		static const std::shared_ptr<Texture> Initialise(const glm::ivec2& aspectRatio, const std::uint32_t& textureParams, const TextureFormats& internalFormat, const TextureFormats& format, const TextureType& textureType = TextureType::MIMIC_NO_TYPE);
 		void SetType(const TextureType& textureType);
 		const unsigned int GetId() const noexcept;
 
 		// user texture parameters:
-		static const std::uint16_t MIMIC_2D_TEXTURE_PARAMS = MIMIC_2D_TEXTURE | MIMIC_UNSIGNED_BYTE | MIMIC_WRAPS_REPEAT | MIMIC_WRAPT_REPEAT | MIMIC_MIN_MIPMAP_LINEAR | MIMIC_MAG_LINEAR | MIMIC_GEN_MIPMAP;
+		static const std::uint32_t MIMIC_2D_TEXTURE_PARAMS = MIMIC_2D_TEXTURE | MIMIC_UNSIGNED_BYTE | MIMIC_WRAPS_REPEAT | MIMIC_WRAPT_REPEAT | MIMIC_MIN_MIPMAP_LINEAR | MIMIC_MAG_LINEAR | MIMIC_GEN_MIPMAP;
+		static const std::uint32_t MIMIC_DEPTH_MAP_PARAMS = MIMIC_2D_TEXTURE | MIMIC_FLOAT | MIMIC_WRAPS_REPEAT | MIMIC_WRAPT_REPEAT | MIMIC_MIN_NEAREST | MIMIC_MAG_NEAREST | MIMIC_GEN_MIPMAP; // NOTE: make private after implementing shadow map class
 	};
 }

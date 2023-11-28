@@ -10,7 +10,7 @@ namespace MimicRender
 	// #############################################################################
 	// texture functions:
 	// #############################################################################
-	const std::shared_ptr<Texture> Texture::Initialise(const std::string& fullPath, const glm::ivec2& aspectRatio, const std::uint16_t& textureParams, const TextureType& textureType)
+	const std::shared_ptr<Texture> Texture::Initialise(const std::string& fullPath, const glm::ivec2& aspectRatio, const std::uint32_t& textureParams, const TextureType& textureType)
 	{
 		// generate texture ID:
 		unsigned int textureId;
@@ -72,7 +72,7 @@ namespace MimicRender
 		return texture;
 	}
 
-	const std::shared_ptr<Texture> Texture::Initialise(const glm::ivec2& aspectRatio, const std::uint16_t& textureParams, const TextureFormats& internalFormat, const TextureFormats& format, const TextureType& textureType)
+	const std::shared_ptr<Texture> Texture::Initialise(const glm::ivec2& aspectRatio, const std::uint32_t& textureParams, const TextureFormats& internalFormat, const TextureFormats& format, const TextureType& textureType)
 	{
 		// load texture parameters:
 		const GLenum target = GetGLTarget(textureParams);
@@ -88,6 +88,7 @@ namespace MimicRender
 		else if (internalFormat & TextureFormats::MIMIC_RED) internalFormatGL = GL_RED;
 		else if (internalFormat & TextureFormats::MIMIC_RG) internalFormatGL = GL_RG;
 		else if (internalFormat & TextureFormats::MIMIC_RG16F) internalFormatGL = GL_RG16F;
+		else if (internalFormat & TextureFormats::MIMIC_DEPTH_COMPONENT) internalFormatGL = GL_DEPTH_COMPONENT32F;
 		else
 		{
 			MIMIC_LOG_WARNING("[MimicRender::Texture] Could not create texture, no valid texture internal format arguement.");
@@ -103,6 +104,7 @@ namespace MimicRender
 		else if (format & TextureFormats::MIMIC_RED) formatGL = GL_RED;
 		else if (format & TextureFormats::MIMIC_RG) formatGL = GL_RG;
 		else if (format & TextureFormats::MIMIC_RG16F) formatGL = GL_RG16F;
+		else if (format & TextureFormats::MIMIC_DEPTH_COMPONENT) formatGL = GL_DEPTH_COMPONENT32F;
 		else
 		{
 			MIMIC_LOG_WARNING("[MimicRender::Texture] Could not create texture, no valid texture format arguement.");
@@ -138,7 +140,7 @@ namespace MimicRender
 		return texture;
 	}
 
-	const GLenum Texture::GetGLTarget(const std::uint16_t& textureParams) noexcept
+	const GLenum Texture::GetGLTarget(const std::uint32_t& textureParams) noexcept
 	{
 		if (textureParams & MIMIC_2D_TEXTURE) return GL_TEXTURE_2D;
 		else if (textureParams & MIMIC_CUBEMAP_TEXTURE) return GL_TEXTURE_CUBE_MAP;
@@ -150,7 +152,7 @@ namespace MimicRender
 		}
 	}
 
-	const GLenum Texture::GetGLDataType(const std::uint16_t& textureParams) noexcept
+	const GLenum Texture::GetGLDataType(const std::uint32_t& textureParams) noexcept
 	{
 		if (textureParams & MIMIC_UNSIGNED_BYTE) return GL_UNSIGNED_BYTE;
 		else if (textureParams & MIMIC_FLOAT) return GL_FLOAT;
@@ -162,7 +164,7 @@ namespace MimicRender
 		}
 	}
 
-	void Texture::GLTextureParams(const std::uint16_t& textureParams, const GLenum& target) noexcept
+	void Texture::GLTextureParams(const std::uint32_t& textureParams, const GLenum& target) noexcept
 	{
 		if (textureParams & MIMIC_WRAPS_REPEAT) glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		if (textureParams & MIMIC_WRAPT_REPEAT) glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -173,6 +175,9 @@ namespace MimicRender
 
 		if (textureParams & MIMIC_MIN_LINEAR) glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		if (textureParams & MIMIC_MAG_LINEAR) glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		if (textureParams & MIMIC_MIN_NEAREST) glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		if (textureParams & MIMIC_MAG_NEAREST) glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
 		if (textureParams & MIMIC_MIN_MIPMAP_LINEAR) glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 		if (textureParams & MIMIC_MAG_MIPMAP_LINEAR) glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
