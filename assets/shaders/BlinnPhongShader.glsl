@@ -20,7 +20,7 @@ void main()
 {
 	const vec4 fragPositionVec4 = vec4(aPos, 1.0);
 	fragPosition = vec3(u_Model * fragPositionVec4);
-	fragPositionLightSpace = u_LightSpaceMatrix * fragPositionVec4;
+	fragPositionLightSpace = u_LightSpaceMatrix * u_Model * fragPositionVec4;
 	normal = mat3(transpose(inverse(u_Model))) * normalize(aNormal);
 	gl_Position = u_Projection * u_View * u_Model * vec4(aPos, 1.0);
 }
@@ -49,13 +49,14 @@ uniform sampler2D u_ShadowMap;
 
 out vec4 fragColour;
 
-float ShadowCalculation(vec4 lightSpacePos)
+float ShadowCalculation(vec4 lightSpacePos, const vec3 lightDir)
 {
 	vec3 projectedCoords = fragPositionLightSpace.xyz / fragPositionLightSpace.w;
 	projectedCoords = projectedCoords * 0.5 + 0.5;
 	float closestDepth = texture(u_ShadowMap, projectedCoords.xy).r;
 	float currentDepth = projectedCoords.z;
-	float shadow = currentDepth > closestDepth  ? 1.0 : 0.0;
+	const float shadowBias = max(0.05 * (1.0 - dot(normal, lightDir)), 0.005);
+	float shadow = currentDepth - shadowBias > closestDepth  ? 1.0 : 0.0;
 	return shadow;
 }
 
@@ -78,7 +79,7 @@ void main()
 	// const vec3 specular = u_SpecularStrength * pow(max(dot(viewDirection, reflectDirection), 0.0), u_Shininess) * u_LightColour;
 
 	// calculate shadows:
-	float shadow = ShadowCalculation(fragPositionLightSpace);
+	float shadow = ShadowCalculation(fragPositionLightSpace, lightDirection);
 
 	// generate fragment colour:
 	vec3 resultColour = (ambient + (1.0 - shadow) * (diffuse + specular)) * u_ObjectColour;

@@ -234,7 +234,7 @@ int main(int argc, char* argv[])
 			glUniform1i(glGetUniformLocation(blinnPhongShader->_shaderProgramId, "u_ShadowMap"), 1);
 			blinnPhongShader->SetVector3("u_ObjectColour", objectColour);
 			blinnPhongShader->SetVector3("u_LightColour", lightColour);
-			blinnPhongShader->SetVector3("u_LightPosition", pointLights[0]->Position);
+			blinnPhongShader->SetVector3("u_LightPosition", directLights[0]->Position);
 			blinnPhongShader->SetFloat("u_AmbientStrength", ambientStrength);
 			blinnPhongShader->SetFloat("u_SpecularStrength", specularStrength);
 			blinnPhongShader->SetFloat("u_Shininess", shininess);
@@ -319,8 +319,10 @@ int main(int argc, char* argv[])
 			depthMapRenderTexture->SetTextureViewPort();
 			depthMapRenderTexture->Bind();
 			glClear(GL_DEPTH_BUFFER_BIT);
+			glCullFace(GL_FRONT); // cull front-faces to avoid Peter-Panning:
 			renderer->Draw(directLightCamera->_viewMatrix, lightProjection);
 			renderer->ClearRenderQue();
+			glCullFace(GL_BACK);
 			depthMapRenderTexture->Unbind();
 			window->ResetViewPort();
 			// send meshes to renderer:
