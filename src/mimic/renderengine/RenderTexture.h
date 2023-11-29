@@ -24,9 +24,10 @@ namespace MimicRender
 
 		void Bind() const noexcept;
 		void Unbind() const noexcept;
-		void BindTextureForRender(const TextureTarget& textureTarget, const std::uint8_t& params, const int level = 0, const RenderTextureAttachment& attachment = RenderTextureAttachment::MIMIC_COLOR);
+		void AttachTexture(const TextureTarget& textureTarget, const std::uint8_t& params, const RenderTextureAttachment& attachment = RenderTextureAttachment::MIMIC_COLOR, const int level = 0);
 		void UseRenderObject(const glm::ivec2& aspectRatio) const;
 		void SetTexture(const std::shared_ptr<Texture>& texture);
+		void SetTextureViewPort() const noexcept;
 		const unsigned int GetTextureID() const;
 
 		// render texture parameters:
@@ -34,6 +35,8 @@ namespace MimicRender
 		static const std::uint8_t MIMIC_NO_READ			 = 0b10;
 		static const std::uint8_t MIMIC_COLOR_BUFFER_BIT = 0b100;
 		static const std::uint8_t MIMIC_DEPTH_BUFFER_BIT = 0b1000;
+		static const std::uint8_t MIMIC_DEPTH_AND_COLOR  = 0b1'0000;
+		static const std::uint8_t MIMIC_VIEWPORT	     = 0b1'0000;
 
 	private:
 		friend struct Renderer;

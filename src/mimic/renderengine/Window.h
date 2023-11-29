@@ -14,6 +14,7 @@ namespace MimicRender
 	{
 		~Window();
 		static std::shared_ptr<Window> Initialise(const std::string& windowName);
+		const void ResetViewPort() const noexcept;
 		const glm::vec2 GetAspectRatio() const noexcept;
 		void SwapWindow() const;
 

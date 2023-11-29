@@ -89,7 +89,7 @@ namespace MimicRender
 		else if (internalFormat & TextureFormats::MIMIC_RED) internalFormatGL = GL_RED;
 		else if (internalFormat & TextureFormats::MIMIC_RG) internalFormatGL = GL_RG;
 		else if (internalFormat & TextureFormats::MIMIC_RG16F) internalFormatGL = GL_RG16F;
-		else if (internalFormat & TextureFormats::MIMIC_DEPTH_COMPONENT) internalFormatGL = GL_DEPTH_COMPONENT32F;
+		else if (internalFormat & TextureFormats::MIMIC_DEPTH_COMPONENT) internalFormatGL = GL_DEPTH_COMPONENT;
 		else
 		{
 			MIMIC_LOG_WARNING("[MimicRender::Texture] Could not create texture, no valid texture internal format arguement.");
@@ -105,7 +105,7 @@ namespace MimicRender
 		else if (format & TextureFormats::MIMIC_RED) formatGL = GL_RED;
 		else if (format & TextureFormats::MIMIC_RG) formatGL = GL_RG;
 		else if (format & TextureFormats::MIMIC_RG16F) formatGL = GL_RG16F;
-		else if (format & TextureFormats::MIMIC_DEPTH_COMPONENT) formatGL = GL_DEPTH_COMPONENT32F;
+		else if (format & TextureFormats::MIMIC_DEPTH_COMPONENT) formatGL = GL_DEPTH_COMPONENT;
 		else
 		{
 			MIMIC_LOG_WARNING("[MimicRender::Texture] Could not create texture, no valid texture format arguement.");

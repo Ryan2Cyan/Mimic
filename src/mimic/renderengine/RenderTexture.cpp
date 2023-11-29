@@ -44,14 +44,14 @@ namespace MimicRender
 	}
 
 
-	void RenderTexture::BindTextureForRender(const TextureTarget& textureTarget, const std::uint8_t& params, const int level, const RenderTextureAttachment& attachment)
+	void RenderTexture::AttachTexture(const TextureTarget& textureTarget, const std::uint8_t& params, const RenderTextureAttachment& attachment, const int level)
 	{
 		if (_texture == nullptr || !_initialised)
 		{
 			MIMIC_LOG_WARNING("[MimicRender::RenderTexture] Unable to bind uninitialised texture.");
 			return;
 		}
-		
+
 		// find target:
 		GLenum targetGL = 0;
 		switch (textureTarget)
@@ -76,20 +76,23 @@ namespace MimicRender
 		{
 			case RenderTextureAttachment::MIMIC_COLOR: { attachmentGL = GL_COLOR_ATTACHMENT0; } break;
 			case RenderTextureAttachment::MIMIC_DEPTH: { attachmentGL = GL_DEPTH_ATTACHMENT; } break;
-		default:
-		{
-			MIMIC_LOG_WARNING("[MimicRender::RenderTexture] Could not render to texture, invalid target type.");
-			return;
-		}break;
+			default:
+			{
+				MIMIC_LOG_WARNING("[MimicRender::RenderTexture] Could not render to texture, invalid target type.");
+				return;
+			}break;
 		}
-
+		glBindFramebuffer(GL_FRAMEBUFFER, _id);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, attachmentGL, targetGL, _texture->_id, level);
 
-		// if(params & MIMIC_NO_DRAW) glDrawBuffer(GL_NONE);
-		// if (params & MIMIC_NO_READ) glReadBuffer(GL_NONE);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		if (params & MIMIC_COLOR_BUFFER_BIT) glClear(GL_COLOR_BUFFER_BIT);
-		if (params & MIMIC_DEPTH_BUFFER_BIT) glClear(GL_DEPTH_BUFFER_BIT);
+		if (params & MIMIC_DEPTH_AND_COLOR) glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		else if(params & MIMIC_COLOR_BUFFER_BIT) glClear(GL_COLOR_BUFFER_BIT);
+		else if (params & MIMIC_DEPTH_BUFFER_BIT) glClear(GL_DEPTH_BUFFER_BIT);
+
+		if (params & MIMIC_NO_DRAW) glDrawBuffer(GL_NONE);
+		if (params & MIMIC_NO_READ) glReadBuffer(GL_NONE);
+
+		if(params & MIMIC_VIEWPORT) glViewport(0, 0, _texture->GetAspectRatio().x, _texture->GetAspectRatio().y);
 	}
 
 	void RenderTexture::UseRenderObject(const glm::ivec2& aspectRatio) const
@@ -123,6 +126,21 @@ namespace MimicRender
 			return;
 		}
 		_texture = texture;
+	}
+
+	void RenderTexture::SetTextureViewPort() const noexcept
+	{
+		if (!_initialised)
+		{
+			MIMIC_LOG_WARNING("[MimicRender::RenderTexture] Unable to use uninitialised render texture.");
+			return;
+		}
+		if (_texture == nullptr)
+		{
+			MIMIC_LOG_WARNING("[MimicRender::RenderTexture] Unable to set uninitialised texture.");
+			return;
+		}
+		glViewport(0, 0, _texture->_aspectRatio.x, _texture->_aspectRatio.y);
 	}
 
 	const unsigned int RenderTexture::GetTextureID() const

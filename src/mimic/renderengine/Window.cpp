@@ -104,6 +104,11 @@ namespace MimicRender
 		ImGui::DestroyContext();
 	}
 
+	const void Window::ResetViewPort() const noexcept
+	{
+		glViewport(0, 0, _aspectRatio.x, _aspectRatio.y);
+	}
+
 	const glm::vec2 Window::GetAspectRatio() const noexcept
 	{
 		return _aspectRatio;

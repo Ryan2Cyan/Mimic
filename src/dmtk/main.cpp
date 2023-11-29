@@ -115,18 +115,6 @@ int main(int argc, char* argv[])
 			PointLight::Initialise(glm::vec3(0.5f, 0.0f, 0.5f), glm::vec3(70.0f, 20.0f, 15.0f))
 		};
 
-		// shadow mapping:
-		// std::shared_ptr<RenderTexture> depthMapRenderTexture = RenderTexture::Initialise();
-		// depthMapRenderTexture->SetTexture(Texture::Initialise(glm::ivec2(1024, 1024), Texture::MIMIC_DEPTH_MAP_PARAMS, Texture::MIMIC_DEPTH_COMPONENT, Texture::MIMIC_DEPTH_COMPONENT));
-		constexpr glm::vec2 lightProjectionClippingPlanes = glm::vec2(1.0f, 25.0f);
-		const glm::mat4 lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, lightProjectionClippingPlanes.x, lightProjectionClippingPlanes.y);
-		const glm::mat4 lightView = glm::lookAt(
-			glm::vec3(-2.0f, 4.0f, -1.0f),
-			glm::vec3(0.0f, 0.0f, 0.0f),
-			glm::vec3(0.0f, 1.0f, 0.0f));
-		const glm::mat4 lightSpaceMatrix = lightProjection * lightView;
-
-
 		// load hdr environment map:
 		std::shared_ptr<EnvironmentCubeMap> environmentCubeMap = EnvironmentCubeMap::Initialise("rural_asphalt_road_4k.hdr", window->GetAspectRatio(), renderer);
 
@@ -224,12 +212,10 @@ int main(int argc, char* argv[])
 		std::function<void()> blinnPhongOnDrawLamba = [&]()
 		{
 			// set uniforms:
-			// phongShader->SetMat4("u_NormalMatrix", normalMatrix);
 			blinnPhongShader->SetVector3("u_ObjectColour", objectColour);
 			blinnPhongShader->SetVector3("u_LightColour", lightColour);
 			blinnPhongShader->SetVector3("u_LightPosition", pointLights[0]->Position);
 			blinnPhongShader->SetFloat("u_AmbientStrength", ambientStrength);
-			// phongShader->SetFloat("u_DiffuseStrength", diffuseStrength);
 			blinnPhongShader->SetFloat("u_SpecularStrength", specularStrength);
 			blinnPhongShader->SetFloat("u_Shininess", shininess);
 		};
@@ -244,37 +230,30 @@ int main(int argc, char* argv[])
 			depthMapShader->SetMat4("u_LightSpaceMatrix", camera->_projectionMatrix * camera->_viewMatrix);
 		};
 
-		// init framebuffer:
-		unsigned int depthMapFBO;
-		glGenFramebuffers(1, &depthMapFBO);
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-		// init depth texture:
-		const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
-
-		unsigned int depthMap;
-		glGenTextures(1, &depthMap);
-		glBindTexture(GL_TEXTURE_2D, depthMap);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,
-			SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		glBindTexture(GL_TEXTURE_2D, 0);
-
-		glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
-		glDrawBuffer(GL_NONE);
-		glReadBuffer(GL_NONE);
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		// shadow mapping:
+		constexpr glm::vec2 lightProjectionClippingPlanes = glm::vec2(1.0f, 25.0f);
+		const glm::mat4 lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, lightProjectionClippingPlanes.x, lightProjectionClippingPlanes.y);
+		const glm::mat4 lightView = glm::lookAt(
+			glm::vec3(-2.0f, 4.0f, -1.0f),
+			glm::vec3(0.0f, 0.0f, 0.0f),
+			glm::vec3(0.0f, 1.0f, 0.0f));
+		const glm::mat4 lightSpaceMatrix = lightProjection * lightView;
 
 
-		// render loop:
+		std::shared_ptr<RenderTexture> depthMapRenderTexture = RenderTexture::Initialise();
+		depthMapRenderTexture->SetTexture(Texture::Initialise(glm::ivec2(1024, 1024), Texture::MIMIC_DEPTH_MAP_PARAMS, Texture::MIMIC_DEPTH_COMPONENT, Texture::MIMIC_DEPTH_COMPONENT));
+		depthMapRenderTexture->AttachTexture(TextureTarget::MIMIC_TEXTURE_2D, RenderTexture::MIMIC_NO_DRAW | RenderTexture::MIMIC_NO_READ | RenderTexture::MIMIC_DEPTH_BUFFER_BIT, RenderTextureAttachment::MIMIC_DEPTH);
+		depthMapRenderTexture->Unbind();
+
+		// #############################################################################
+		//game loop:
+		// #############################################################################
 		bool applicationRunning = true;
 		while (applicationRunning)
 		{
-			// handle human interface devices:
+			// #############################################################################
+			// human interface devices:
+			// #############################################################################
 			SDL_Event event;
 			while (SDL_PollEvent(&event))
 			{
@@ -301,10 +280,9 @@ int main(int argc, char* argv[])
 				}
 			}
 
+			// #############################################################################
 			// update scene:
-			glClearColor(0.77f, 0.73f, 0.97f, 1.0f);
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	
+			// #############################################################################
 			camera->Update();
 			model->UpdateModelMatrix(glm::vec3(0.0f, 0.0f, -4.0f),rotation, glm::vec3(1.0f));
 			model1->UpdateModelMatrix(glm::vec3(-2.5f, 0.0f, -4.0f), rotation, glm::vec3(1.0f));
@@ -313,40 +291,19 @@ int main(int argc, char* argv[])
 			lightModel->UpdateModelMatrix(pointLights[0]->Position, rotation, glm::vec3(0.2f));
 
 
-			
-			////// update shadow maps:
+			// #############################################################################
+			// render scene:
+			// #############################################################################
+			glClearColor(0.77f, 0.73f, 0.97f, 1.0f);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+			// update shadow maps:
 			model->QueMeshesToDraw(depthMapShader, depthMapOnDrawLamba, renderer);
-			//
-			///*depthMapRenderTexture->Bind();
-			//depthMapRenderTexture->BindTextureForRender(TextureTarget::MIMIC_TEXTURE_2D, RenderTexture::MIMIC_DEPTH_BUFFER_BIT | RenderTexture::MIMIC_NO_DRAW |
-			//	RenderTexture::MIMIC_NO_READ);*/
-			//glViewport(0, 0, 1024, 1024);
-
-			//renderer->Draw(lightView, lightProjection);
-			//renderer->ClearRenderQue();
-			//depthMapRenderTexture->Unbind();
-			//
-			//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-			//glViewport(0, 0, window->GetAspectRatio().x, window->GetAspectRatio().y);
-
-			// 1. first render to depth map
-			glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
-			glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
-			glClear(GL_DEPTH_BUFFER_BIT);
+			depthMapRenderTexture->SetTextureViewPort();
+			depthMapRenderTexture->Bind();
 			renderer->Draw(lightView, lightProjection);
 			renderer->ClearRenderQue();
-			glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-			// glBindTexture(GL_TEXTURE_2D, depthMap);
-			//// render depth map to quad:
-			//depthMapDebugShader->UseShader();
-			//depthMapDebugShader->SetFloat("u_NearPlane", lightProjectionClippingPlanes.x);
-			//depthMapDebugShader->SetFloat("u_FarPlane", lightProjectionClippingPlanes.y);
-			//depthMapDebugShader->SetTexture("u_DepthMap", depthMap, 1);
-			//renderer->DrawUnitQuad();
-
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-			glViewport(0, 0, window->GetAspectRatio().x, window->GetAspectRatio().y);
+			depthMapRenderTexture->Unbind();
 
 			// send meshes to renderer:
 			model->QueMeshesToDraw(pbrShader, pbrOnDrawLamba, renderer);
@@ -355,17 +312,21 @@ int main(int argc, char* argv[])
 			lightModel->QueMeshesToDraw(flatColourShader, flatColourOnDrawLamba, renderer);
 
 			// draw:
+			window->ResetViewPort();
 			renderer->Draw(camera);
 			renderer->ClearRenderQue();
 			renderer->DrawCubeMap(camera, environmentCubeMap);
 
+			// #############################################################################
 			// gui:
+			// #############################################################################
 			ImGui_ImplOpenGL3_NewFrame(); 
 			ImGui_ImplSDL2_NewFrame();
 			ImGui::NewFrame();
 
 			// show texture:
-			ImGui::Image((void*)depthMap, ImVec2(800, 800));
+			ImGui::Image((void*)depthMapRenderTexture->GetTextureID(), ImVec2(800, 800));
+
 			// light controls:
 			ImGui::Begin("Point Light");
 			ImGui::SliderFloat3("Position##pl1", &(pointLights[0]->Position[0]), -10.0f, 10.0f);
