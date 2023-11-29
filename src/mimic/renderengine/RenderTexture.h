@@ -36,7 +36,7 @@ namespace MimicRender
 		static const std::uint8_t MIMIC_COLOR_BUFFER_BIT = 0b100;
 		static const std::uint8_t MIMIC_DEPTH_BUFFER_BIT = 0b1000;
 		static const std::uint8_t MIMIC_DEPTH_AND_COLOR  = 0b1'0000;
-		static const std::uint8_t MIMIC_VIEWPORT	     = 0b1'0000;
+		static const std::uint8_t MIMIC_VIEWPORT	     = 0b10'0000;
 
 	private:
 		friend struct Renderer;

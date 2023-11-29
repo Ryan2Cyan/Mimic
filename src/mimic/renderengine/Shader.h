@@ -31,6 +31,7 @@ namespace MimicRender
 		const unsigned int GetSubroutineIndex(const GLenum& shaderType, const std::string& subroutineFuncName);
 
 		void UseShader() const noexcept; // move to private
+		unsigned int _shaderProgramId;
 	private:
 		friend struct Renderer;
 		friend struct EnvironmentCubeMap;
@@ -44,7 +45,7 @@ namespace MimicRender
 		int _modelMatrixUniformLocation = -1;
 		int _viewMatrixUniformLocation = -1;
 		int _projectionMatrixUniformLocation = -1;
-		unsigned int _shaderProgramId;
+	
 		bool _initialised;
 	};
 }

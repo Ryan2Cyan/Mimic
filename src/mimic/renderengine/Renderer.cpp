@@ -45,11 +45,11 @@ namespace MimicRender
 		{
 			// set uniforms:
 			renderObject->_shader->UseShader();
+			renderObject->_onDraw();
 			renderObject->_shader->SetVector3("u_CameraPosition", camera->Position);
 			renderObject->_shader->SetModelMatrix(renderObject->_modelMatrix);
 			renderObject->_shader->SetViewMatrix(camera->_viewMatrix);
 			renderObject->_shader->SetProjectionMatrix(camera->_projectionMatrix);
-			renderObject->_onDraw();
 
 			// draw mesh:
 			glBindVertexArray(renderObject->_vertexArrayId);
@@ -65,7 +65,7 @@ namespace MimicRender
 		{
 			// set uniforms:
 			renderObject->_shader->UseShader();
-			// renderObject->_shader->SetVector3("u_CameraPosition", camera->Position);
+			//renderObject->_shader->SetVector3("u_CameraPosition", camera->Position);
 			renderObject->_shader->SetModelMatrix(renderObject->_modelMatrix);
 			renderObject->_shader->SetViewMatrix(view);
 			renderObject->_shader->SetProjectionMatrix(projection);

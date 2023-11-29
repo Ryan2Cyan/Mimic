@@ -116,7 +116,7 @@ namespace MimicRender
 			int success;
 			char infoLog[512];
 			glGetShaderiv(shaderId, GL_COMPILE_STATUS, &success);
-			if (!success)
+			if (success != GL_TRUE)
 			{
 				glGetShaderInfoLog(shaderId, 512, NULL, infoLog);
 				MIMIC_LOG_WARNING("[MimicRender::Shader] Shader(s) have failed to compile: %", infoLog);
@@ -183,8 +183,8 @@ namespace MimicRender
 	void Shader::SetTexture(const char* name, const int& textureId, const int& bindPoint)
 	{
 		if (!_initialised) return;
-		glActiveTexture(GL_TEXTURE0 + bindPoint);
 		glBindTexture(GL_TEXTURE_2D, textureId);
+		glActiveTexture(GL_TEXTURE0 + bindPoint);
 		SetInt(name, textureId);
 	}
 

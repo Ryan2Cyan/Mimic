@@ -11,6 +11,7 @@
 #include <renderengine/Camera.h>
 #include <renderengine/CubeMap.h>
 #include <utility/FileLoader.h>
+#include <utility/Logger.h>
 #include <filesystem>
 #include <vector>
 #include <glm/glm.hpp>
@@ -48,7 +49,7 @@ int main(int argc, char* argv[])
 		float alpha = 1.0f;
 
 		const std::shared_ptr<Shader> blinnPhongShader = Shader::Initialise(fileLoader->LocateFileInDirectory(assetPath, "BlinnPhongShader.glsl"));
-		glm::vec3 objectColour = glm::vec3(1.0f, 0.0f, 0.0f);
+		glm::vec3 objectColour = glm::vec3(0.8f);
 		glm::vec3 lightColour = glm::vec3(0.3f, 0.3f, 0.3f);
 		float ambientStrength = 0.8f;
 		float diffuseStrength = 0.5f;
@@ -84,6 +85,7 @@ int main(int argc, char* argv[])
 
 		// create camera:
 		std::shared_ptr<Camera> camera = Camera::Initialise(window->GetAspectRatio(), 45.0f);
+		std::shared_ptr<Camera> directLightCamera = Camera::Initialise(window->GetAspectRatio(), 45.0f);
 
 		// create models:
 		glm::vec3 rotation = glm::vec3(0.0f);
@@ -91,6 +93,10 @@ int main(int argc, char* argv[])
 		std::shared_ptr<Model> model1 = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "normal_rock_sphere.obj"));
 		std::shared_ptr<Model> model2 = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "normal_rock_sphere.obj"));
 		std::shared_ptr<Model> model3 = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "normal_rock_sphere.obj"));
+		std::shared_ptr<Model> ground = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "cube.obj"));
+		std::shared_ptr<Model> wall1 = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "cube.obj"));
+		glm::vec3 wallPos = glm::vec3(0.0f, 0.0f, -15.0f);
+		glm::vec3 wallScale = glm::vec3(1.0f);
 		std::shared_ptr<Model> lightModel = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "normal_rock_sphere.obj"));
 
 		// create textures:
@@ -117,6 +123,17 @@ int main(int argc, char* argv[])
 
 		// load hdr environment map:
 		std::shared_ptr<EnvironmentCubeMap> environmentCubeMap = EnvironmentCubeMap::Initialise("rural_asphalt_road_4k.hdr", window->GetAspectRatio(), renderer);
+
+		// shadow mapping (light-space matrix):
+		constexpr glm::vec2 lightProjectionClippingPlanes = glm::vec2(1.0f, 25.0f);
+		const glm::mat4 lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, lightProjectionClippingPlanes.x, lightProjectionClippingPlanes.y);
+		
+
+		// shadow mapping (depth map render texture):
+		std::shared_ptr<RenderTexture> depthMapRenderTexture = RenderTexture::Initialise();
+		depthMapRenderTexture->SetTexture(Texture::Initialise(glm::ivec2(1024, 1024), Texture::MIMIC_DEPTH_MAP_PARAMS, Texture::MIMIC_DEPTH_COMPONENT, Texture::MIMIC_DEPTH_COMPONENT));
+		depthMapRenderTexture->AttachTexture(TextureTarget::MIMIC_TEXTURE_2D, RenderTexture::MIMIC_NO_DRAW | RenderTexture::MIMIC_NO_READ | RenderTexture::MIMIC_DEPTH_BUFFER_BIT, RenderTextureAttachment::MIMIC_DEPTH);
+		depthMapRenderTexture->Unbind();
 
 		// render-shader lambdas:
 		std::function<void()> pbrOnDrawLamba = [&]()
@@ -212,12 +229,17 @@ int main(int argc, char* argv[])
 		std::function<void()> blinnPhongOnDrawLamba = [&]()
 		{
 			// set uniforms:
+			//blinnPhongShader->SetTexture("u_ShadowMap", depthMapRenderTexture->GetTextureID(), 1);
+			glBindTextureUnit(1, depthMapRenderTexture->GetTextureID());
+			glUniform1i(glGetUniformLocation(blinnPhongShader->_shaderProgramId, "u_ShadowMap"), 1);
 			blinnPhongShader->SetVector3("u_ObjectColour", objectColour);
 			blinnPhongShader->SetVector3("u_LightColour", lightColour);
 			blinnPhongShader->SetVector3("u_LightPosition", pointLights[0]->Position);
 			blinnPhongShader->SetFloat("u_AmbientStrength", ambientStrength);
 			blinnPhongShader->SetFloat("u_SpecularStrength", specularStrength);
 			blinnPhongShader->SetFloat("u_Shininess", shininess);
+			blinnPhongShader->SetMat4("u_LightSpaceMatrix", lightProjection * directLightCamera->_viewMatrix);
+
 		};
 		std::function<void()> flatColourOnDrawLamba = [&]()
 		{
@@ -227,23 +249,8 @@ int main(int argc, char* argv[])
 		std::function<void()> depthMapOnDrawLamba = [&]()
 		{
 			// set uniforms:
-			depthMapShader->SetMat4("u_LightSpaceMatrix", camera->_projectionMatrix * camera->_viewMatrix);
+			depthMapShader->SetMat4("u_LightSpaceMatrix", lightProjection * directLightCamera->_viewMatrix);
 		};
-
-		// shadow mapping:
-		constexpr glm::vec2 lightProjectionClippingPlanes = glm::vec2(1.0f, 25.0f);
-		const glm::mat4 lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, lightProjectionClippingPlanes.x, lightProjectionClippingPlanes.y);
-		const glm::mat4 lightView = glm::lookAt(
-			glm::vec3(-2.0f, 4.0f, -1.0f),
-			glm::vec3(0.0f, 0.0f, 0.0f),
-			glm::vec3(0.0f, 1.0f, 0.0f));
-		const glm::mat4 lightSpaceMatrix = lightProjection * lightView;
-
-
-		std::shared_ptr<RenderTexture> depthMapRenderTexture = RenderTexture::Initialise();
-		depthMapRenderTexture->SetTexture(Texture::Initialise(glm::ivec2(1024, 1024), Texture::MIMIC_DEPTH_MAP_PARAMS, Texture::MIMIC_DEPTH_COMPONENT, Texture::MIMIC_DEPTH_COMPONENT));
-		depthMapRenderTexture->AttachTexture(TextureTarget::MIMIC_TEXTURE_2D, RenderTexture::MIMIC_NO_DRAW | RenderTexture::MIMIC_NO_READ | RenderTexture::MIMIC_DEPTH_BUFFER_BIT, RenderTextureAttachment::MIMIC_DEPTH);
-		depthMapRenderTexture->Unbind();
 
 		// #############################################################################
 		//game loop:
@@ -284,12 +291,21 @@ int main(int argc, char* argv[])
 			// update scene:
 			// #############################################################################
 			camera->Update();
+			directLightCamera->Position = directLights[0]->Position;
+			directLightCamera->Orientation = directLights[0]->Direction;
+			directLightCamera->Update();
 			model->UpdateModelMatrix(glm::vec3(0.0f, 0.0f, -4.0f),rotation, glm::vec3(1.0f));
 			model1->UpdateModelMatrix(glm::vec3(-2.5f, 0.0f, -4.0f), rotation, glm::vec3(1.0f));
 			model2->UpdateModelMatrix(glm::vec3(2.5f, 0.0f, -4.0f), rotation, glm::vec3(1.0f));
 			model3->UpdateModelMatrix(glm::vec3(2.5f, 1.0f, -4.0f), rotation, glm::vec3(1.0f));
-			lightModel->UpdateModelMatrix(pointLights[0]->Position, rotation, glm::vec3(0.2f));
+			wall1->UpdateModelMatrix(wallPos, glm::vec3(0.0), glm::vec3(7.143, 5.357, 1.163));
+			lightModel->UpdateModelMatrix(directLights[0]->Position, rotation, glm::vec3(0.2f));
 
+
+			/*lightView = glm::lookAt(
+			directLights[0]->Position,
+			glm::vec3(0.0f, 0.0f, 0.0f),
+			glm::vec3(0.0f, 1.0f, 0.0f));*/
 
 			// #############################################################################
 			// render scene:
@@ -298,21 +314,25 @@ int main(int argc, char* argv[])
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 			// update shadow maps:
-			model->QueMeshesToDraw(depthMapShader, depthMapOnDrawLamba, renderer);
+			model3->QueMeshesToDraw(depthMapShader, depthMapOnDrawLamba, renderer);
+			wall1->QueMeshesToDraw(depthMapShader, depthMapOnDrawLamba, renderer);
 			depthMapRenderTexture->SetTextureViewPort();
 			depthMapRenderTexture->Bind();
-			renderer->Draw(lightView, lightProjection);
+			glClear(GL_DEPTH_BUFFER_BIT);
+			renderer->Draw(directLightCamera->_viewMatrix, lightProjection);
 			renderer->ClearRenderQue();
 			depthMapRenderTexture->Unbind();
-
+			window->ResetViewPort();
 			// send meshes to renderer:
-			model->QueMeshesToDraw(pbrShader, pbrOnDrawLamba, renderer);
-			model1->QueMeshesToDraw(pbrShader, pbrOnDrawLamba, renderer);
+			/*model->QueMeshesToDraw(pbrShader, pbrOnDrawLamba, renderer);
+			model1->QueMeshesToDraw(pbrShader, pbrOnDrawLamba, renderer);*/
+			wall1->QueMeshesToDraw(blinnPhongShader, blinnPhongOnDrawLamba, renderer);
 			model2->QueMeshesToDraw(blinnPhongShader, blinnPhongOnDrawLamba, renderer);
+			// ground->QueMeshesToDraw(pbrShader, pbrOnDrawLamba, renderer);
 			lightModel->QueMeshesToDraw(flatColourShader, flatColourOnDrawLamba, renderer);
 
 			// draw:
-			window->ResetViewPort();
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			renderer->Draw(camera);
 			renderer->ClearRenderQue();
 			renderer->DrawCubeMap(camera, environmentCubeMap);
@@ -363,6 +383,11 @@ int main(int argc, char* argv[])
 			// model controls:
 			ImGui::Begin("Model");
 			ImGui::SliderFloat3("Rotation##m2", &(rotation[0]), -5.0f, 5.0f);
+			ImGui::End();
+
+			ImGui::Begin("Wall");
+			ImGui::SliderFloat3("Position##w2", &(wallPos[0]), -50.0f, 50.0f);
+			ImGui::SliderFloat3("Scale##w2", &(wallScale[0]), 0.0f, 50.0f);
 			ImGui::End();
 
 			ImGui::Render();
