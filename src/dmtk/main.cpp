@@ -229,9 +229,7 @@ int main(int argc, char* argv[])
 		std::function<void()> blinnPhongOnDrawLamba = [&]()
 		{
 			// set uniforms:
-			//blinnPhongShader->SetTexture("u_ShadowMap", depthMapRenderTexture->GetTextureID(), 1);
-			glBindTextureUnit(1, depthMapRenderTexture->GetTextureID());
-			glUniform1i(glGetUniformLocation(blinnPhongShader->_shaderProgramId, "u_ShadowMap"), 1);
+			blinnPhongShader->SetTexture("u_ShadowMap", depthMapRenderTexture->GetTextureID(), 1);
 			blinnPhongShader->SetVector3("u_ObjectColour", objectColour);
 			blinnPhongShader->SetVector3("u_LightColour", lightColour);
 			blinnPhongShader->SetVector3("u_LightPosition", directLights[0]->Position);

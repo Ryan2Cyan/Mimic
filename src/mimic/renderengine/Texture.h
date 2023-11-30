@@ -47,27 +47,30 @@ namespace MimicRender
 		friend struct EnvironmentCubeMap;
 
 		// texture type
-		static const std::uint32_t MIMIC_2D_TEXTURE =		 0b1;
-		static const std::uint32_t MIMIC_CUBEMAP_TEXTURE =	 0b10;
+		static const std::uint32_t MIMIC_2D_TEXTURE =					 0b1;
+		static const std::uint32_t MIMIC_CUBEMAP_TEXTURE =				 0b10;
 
 		// texture parameters:
-		static const std::uint32_t MIMIC_UNSIGNED_BYTE =	 0b100;
-		static const std::uint32_t MIMIC_FLOAT =			 0b1000;
+		static const std::uint32_t MIMIC_UNSIGNED_BYTE =				 0b100;
+		static const std::uint32_t MIMIC_FLOAT =						 0b1000;
 
-		static const std::uint32_t MIMIC_WRAPT_REPEAT =		 0b1'000;
-		static const std::uint32_t MIMIC_WRAPS_REPEAT =		 0b10'0000;
-		static const std::uint32_t MIMIC_WRAPT_CLAMP =		 0b100'0000;
-		static const std::uint32_t MIMIC_WRAPS_CLAMP =		 0b1000'0000;
-		static const std::uint32_t MIMIC_WRAPR_CLAMP =		 0b1'0000'0000;
+		static const std::uint32_t MIMIC_WRAPT_REPEAT =					 0b1'000;
+		static const std::uint32_t MIMIC_WRAPS_REPEAT =					 0b10'0000;
+		static const std::uint32_t MIMIC_WRAPT_CLAMP_TO_BORDER =		 0b10'000;
+		static const std::uint32_t MIMIC_WRAPS_CLAMP_TO_BORDER =		 0b100'0000;
+		static const std::uint32_t MIMIC_WRAPT_CLAMP =				     0b1000'0000;
+		static const std::uint32_t MIMIC_WRAPS_CLAMP =					 0b1'0000'0000;
+		static const std::uint32_t MIMIC_WRAPR_CLAMP =					 0b10'0000'0000;
 		
-		static const std::uint32_t MIMIC_MIN_LINEAR =		 0b10'0000'0000;
-		static const std::uint32_t MIMIC_MAG_LINEAR =		 0b100'0000'0000;
-		static const std::uint32_t MIMIC_MIN_NEAREST =		 0b1000'0000'0000;
-		static const std::uint32_t MIMIC_MAG_NEAREST =		 0b1'0000'0000'0000;
-		static const std::uint32_t MIMIC_MIN_MIPMAP_LINEAR = 0b10'0000'0000'0000;
-		static const std::uint32_t MIMIC_MAG_MIPMAP_LINEAR = 0b100'0000'0000'0000;
-		static const std::uint32_t MIMIC_GEN_MIPMAP =		 0b1000'0000'0000'0000;
-		static const std::uint32_t MIMIC_FLIP_VERTICAL =     0b1'0000'0000'0000'0000;
+		static const std::uint32_t MIMIC_MIN_LINEAR =					 0b100'0000'0000;
+		static const std::uint32_t MIMIC_MAG_LINEAR =					 0b1000'0000'0000;
+		static const std::uint32_t MIMIC_MIN_NEAREST =					 0b1'0000'0000'0000;
+		static const std::uint32_t MIMIC_MAG_NEAREST =					 0b10'0000'0000'0000;
+		static const std::uint32_t MIMIC_MIN_MIPMAP_LINEAR =			 0b100'0000'0000'0000;
+		static const std::uint32_t MIMIC_MAG_MIPMAP_LINEAR =			 0b1000'0000'0000'0000;
+		static const std::uint32_t MIMIC_GEN_MIPMAP =					 0b1'0000'0000'0000'0000;
+		static const std::uint32_t MIMIC_FLIP_VERTICAL =				 0b10'0000'0000'0000'0000;
+		static const std::uint32_t MIMIC_CLAMP_BORDER_COLOR =			 0b100'0000'0000'0000'0000;
 
 		// engine texture parameters:
 		static const std::uint32_t MIMIC_BRDF_TEXTURE_PARAMS = MIMIC_2D_TEXTURE | MIMIC_FLOAT | MIMIC_WRAPS_CLAMP | MIMIC_WRAPT_CLAMP | MIMIC_MIN_LINEAR | MIMIC_MAG_LINEAR;
@@ -101,6 +104,6 @@ namespace MimicRender
 
 		// user texture parameters:
 		static const std::uint32_t MIMIC_2D_TEXTURE_PARAMS = MIMIC_2D_TEXTURE | MIMIC_UNSIGNED_BYTE | MIMIC_WRAPS_REPEAT | MIMIC_WRAPT_REPEAT | MIMIC_MIN_MIPMAP_LINEAR | MIMIC_MAG_LINEAR | MIMIC_GEN_MIPMAP;
-		static const std::uint32_t MIMIC_DEPTH_MAP_PARAMS = MIMIC_2D_TEXTURE | MIMIC_FLOAT | MIMIC_WRAPS_REPEAT | MIMIC_WRAPT_REPEAT | MIMIC_MIN_NEAREST | MIMIC_MAG_NEAREST; // NOTE: make private after implementing shadow map class
+		static const std::uint32_t MIMIC_DEPTH_MAP_PARAMS = MIMIC_2D_TEXTURE | MIMIC_FLOAT | MIMIC_WRAPS_CLAMP_TO_BORDER | MIMIC_WRAPT_CLAMP_TO_BORDER | MIMIC_MIN_NEAREST | MIMIC_MAG_NEAREST | MIMIC_CLAMP_BORDER_COLOR; // NOTE: make private after implementing shadow map class
 	};
 }

@@ -185,7 +185,7 @@ namespace MimicRender
 		if (!_initialised) return;
 		glBindTexture(GL_TEXTURE_2D, textureId);
 		glActiveTexture(GL_TEXTURE0 + bindPoint);
-		SetInt(name, textureId);
+		SetInt(name, bindPoint);
 	}
 
 	void Shader::SetFloat(const char* name, const float value) const noexcept

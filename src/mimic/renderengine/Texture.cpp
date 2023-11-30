@@ -171,6 +171,9 @@ namespace MimicRender
 		if (textureParams & MIMIC_WRAPS_REPEAT) glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		if (textureParams & MIMIC_WRAPT_REPEAT) glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
+		if (textureParams & MIMIC_WRAPS_CLAMP_TO_BORDER) glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+		if (textureParams & MIMIC_WRAPT_CLAMP_TO_BORDER) glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+
 		if (textureParams & MIMIC_WRAPS_CLAMP) glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		if (textureParams & MIMIC_WRAPT_CLAMP) glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		if (textureParams & MIMIC_WRAPR_CLAMP) glTexParameteri(target, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
@@ -183,6 +186,12 @@ namespace MimicRender
 
 		if (textureParams & MIMIC_MIN_MIPMAP_LINEAR) glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 		if (textureParams & MIMIC_MAG_MIPMAP_LINEAR) glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+
+		if (textureParams & MIMIC_CLAMP_BORDER_COLOR)
+		{
+			constexpr float borderColour[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+			glTexParameterfv(target, GL_TEXTURE_BORDER_COLOR, borderColour);
+		}
 
 		if (textureParams & MIMIC_GEN_MIPMAP) glGenerateMipmap(target);
 	}

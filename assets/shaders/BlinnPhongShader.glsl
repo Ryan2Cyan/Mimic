@@ -49,15 +49,27 @@ uniform sampler2D u_ShadowMap;
 
 out vec4 fragColour;
 
-float ShadowCalculation(vec4 lightSpacePos, const vec3 lightDir)
+const float ShadowCalculation(const vec4 lightSpacePos, const vec3 lightDir)
 {
-	vec3 projectedCoords = fragPositionLightSpace.xyz / fragPositionLightSpace.w;
-	projectedCoords = projectedCoords * 0.5 + 0.5;
-	float closestDepth = texture(u_ShadowMap, projectedCoords.xy).r;
-	float currentDepth = projectedCoords.z;
+	vec3 projectedCoords = (fragPositionLightSpace.xyz / fragPositionLightSpace.w) * 0.5 + 0.5;
+	if(projectedCoords.z > 1.0) return 0.0;
+
+	const float closestDepth = texture(u_ShadowMap, projectedCoords.xy).r;
+	const float currentDepth = projectedCoords.z;
 	const float shadowBias = max(0.05 * (1.0 - dot(normal, lightDir)), 0.005);
-	float shadow = currentDepth - shadowBias > closestDepth  ? 1.0 : 0.0;
-	return shadow;
+
+	// percentage-closer filtering to create the illusion of higher resolution shadows:
+	float shadow = 0.0;
+	const vec2 texelSize = 1.0 / textureSize(u_ShadowMap, 0);
+	for(int x = -1; x <= 1; x++)
+	{
+		for(int y = -1; y <= 1; y++)
+		{
+			const float pcfDepth = texture(u_ShadowMap, projectedCoords.xy + vec2(x, y) * texelSize).r;
+			shadow += currentDepth - shadowBias > pcfDepth ? 1.0 : 0.0;
+		}
+	}
+	return shadow /= 9.0;
 }
 
 void main()
