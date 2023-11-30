@@ -85,6 +85,8 @@ add_library(mimicrenderer
     src/mimic/renderengine/Camera.h
     src/mimic/renderengine/CubeMap.cpp
     src/mimic/renderengine/CubeMap.h
+    src/mimic/renderengine/ShadowMapper.cpp
+    src/mimic/renderengine/ShadowMapper.h
 
     SDKs/stbi/include/stb_image.h
 )

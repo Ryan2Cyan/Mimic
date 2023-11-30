@@ -72,13 +72,13 @@ subroutine uniform CalculateMetallic MetallicMode;
 
 uniform vec3 u_CameraPosition;
 
-uniform samplerCube u_IrradianceMap;
-uniform samplerCube u_PrefilterMap;
-uniform sampler2D u_BRDFLookupTexture;
 uniform sampler2D u_AlbedoMap;
 uniform sampler2D u_RoughnessMap;
 uniform sampler2D u_NormalMap;
 uniform sampler2D u_MetallicMap;
+uniform samplerCube u_IrradianceMap;
+uniform samplerCube u_PrefilterMap;
+uniform sampler2D u_BRDFLookupTexture;
 
 uniform vec3 u_Albedo;
 uniform float u_Roughness;
