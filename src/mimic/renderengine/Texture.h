@@ -39,16 +39,17 @@ namespace MimicRender
 	// Source: https://cplusplus.com/forum/general/1590/
 	struct Texture
 	{
+		// texture types:
+		static const std::uint32_t MIMIC_2D_TEXTURE = 0b1;
+		static const std::uint32_t MIMIC_CUBEMAP_TEXTURE = 0b10;
+
 	private:
 		friend struct Renderer;
 		friend struct Mesh;
 		friend struct Model;
 		friend struct RenderTexture;
 		friend struct EnvironmentCubeMap;
-
-		// texture type
-		static const std::uint32_t MIMIC_2D_TEXTURE =					 0b1;
-		static const std::uint32_t MIMIC_CUBEMAP_TEXTURE =				 0b10;
+		friend struct Shader;
 
 		// texture parameters:
 		static const std::uint32_t MIMIC_UNSIGNED_BYTE =				 0b100;

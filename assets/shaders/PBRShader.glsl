@@ -13,16 +13,20 @@ uniform mat4 u_View;
 uniform mat4 u_Projection;
 // uniform mat3 u_NormalMatrix;
 
+uniform mat4 u_DirectLightMatrices[20];
+uniform int u_DirectLightsCount;
+// uniform mat4 u_PointLightMatrices[20];
+
 out vec2 texCoord;
 // out vec3 vertexNormal;
 out vec3 fragPosition;
 out vec3 viewDirectionNormal;
 out mat3 TBN;
+out vec4 directionalLightSpacePositions[20];
 
 void main()
 {
 	texCoord = aTexCoord;
-	// vertexNormal = u_NormalMatrix * aNormal;
 
 	// normal mapping: calculate tangent-bitangent-normal matrix.
 	vec3 t = normalize(vec3(u_Model * vec4(aTangent, 0.0)));
@@ -30,10 +34,16 @@ void main()
 	t = normalize(t - dot(t, n) * n);
 	const vec3 b = cross(n, t);
 	TBN = mat3(t, b, n);
-
+	
 	const vec4 aPosVec4 = vec4(aPos, 1.0);
-    fragPosition = vec3(u_Model * aPosVec4);
+        fragPosition = vec3(u_Model * aPosVec4);
 	viewDirectionNormal = transpose(inverse(mat3(u_Model))) * aNormal;
+	
+	// calculate light space positions for shadow maps:
+	for(int i = 0; i < u_DirectLightsCount; i++)
+	{
+		directionalLightSpacePositions[i] = u_DirectLightMatrices[i] * u_Model * aPosVec4;
+	}	
 
 	gl_Position = u_Projection * u_View * u_Model * aPosVec4;
 }
@@ -56,6 +66,7 @@ in vec2 texCoord;
 in vec3 fragPosition;
 in vec3 viewDirectionNormal;
 in mat3 TBN;
+in vec4 directionalLightSpacePositions[20];
 
 // subroutine definitions:
 subroutine vec3 CalculateAlbedo();
@@ -79,6 +90,7 @@ uniform sampler2D u_MetallicMap;
 uniform samplerCube u_IrradianceMap;
 uniform samplerCube u_PrefilterMap;
 uniform sampler2D u_BRDFLookupTexture;
+uniform sampler2D u_DirectShadowMaps[20];
 
 uniform vec3 u_Albedo;
 uniform float u_Roughness;
@@ -95,7 +107,6 @@ struct DirectLight
 };
 uniform DirectLight u_DirectLights[20];
 uniform int u_DirectLightsCount;
-
 struct PointLight
 {
 	vec4 colour;
@@ -110,6 +121,30 @@ uniform int u_PointLightsCount;
 out vec4 FragColour;
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// calculate directional shadow map:
+const float ShadowCalculation(const vec4 lightSpacePos, const vec3 lightDir, const sampler2D shadowMap, const vec3 normal)
+{
+	vec3 projectedCoords = (lightSpacePos.xyz / lightSpacePos.w) * 0.5 + 0.5;
+	if(projectedCoords.z > 1.0) return 0.0;
+
+	const float closestDepth = texture(shadowMap, projectedCoords.xy).r;
+	const float currentDepth = projectedCoords.z;
+	const float shadowBias = max(0.05 * (1.0 - dot(normal, lightDir)), 0.005);
+
+	// percentage-closer filtering to create the illusion of higher resolution shadows:
+	float shadow = 0.0;
+	const vec2 texelSize = 1.0 / textureSize(shadowMap, 0);
+	for(int x = -1; x <= 1; x++)
+	{
+		for(int y = -1; y <= 1; y++)
+		{
+			const float pcfDepth = texture(shadowMap, projectedCoords.xy + vec2(x, y) * texelSize).r;
+			shadow += currentDepth - shadowBias > pcfDepth ? 1.0 : 0.0;
+		}
+	}
+	return shadow /= 9.0;
+}
+
 // Normal Distribution Function (Trowbridge-Reitz GGX) - Approximates surface's microfacets that align to the halfway vector:
 const float DistrubutionGGX(const in vec3 normal, const in vec3 halfwayVector, const in float roughness)
 {
@@ -235,10 +270,13 @@ void main()
 		const vec3 numerator = d * g * f;
 		const float denominator = 4.0f * max(dot(normal, viewDir), 0.0) * max(dot(normal, lightDirection), 0.0) + 0.0001;
 		const vec3 specular = numerator / denominator;
+		
+		// calculate shadows:
+		float shadow = ShadowCalculation(directionalLightSpacePositions[i], lightDirection, u_DirectShadowMaps[i], normal);
 
 		// Add to outgoing radiance:
 		const float normalDotLight = max(dot(normal, lightDirection), 0.0);
-		totalRadiance += (kD * albedo / PI + specular) * radiance * normalDotLight;
+		totalRadiance += (kD * albedo / PI + specular) * radiance * normalDotLight * (1.0 - shadow);
 	}
 
 	// sum radiance for all point lights:
@@ -287,6 +325,6 @@ void main()
 
 	vec3 colour = ambient + totalRadiance;
 	colour = colour / (colour + vec3(1.0));
-	colour = pow(colour, vec3(1.0/2.2));
+	colour = pow(colour, vec3(1.0 / 2.2));
 	FragColour = vec4( u_Emissive + colour, u_Alpha );
 }

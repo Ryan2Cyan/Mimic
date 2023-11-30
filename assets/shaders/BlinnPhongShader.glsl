@@ -51,7 +51,7 @@ out vec4 fragColour;
 
 const float ShadowCalculation(const vec4 lightSpacePos, const vec3 lightDir)
 {
-	vec3 projectedCoords = (fragPositionLightSpace.xyz / fragPositionLightSpace.w) * 0.5 + 0.5;
+	vec3 projectedCoords = (lightSpacePos.xyz / lightSpacePos.w) * 0.5 + 0.5;
 	if(projectedCoords.z > 1.0) return 0.0;
 
 	const float closestDepth = texture(u_ShadowMap, projectedCoords.xy).r;

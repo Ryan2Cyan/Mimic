@@ -1,4 +1,5 @@
 #include "Shader.h"
+#include <renderengine/Texture.h>
 #include <utility/Logger.h>
 #include <fstream>
 #include <array>
@@ -180,12 +181,12 @@ namespace MimicRender
 		glUniform1i(location, value);
 	}
 
-	void Shader::SetTexture(const char* name, const int& textureId, const int& bindPoint)
+	void Shader::SetTexture(const char* name, const int& textureId, const int& bindPoint, const std::uint32_t& textureParams)
 	{
-		if (!_initialised) return;
-		glBindTexture(GL_TEXTURE_2D, textureId);
-		glActiveTexture(GL_TEXTURE0 + bindPoint);
+		if (!_initialised) return;;
 		SetInt(name, bindPoint);
+		glActiveTexture(GL_TEXTURE0 + bindPoint);
+		glBindTexture(Texture::GetGLTarget(textureParams), textureId);
 	}
 
 	void Shader::SetFloat(const char* name, const float value) const noexcept

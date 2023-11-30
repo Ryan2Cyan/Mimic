@@ -10,6 +10,7 @@
 #include <renderengine/Window.h>
 #include <renderengine/Camera.h>
 #include <renderengine/CubeMap.h>
+#include <renderengine/ShadowMapper.h>
 #include <utility/FileLoader.h>
 #include <utility/Logger.h>
 #include <filesystem>
@@ -17,7 +18,6 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <imgui.h>
-
 #include <imgui_impl_opengl3.h>
 #include <imgui_impl_sdl2.h>
 #define SDL_MAIN_HANDLED
@@ -142,10 +142,7 @@ int main(int argc, char* argv[])
 			if (albedoTexture)
 			{
 				subroutineUniformIndices[albedoSubroutineUniform] = albedoAuto;
-				// pbrShader->SetTexture("u_AlbedoMap", albedoTexture->GetId(), 0); // texture unit slots start at 1.
-				pbrShader->SetInt("u_AlbedoMap", 0);
-				glActiveTexture(GL_TEXTURE0);
-				glBindTexture(GL_TEXTURE_2D, albedoTexture->GetId());
+				pbrShader->SetTexture("u_AlbedoMap", albedoTexture->GetId(), 0, Texture::MIMIC_2D_TEXTURE);
 			}
 			else
 			{
@@ -157,10 +154,7 @@ int main(int argc, char* argv[])
 			if (normalTexture)
 			{
 				subroutineUniformIndices[normalSubroutineUniform] = normalAuto;
-				// pbrShader->SetTexture("u_NormalMap", normalTexture->GetId(), 1);
-				pbrShader->SetInt("u_NormalMap", 1);
-				glActiveTexture(GL_TEXTURE1);
-				glBindTexture(GL_TEXTURE_2D, normalTexture->GetId());
+				pbrShader->SetTexture("u_NormalMap", normalTexture->GetId(), 1, Texture::MIMIC_2D_TEXTURE);
 			}
 			else subroutineUniformIndices[normalSubroutineUniform] = normalManual;
 
@@ -168,10 +162,7 @@ int main(int argc, char* argv[])
 			if (roughnessTexture)
 			{
 				subroutineUniformIndices[roughnessSubroutineUniform] = roughnessAuto;
-				// pbrShader->SetTexture("u_RoughnessMap", roughnessTexture->GetId(), 2);
-				pbrShader->SetInt("u_RoughnessMap", 2);
-				glActiveTexture(GL_TEXTURE2);
-				glBindTexture(GL_TEXTURE_2D, roughnessTexture->GetId());
+				pbrShader->SetTexture("u_RoughnessMap", roughnessTexture->GetId(), 2, Texture::MIMIC_2D_TEXTURE);
 			}
 			else
 			{
@@ -183,10 +174,7 @@ int main(int argc, char* argv[])
 			if (metallicTexture)
 			{
 				subroutineUniformIndices[metallicSubroutineUniform] = metallicAuto;
-				// pbrShader->SetTexture("u_MetallicMap", metallicTexture->GetId(), 3);
-				pbrShader->SetInt("u_MetallicMap", 3);
-				glActiveTexture(GL_TEXTURE3);
-				glBindTexture(GL_TEXTURE_2D, metallicTexture->GetId());
+				pbrShader->SetTexture("u_MetallicMap", metallicTexture->GetId(), 3, Texture::MIMIC_2D_TEXTURE);
 			}
 			else
 			{
@@ -196,20 +184,9 @@ int main(int argc, char* argv[])
 
 			glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, subroutineUniformIndices.size(), subroutineUniformIndices.data());
 
-			/*pbrShader->SetTexture("u_IrradianceMap", environmentCubeMap->GetIrradianceId(), 4);
-			pbrShader->SetTexture("u_PrefilterMap", environmentCubeMap->GetPreFilteredId(), 5);
-			pbrShader->SetTexture("u_BRDFLookupTexture", environmentCubeMap->GetBRDFId(), 6);*/
-			pbrShader->SetInt("u_IrradianceMap", 4);
-			glActiveTexture(GL_TEXTURE4);
-			glBindTexture(GL_TEXTURE_CUBE_MAP, environmentCubeMap->GetIrradianceId());
-
-			pbrShader->SetInt("u_PrefilterMap", 5);
-			glActiveTexture(GL_TEXTURE5);
-			glBindTexture(GL_TEXTURE_CUBE_MAP, environmentCubeMap->GetPreFilteredId());
-
-			pbrShader->SetInt("u_BRDFLookupTexture", 6);
-			glActiveTexture(GL_TEXTURE6);
-			glBindTexture(GL_TEXTURE_2D, environmentCubeMap->GetBRDFId());
+			pbrShader->SetTexture("u_IrradianceMap", environmentCubeMap->GetIrradianceId(), 4, Texture::MIMIC_CUBEMAP_TEXTURE);
+			pbrShader->SetTexture("u_PrefilterMap", environmentCubeMap->GetPreFilteredId(), 5, Texture::MIMIC_CUBEMAP_TEXTURE);
+			pbrShader->SetTexture("u_BRDFLookupTexture", environmentCubeMap->GetBRDFId(), 6, Texture::MIMIC_2D_TEXTURE);
 
 			pbrShader->SetVector3("u_Emissive", emissive);
 			pbrShader->SetFloat("u_Alpha", alpha);
@@ -219,10 +196,14 @@ int main(int argc, char* argv[])
 			for (int i = 0; i < directLights.size(); i++)
 			{
 				const std::string currentLight = "u_DirectLights[" + std::to_string(i) + "]";
+				const std::string currentLightMatrix = "u_DirectLightMatrices[" + std::to_string(i) + "]";
+				const std::string currentShadowMap = "u_DirectShadowMaps[" + std::to_string(i) + "]";
 
 				pbrShader->SetVector3((currentLight + ".direction").c_str(), glm::normalize(-directLights[i]->Direction));
 				const glm::vec4 colour = glm::vec4(directLights[i]->Colour.x, directLights[i]->Colour.y, directLights[i]->Colour.z, 1.0f);
 				pbrShader->SetVector4((currentLight + ".colour").c_str(), colour);
+				pbrShader->SetMat4(currentLightMatrix.c_str(), lightProjection * directLightCamera->_viewMatrix);
+				pbrShader->SetTexture(currentShadowMap.c_str(), depthMapRenderTexture->GetTextureID(), 7, Texture::MIMIC_2D_TEXTURE);
 			}
 			pbrShader->SetInt("u_DirectLightsCount", directLights.size());
 
@@ -244,7 +225,7 @@ int main(int argc, char* argv[])
 		std::function<void()> blinnPhongOnDrawLamba = [&]()
 		{
 			// set uniforms:
-			blinnPhongShader->SetTexture("u_ShadowMap", depthMapRenderTexture->GetTextureID(), 1);
+			blinnPhongShader->SetTexture("u_ShadowMap", depthMapRenderTexture->GetTextureID(), 1, Texture::MIMIC_2D_TEXTURE);
 			blinnPhongShader->SetVector3("u_ObjectColour", objectColour);
 			blinnPhongShader->SetVector3("u_LightColour", lightColour);
 			blinnPhongShader->SetVector3("u_LightPosition", directLights[0]->Position);
@@ -327,23 +308,25 @@ int main(int argc, char* argv[])
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 			// update shadow maps:
-			//model3->QueMeshesToDraw(depthMapShader, depthMapOnDrawLamba, renderer);
-			//wall1->QueMeshesToDraw(depthMapShader, depthMapOnDrawLamba, renderer);
-			//depthMapRenderTexture->SetTextureViewPort();
-			//depthMapRenderTexture->Bind();
-			//glClear(GL_DEPTH_BUFFER_BIT);
-			//glCullFace(GL_FRONT); // cull front-faces to avoid Peter-Panning:
-			//renderer->Draw(directLightCamera->_viewMatrix, lightProjection);
-			//renderer->ClearRenderQue();
-			//glCullFace(GL_BACK);
-			//depthMapRenderTexture->Unbind();
-			//window->ResetViewPort();
+			model->QueMeshesToDraw(depthMapShader, depthMapOnDrawLamba, renderer);
+			model1->QueMeshesToDraw(depthMapShader, depthMapOnDrawLamba, renderer);
+			model2->QueMeshesToDraw(depthMapShader, depthMapOnDrawLamba, renderer);
+			wall1->QueMeshesToDraw(depthMapShader, depthMapOnDrawLamba, renderer);
+			depthMapRenderTexture->SetTextureViewPort();
+			depthMapRenderTexture->Bind();
+			glClear(GL_DEPTH_BUFFER_BIT);
+			glCullFace(GL_FRONT); // cull front-faces to avoid Peter-Panning:
+			renderer->Draw(directLightCamera->_viewMatrix, lightProjection);
+			renderer->ClearRenderQue();
+			glCullFace(GL_BACK);
+			depthMapRenderTexture->Unbind();
+			window->ResetViewPort();
 
 			// send meshes to renderer:
 			model->QueMeshesToDraw(pbrShader, pbrOnDrawLamba, renderer);
 			model1->QueMeshesToDraw(pbrShader, pbrOnDrawLamba, renderer);
-			// wall1->QueMeshesToDraw(blinnPhongShader, blinnPhongOnDrawLamba, renderer);
-			// model2->QueMeshesToDraw(blinnPhongShader, blinnPhongOnDrawLamba, renderer);
+			model2->QueMeshesToDraw(blinnPhongShader, blinnPhongOnDrawLamba, renderer);
+			wall1->QueMeshesToDraw(blinnPhongShader, blinnPhongOnDrawLamba, renderer);
 			// ground->QueMeshesToDraw(pbrShader, pbrOnDrawLamba, renderer);
 			lightModel->QueMeshesToDraw(flatColourShader, flatColourOnDrawLamba, renderer);
 
