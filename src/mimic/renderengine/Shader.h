@@ -19,6 +19,8 @@ namespace MimicRender
 		void SetModelMatrix(const glm::mat4& value) noexcept;
 		void SetViewMatrix(const glm::mat4& value) noexcept;
 		void SetProjectionMatrix(const glm::mat4& value) noexcept;
+		void SetCameraPosition(const glm::vec3& value) noexcept;
+
 		void SetTexture(const char* name, const int& textureId, const int& bindPoint, const std::uint32_t& textureParams);
 		void SetBool(const char* name, const bool value) const noexcept;
 		void SetInt(const char* name, const int value) const noexcept;
@@ -45,6 +47,7 @@ namespace MimicRender
 		int _modelMatrixUniformLocation = -1;
 		int _viewMatrixUniformLocation = -1;
 		int _projectionMatrixUniformLocation = -1;
+		int _cameraPositionUniformLocation = -1;
 	
 		bool _initialised;
 	};

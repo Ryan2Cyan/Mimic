@@ -17,11 +17,20 @@ namespace MimicRender
 	// #############################################################################
 	// direct light struct:
 	// #############################################################################
+	struct RenderTexture;
 	struct DirectLight : Light
 	{
 		static const std::shared_ptr<DirectLight> Initialise() noexcept;
 		static const std::shared_ptr<DirectLight> Initialise(const glm::vec3& position, const glm::vec3& direction, const glm::vec3& colour) noexcept;
+		const unsigned int GetDepthMapTextureId() const noexcept;
+		const glm::mat4 GetLightMatrix() const noexcept;
+
 		glm::vec3 Direction;
+
+	private:
+		friend struct ShadowMapper;
+		std::shared_ptr<RenderTexture> _depthMapRT;
+		glm::mat4 _lightMatrix;
 	};
 
 

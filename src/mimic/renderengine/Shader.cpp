@@ -144,10 +144,11 @@ namespace MimicRender
 			return nullptr;
 		}
 
-		// assign uniforms:
+		// capture uniform locations:
 		shader->_modelMatrixUniformLocation = glGetUniformLocation(programId, "u_Model");
 		shader->_viewMatrixUniformLocation = glGetUniformLocation(programId, "u_View");
 		shader->_projectionMatrixUniformLocation = glGetUniformLocation(programId, "u_Projection");
+		shader->_cameraPositionUniformLocation = glGetUniformLocation(programId, "u_CameraPosition");
 
 		for (auto shaderId : glShaderIds) glDetachShader(programId, shaderId);
 
@@ -270,6 +271,13 @@ namespace MimicRender
 		glUniformMatrix4fv(_projectionMatrixUniformLocation, 1, GL_FALSE, glm::value_ptr(value));
 	}
 	
+	void Shader::SetCameraPosition(const glm::vec3& value) noexcept
+	{
+		if (!_initialised) return;
+		if (_projectionMatrixUniformLocation == -1) return;
+		glUniform3f(_projectionMatrixUniformLocation, value.x, value.y, value.z);
+	}
+
 	const unsigned int Shader::GetSubroutineUniform(const GLenum& shaderType, const std::string& subroutineName)
 	{
 		if (!_initialised) return 0;

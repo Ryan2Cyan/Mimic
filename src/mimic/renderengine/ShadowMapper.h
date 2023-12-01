@@ -26,13 +26,11 @@ namespace MimicRender
 	struct ShadowMapper
 	{
 		static const std::shared_ptr<ShadowMapper> Initialise(glm::ivec2 aspectRatio = glm::ivec2(1024, 1024));
-		// void CaptureDepthMap()
 		void RenderDirectLightDepthMaps(const std::vector<std::shared_ptr<Model>>& models, std::vector<std::shared_ptr<DirectLight>>& directLights, std::shared_ptr<Renderer>& renderer);
-		const glm::mat4 GetDirectLightMatrix(const unsigned int& index);
-		const unsigned int GetDepthMapTextureId(const unsigned int& index) const noexcept;
+		/*const glm::mat4 GetDirectLightMatrix(const unsigned int& index);
+		const unsigned int GetDepthMapTextureId(const unsigned int& index) const noexcept;*/
 
 	private:
-		std::vector<DirectLightDepthMapData> _directLightDepthMapData;
 		std::shared_ptr<Shader> _depthMapShader;
 		glm::ivec2 _depthMapAspect;
 		bool _initialised;

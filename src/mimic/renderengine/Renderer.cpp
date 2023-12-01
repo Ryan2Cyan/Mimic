@@ -46,7 +46,7 @@ namespace MimicRender
 			// set uniforms:
 			renderObject->_shader->UseShader();
 			renderObject->_onDraw();
-			renderObject->_shader->SetVector3("u_CameraPosition", camera->Position);
+			renderObject->_shader->SetCameraPosition(camera->Position);
 			renderObject->_shader->SetModelMatrix(renderObject->_modelMatrix);
 			renderObject->_shader->SetViewMatrix(camera->_viewMatrix);
 			renderObject->_shader->SetProjectionMatrix(camera->_projectionMatrix);

@@ -1,4 +1,5 @@
 #include "Light.h"
+#include <renderengine/RenderTexture.h>
 
 namespace MimicRender
 {
@@ -17,6 +18,16 @@ namespace MimicRender
 		directLight->Direction = direction;
 		directLight->Colour = colour;
 		return directLight;
+	}
+
+	const unsigned int DirectLight::GetDepthMapTextureId() const noexcept
+	{
+		return _depthMapRT->GetTextureID();
+	}
+
+	const glm::mat4 DirectLight::GetLightMatrix() const noexcept
+	{
+		return _lightMatrix;
 	}
 
 

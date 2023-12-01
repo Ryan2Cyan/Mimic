@@ -35,7 +35,6 @@ namespace MimicRender
 
 	void ShadowMapper::RenderDirectLightDepthMaps(const std::vector<std::shared_ptr<Model>>& models, std::vector<std::shared_ptr<DirectLight>>& directLights, std::shared_ptr<Renderer>& renderer)
 	{
-		_directLightDepthMapData.clear();
 		constexpr glm::vec2 lightProjectionClippingPlanes = glm::vec2(1.0f, 25.0f);
 		const glm::mat4 lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, lightProjectionClippingPlanes.x, lightProjectionClippingPlanes.y);
 		glm::mat4 lightView = glm::mat4(1.0f);
@@ -49,11 +48,15 @@ namespace MimicRender
 		for (auto directLight : directLights)
 		{
 			lightView = glm::lookAt(directLight->Position, directLight->Position + directLight->Direction, glm::vec3(0.0f, 1.0f, 0.0f));
+			directLight->_lightMatrix = lightProjection * lightView;
 
-			std::shared_ptr<RenderTexture> depthMapRenderTexture = RenderTexture::Initialise();
-			depthMapRenderTexture->SetTexture(Texture::Initialise(_depthMapAspect, Texture::MIMIC_DEPTH_MAP_PARAMS, Texture::MIMIC_DEPTH_COMPONENT, Texture::MIMIC_DEPTH_COMPONENT));
-			depthMapRenderTexture->AttachTexture(TextureTarget::MIMIC_TEXTURE_2D, RenderTexture::MIMIC_NO_DRAW | RenderTexture::MIMIC_NO_READ | RenderTexture::MIMIC_DEPTH_BUFFER_BIT, RenderTextureAttachment::MIMIC_DEPTH);
-			depthMapRenderTexture->SetTextureViewPort();
+			if (directLight->_depthMapRT == nullptr)
+			{
+				directLight->_depthMapRT = RenderTexture::Initialise();
+				directLight->_depthMapRT->SetTexture(Texture::Initialise(_depthMapAspect, Texture::MIMIC_DEPTH_MAP_PARAMS, Texture::MIMIC_DEPTH_COMPONENT, Texture::MIMIC_DEPTH_COMPONENT));
+			}
+			directLight->_depthMapRT->AttachTexture(TextureTarget::MIMIC_TEXTURE_2D, RenderTexture::MIMIC_NO_DRAW | RenderTexture::MIMIC_NO_READ | RenderTexture::MIMIC_DEPTH_BUFFER_BIT, RenderTextureAttachment::MIMIC_DEPTH);
+			directLight->_depthMapRT->SetTextureViewPort();
 
 			for (auto model : models) model->QueMeshesToDraw(_depthMapShader, depthMapOnDrawLamba, renderer);
 			
@@ -63,17 +66,11 @@ namespace MimicRender
 			renderer->ClearRenderQue();
 			glCullFace(GL_BACK);
 
-			depthMapRenderTexture->Unbind();
-
-			// store data for the future render pass:
-			_directLightDepthMapData.push_back(DirectLightDepthMapData(
-				depthMapRenderTexture,
-				lightProjection * lightView
-			));
+			directLight->_depthMapRT->Unbind();
 		}
 	}
 
-	const glm::mat4 ShadowMapper::GetDirectLightMatrix(const unsigned int& index)
+	/*const glm::mat4 ShadowMapper::GetDirectLightMatrix(const unsigned int& index)
 	{
 		if (!_initialised) return glm::mat4(1.0f);
 		if (index > _directLightDepthMapData.size() - 1)
@@ -81,7 +78,7 @@ namespace MimicRender
 			MIMIC_LOG_WARNING("Unable to access light matrix from index: %", index);
 			return glm::mat4(1.0f);
 		}
-		return _directLightDepthMapData[index]._lightMatrix;
+		return _directLightDepthMapData[index]->_lightMatrix;
 	}
 
 	const unsigned int ShadowMapper::GetDepthMapTextureId(const unsigned int& index) const noexcept
@@ -92,6 +89,6 @@ namespace MimicRender
 			MIMIC_LOG_WARNING("Unable to access light render texture from index: %", index);
 			return 0;
 		}
-		return _directLightDepthMapData[index]._depthMapRT->GetTextureID();
-	}
+		return _directLightDepthMapData[index]->_depthMapRT->GetTextureID();
+	}*/
 }
