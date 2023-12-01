@@ -4,6 +4,9 @@
 #include <renderengine/Shader.h>
 #include <renderengine/Model.h>
 #include <renderengine/Renderer.h>
+#include <renderengine/Light.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 #include <utility/Logger.h>
 #include <utility/FileLoader.h>
 #include <filesystem>
@@ -12,43 +15,83 @@
 
 namespace MimicRender
 {
+	DirectLightDepthMapData::DirectLightDepthMapData(const std::shared_ptr<RenderTexture>& depthMap, const glm::mat4& lightMatrix)
+		: _depthMapRT(depthMap), _lightMatrix(lightMatrix)
+	{
+
+	}
+
 	const std::shared_ptr<ShadowMapper> ShadowMapper::Initialise(glm::ivec2 aspectRatio)
 	{
-		std::shared_ptr<RenderTexture> depthMapRenderTexture = RenderTexture::Initialise();
-		depthMapRenderTexture->SetTexture(Texture::Initialise(aspectRatio, Texture::MIMIC_DEPTH_MAP_PARAMS, Texture::MIMIC_DEPTH_COMPONENT, Texture::MIMIC_DEPTH_COMPONENT));
-		depthMapRenderTexture->AttachTexture(TextureTarget::MIMIC_TEXTURE_2D, RenderTexture::MIMIC_NO_DRAW | RenderTexture::MIMIC_NO_READ | RenderTexture::MIMIC_DEPTH_BUFFER_BIT, RenderTextureAttachment::MIMIC_DEPTH);
-		depthMapRenderTexture->Unbind();
-
-		if (depthMapRenderTexture == nullptr)
-		{
-			MIMIC_LOG_WARNING("[MimicRender::Texture] Unable to initialise depth map render texture.");
-			return nullptr;
-		}
-
 		std::shared_ptr<Mimic::FileLoader> fileLoader = Mimic::FileLoader::Initialise();
 		const std::string assetPath = fileLoader->LocateDirectory("assets").generic_string();
 
 		std::shared_ptr<ShadowMapper> shadowMapper = std::make_shared<ShadowMapper>();
-		shadowMapper->_depthMapRenderTexture = depthMapRenderTexture;
 		shadowMapper->_depthMapShader = Shader::Initialise(fileLoader->LocateFileInDirectory(assetPath, "DepthMapShader.glsl"));
 		shadowMapper->_initialised = true;
+		shadowMapper->_depthMapAspect = aspectRatio;
 		return shadowMapper;
 	}
 
-	const void GetDepthMapTextureId(const std::vector<std::shared_ptr<Model>>& models, const std::vector<std::shared_ptr<DirectLight>>& directLights, std::shared_ptr<Renderer>& renderer)
+	void ShadowMapper::RenderDirectLightDepthMaps(const std::vector<std::shared_ptr<Model>>& models, std::vector<std::shared_ptr<DirectLight>>& directLights, std::shared_ptr<Renderer>& renderer)
 	{
-		for (auto light : directLights)
-		{
-			for (auto model : models)
-			{
+		_directLightDepthMapData.clear();
+		constexpr glm::vec2 lightProjectionClippingPlanes = glm::vec2(1.0f, 25.0f);
+		const glm::mat4 lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, lightProjectionClippingPlanes.x, lightProjectionClippingPlanes.y);
+		glm::mat4 lightView = glm::mat4(1.0f);
 
-			}
+		std::function<void()> depthMapOnDrawLamba = [&]()
+		{
+			_depthMapShader->SetMat4("u_LightSpaceMatrix", lightProjection * lightView);
+		};
+		
+		// que all models to be rendered into each direct light's depth map textures:
+		for (auto directLight : directLights)
+		{
+			lightView = glm::lookAt(directLight->Position, directLight->Position + directLight->Direction, glm::vec3(0.0f, 1.0f, 0.0f));
+
+			std::shared_ptr<RenderTexture> depthMapRenderTexture = RenderTexture::Initialise();
+			depthMapRenderTexture->SetTexture(Texture::Initialise(_depthMapAspect, Texture::MIMIC_DEPTH_MAP_PARAMS, Texture::MIMIC_DEPTH_COMPONENT, Texture::MIMIC_DEPTH_COMPONENT));
+			depthMapRenderTexture->AttachTexture(TextureTarget::MIMIC_TEXTURE_2D, RenderTexture::MIMIC_NO_DRAW | RenderTexture::MIMIC_NO_READ | RenderTexture::MIMIC_DEPTH_BUFFER_BIT, RenderTextureAttachment::MIMIC_DEPTH);
+			depthMapRenderTexture->SetTextureViewPort();
+
+			for (auto model : models) model->QueMeshesToDraw(_depthMapShader, depthMapOnDrawLamba, renderer);
+			
+			glClear(GL_DEPTH_BUFFER_BIT);
+			glCullFace(GL_FRONT); // cull front-faces to avoid Peter-Panning:
+			renderer->Draw(lightView, lightProjection);
+			renderer->ClearRenderQue();
+			glCullFace(GL_BACK);
+
+			depthMapRenderTexture->Unbind();
+
+			// store data for the future render pass:
+			_directLightDepthMapData.push_back(DirectLightDepthMapData(
+				depthMapRenderTexture,
+				lightProjection * lightView
+			));
 		}
 	}
 
-	const unsigned int ShadowMapper::GetDepthMapTextureId() const noexcept
+	const glm::mat4 ShadowMapper::GetDirectLightMatrix(const unsigned int& index)
+	{
+		if (!_initialised) return glm::mat4(1.0f);
+		if (index > _directLightDepthMapData.size() - 1)
+		{
+			MIMIC_LOG_WARNING("Unable to access light matrix from index: %", index);
+			return glm::mat4(1.0f);
+		}
+		return _directLightDepthMapData[index]._lightMatrix;
+	}
+
+	const unsigned int ShadowMapper::GetDepthMapTextureId(const unsigned int& index) const noexcept
 	{
 		if (!_initialised) return 0;
-		return _depthMapRenderTexture->GetTextureID();
+		if (index > _directLightDepthMapData.size() - 1)
+		{
+			MIMIC_LOG_WARNING("Unable to access light render texture from index: %", index);
+			return 0;
+		}
+		return _directLightDepthMapData[index]._depthMapRT->GetTextureID();
 	}
 }

@@ -253,9 +253,6 @@ void main()
 		const vec3 lightDirection = u_DirectLights[i].direction;
 
 		const vec3 halfVec = normalize(viewDir + lightDirection);
-		// const float distance = 1.0; // constant distance as the light is extremely far away (parallel light rays)
-		// const float attenuation = 1.0 / (distance * distance);
-		// const float attenuation = 1.0;
 		const vec3 radiance = vec3(u_DirectLights[i].colour);
 
 		// Cook-Torrence BRDF:

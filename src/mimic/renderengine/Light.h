@@ -2,7 +2,7 @@
 #include <GLM/glm.hpp>
 #include <memory>
 
-namespace Mimic
+namespace MimicRender
 {
 	// Source: https://learnopengl.com/Lighting/Light-casters
 	// #############################################################################

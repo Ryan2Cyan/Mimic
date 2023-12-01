@@ -39,6 +39,9 @@ int main(int argc, char* argv[])
 		// initialise renderer:
 		std::shared_ptr<Renderer> renderer = Renderer::Initialise();
 
+		// initialise shadow mapper:
+		// std::shared_ptr<ShadowMapper> shadowMapper = ShadowMapper::Initialise();
+
 		// initialise shaders:
 		const std::shared_ptr<Shader> pbrShader = Shader::Initialise(fileLoader->LocateFileInDirectory(assetPath, "PBRShader.glsl"));
 		glm::vec3 albedo = glm::vec3(1.0f, 0.0f, 0.0f);
@@ -58,9 +61,6 @@ int main(int argc, char* argv[])
 
 		const std::shared_ptr<Shader> flatColourShader = Shader::Initialise(fileLoader->LocateFileInDirectory(assetPath, "FlatColourShader.glsl"));
 		constexpr glm::vec3 flatColour = glm::vec3(1.0f);
-
-		const std::shared_ptr<Shader> depthMapShader = Shader::Initialise(fileLoader->LocateFileInDirectory(assetPath, "DepthMapShader.glsl"));
-		const std::shared_ptr<Shader> depthMapDebugShader = Shader::Initialise(fileLoader->LocateFileInDirectory(assetPath, "DepthMapDebug.glsl"));
 
 
 		// load shader subroutine uniforms:
@@ -85,7 +85,6 @@ int main(int argc, char* argv[])
 
 		// create camera:
 		std::shared_ptr<Camera> camera = Camera::Initialise(window->GetAspectRatio(), 45.0f);
-		std::shared_ptr<Camera> directLightCamera = Camera::Initialise(window->GetAspectRatio(), 45.0f);
 
 		// create models:
 		glm::vec3 rotation = glm::vec3(0.0f);
@@ -98,6 +97,8 @@ int main(int argc, char* argv[])
 		glm::vec3 wallPos = glm::vec3(0.0f, 0.0f, -15.0f);
 		glm::vec3 wallScale = glm::vec3(1.0f);
 		std::shared_ptr<Model> lightModel = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "normal_rock_sphere.obj"));
+
+		const std::vector<std::shared_ptr<Model>> sceneModels = { model, model1, model2, wall1 };
 
 		// create textures:
 		std::shared_ptr<Texture> albedoTexture = Texture::Initialise(fileLoader->LocateFileInDirectory(assetPath, "rustediron2_basecolor.png"), window->GetAspectRatio(), Texture::MIMIC_2D_TEXTURE_PARAMS, TextureType::MIMIC_ALBEDO);
@@ -113,7 +114,8 @@ int main(int argc, char* argv[])
 		// load lights:
 		std::vector<std::shared_ptr<DirectLight>> directLights =
 		{
-			DirectLight::Initialise(glm::vec3(0.5f, 0.0f, 0.5f), glm::vec3(0.5f, 0.1f, -0.5f), glm::vec3(70.0f, 20.0f, 15.0f))
+			DirectLight::Initialise(glm::vec3(0.5f, 0.0f, 0.5f), glm::vec3(0.5f, 0.1f, -0.5f), glm::vec3(70.0f, 20.0f, 15.0f)),
+			DirectLight::Initialise(glm::vec3(-0.5f, 0.0f, 0.5f), glm::vec3(0.5f, 0.1f, -0.5f), glm::vec3(70.0f, 20.0f, 15.0f))
 		};
 
 		std::vector<std::shared_ptr<PointLight>> pointLights =
@@ -123,17 +125,6 @@ int main(int argc, char* argv[])
 
 		// load hdr environment map:
 		std::shared_ptr<EnvironmentCubeMap> environmentCubeMap = EnvironmentCubeMap::Initialise("rural_asphalt_road_4k.hdr", window->GetAspectRatio(), renderer);
-
-		// shadow mapping (light-space matrix):
-		constexpr glm::vec2 lightProjectionClippingPlanes = glm::vec2(1.0f, 25.0f);
-		const glm::mat4 lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, lightProjectionClippingPlanes.x, lightProjectionClippingPlanes.y);
-		
-
-		// shadow mapping (depth map render texture):
-		std::shared_ptr<RenderTexture> depthMapRenderTexture = RenderTexture::Initialise();
-		depthMapRenderTexture->SetTexture(Texture::Initialise(glm::ivec2(1024, 1024), Texture::MIMIC_DEPTH_MAP_PARAMS, Texture::MIMIC_DEPTH_COMPONENT, Texture::MIMIC_DEPTH_COMPONENT));
-		depthMapRenderTexture->AttachTexture(TextureTarget::MIMIC_TEXTURE_2D, RenderTexture::MIMIC_NO_DRAW | RenderTexture::MIMIC_NO_READ | RenderTexture::MIMIC_DEPTH_BUFFER_BIT, RenderTextureAttachment::MIMIC_DEPTH);
-		depthMapRenderTexture->Unbind();
 
 		// render-shader lambdas:
 		std::function<void()> pbrOnDrawLamba = [&]()
@@ -195,15 +186,16 @@ int main(int argc, char* argv[])
 			// direct lights
 			for (int i = 0; i < directLights.size(); i++)
 			{
-				const std::string currentLight = "u_DirectLights[" + std::to_string(i) + "]";
-				const std::string currentLightMatrix = "u_DirectLightMatrices[" + std::to_string(i) + "]";
-				const std::string currentShadowMap = "u_DirectShadowMaps[" + std::to_string(i) + "]";
+				const std::string index = std::to_string(i);
+				const std::string currentLight = "u_DirectLights[" + index + "]";
+				const std::string currentLightMatrix = "u_DirectLightMatrices[" + index + "]";
+				const std::string currentShadowMap = "u_DirectShadowMaps[" + index + "]";
 
 				pbrShader->SetVector3((currentLight + ".direction").c_str(), glm::normalize(-directLights[i]->Direction));
 				const glm::vec4 colour = glm::vec4(directLights[i]->Colour.x, directLights[i]->Colour.y, directLights[i]->Colour.z, 1.0f);
 				pbrShader->SetVector4((currentLight + ".colour").c_str(), colour);
-				pbrShader->SetMat4(currentLightMatrix.c_str(), lightProjection * directLightCamera->_viewMatrix);
-				pbrShader->SetTexture(currentShadowMap.c_str(), depthMapRenderTexture->GetTextureID(), 7, Texture::MIMIC_2D_TEXTURE);
+				// pbrShader->SetMat4(currentLightMatrix.c_str(), shadowMapper->GetDirectLightMatrix(i));
+				// pbrShader->SetTexture(currentShadowMap.c_str(), shadowMapper->GetDepthMapTextureId(i), 7, Texture::MIMIC_2D_TEXTURE);
 			}
 			pbrShader->SetInt("u_DirectLightsCount", directLights.size());
 
@@ -222,29 +214,45 @@ int main(int argc, char* argv[])
 			}
 			pbrShader->SetInt("u_PointLightsCount", pointLights.size());
 		};
+
 		std::function<void()> blinnPhongOnDrawLamba = [&]()
 		{
 			// set uniforms:
-			blinnPhongShader->SetTexture("u_ShadowMap", depthMapRenderTexture->GetTextureID(), 1, Texture::MIMIC_2D_TEXTURE);
+			// blinnPhongShader->SetTexture("u_ShadowMap", shadowMapper->GetDepthMapTextureId(1), 1, Texture::MIMIC_2D_TEXTURE);
 			blinnPhongShader->SetVector3("u_ObjectColour", objectColour);
-			blinnPhongShader->SetVector3("u_LightColour", lightColour);
-			blinnPhongShader->SetVector3("u_LightPosition", directLights[0]->Position);
+			// blinnPhongShader->SetVector3("u_LightColour", lightColour);
+			// blinnPhongShader->SetVector3("u_LightPosition", directLights[1]->Position);
 			blinnPhongShader->SetFloat("u_AmbientStrength", ambientStrength);
 			blinnPhongShader->SetFloat("u_SpecularStrength", specularStrength);
 			blinnPhongShader->SetFloat("u_Shininess", shininess);
-			blinnPhongShader->SetMat4("u_LightSpaceMatrix", lightProjection * directLightCamera->_viewMatrix);
 
+			// direct lights
+			for (int i = 0; i < directLights.size(); i++)
+			{
+				const std::string index = std::to_string(i);
+				const std::string currentLight = "u_DirectLights[" + index + "]";
+				const std::string currentLightMatrix = "u_DirectLightMatrices[" + index + "]";
+				const std::string currentShadowMap = "u_DirectShadowMaps[" + index + "]";
+
+				blinnPhongShader->SetVector3((currentLight + ".direction").c_str(), glm::normalize(-directLights[i]->Direction));
+				const glm::vec4 colour = glm::vec4(directLights[i]->Colour.x, directLights[i]->Colour.y, directLights[i]->Colour.z, 1.0f);
+				blinnPhongShader->SetVector4((currentLight + ".colour").c_str(), colour);
+				// blinnPhongShader->SetMat4(currentLightMatrix.c_str(), shadowMapper->GetDirectLightMatrix(i));
+				// blinnPhongShader->SetTexture(currentShadowMap.c_str(), shadowMapper->GetDepthMapTextureId(i), 0, Texture::MIMIC_2D_TEXTURE);
+			}
+			blinnPhongShader->SetInt("u_DirectLightsCount", directLights.size());
+			// blinnPhongShader->SetMat4("u_LightSpaceMatrix", shadowMapper->GetDirectLightMatrix(1));
 		};
 		std::function<void()> flatColourOnDrawLamba = [&]()
 		{
 			// set uniforms:
 			flatColourShader->SetVector3("u_Colour", flatColour);
 		};
-		std::function<void()> depthMapOnDrawLamba = [&]()
-		{
-			// set uniforms:
-			depthMapShader->SetMat4("u_LightSpaceMatrix", lightProjection * directLightCamera->_viewMatrix);
-		};
+		//std::function<void()> depthMapOnDrawLamba = [&]()
+		//{
+		//	// set uniforms:
+		//	depthMapShader->SetMat4("u_LightSpaceMatrix", lightProjection * directLightCamera->_viewMatrix);
+		//};
 
 		// #############################################################################
 		//game loop:
@@ -285,9 +293,9 @@ int main(int argc, char* argv[])
 			// update scene:
 			// #############################################################################
 			camera->Update();
-			directLightCamera->Position = directLights[0]->Position;
-			directLightCamera->Orientation = directLights[0]->Direction;
-			directLightCamera->Update();
+			// directLightCamera->Position = directLights[0]->Position;
+			// directLightCamera->Orientation = directLights[0]->Direction;
+			// directLightCamera->Update();
 			model->UpdateModelMatrix(glm::vec3(0.0f, 0.0f, -4.0f),rotation, glm::vec3(1.0f));
 			model1->UpdateModelMatrix(glm::vec3(-2.5f, 0.0f, -4.0f), rotation, glm::vec3(1.0f));
 			model2->UpdateModelMatrix(glm::vec3(2.5f, 0.0f, -4.0f), rotation, glm::vec3(1.0f));
@@ -308,19 +316,7 @@ int main(int argc, char* argv[])
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 			// update shadow maps:
-			model->QueMeshesToDraw(depthMapShader, depthMapOnDrawLamba, renderer);
-			model1->QueMeshesToDraw(depthMapShader, depthMapOnDrawLamba, renderer);
-			model2->QueMeshesToDraw(depthMapShader, depthMapOnDrawLamba, renderer);
-			wall1->QueMeshesToDraw(depthMapShader, depthMapOnDrawLamba, renderer);
-			depthMapRenderTexture->SetTextureViewPort();
-			depthMapRenderTexture->Bind();
-			glClear(GL_DEPTH_BUFFER_BIT);
-			glCullFace(GL_FRONT); // cull front-faces to avoid Peter-Panning:
-			renderer->Draw(directLightCamera->_viewMatrix, lightProjection);
-			renderer->ClearRenderQue();
-			glCullFace(GL_BACK);
-			depthMapRenderTexture->Unbind();
-			window->ResetViewPort();
+			// shadowMapper->RenderDirectLightDepthMaps(sceneModels, directLights, renderer);
 
 			// send meshes to renderer:
 			model->QueMeshesToDraw(pbrShader, pbrOnDrawLamba, renderer);
@@ -332,6 +328,7 @@ int main(int argc, char* argv[])
 
 			// draw:
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			window->ResetViewPort();
 			renderer->Draw(camera);
 			renderer->ClearRenderQue();
 			renderer->DrawCubeMap(camera, environmentCubeMap);
@@ -343,21 +340,22 @@ int main(int argc, char* argv[])
 			ImGui_ImplSDL2_NewFrame();
 			ImGui::NewFrame();
 
-			// show texture:
-			ImGui::Image((void*)depthMapRenderTexture->GetTextureID(), ImVec2(800, 800));
-
 			// light controls:
 			ImGui::Begin("Point Light");
 			ImGui::SliderFloat3("Position##pl1", &(pointLights[0]->Position[0]), -10.0f, 10.0f);
 			ImGui::SliderFloat3("Colour##pl3", &(pointLights[0]->Colour[0]), 0.0f, 100.0f);
-			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 			ImGui::End();
 
 			ImGui::Begin("Direct Light");
 			ImGui::SliderFloat3("Position##dl1", &(directLights[0]->Position[0]), -5.0f, 5.0f);
 			ImGui::SliderFloat3("Direction##dl2", &(directLights[0]->Direction[0]), -1.0f, 1.0f);
 			ImGui::SliderFloat3("Colour##dl3", &(directLights[0]->Colour[0]), 0.0f, 100.0f);
-			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+			ImGui::End();
+
+			ImGui::Begin("Direct Light2");
+			ImGui::SliderFloat3("Position##dl1_2", &(directLights[1]->Position[0]), -5.0f, 5.0f);
+			ImGui::SliderFloat3("Direction##dl2_2", &(directLights[1]->Direction[0]), -1.0f, 1.0f);
+			ImGui::SliderFloat3("Colour##dl3_2", &(directLights[1]->Colour[0]), 0.0f, 100.0f);
 			ImGui::End();
 
 			// pbr material controls:

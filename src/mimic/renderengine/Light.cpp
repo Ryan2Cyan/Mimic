@@ -1,6 +1,6 @@
 #include "Light.h"
 
-namespace Mimic
+namespace MimicRender
 {
 	// #############################################################################
 	// direct light functions:
