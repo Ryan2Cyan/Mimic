@@ -1,7 +1,7 @@
 #include "Logger.h"
 #include <GL/glew.h>
 
-namespace Mimic
+namespace MimicUtil
 {
 	std::shared_ptr<Logger> Logger::_coreLogger;
 	void Logger::Init()

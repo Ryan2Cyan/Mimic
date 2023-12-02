@@ -2,7 +2,7 @@
 #include <filesystem>
 #include <memory>
 
-namespace Mimic 
+namespace MimicUtil
 {
 	// #############################################################################
 	// file loader stuct:

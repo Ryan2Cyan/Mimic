@@ -1,7 +1,7 @@
 #include "FileLoader.h"
 #include <utility/Logger.h>
 
-namespace Mimic
+namespace MimicUtil
 {
 	const std::shared_ptr<FileLoader> FileLoader::Initialise() noexcept
 	{

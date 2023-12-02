@@ -34,8 +34,8 @@ link_directories(
 ################################################################i##############
 # DMTK engine
 #############################################################################
-add_library(mimic
-    # src/mimic/lowlevelsystems/Mimic.h
+ add_library(mimic
+    src/mimic/lowlevelsystems/Mimic.h
     # src/mimic/lowlevelsystems/MimicCore.cpp
     # src/mimic/lowlevelsystems/MimicCore.h
     # src/mimic/lowlevelsystems/GameObject.cpp
@@ -52,7 +52,9 @@ add_library(mimic
     # src/mimic/lowlevelsystems/Resource.h
     # src/mimic/lowlevelsystems/Material.cpp
     # src/mimic/lowlevelsystems/Material.h
+)
 
+add_library(mimicutil
     src/mimic/utility/Logger.cpp
     src/mimic/utility/Logger.h
     src/mimic/utility/PerformanceCounter.cpp
@@ -61,8 +63,8 @@ add_library(mimic
     src/mimic/utility/FileLoader.h
 )
 
-# Make the renderer a separate library that's attached to the mimic engine.
 add_library(mimicrenderer
+
     src/mimic/renderengine/Model.cpp
     src/mimic/renderengine/Model.h
     src/mimic/renderengine/Mesh.cpp
@@ -122,6 +124,7 @@ target_link_libraries(mimic
     glew32s
     imgui_lib
     mimicrenderer
+    mimicutil
 )
 
 #target_link_libraries(mimicrenderer

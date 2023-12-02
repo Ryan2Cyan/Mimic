@@ -5,15 +5,15 @@
 
 // Source: https://www.youtube.com/watch?v=dZr-53LAlOw&t=1619s
 
-#define MIMIC_DEBUG_LOG(...)			::Mimic::Logger::GetCoreLogger()->DebugLog(__VA_ARGS__)
-#define MIMIC_LOG_INFO(...)				::Mimic::Logger::GetCoreLogger()->LogInfo(__VA_ARGS__)
-#define MIMIC_LOG_WARNING(...)			::Mimic::Logger::GetCoreLogger()->LogWarning(__VA_ARGS__)
-#define MIMIC_LOG_ERROR(...)			::Mimic::Logger::GetCoreLogger()->LogError(__VA_ARGS__)
-#define MIMIC_LOG_FATAL(...)			::Mimic::Logger::GetCoreLogger()->LogFatal(__VA_ARGS__)
+#define MIMIC_DEBUG_LOG(...)			::MimicUtil::Logger::GetCoreLogger()->DebugLog(__VA_ARGS__)
+#define MIMIC_LOG_INFO(...)				::MimicUtil::Logger::GetCoreLogger()->LogInfo(__VA_ARGS__)
+#define MIMIC_LOG_WARNING(...)			::MimicUtil::Logger::GetCoreLogger()->LogWarning(__VA_ARGS__)
+#define MIMIC_LOG_ERROR(...)			::MimicUtil::Logger::GetCoreLogger()->LogError(__VA_ARGS__)
+#define MIMIC_LOG_FATAL(...)			::MimicUtil::Logger::GetCoreLogger()->LogFatal(__VA_ARGS__)
 
-#define MIMIC_LOG_OPENGL(...)			::Mimic::Logger::GetCoreLogger()->LogOpenGLError(__VA_ARGS__)
+#define MIMIC_LOG_OPENGL(...)			::MimicUtil::Logger::GetCoreLogger()->LogOpenGLError(__VA_ARGS__)
 
-namespace Mimic
+namespace MimicUtil
 {
 	// #############################################################################
 	// logger stuct:

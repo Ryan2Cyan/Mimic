@@ -30,7 +30,7 @@ namespace MimicRender
 		};
 
 		// initialise file loader:
-		std::shared_ptr<Mimic::FileLoader> fileLoader = Mimic::FileLoader::Initialise();
+		std::shared_ptr<MimicUtil::FileLoader> fileLoader = MimicUtil::FileLoader::Initialise();
 		const std::string assetsDirectory = fileLoader->LocateDirectory("assets").generic_string();
 
 		// load hdr texture:

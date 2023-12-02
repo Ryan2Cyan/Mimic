@@ -1,4 +1,3 @@
-//#include <lowlevelsystems/Mimic.h>
 #include <renderengine/Light.h>
 #include <renderengine/Mesh.h>
 #include <renderengine/Model.h>
@@ -13,6 +12,7 @@
 #include <renderengine/ShadowMapper.h>
 #include <utility/FileLoader.h>
 #include <utility/Logger.h>
+#include <utility/PerformanceCounter.h>
 #include <filesystem>
 #include <vector>
 #include <glm/glm.hpp>
@@ -22,7 +22,7 @@
 #include <imgui_impl_sdl2.h>
 #define SDL_MAIN_HANDLED
 
-using namespace Mimic;
+using namespace MimicUtil;
 using namespace MimicRender;
 
 #undef main
@@ -40,22 +40,21 @@ int main(int argc, char* argv[])
 		std::shared_ptr<Renderer> renderer = Renderer::Initialise();
 
 		// initialise shadow mapper:
-		std::shared_ptr<ShadowMapper> shadowMapper = ShadowMapper::Initialise();
+		std::shared_ptr<ShadowMapper> shadowMapper = ShadowMapper::Initialise(glm::ivec2(2048, 2048));
 
 		// initialise shaders:
 		const std::shared_ptr<Shader> pbrShader = Shader::Initialise(fileLoader->LocateFileInDirectory(assetPath, "PBRShader.glsl"));
-		glm::vec3 albedo = glm::vec3(1.0f, 0.0f, 0.0f);
+		glm::vec3 albedo = glm::vec3(0.3f);
 		glm::vec3 emissive = glm::vec3(0.0f, 0.0f, 0.0f);
-		float metallic = 0.25f;
-		float roughness = 0.6f;
-		float ambientOcclusion = 0.7f;
+		float metallic = 0.236f;
+		float roughness = 0.039f;
+		float ambientOcclusion = 0.307f;
 		float alpha = 1.0f;
 
 		const std::shared_ptr<Shader> blinnPhongShader = Shader::Initialise(fileLoader->LocateFileInDirectory(assetPath, "BlinnPhongShader.glsl"));
 		glm::vec3 objectColour = glm::vec3(0.8f);
 		glm::vec3 lightColour = glm::vec3(0.3f, 0.3f, 0.3f);
-		float ambientStrength = 0.8f;
-		float diffuseStrength = 0.5f;
+		float ambientStrength = 0.227f;
 		float specularStrength = 0.5f;
 		float shininess = 32.0f;
 
@@ -85,46 +84,47 @@ int main(int argc, char* argv[])
 
 		// create camera:
 		std::shared_ptr<Camera> camera = Camera::Initialise(window->GetAspectRatio(), 45.0f);
+		camera->Position = glm::vec3(0.0, 1.355f, -9.180f);
+		camera->Orientation = glm::vec3(0.0, -0.756f, -3.0f);
 
 		// create models:
 		glm::vec3 rotation = glm::vec3(0.0f);
-		std::shared_ptr<Model> model = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "normal_rock_sphere.obj"));
-		std::shared_ptr<Model> model1 = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "normal_rock_sphere.obj"));
+		glm::vec3 position = glm::vec3(0.0f, 0.0f, -14.285f);
+		std::shared_ptr<Model> model = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "sphere.obj"));
+		/*std::shared_ptr<Model> model1 = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "normal_rock_sphere.obj"));
 		std::shared_ptr<Model> model2 = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "normal_rock_sphere.obj"));
 		std::shared_ptr<Model> model3 = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "normal_rock_sphere.obj"));
-		std::shared_ptr<Model> ground = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "cube.obj"));
+		std::shared_ptr<Model> ground = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "cube.obj"));*/
 		std::shared_ptr<Model> wall1 = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "cube.obj"));
-		glm::vec3 wallPos = glm::vec3(0.0f, 0.0f, -15.0f);
-		glm::vec3 wallScale = glm::vec3(1.0f);
+		glm::vec3 wallPos = glm::vec3(0.0f, -1.24f, -50.0f);
+		glm::vec3 wallRot = glm::vec3(0.0f);
+		glm::vec3 wallScale = glm::vec3(43.45f, -0.595f, 50.0f);
 		std::shared_ptr<Model> lightModel = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "normal_rock_sphere.obj"));
 
-		const std::vector<std::shared_ptr<Model>> sceneModels = { model, model1, model2, wall1 };
+		const std::vector<std::shared_ptr<Model>> sceneModels = { model, wall1/*, model1, model2, wall1*/ };
 
 		// create textures:
-		std::shared_ptr<Texture> albedoTexture = Texture::Initialise(fileLoader->LocateFileInDirectory(assetPath, "rustediron2_basecolor.png"), window->GetAspectRatio(), Texture::MIMIC_2D_TEXTURE_PARAMS, TextureType::MIMIC_ALBEDO);
-		std::shared_ptr<Texture> normalTexture = Texture::Initialise(fileLoader->LocateFileInDirectory(assetPath, "rustediron2_normal.png"), window->GetAspectRatio(), Texture::MIMIC_2D_TEXTURE_PARAMS, TextureType::MIMIC_NORMAL);
-		std::shared_ptr<Texture> roughnessTexture = Texture::Initialise(fileLoader->LocateFileInDirectory(assetPath, "rustediron2_roughness.png"), window->GetAspectRatio(), Texture::MIMIC_2D_TEXTURE_PARAMS, TextureType::MIMIC_ROUGHNESS);
-		std::shared_ptr<Texture> metallicTexture = Texture::Initialise(fileLoader->LocateFileInDirectory(assetPath, "rustediron2_metallic.png"), window->GetAspectRatio(), Texture::MIMIC_2D_TEXTURE_PARAMS, TextureType::MIMIC_METALLIC);
+		std::shared_ptr<Texture> albedoTexture;
+		std::shared_ptr<Texture> normalTexture;
+		std::shared_ptr<Texture> roughnessTexture;
+		std::shared_ptr<Texture> metallicTexture;
 
-	/*	albedoTexture = nullptr;
-		normalTexture = nullptr;
-		roughnessTexture = nullptr;
-		metallicTexture = nullptr;*/
+		std::shared_ptr<Texture> sphereNormalTexture = Texture::Initialise(fileLoader->LocateFileInDirectory(assetPath, "Metal046B_1K-PNG_NormalGL.png"), window->GetAspectRatio(), Texture::MIMIC_2D_TEXTURE_PARAMS, TextureType::MIMIC_NORMAL);
+		// std::shared_ptr<Texture> groundAlbedoTexture = Texture::Initialise(fileLoader->LocateFileInDirectory(assetPath, "Metal046B_1K-PNG_Metalness.png"), window->GetAspectRatio(), Texture::MIMIC_2D_TEXTURE_PARAMS, TextureType::MIMIC_ALBEDO);
 
 		// load lights:
 		std::vector<std::shared_ptr<DirectLight>> directLights =
 		{
-			DirectLight::Initialise(glm::vec3(0.5f, 0.0f, 0.5f), glm::vec3(0.5f, 0.1f, -0.5f), glm::vec3(70.0f, 20.0f, 15.0f)),
-			DirectLight::Initialise(glm::vec3(-0.5f, 0.0f, 0.5f), glm::vec3(0.5f, 0.1f, -0.5f), glm::vec3(70.0f, 20.0f, 15.0f))
+			DirectLight::Initialise(glm::vec3(2.72f, 0.926f, -5.0f), glm::vec3(-1.0f, -1.0f, -0.246f), glm::vec3(100.0f))
 		};
 
 		std::vector<std::shared_ptr<PointLight>> pointLights =
 		{
-			PointLight::Initialise(glm::vec3(0.5f, 0.0f, 0.5f), glm::vec3(70.0f, 20.0f, 15.0f))
+			// PointLight::Initialise(glm::vec3(0.5f, 0.0f, 0.5f), glm::vec3(70.0f, 20.0f, 15.0f))
 		};
 
 		// load hdr environment map:
-		std::shared_ptr<EnvironmentCubeMap> environmentCubeMap = EnvironmentCubeMap::Initialise("rural_asphalt_road_4k.hdr", window->GetAspectRatio(), renderer);
+		std::shared_ptr<EnvironmentCubeMap> environmentCubeMap = EnvironmentCubeMap::Initialise("studio_small_09_4k.hdr", window->GetAspectRatio(), renderer);
 
 		// render-shader lambdas:
 		std::function<void()> pbrOnDrawLamba = [&]()
@@ -215,13 +215,26 @@ int main(int argc, char* argv[])
 			pbrShader->SetInt("u_PointLightsCount", pointLights.size());
 		};
 
+		std::function<void()> modelPBROnDrawLamba = [&]()
+		{
+			albedo = glm::vec3(0.4f);
+			// albedoTexture = nullptr;
+			normalTexture = sphereNormalTexture;
+			pbrOnDrawLamba();
+		};
+
+		std::function<void()> wallPBROnDrawLamba = [&]()
+		{
+			albedo = glm::vec3(0.6f);
+			// albedoTexture = groundAlbedoTexture;
+			normalTexture = nullptr;
+			pbrOnDrawLamba();
+		};
+
 		std::function<void()> blinnPhongOnDrawLamba = [&]()
 		{
 			// set uniforms:
-			// blinnPhongShader->SetTexture("u_ShadowMap", shadowMapper->GetDepthMapTextureId(1), 1, Texture::MIMIC_2D_TEXTURE);
 			blinnPhongShader->SetVector3("u_ObjectColour", objectColour);
-			// blinnPhongShader->SetVector3("u_LightColour", lightColour);
-			// blinnPhongShader->SetVector3("u_LightPosition", directLights[1]->Position);
 			blinnPhongShader->SetFloat("u_AmbientStrength", ambientStrength);
 			blinnPhongShader->SetFloat("u_SpecularStrength", specularStrength);
 			blinnPhongShader->SetFloat("u_Shininess", shininess);
@@ -236,12 +249,24 @@ int main(int argc, char* argv[])
 
 				blinnPhongShader->SetVector3((currentLight + ".direction").c_str(), glm::normalize(-directLights[i]->Direction));
 				const glm::vec4 colour = glm::vec4(directLights[i]->Colour.x, directLights[i]->Colour.y, directLights[i]->Colour.z, 1.0f);
-				blinnPhongShader->SetVector4((currentLight + ".colour").c_str(), colour);
+				blinnPhongShader->SetVector4((currentLight + ".colour").c_str(), glm::normalize(colour));
 				blinnPhongShader->SetMat4(currentLightMatrix.c_str(), directLights[i]->GetLightMatrix());
 				blinnPhongShader->SetTexture(currentShadowMap.c_str(), directLights[i]->GetDepthMapTextureId(), 0, Texture::MIMIC_2D_TEXTURE);
 			}
 			blinnPhongShader->SetInt("u_DirectLightsCount", directLights.size());
 		};
+
+		std::function<void()> sphereBPOnDrawLamba = [&]()
+		{
+			objectColour = glm::vec3(0.9f);
+			blinnPhongOnDrawLamba();
+		};
+		std::function<void()> wallBPOnDrawLamba = [&]()
+		{
+			objectColour = glm::vec3(0.98f);
+			blinnPhongOnDrawLamba();
+		};
+
 		std::function<void()> flatColourOnDrawLamba = [&]()
 		{
 			// set uniforms:
@@ -286,12 +311,13 @@ int main(int argc, char* argv[])
 			// #############################################################################
 			// update scene:
 			// #############################################################################
+			
 			camera->Update();
-			model->UpdateModelMatrix(glm::vec3(0.0f, 0.0f, -4.0f),rotation, glm::vec3(1.0f));
-			model1->UpdateModelMatrix(glm::vec3(-2.5f, 0.0f, -4.0f), rotation, glm::vec3(1.0f));
-			model2->UpdateModelMatrix(glm::vec3(2.5f, 0.0f, -4.0f), rotation, glm::vec3(1.0f));
-			model3->UpdateModelMatrix(glm::vec3(2.5f, 1.0f, -4.0f), rotation, glm::vec3(1.0f));
-			wall1->UpdateModelMatrix(wallPos, glm::vec3(0.0), glm::vec3(7.143, 5.357, 1.163));
+			model->UpdateModelMatrix(position, rotation, glm::vec3(1.0f));
+			// model1->UpdateModelMatrix(glm::vec3(-2.5f, 0.0f, -4.0f), rotation, glm::vec3(1.0f));
+			// model2->UpdateModelMatrix(glm::vec3(2.5f, 0.0f, -4.0f), rotation, glm::vec3(1.0f));
+			// model3->UpdateModelMatrix(glm::vec3(2.5f, 1.0f, -4.0f), rotation, glm::vec3(1.0f));
+			wall1->UpdateModelMatrix(wallPos, wallRot, wallScale);
 			lightModel->UpdateModelMatrix(directLights[0]->Position, rotation, glm::vec3(0.2f));
 
 			// #############################################################################
@@ -304,10 +330,10 @@ int main(int argc, char* argv[])
 			shadowMapper->RenderDirectLightDepthMaps(sceneModels, directLights, renderer);
 
 			// send meshes to renderer:
-			model->QueMeshesToDraw(pbrShader, pbrOnDrawLamba, renderer);
-			model1->QueMeshesToDraw(pbrShader, pbrOnDrawLamba, renderer);
-			model2->QueMeshesToDraw(blinnPhongShader, blinnPhongOnDrawLamba, renderer);
-			wall1->QueMeshesToDraw(blinnPhongShader, blinnPhongOnDrawLamba, renderer);
+			model->QueMeshesToDraw(blinnPhongShader, sphereBPOnDrawLamba, renderer);
+			/*model1->QueMeshesToDraw(pbrShader, pbrOnDrawLamba, renderer);
+			model2->QueMeshesToDraw(blinnPhongShader, blinnPhongOnDrawLamba, renderer);*/
+			wall1->QueMeshesToDraw(blinnPhongShader, wallBPOnDrawLamba, renderer);
 			// ground->QueMeshesToDraw(pbrShader, pbrOnDrawLamba, renderer);
 			lightModel->QueMeshesToDraw(flatColourShader, flatColourOnDrawLamba, renderer);
 
@@ -317,6 +343,7 @@ int main(int argc, char* argv[])
 			renderer->Draw(camera);
 			renderer->ClearRenderQue();
 			renderer->DrawCubeMap(camera, environmentCubeMap);
+			
 
 			// #############################################################################
 			// gui:
@@ -327,24 +354,25 @@ int main(int argc, char* argv[])
 
 			// display depth maps:
 			ImGui::Image((void*)directLights[0]->GetDepthMapTextureId(), ImVec2(800, 800));
-			ImGui::Image((void*)directLights[1]->GetDepthMapTextureId(), ImVec2(800, 800));
+			// ImGui::Image((void*)directLights[1]->GetDepthMapTextureId(), ImVec2(800, 800));
+
 			// light controls:
-			ImGui::Begin("Point Light");
+			/*ImGui::Begin("Point Light");
 			ImGui::SliderFloat3("Position##pl1", &(pointLights[0]->Position[0]), -10.0f, 10.0f);
 			ImGui::SliderFloat3("Colour##pl3", &(pointLights[0]->Colour[0]), 0.0f, 100.0f);
-			ImGui::End();
+			ImGui::End();*/
 
 			ImGui::Begin("Direct Light");
 			ImGui::SliderFloat3("Position##dl1", &(directLights[0]->Position[0]), -5.0f, 5.0f);
 			ImGui::SliderFloat3("Direction##dl2", &(directLights[0]->Direction[0]), -1.0f, 1.0f);
-			ImGui::SliderFloat3("Colour##dl3", &(directLights[0]->Colour[0]), 0.0f, 1.0f);
+			ImGui::SliderFloat3("Colour##dl3", &(directLights[0]->Colour[0]), 0.0f, 100.0f);
 			ImGui::End();
 
-			ImGui::Begin("Direct Light2");
+			/*ImGui::Begin("Direct Light2");
 			ImGui::SliderFloat3("Position##dl1_2", &(directLights[1]->Position[0]), -5.0f, 5.0f);
 			ImGui::SliderFloat3("Direction##dl2_2", &(directLights[1]->Direction[0]), -1.0f, 1.0f);
 			ImGui::SliderFloat3("Colour##dl3_2", &(directLights[1]->Colour[0]), 0.0f, 1.0f);
-			ImGui::End();
+			ImGui::End();*/
 
 			// pbr material controls:
 			ImGui::Begin("PBR Material");
@@ -360,19 +388,26 @@ int main(int argc, char* argv[])
 			ImGui::ColorEdit3("Object Colour##phong_mat1", &(objectColour[0]));
 			ImGui::ColorEdit3("Light Colouur##phong_mat2", &(lightColour[0]));
 			ImGui::SliderFloat("Ambient Strength##phong_mat3", &(ambientStrength), 0.0f, 1.0f);
-			ImGui::SliderFloat("Diffuse Strength##phong_mat4", &(diffuseStrength), 0.0f, 1.0f);
 			ImGui::SliderFloat("Specular Strength##phong_mat5", &(specularStrength), 0.0f, 1.0f);
 			ImGui::SliderFloat("Shininess##phong_mat6", &(shininess), 0.0f, 100.0f);
 			ImGui::End();
 
+			// camera controls:
+			ImGui::Begin("Camera");
+			ImGui::SliderFloat3("Position##c1", &(camera->Position[0]), -20.0f, 20.0f);
+			ImGui::SliderFloat3("Orientation##c2", &(camera->Orientation[0]), -5.0f, 5.0f);
+			ImGui::End();
+
 			// model controls:
 			ImGui::Begin("Model");
+			ImGui::SliderFloat3("Position##m1", &(position[0]), -20.0f, 20.0f);
 			ImGui::SliderFloat3("Rotation##m2", &(rotation[0]), -5.0f, 5.0f);
 			ImGui::End();
 
 			ImGui::Begin("Wall");
 			ImGui::SliderFloat3("Position##w2", &(wallPos[0]), -50.0f, 50.0f);
-			ImGui::SliderFloat3("Scale##w2", &(wallScale[0]), 0.0f, 50.0f);
+			ImGui::SliderFloat3("Rotation##w2", &(wallRot[0]), -50.0f, 50.0f);
+			ImGui::SliderFloat3("Scale##w3", &(wallScale[0]), 0.0f, 50.0f);
 			ImGui::End();
 
 			ImGui::Render();

@@ -1,22 +1,37 @@
 #pragma once
-#include <memory>
+#include <chrono>
 
-namespace Mimic
+namespace MimicUtil
 {
 	// #############################################################################
-	// performance counter stuct:
+	// timer stuct:
 	// #############################################################################
-	struct PerformanceCounter
+	struct Timer
 	{
-		explicit PerformanceCounter();
+		Timer();
+		~Timer(); // scope based: stop is called int he destructor
 
-		static std::shared_ptr<PerformanceCounter> Initialise();
-		void StartPerformanceCounter() noexcept;
-		const long long EndPerformanceCounter() noexcept;
-		const long GetFPS() const noexcept;
+		void Stop();
 
 	private:
-		long long _startTime;
-		long long _elapsedTime;
+		std::chrono::time_point<std::chrono::high_resolution_clock> _startTimePoint;
 	};
+
+
+	//// #############################################################################
+	//// performance counter stuct:
+	//// #############################################################################
+	//struct PerformanceCounter
+	//{
+	//	explicit PerformanceCounter();
+
+	//	static std::shared_ptr<PerformanceCounter> Initialise();
+	//	void StartPerformanceCounter() noexcept;
+	//	const long long EndPerformanceCounter() noexcept;
+	//	const long GetFPS() const noexcept;
+
+	//private:
+	//	long long _startTime;
+	//	long long _elapsedTime;
+	//};
 }

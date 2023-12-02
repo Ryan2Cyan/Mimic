@@ -23,7 +23,7 @@ namespace MimicRender
 
 	const std::shared_ptr<ShadowMapper> ShadowMapper::Initialise(glm::ivec2 aspectRatio)
 	{
-		std::shared_ptr<Mimic::FileLoader> fileLoader = Mimic::FileLoader::Initialise();
+		std::shared_ptr<MimicUtil::FileLoader> fileLoader = MimicUtil::FileLoader::Initialise();
 		const std::string assetPath = fileLoader->LocateDirectory("assets").generic_string();
 
 		std::shared_ptr<ShadowMapper> shadowMapper = std::make_shared<ShadowMapper>();
@@ -69,26 +69,4 @@ namespace MimicRender
 			directLight->_depthMapRT->Unbind();
 		}
 	}
-
-	/*const glm::mat4 ShadowMapper::GetDirectLightMatrix(const unsigned int& index)
-	{
-		if (!_initialised) return glm::mat4(1.0f);
-		if (index > _directLightDepthMapData.size() - 1)
-		{
-			MIMIC_LOG_WARNING("Unable to access light matrix from index: %", index);
-			return glm::mat4(1.0f);
-		}
-		return _directLightDepthMapData[index]->_lightMatrix;
-	}
-
-	const unsigned int ShadowMapper::GetDepthMapTextureId(const unsigned int& index) const noexcept
-	{
-		if (!_initialised) return 0;
-		if (index > _directLightDepthMapData.size() - 1)
-		{
-			MIMIC_LOG_WARNING("Unable to access light render texture from index: %", index);
-			return 0;
-		}
-		return _directLightDepthMapData[index]->_depthMapRT->GetTextureID();
-	}*/
 }
