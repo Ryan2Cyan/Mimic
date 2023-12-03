@@ -10,7 +10,7 @@
 #define MIMIC_LOG_WARNING(...)			::MimicUtil::Logger::GetCoreLogger()->LogWarning(__VA_ARGS__)
 #define MIMIC_LOG_ERROR(...)			::MimicUtil::Logger::GetCoreLogger()->LogError(__VA_ARGS__)
 #define MIMIC_LOG_FATAL(...)			::MimicUtil::Logger::GetCoreLogger()->LogFatal(__VA_ARGS__)
-
+#define MIMIC_LOG(...)					::MimicUtil::Logger::GetCoreLogger()->Log(__VA_ARGS__)
 #define MIMIC_LOG_OPENGL(...)			::MimicUtil::Logger::GetCoreLogger()->LogOpenGLError(__VA_ARGS__)
 
 namespace MimicUtil

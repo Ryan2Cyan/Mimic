@@ -5,13 +5,10 @@
 #include "MimicCore.h"
 #include "GameObject.h"
 #include "Component.h"
-#include "Window.h"
 #include "Environment.h"
-#include "Camera.h"
 #include "ResourceManager.h"
 #include "Resource.h"
 #include "ModelRenderer.h"
-#include "CubeMap.h"
 #include "Material.h"
 
 #include <renderengine/Mesh.h>
@@ -22,6 +19,9 @@
 #include <renderengine/Renderer.h>
 #include <renderengine/Light.h>
 #include <renderengine/RenderTexture.h>
+#include <renderengine/CubeMap.h>
+#include <renderengine/Camera.h>
+#include <renderengine/Window.h>
 
 #include <utility/PerformanceCounter.h>
 #include <utility/Logger.h>

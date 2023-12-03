@@ -28,6 +28,7 @@ using namespace MimicRender;
 #undef main
 int main(int argc, char* argv[])
 {
+	MIMIC_PROFILE_BEGIN_SESSION("Mimic Profile", "MimicProfile.json");
 	{
 		// create file loader:
 		std::shared_ptr<FileLoader> fileLoader = FileLoader::Initialise();
@@ -279,71 +280,94 @@ int main(int argc, char* argv[])
 		bool applicationRunning = true;
 		while (applicationRunning)
 		{
-			// #############################################################################
-			// human interface devices:
-			// #############################################################################
-			SDL_Event event;
-			while (SDL_PollEvent(&event))
+			MIMIC_PROFILE_FUNCTION();
 			{
-				ImGui_ImplSDL2_ProcessEvent(&event);
-				switch (event.type)
+				// #############################################################################
+				// human interface devices:
+				// #############################################################################
+				SDL_Event event;
+				while (SDL_PollEvent(&event))
 				{
-					case SDL_QUIT:
+					ImGui_ImplSDL2_ProcessEvent(&event);
+					switch (event.type)
 					{
-						applicationRunning = false;
-						break;
-					}
-
-					case SDL_KEYDOWN:
-					{
-						switch (event.key.keysym.sym)
+						case SDL_QUIT:
 						{
-							case SDLK_ESCAPE:
 							applicationRunning = false;
 							break;
 						}
-						break;
+
+						case SDL_KEYDOWN:
+						{
+							switch (event.key.keysym.sym)
+							{
+								case SDLK_ESCAPE:
+								applicationRunning = false;
+								break;
+							}
+							break;
+						}
+						case SDL_KEYUP: { break; }
 					}
-					case SDL_KEYUP: { break; }
+				}
+
+				// #############################################################################
+				// update scene:
+				// #############################################################################
+
+				camera->Update();
+				{
+					MIMIC_PROFILE_SCOPE("Update Model Matrices");
+					model->UpdateModelMatrix(position, rotation, glm::vec3(1.0f));
+					// model1->UpdateModelMatrix(glm::vec3(-2.5f, 0.0f, -4.0f), rotation, glm::vec3(1.0f));
+					// model2->UpdateModelMatrix(glm::vec3(2.5f, 0.0f, -4.0f), rotation, glm::vec3(1.0f));
+					// model3->UpdateModelMatrix(glm::vec3(2.5f, 1.0f, -4.0f), rotation, glm::vec3(1.0f));
+					wall1->UpdateModelMatrix(wallPos, wallRot, wallScale);
+					lightModel->UpdateModelMatrix(directLights[0]->Position, rotation, glm::vec3(0.2f));
+				}
+				// #############################################################################
+				// render scene:
+				// #############################################################################
+				{
+					MIMIC_PROFILE_SCOPE("Clear Color & Depth Buffers");
+					glClearColor(0.77f, 0.73f, 0.97f, 1.0f);
+					glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+				}
+				// update shadow maps:
+				{
+					MIMIC_PROFILE_SCOPE("Render Depth Maps");
+					shadowMapper->RenderDirectLightDepthMaps(sceneModels, directLights, renderer);
+				}
+
+				// send meshes to renderer:
+				{
+					MIMIC_PROFILE_SCOPE("Add Scene Objects To Draw Queue");
+					model->QueMeshesToDraw(blinnPhongShader, sphereBPOnDrawLamba, renderer);
+					/*model1->QueMeshesToDraw(pbrShader, pbrOnDrawLamba, renderer);
+					model2->QueMeshesToDraw(blinnPhongShader, blinnPhongOnDrawLamba, renderer);*/
+					wall1->QueMeshesToDraw(blinnPhongShader, wallBPOnDrawLamba, renderer);
+					// ground->QueMeshesToDraw(pbrShader, pbrOnDrawLamba, renderer);
+					lightModel->QueMeshesToDraw(flatColourShader, flatColourOnDrawLamba, renderer);
+				}
+				// draw:
+				{
+					MIMIC_PROFILE_SCOPE("Clear Color & Depth Buffers");
+					glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+				}
+				{
+					MIMIC_PROFILE_SCOPE("Reset Viewport");
+					window->ResetViewPort();
+				}
+				{
+					MIMIC_PROFILE_SCOPE("Draw Scene Objects");
+					renderer->Draw(camera);
+					renderer->ClearRenderQue();
+				}
+				{
+					MIMIC_PROFILE_SCOPE("Draw HDR Environment Map");
+					renderer->DrawCubeMap(camera, environmentCubeMap);
 				}
 			}
-
-			// #############################################################################
-			// update scene:
-			// #############################################################################
-			
-			camera->Update();
-			model->UpdateModelMatrix(position, rotation, glm::vec3(1.0f));
-			// model1->UpdateModelMatrix(glm::vec3(-2.5f, 0.0f, -4.0f), rotation, glm::vec3(1.0f));
-			// model2->UpdateModelMatrix(glm::vec3(2.5f, 0.0f, -4.0f), rotation, glm::vec3(1.0f));
-			// model3->UpdateModelMatrix(glm::vec3(2.5f, 1.0f, -4.0f), rotation, glm::vec3(1.0f));
-			wall1->UpdateModelMatrix(wallPos, wallRot, wallScale);
-			lightModel->UpdateModelMatrix(directLights[0]->Position, rotation, glm::vec3(0.2f));
-
-			// #############################################################################
-			// render scene:
-			// #############################################################################
-			glClearColor(0.77f, 0.73f, 0.97f, 1.0f);
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-			// update shadow maps:
-			shadowMapper->RenderDirectLightDepthMaps(sceneModels, directLights, renderer);
-
-			// send meshes to renderer:
-			model->QueMeshesToDraw(blinnPhongShader, sphereBPOnDrawLamba, renderer);
-			/*model1->QueMeshesToDraw(pbrShader, pbrOnDrawLamba, renderer);
-			model2->QueMeshesToDraw(blinnPhongShader, blinnPhongOnDrawLamba, renderer);*/
-			wall1->QueMeshesToDraw(blinnPhongShader, wallBPOnDrawLamba, renderer);
-			// ground->QueMeshesToDraw(pbrShader, pbrOnDrawLamba, renderer);
-			lightModel->QueMeshesToDraw(flatColourShader, flatColourOnDrawLamba, renderer);
-
-			// draw:
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-			window->ResetViewPort();
-			renderer->Draw(camera);
-			renderer->ClearRenderQue();
-			renderer->DrawCubeMap(camera, environmentCubeMap);
-			
 
 			// #############################################################################
 			// gui:
@@ -353,7 +377,7 @@ int main(int argc, char* argv[])
 			ImGui::NewFrame();
 
 			// display depth maps:
-			ImGui::Image((void*)directLights[0]->GetDepthMapTextureId(), ImVec2(800, 800));
+			// ImGui::Image((void*)directLights[0]->GetDepthMapTextureId(), ImVec2(800, 800));
 			// ImGui::Image((void*)directLights[1]->GetDepthMapTextureId(), ImVec2(800, 800));
 
 			// light controls:
@@ -416,4 +440,5 @@ int main(int argc, char* argv[])
 			window->SwapWindow();
 		}
 	}
+	MIMIC_PROFILE_END_SESSION();
 }

@@ -1,6 +1,7 @@
 #include "Camera.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <utility/PerformanceCounter.h>
 
 namespace MimicRender
 {
@@ -20,6 +21,7 @@ namespace MimicRender
 
 	void Camera::Update() 
 	{
+		MIMIC_PROFILE_SCOPE("Camera Update");
 		// Initializes matrices since otherwise they will be the null matrix
 		glm::mat4 view = glm::mat4(1.0f);
 		glm::mat4 projection = glm::mat4(1.0f);

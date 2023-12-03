@@ -31,7 +31,7 @@ link_directories(
     ${CMAKE_SOURCE_DIR}/SDKs/x64/lib
 )
 
-################################################################i##############
+##############################################################################
 # DMTK engine
 #############################################################################
  add_library(mimic
@@ -117,15 +117,15 @@ add_library(imgui_lib
 
 find_package(OpenGL)
 
-target_link_libraries(mimic
-    SDL2    
-    OpenGL::GL
-    assimp-vc143-mt
-    glew32s
-    imgui_lib
-    mimicrenderer
-    mimicutil
-)
+#target_link_libraries(mimic
+#    SDL2    
+#    OpenGL::GL
+#    assimp-vc143-mt
+#    glew32s
+#    imgui_lib
+#    mimicutil
+#    mimicrenderer
+# )
 
 #target_link_libraries(mimicrenderer
 #    SDL2    
@@ -142,5 +142,11 @@ add_executable(dmtk
 )
 
 target_link_libraries(dmtk 
-    mimic
+    SDL2    
+    OpenGL::GL
+    assimp-vc143-mt
+    glew32s
+    imgui_lib
+    mimicutil
+    mimicrenderer
 )
