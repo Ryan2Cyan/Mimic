@@ -18,6 +18,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <imgui.h>
+#include <iostream>
 #include <imgui_impl_opengl3.h>
 #include <imgui_impl_sdl2.h>
 #define SDL_MAIN_HANDLED
@@ -84,13 +85,13 @@ int main(int argc, char* argv[])
 
 		// create camera:
 		std::shared_ptr<Camera> camera = Camera::Initialise(window->GetAspectRatio(), 45.0f);
-		camera->Position = glm::vec3(0.0, 2.6f, 7.6f);
-		camera->Orientation = glm::vec3(0.0, -1.133f, -3.0f);
+		camera->Position = glm::vec3(0.0, 2.6f, 20.6f);
+		camera->Orientation = glm::vec3(0.0, -1.133f, 3.0f);
 
 		// create models:
 		glm::vec3 rotation = glm::vec3(0.0f);
 		glm::vec3 position = glm::vec3(0.0f, 0.235f, -14.285f);
-		int modelCount = 10;
+		constexpr int modelCount = 5000;
 		std::vector< std::shared_ptr<Model>> models;
 		for (size_t i = 0; i < modelCount; i++)
 		{
@@ -125,7 +126,7 @@ int main(int argc, char* argv[])
 		// load lights:
 		std::vector<std::shared_ptr<DirectLight>> directLights =
 		{
-			DirectLight::Initialise(glm::vec3(2.72f, -3.14f, -5.0f), glm::vec3(-1.0f, -0.704f, -0.714f), glm::vec3(1.0f))
+			DirectLight::Initialise(glm::vec3(2.72f, -3.14f, -5.0f), glm::vec3(-1.0f, -0.704f, -0.714f), glm::vec3(100.0f))
 		};
 
 		std::vector<std::shared_ptr<PointLight>> pointLights =
@@ -298,7 +299,7 @@ int main(int argc, char* argv[])
 
 				camera->Update();
 				{
-					MIMIC_PROFILE_SCOPE("Update Model Matrices");
+					// MIMIC_PROFILE_SCOPE("Update Model Matrices");
 					float x = 0.0f;
 					float z = 0.0f;
 					int maxRow = 5;
@@ -328,7 +329,7 @@ int main(int argc, char* argv[])
 				// render scene:
 				// #############################################################################
 				{
-					MIMIC_PROFILE_SCOPE("Clear Color & Depth Buffers");
+					// MIMIC_PROFILE_SCOPE("Clear Color & Depth Buffers");
 					glClearColor(0.77f, 0.73f, 0.97f, 1.0f);
 					glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 				}
@@ -340,7 +341,7 @@ int main(int argc, char* argv[])
 				//}
 				// send meshes to renderer:
 				{
-					MIMIC_PROFILE_SCOPE("Add Scene Objects To Draw Queue");
+					// MIMIC_PROFILE_SCOPE("Add Scene Objects To Draw Queue");
 					for (auto model : models)
 					{
 						model->QueMeshesToDraw(pbrShader, pbrOnDrawLamba, renderer);
@@ -355,11 +356,11 @@ int main(int argc, char* argv[])
 				}
 				// draw:
 				{
-					MIMIC_PROFILE_SCOPE("Clear Color & Depth Buffers");
+					// MIMIC_PROFILE_SCOPE("Clear Color & Depth Buffers");
 					glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 				}
 				{
-					MIMIC_PROFILE_SCOPE("Reset Viewport");
+					// MIMIC_PROFILE_SCOPE("Reset Viewport");
 					window->ResetViewPort();
 				}
 				{
@@ -368,7 +369,7 @@ int main(int argc, char* argv[])
 					renderer->ClearRenderQue();
 				}
 				{
-					MIMIC_PROFILE_SCOPE("Draw HDR Environment Map");
+					// MIMIC_PROFILE_SCOPE("Draw HDR Environment Map");
 					renderer->DrawCubeMap(camera, environmentCubeMap);
 				}
 			}
@@ -424,6 +425,7 @@ int main(int argc, char* argv[])
 			ImGui::Begin("Camera");
 			ImGui::SliderFloat3("Position##c1", &(camera->Position[0]), -20.0f, 20.0f);
 			ImGui::SliderFloat3("Orientation##c2", &(camera->Orientation[0]), -5.0f, 5.0f);
+			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 			ImGui::End();
 
 			//// model controls:
