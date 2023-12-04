@@ -97,11 +97,11 @@ int main(int argc, char* argv[])
 			models.push_back(Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "sphere.obj")));
 		}
 
-		// std::shared_ptr<Model> model = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "sphere.obj"));
-		/*std::shared_ptr<Model> model1 = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "normal_rock_sphere.obj"));
+		/*std::shared_ptr<Model> model = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "normal_rock_sphere.obj.obj"));
+		std::shared_ptr<Model> model1 = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "normal_rock_sphere.obj"));
 		std::shared_ptr<Model> model2 = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "normal_rock_sphere.obj"));
-		std::shared_ptr<Model> model3 = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "normal_rock_sphere.obj"));
-		std::shared_ptr<Model> ground = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "cube.obj"));*/
+		std::shared_ptr<Model> model3 = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "normal_rock_sphere.obj"));*/
+		// std::shared_ptr<Model> ground = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "cube.obj"));
 		// std::shared_ptr<Model> wall1 = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "cube.obj"));
 		// glm::vec3 wallPos = glm::vec3(0.0f, -1.24f, -50.0f);
 		// glm::vec3 wallRot = glm::vec3(0.0f);
@@ -116,7 +116,10 @@ int main(int argc, char* argv[])
 		std::shared_ptr<Texture> roughnessTexture = Texture::Initialise(fileLoader->LocateFileInDirectory(assetPath, "rustediron2_roughness.png"), window->GetAspectRatio(), Texture::MIMIC_2D_TEXTURE_PARAMS, TextureType::MIMIC_ROUGHNESS);
 		std::shared_ptr<Texture> metallicTexture = Texture::Initialise(fileLoader->LocateFileInDirectory(assetPath, "rustediron2_metallic.png"), window->GetAspectRatio(), Texture::MIMIC_2D_TEXTURE_PARAMS, TextureType::MIMIC_METALLIC);
 
-		std::shared_ptr<Texture> sphereNormalTexture = Texture::Initialise(fileLoader->LocateFileInDirectory(assetPath, "Metal046B_1K-PNG_NormalGL.png"), window->GetAspectRatio(), Texture::MIMIC_2D_TEXTURE_PARAMS, TextureType::MIMIC_NORMAL);
+		/*albedoTexture = nullptr;
+		normalTexture = nullptr;
+		roughnessTexture = nullptr;
+		metallicTexture = nullptr;*/
 		// std::shared_ptr<Texture> groundAlbedoTexture = Texture::Initialise(fileLoader->LocateFileInDirectory(assetPath, "Metal046B_1K-PNG_Metalness.png"), window->GetAspectRatio(), Texture::MIMIC_2D_TEXTURE_PARAMS, TextureType::MIMIC_ALBEDO);
 
 		// load lights:
@@ -221,23 +224,6 @@ int main(int argc, char* argv[])
 			}
 			pbrShader->SetInt("u_PointLightsCount", pointLights.size());
 		};
-
-		std::function<void()> modelPBROnDrawLamba = [&]()
-		{
-			albedo = glm::vec3(0.4f);
-			// albedoTexture = nullptr;
-			// normalTexture = sphereNormalTexture;
-			pbrOnDrawLamba();
-		};
-
-		std::function<void()> wallPBROnDrawLamba = [&]()
-		{
-			// albedo = glm::vec3(0.6f);
-			// albedoTexture = groundAlbedoTexture;
-			// normalTexture = nullptr;
-			pbrOnDrawLamba();
-		};
-
 		std::function<void()> blinnPhongOnDrawLamba = [&]()
 		{
 			// set uniforms:
@@ -262,18 +248,6 @@ int main(int argc, char* argv[])
 			}
 			blinnPhongShader->SetInt("u_DirectLightsCount", directLights.size());
 		};
-
-		std::function<void()> sphereBPOnDrawLamba = [&]()
-		{
-			objectColour = glm::vec3(0.9f);
-			blinnPhongOnDrawLamba();
-		};
-		std::function<void()> wallBPOnDrawLamba = [&]()
-		{
-			objectColour = glm::vec3(0.98f);
-			blinnPhongOnDrawLamba();
-		};
-
 		std::function<void()> flatColourOnDrawLamba = [&]()
 		{
 			// set uniforms:
@@ -329,7 +303,7 @@ int main(int argc, char* argv[])
 					float z = 0.0f;
 					int maxRow = 5;
 					int index = 0;
-					float increment = 2.0f;
+					float increment = 3.0f;
 
 					for (auto model : models)
 					{
@@ -343,10 +317,10 @@ int main(int argc, char* argv[])
 							index = 0;
 						}
 					}
-					// model->UpdateModelMatrix(position, rotation, glm::vec3(1.0f));
-					// model1->UpdateModelMatrix(glm::vec3(-2.5f, 0.0f, -4.0f), rotation, glm::vec3(1.0f));
-					// model2->UpdateModelMatrix(glm::vec3(2.5f, 0.0f, -4.0f), rotation, glm::vec3(1.0f));
-					// model3->UpdateModelMatrix(glm::vec3(2.5f, 1.0f, -4.0f), rotation, glm::vec3(1.0f));
+					/* model->UpdateModelMatrix(glm::vec3(-2.5f, 0.0f, -4.0f), rotation, glm::vec3(1.0f));
+					 model1->UpdateModelMatrix(glm::vec3(0.0f, 0.0f, -4.0f), rotation, glm::vec3(1.0f));
+					 model2->UpdateModelMatrix(glm::vec3(2.5f, 0.0f, -4.0f), rotation, glm::vec3(1.0f));
+					 model3->UpdateModelMatrix(glm::vec3(5.0f, 1.0f, -4.0f), rotation, glm::vec3(1.0f));*/
 					// wall1->UpdateModelMatrix(wallPos, wallRot, wallScale);
 					//lightModel->UpdateModelMatrix(directLights[0]->Position, rotation, glm::vec3(0.2f));
 				}
@@ -369,11 +343,12 @@ int main(int argc, char* argv[])
 					MIMIC_PROFILE_SCOPE("Add Scene Objects To Draw Queue");
 					for (auto model : models)
 					{
-						model->QueMeshesToDraw(pbrShader, modelPBROnDrawLamba, renderer);
+						model->QueMeshesToDraw(pbrShader, pbrOnDrawLamba, renderer);
 					}
-					// model->QueMeshesToDraw(blinnPhongShader, sphereBPOnDrawLamba, renderer);
-					/*model1->QueMeshesToDraw(pbrShader, pbrOnDrawLamba, renderer);
-					model2->QueMeshesToDraw(blinnPhongShader, blinnPhongOnDrawLamba, renderer);*/
+					/*model->QueMeshesToDraw(pbrShader, pbrOnDrawLamba, renderer);
+					model1->QueMeshesToDraw(pbrShader, pbrOnDrawLamba, renderer);
+					model2->QueMeshesToDraw(pbrShader, pbrOnDrawLamba, renderer);
+					model3->QueMeshesToDraw(pbrShader, pbrOnDrawLamba, renderer);*/
 					// wall1->QueMeshesToDraw(blinnPhongShader, wallBPOnDrawLamba, renderer);
 					// ground->QueMeshesToDraw(pbrShader, pbrOnDrawLamba, renderer);
 					// lightModel->QueMeshesToDraw(flatColourShader, flatColourOnDrawLamba, renderer);

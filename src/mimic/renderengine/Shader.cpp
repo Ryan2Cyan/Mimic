@@ -274,8 +274,8 @@ namespace MimicRender
 	void Shader::SetCameraPosition(const glm::vec3& value) noexcept
 	{
 		if (!_initialised) return;
-		if (_projectionMatrixUniformLocation == -1) return;
-		glUniform3f(_projectionMatrixUniformLocation, value.x, value.y, value.z);
+		if (_cameraPositionUniformLocation == -1) return;
+		glUniform3f(_cameraPositionUniformLocation, value.x, value.y, value.z);
 	}
 
 	const unsigned int Shader::GetSubroutineUniform(const GLenum& shaderType, const std::string& subroutineName)
