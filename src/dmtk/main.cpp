@@ -41,7 +41,7 @@ int main(int argc, char* argv[])
 		std::shared_ptr<Renderer> renderer = Renderer::Initialise();
 
 		// initialise shadow mapper:
-		std::shared_ptr<ShadowMapper> shadowMapper = ShadowMapper::Initialise(glm::ivec2(4096, 4096));
+		std::shared_ptr<ShadowMapper> shadowMapper = ShadowMapper::Initialise(glm::ivec2(8192, 8192));
 
 		// initialise shaders:
 		const std::shared_ptr<Shader> pbrShader = Shader::Initialise(fileLoader->LocateFileInDirectory(assetPath, "PBRShader.glsl"));
@@ -116,7 +116,7 @@ int main(int argc, char* argv[])
 		// load lights:
 		std::vector<std::shared_ptr<DirectLight>> directLights;
 
-		int numDirectLights = 25;
+		int numDirectLights = 1;
 		for (size_t i = 0; i < numDirectLights; i++)
 		{
 			directLights.push_back(DirectLight::Initialise(glm::vec3(2.72f, 0.926f, -5.0f), glm::vec3(-1.0f, -1.0f, -0.246f), glm::vec3(100.0f)));
