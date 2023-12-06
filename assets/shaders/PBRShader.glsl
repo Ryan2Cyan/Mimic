@@ -13,7 +13,7 @@ uniform mat4 u_View;
 uniform mat4 u_Projection;
 // uniform mat3 u_NormalMatrix;
 
-uniform mat4 u_DirectLightMatrices[20];
+uniform mat4 u_DirectLightMatrices[25];
 uniform int u_DirectLightsCount;
 // uniform mat4 u_PointLightMatrices[20];
 
@@ -22,7 +22,7 @@ out vec2 texCoord;
 out vec3 fragPosition;
 out vec3 viewDirectionNormal;
 out mat3 TBN;
-out vec4 directionalLightSpacePositions[20];
+out vec4 directionalLightSpacePositions[25];
 
 void main()
 {
@@ -66,7 +66,7 @@ in vec2 texCoord;
 in vec3 fragPosition;
 in vec3 viewDirectionNormal;
 in mat3 TBN;
-in vec4 directionalLightSpacePositions[20];
+in vec4 directionalLightSpacePositions[25];
 
 // subroutine definitions:
 subroutine vec3 CalculateAlbedo();
@@ -90,7 +90,7 @@ uniform sampler2D u_MetallicMap;
 uniform samplerCube u_IrradianceMap;
 uniform samplerCube u_PrefilterMap;
 uniform sampler2D u_BRDFLookupTexture;
-uniform sampler2D u_DirectShadowMaps[20];
+uniform sampler2D u_DirectShadowMaps[25];
 
 uniform vec3 u_Albedo;
 uniform float u_Roughness;
@@ -105,7 +105,7 @@ struct DirectLight
 	vec3 position;
 	vec3 direction;
 };
-uniform DirectLight u_DirectLights[20];
+uniform DirectLight u_DirectLights[25];
 uniform int u_DirectLightsCount;
 struct PointLight
 {
@@ -115,7 +115,7 @@ struct PointLight
 	float linear;
 	float quadratic;
 };
-uniform PointLight u_PointLights[20];
+uniform PointLight u_PointLights[25];
 uniform int u_PointLightsCount;
 
 out vec4 FragColour;
@@ -235,45 +235,58 @@ subroutine(CalculateMetallic) const float CalculateMetallicAutoTexture()
 
 void main()
 {
-	const vec3 normal = NormalMode();
+    // Surface Normal: Direction the surface (this fragment is on) is facing.
+	const vec3 N = NormalMode();
 	const vec3 viewDir = normalize( u_CameraPosition - fragPosition );
-	const vec3 reflectionDir = reflect(-viewDir, normal);
+	const vec3 reflectionDir = reflect(-viewDir, N);
 
 	const float roughness = RoughnessMode();
 	const float metallic = MetallicMode();
 	const vec3 albedo = mix(AlbedoMode(), vec3(0.0), metallic);
 	const vec3 baseReflectivity = mix(vec3(0.04), albedo, metallic);
 	
-	vec3 totalRadiance = vec3(0.0);
+	// Irradiance: The sum of radiances for each light source, scaled by a BRDF and the incident angle (dot of 
+	// normal and light direction) for this fragment point.
+	vec3 Lo = vec3(0.0);
 	
-	// sum radiance for all direct lights:
+	// Sum radiance for all direct lights:
 	for(int i = 0; i < u_DirectLightsCount; ++i)
 	{
 		const vec3 lightPosition = u_DirectLights[i].position;
-		const vec3 lightDirection = u_DirectLights[i].direction;
 
-		const vec3 halfVec = normalize(viewDir + lightDirection);
-		const vec3 radiance = vec3(u_DirectLights[i].colour);
+		// Light Direction.
+		const vec3 Wi = u_DirectLights[i].direction;
+
+		// Halfway Vector: A unit vector halfway between the view direction and the light direction. The closer
+		// this vector aligns with the surface normal, the higher the specular contribution.
+		const vec3 H = normalize(viewDir + Wi);
+		
+		// Radiance: The spectral radiance of the incoming light ray (represented as an RGB value).
+		const vec3 Li = u_DirectLights[i].colour.rgb;
 
 		// Cook-Torrence BRDF:
-		const float d = DistrubutionGGX(normal, halfVec, roughness);
-		const vec3 f = FresnelSchlick(dot(normal, halfVec), baseReflectivity);
-		const float g = GeometrySmith(normal, viewDir, lightDirection, roughness);
+		const float d = DistrubutionGGX(N, H, roughness);
+		const vec3 f = FresnelSchlick(dot(N, H), baseReflectivity);
+		const float g = GeometrySmith(N, viewDir, Wi, roughness);
 
 		const vec3 kS = f;
 		// vec3 kD = vec3(1.0) - kS;
 		vec3 kD = kS * ( 1.0 - metallic );
 
 		const vec3 numerator = d * g * f;
-		const float denominator = 4.0f * max(dot(normal, viewDir), 0.0) * max(dot(normal, lightDirection), 0.0) + 0.0001;
+		const float denominator = 4.0f * max(dot(N, viewDir), 0.0) * max(dot(N, Wi), 0.0) + 0.0001;
 		const vec3 specular = numerator / denominator;
 		
 		// calculate shadows:
-		float shadow = ShadowCalculation(directionalLightSpacePositions[i], lightDirection, u_DirectShadowMaps[i], normal);
+		float shadow = ShadowCalculation(directionalLightSpacePositions[i], Wi, u_DirectShadowMaps[i], N);
 
-		// Add to outgoing radiance:
-		const float normalDotLight = max(dot(normal, lightDirection), 0.0);
-		totalRadiance += (kD * albedo / PI + specular) * radiance * normalDotLight * (1.0 - shadow);
+		// Incident angle: Used in Lambertian Diffusion, where the greater the cosine angle between light and surface 
+		// normal, the less impact the light ray will have on the irradiance.
+		const float cosTheta = max(dot(N, Wi), 0.0);
+
+		// Reflectance Equation: Factoring in Lambertian Diffusion (diffuse), the Cook-Torrance BRDF (specular) and the 
+		// light's radiance.
+		Lo += (kD * albedo / PI + specular) * Li * cosTheta * (1.0 - shadow);
 	}
 
 	// sum radiance for all point lights:
@@ -288,39 +301,39 @@ void main()
 		const vec3 radiance = vec3(u_PointLights[i].colour) * attenuation;
 
 		// Cook-Torrence BRDF:
-		const float d = DistrubutionGGX(normal, halfVec, roughness);
-		const vec3 f = FresnelSchlick(dot(normal, halfVec), baseReflectivity);
-		const float g = GeometrySmith(normal, viewDir, lightDirection, roughness);
+		const float d = DistrubutionGGX(N, halfVec, roughness);
+		const vec3 f = FresnelSchlick(dot(N, halfVec), baseReflectivity);
+		const float g = GeometrySmith(N, viewDir, lightDirection, roughness);
 
 		const vec3 kS = f;
 		// vec3 kD = vec3(1.0) - kS;
 		vec3 kD = kS * ( 1.0 - metallic );
 
 		const vec3 numerator = d * g * f;
-		const float denominator = 4.0f * max(dot(normal, viewDir), 0.0) * max(dot(normal, lightDirection), 0.0) + 0.0001;
+		const float denominator = 4.0f * max(dot(N, viewDir), 0.0) * max(dot(N, lightDirection), 0.0) + 0.0001;
 		const vec3 specular = numerator / denominator;
 
 		// Add to outgoing radiance:
-		const float normalDotLight = max(dot(normal, lightDirection), 0.0);
-		totalRadiance += (kD * albedo / PI + specular) * radiance * normalDotLight;
+		const float normalDotLight = max(dot(N, lightDirection), 0.0);
+		Lo += (kD * albedo / PI + specular) * radiance * normalDotLight;
 	}
 
 	// calculate ambience:
 	// const vec3 ambient = vec3(0.03) * albedo * u_AmbientOcclusion;
-	const vec3 fresnel = FresnelSchlickRoughness(max(dot(normal, viewDir), 0.0), baseReflectivity, roughness);
+	const vec3 fresnel = FresnelSchlickRoughness(max(dot(N, viewDir), 0.0), baseReflectivity, roughness);
 	const vec3 kS = fresnel;
 	const vec3 kD = 1.0 - kS;
-	const vec3 irradiance = texture(u_IrradianceMap, normal).rgb;
+	const vec3 irradiance = texture(u_IrradianceMap, N).rgb;
 	const vec3 diffuse = irradiance * albedo;
 
 	const float maxReflectionLOD = 4.0;
 	const vec3 prefilteredColour = textureLod(u_PrefilterMap, reflectionDir, roughness * maxReflectionLOD).rgb;
-	const vec2 brdf = texture(u_BRDFLookupTexture, vec2(max(dot(normal, viewDir), 0.0), roughness)).rg;
+	const vec2 brdf = texture(u_BRDFLookupTexture, vec2(max(dot(N, viewDir), 0.0), roughness)).rg;
 	const vec3 specular = prefilteredColour * (fresnel * brdf.x + brdf.y);
 
 	const vec3 ambient = (kD * diffuse + specular) * u_AmbientOcclusion;
 
-	vec3 colour = ambient + totalRadiance;
+	vec3 colour = ambient + Lo;
 	colour = colour / (colour + vec3(1.0));
 	colour = pow(colour, vec3(1.0 / 2.2));
 	FragColour = vec4( u_Emissive + colour, u_Alpha );
