@@ -41,7 +41,7 @@ int main(int argc, char* argv[])
 		std::shared_ptr<Renderer> renderer = Renderer::Initialise();
 
 		// initialise shadow mapper:
-		// std::shared_ptr<ShadowMapper> shadowMapper = ShadowMapper::Initialise(glm::ivec2(1024, 1024));
+		 std::shared_ptr<ShadowMapper> shadowMapper = ShadowMapper::Initialise(glm::ivec2(4096, 4096));
 
 		// initialise shaders:
 		const std::shared_ptr<Shader> pbrShader = Shader::Initialise(fileLoader->LocateFileInDirectory(assetPath, "PBRShader.glsl"));
@@ -85,31 +85,34 @@ int main(int argc, char* argv[])
 
 		// create camera:
 		std::shared_ptr<Camera> camera = Camera::Initialise(window->GetAspectRatio(), 45.0f);
-		camera->Position = glm::vec3(0.0, 2.6f, 20.6f);
-		camera->Orientation = glm::vec3(0.0, -1.133f, 3.0f);
+		camera->Position = glm::vec3(0.0f, 0.0f, 5.0f);
+		camera->Orientation = glm::vec3(0.0f, -0.0f, -1.0f);
 
 		// create models:
 		glm::vec3 rotation = glm::vec3(0.0f);
 		glm::vec3 position = glm::vec3(0.0f, 0.235f, -14.285f);
-		constexpr int modelCount = 5000;
+		/*constexpr int modelCount = 2500;
 		std::vector< std::shared_ptr<Model>> models;
 		for (size_t i = 0; i < modelCount; i++)
 		{
 			models.push_back(Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "sphere.obj")));
-		}
+		}*/
 
+		std::shared_ptr<Model> model = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "sphere.obj"));
+		model->UpdateModelMatrix(glm::vec3(0.0, 0.0, -3.0), glm::vec3(0.0), glm::vec3(1.0));
 		/*std::shared_ptr<Model> model = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "normal_rock_sphere.obj.obj"));
 		std::shared_ptr<Model> model1 = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "normal_rock_sphere.obj"));
 		std::shared_ptr<Model> model2 = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "normal_rock_sphere.obj"));
 		std::shared_ptr<Model> model3 = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "normal_rock_sphere.obj"));*/
 		// std::shared_ptr<Model> ground = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "cube.obj"));
-		// std::shared_ptr<Model> wall1 = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "cube.obj"));
-		// glm::vec3 wallPos = glm::vec3(0.0f, -1.24f, -50.0f);
-		// glm::vec3 wallRot = glm::vec3(0.0f);
-		// glm::vec3 wallScale = glm::vec3(43.45f, -0.595f, 50.0f);
+		std::shared_ptr<Model> wall1 = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "cube.obj"));
+		glm::vec3 wallPos = glm::vec3(0.0f, -1.6f, -50.0f);
+		glm::vec3 wallRot = glm::vec3(0.0f);
+		glm::vec3 wallScale = glm::vec3(43.45f, -0.595f, 50.0f);
+		wall1->UpdateModelMatrix(wallPos, wallRot, wallScale);
 		// std::shared_ptr<Model> lightModel = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "normal_rock_sphere.obj"));
 
-		// const std::vector<std::shared_ptr<Model>> sceneModels = { model, wall1/*, model1, model2, wall1*/ };
+		const std::vector<std::shared_ptr<Model>> sceneModels = { model, wall1 };
 
 		// create textures:
 		std::shared_ptr<Texture> albedoTexture = Texture::Initialise(fileLoader->LocateFileInDirectory(assetPath, "rustediron2_basecolor.png"), window->GetAspectRatio(), Texture::MIMIC_2D_TEXTURE_PARAMS, TextureType::MIMIC_ALBEDO);
@@ -296,75 +299,29 @@ int main(int argc, char* argv[])
 				// #############################################################################
 				// update scene:
 				// #############################################################################
-
 				camera->Update();
-				{
-					// MIMIC_PROFILE_SCOPE("Update Model Matrices");
-					float x = 0.0f;
-					float z = 0.0f;
-					int maxRow = 5;
-					int index = 0;
-					float increment = 3.0f;
 
-					for (auto model : models)
-					{
-						model->UpdateModelMatrix(glm::vec3(x, 0.0f, z), glm::vec3(0.0f), glm::vec3(1.0f));
-						index++;
-						x += increment;
-						if (index > maxRow)
-						{
-							x = 0.0f;
-							z += increment;
-							index = 0;
-						}
-					}
-					/* model->UpdateModelMatrix(glm::vec3(-2.5f, 0.0f, -4.0f), rotation, glm::vec3(1.0f));
-					 model1->UpdateModelMatrix(glm::vec3(0.0f, 0.0f, -4.0f), rotation, glm::vec3(1.0f));
-					 model2->UpdateModelMatrix(glm::vec3(2.5f, 0.0f, -4.0f), rotation, glm::vec3(1.0f));
-					 model3->UpdateModelMatrix(glm::vec3(5.0f, 1.0f, -4.0f), rotation, glm::vec3(1.0f));*/
-					// wall1->UpdateModelMatrix(wallPos, wallRot, wallScale);
-					//lightModel->UpdateModelMatrix(directLights[0]->Position, rotation, glm::vec3(0.2f));
-				}
 				// #############################################################################
 				// render scene:
 				// #############################################################################
+				glClearColor(0.77f, 0.73f, 0.97f, 1.0f);
+				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+				// update shadow maps:
 				{
-					// MIMIC_PROFILE_SCOPE("Clear Color & Depth Buffers");
-					glClearColor(0.77f, 0.73f, 0.97f, 1.0f);
-					glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+					MIMIC_PROFILE_SCOPE("Render 2D Depth Maps");
+					shadowMapper->RenderDirectLightDepthMaps(sceneModels, directLights, renderer);
 				}
 
-				//// update shadow maps:
-				//{
-				//	MIMIC_PROFILE_SCOPE("Render Depth Maps");
-				//	shadowMapper->RenderDirectLightDepthMaps(models, directLights, renderer);
-				//}
 				// send meshes to renderer:
-				{
-					// MIMIC_PROFILE_SCOPE("Add Scene Objects To Draw Queue");
-					for (auto model : models)
-					{
-						model->QueMeshesToDraw(pbrShader, pbrOnDrawLamba, renderer);
-					}
-					/*model->QueMeshesToDraw(pbrShader, pbrOnDrawLamba, renderer);
-					model1->QueMeshesToDraw(pbrShader, pbrOnDrawLamba, renderer);
-					model2->QueMeshesToDraw(pbrShader, pbrOnDrawLamba, renderer);
-					model3->QueMeshesToDraw(pbrShader, pbrOnDrawLamba, renderer);*/
-					// wall1->QueMeshesToDraw(blinnPhongShader, wallBPOnDrawLamba, renderer);
-					// ground->QueMeshesToDraw(pbrShader, pbrOnDrawLamba, renderer);
-					// lightModel->QueMeshesToDraw(flatColourShader, flatColourOnDrawLamba, renderer);
-				}
+				model->QueMeshesToDraw(blinnPhongShader, blinnPhongOnDrawLamba, renderer);
+				wall1->QueMeshesToDraw(blinnPhongShader, blinnPhongOnDrawLamba, renderer);
+
 				// draw:
+				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+				window->ResetViewPort();
 				{
-					// MIMIC_PROFILE_SCOPE("Clear Color & Depth Buffers");
-					glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-				}
-				{
-					// MIMIC_PROFILE_SCOPE("Reset Viewport");
-					window->ResetViewPort();
-				}
-				{
-					MIMIC_PROFILE_SCOPE("Draw Scene Objects");
+					MIMIC_PROFILE_SCOPE("Draw Scene");
 					renderer->Draw(camera);
 					renderer->ClearRenderQue();
 				}
@@ -382,7 +339,7 @@ int main(int argc, char* argv[])
 			ImGui::NewFrame();
 
 			// display depth maps:
-			// ImGui::Image((void*)directLights[0]->GetDepthMapTextureId(), ImVec2(800, 800));
+			ImGui::Image((void*)directLights[0]->GetDepthMapTextureId(), ImVec2(800, 800));
 			// ImGui::Image((void*)directLights[1]->GetDepthMapTextureId(), ImVec2(800, 800));
 
 			// light controls:
@@ -392,7 +349,7 @@ int main(int argc, char* argv[])
 			ImGui::End();*/
 
 			ImGui::Begin("Direct Light");
-			ImGui::SliderFloat3("Position##dl1", &(directLights[0]->Position[0]), -5.0f, 5.0f);
+			ImGui::SliderFloat3("Position##dl1", &(directLights[0]->Position[0]), -30.0f, 30.0f);
 			ImGui::SliderFloat3("Direction##dl2", &(directLights[0]->Direction[0]), -1.0f, 1.0f);
 			ImGui::SliderFloat3("Colour##dl3", &(directLights[0]->Colour[0]), 0.0f, 100.0f);
 			ImGui::End();
