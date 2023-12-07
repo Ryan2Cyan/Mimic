@@ -145,16 +145,16 @@ const float ShadowCalculation(const vec4 lightSpacePos, const vec3 lightDir, con
 	return shadow /= 9.0;
 }
 
-// Normal Distribution Function (Trowbridge-Reitz GGX): Approximates surface's microfacets that align to the 
-// halfway vector, influenced by the surface's roughness.
-const float DistrubutionGGX(const in vec3 N, const in vec3 H, const in float roughness)
+// Normal Distribution Function (Trowbridge-Reitz GGX): Approximates general value for surface's microfacets 
+// that align to the halfway vector, influenced by the surface's roughness.
+const float DistrubutionGGX(const in vec3 N, const in vec3 H, const in float a)
 {
-	float roughnessPow2 = roughness * roughness;
+	float aPow2 = a * a;
 	float NdotH = max(dot(N, H), 0.0);
 	float NdotHPow2 = NdotH * NdotH;
-	float denominator = (NdotHPow2 * (roughnessPow2 - 1.0) + 1.0);
+	float denominator = (NdotHPow2 * (aPow2 - 1.0) + 1.0);
 	denominator = PI * denominator * denominator;
-	return roughnessPow2 / denominator;
+	return aPow2 / denominator;
 }
 
 // Fresnel Schlick: Calculates the contribution of the Fresnel factor to specular reflection.
@@ -172,19 +172,20 @@ const vec3 FresnelSchlickRoughness(const float cosTheta, const vec3 baseReflecti
 const float SchlickGGXRoughnessRemapperDirect(const in float roughness) { return pow((roughness + 1), 2.0) / 8.0; }
 const float SchlickGGXRoughnessRemapperIBL(const in float roughness) { return (roughness * roughness) / 2.0; }
 
-// Schlick-GGX:
-const float GeometrySchlickGGX(const in float normalDotViewDirection, const in float remappedRoughness)
+// Schlick-GGX: Helper function for GeometrySmith function:
+const float GeometrySchlickGGX(const in float NdotV, const in float k)
 {
-	return normalDotViewDirection / (normalDotViewDirection * (1.0 - remappedRoughness) + remappedRoughness);
+	return NdotV / (NdotV * (1.0 - k) + k);
 }
 
-// Schlick-GGX combined with Smith's method:
-const float GeometrySmith(const in vec3 normal, const in vec3 viewDirection, const in vec3 lightDirection, const in float remappedRoughness)
+// Schlick-GGX combined with Smith's method: Calculates (based on roughness) how much microfacet specular light is 
+// obscured from the viewer [geometry obscuring], and how much is lost in microfacet crevaces [geometry shadowing]:
+const float GeometrySmith(const in vec3 N, const in vec3 V, const in vec3 Wi, const in float k)
 {
-	float normalDotView = max(dot(normal, viewDirection), 0.0);
-	float normalDotLight = max(dot(normal, lightDirection), 0.0);
-	float ggx1 = GeometrySchlickGGX(normalDotView, remappedRoughness);
-	float ggx2 = GeometrySchlickGGX(normalDotLight, remappedRoughness);
+	float NdotV = max(dot(N, V), 0.0);
+	float NdotWi = max(dot(N, Wi), 0.0);
+	float ggx1 = GeometrySchlickGGX(NdotV, k);
+	float ggx2 = GeometrySchlickGGX(NdotWi, k);
 	return ggx1 * ggx2;
 }
 
@@ -265,11 +266,14 @@ void main()
 		
 		// Radiance: The spectral radiance of the incoming light ray (represented as an RGB value).
 		const vec3 Li = u_DirectLights[i].colour.rgb;
+		
+		// Remap roughness:
+		const float k = pow((roughness + 1), 2) / 8;                
 
 		// Cook-Torrence BRDF: Calculates the specular component.
 		const float d = DistrubutionGGX(N, H, roughness);
 		const vec3 f = FresnelSchlick(max(dot(H, N), 0.0), F0);
-		const float g = GeometrySmith(N, V, Wi, roughness);
+		const float g = GeometrySmith(N, V, Wi, k);
 
 		const vec3 kS = f;
 		// vec3 kD = vec3(1.0) - kS;
