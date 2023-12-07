@@ -27,7 +27,7 @@ namespace MimicRender
 		glm::mat4 projection = glm::mat4(1.0f);
 
 		// Makes camera look in the right direction from the right position
-		_viewMatrix = glm::lookAt(Position, Position + Orientation, Up);
+		_viewMatrix = glm::lookAt(Position, Position + glm::normalize(Orientation), Up);
 		// Adds perspective to the scene
 		_projectionMatrix = glm::perspective(glm::radians(Fov), AspectRatio.x / AspectRatio.y, ClippingPlane.x, ClippingPlane.y);
 	}

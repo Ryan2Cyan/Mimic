@@ -331,11 +331,12 @@ void main()
 		Lo += CookTorranceBRDF(N, H, F0, V, Wi, Li, albedo, k, roughness, metallic, i);
 	}
 
-	// calculate ambience:
-	// const vec3 ambient = vec3(0.03) * albedo * u_AmbientOcclusion;
+	// Calculate ambient light:
 	const vec3 fresnel = FresnelSchlickRoughness(max(dot(N, V), 0.0), F0, roughness);
 	const vec3 kS = fresnel;
 	const vec3 kD = 1.0 - kS;
+
+	// Sample pre-computed irradiance map to get the diffuse radiance from the environment:
 	const vec3 irradiance = texture(u_IrradianceMap, N).rgb;
 	const vec3 diffuse = irradiance * albedo;
 

@@ -128,7 +128,7 @@ int main(int argc, char* argv[])
 		};
 
 		// load hdr environment map:
-		std::shared_ptr<EnvironmentCubeMap> environmentCubeMap = EnvironmentCubeMap::Initialise("studio_small_09_4k.hdr", window->GetAspectRatio(), renderer);
+		std::shared_ptr<EnvironmentCubeMap> environmentCubeMap = EnvironmentCubeMap::Initialise("rural_asphalt_road_4k.hdr", window->GetAspectRatio(), renderer);
 
 		// render-shader lambdas:
 		std::function<void()> pbrOnDrawLamba = [&]()
