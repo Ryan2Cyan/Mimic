@@ -145,21 +145,22 @@ const float ShadowCalculation(const vec4 lightSpacePos, const vec3 lightDir, con
 	return shadow /= 9.0;
 }
 
-// Normal Distribution Function (Trowbridge-Reitz GGX) - Approximates surface's microfacets that align to the halfway vector:
-const float DistrubutionGGX(const in vec3 normal, const in vec3 halfwayVector, const in float roughness)
+// Normal Distribution Function (Trowbridge-Reitz GGX): Approximates surface's microfacets that align to the 
+// halfway vector, influenced by the surface's roughness.
+const float DistrubutionGGX(const in vec3 N, const in vec3 H, const in float roughness)
 {
 	float roughnessPow2 = roughness * roughness;
-	float normalDotHalfway = max(dot(normal, halfwayVector), 0.0);
-	float normalDotHalfwayPow2 = normalDotHalfway * normalDotHalfway;
-	float denominator = (normalDotHalfwayPow2 * (roughnessPow2 - 1.0) + 1.0);
+	float NdotH = max(dot(N, H), 0.0);
+	float NdotHPow2 = NdotH * NdotH;
+	float denominator = (NdotHPow2 * (roughnessPow2 - 1.0) + 1.0);
 	denominator = PI * denominator * denominator;
 	return roughnessPow2 / denominator;
 }
 
-// Fresnel Schlick - Ratio of light reflected based on the viewing angle:
-const vec3 FresnelSchlick(const in float cosTheta, const in vec3 baseReflectivity)
+// Fresnel Schlick: Calculates the contribution of the Fresnel factor to specular reflection.
+const vec3 FresnelSchlick(const in float cosTheta, const in vec3 F0)
 {
-	return baseReflectivity + (1.0 - baseReflectivity) * pow(1.0 - cosTheta, 5.0);
+	return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
 }
 
 const vec3 FresnelSchlickRoughness(const float cosTheta, const vec3 baseReflectivity, const float roughness)
@@ -235,46 +236,47 @@ subroutine(CalculateMetallic) const float CalculateMetallicAutoTexture()
 
 void main()
 {
-    // Surface Normal: Direction the surface (this fragment is on) is facing.
-	const vec3 N = NormalMode();
-	const vec3 viewDir = normalize( u_CameraPosition - fragPosition );
-	const vec3 reflectionDir = reflect(-viewDir, N);
+    
+	const vec3 N = NormalMode(); // Surface Normal
+	const vec3 V = normalize( u_CameraPosition - fragPosition ); // View Direction
 
+	// Material Properties.
 	const float roughness = RoughnessMode();
 	const float metallic = MetallicMode();
 	const vec3 albedo = mix(AlbedoMode(), vec3(0.0), metallic);
-	const vec3 baseReflectivity = mix(vec3(0.04), albedo, metallic);
+
+	// Surface Reflection at Zero Incidence: How much the surface reflects light when looking directly at it
+	// along the surface normal. This is exclusively pre-computed for FresnelSchlick computation. For non-metallic
+	// surfaces F0 is always 0.04. We linearly interpolate 0.04 and the albedo to a given metallic property.
+	const vec3 F0 = mix(vec3(0.04), albedo, metallic);
 	
-	// Irradiance: The sum of radiances for each light source, scaled by a BRDF and the incident angle (dot of 
-	// normal and light direction) for this fragment point.
+	// Irradiance: The sum of radiances from each light source.
 	vec3 Lo = vec3(0.0);
 	
 	// Sum radiance for all direct lights:
 	for(int i = 0; i < u_DirectLightsCount; ++i)
 	{
-		const vec3 lightPosition = u_DirectLights[i].position;
-
 		// Light Direction.
 		const vec3 Wi = u_DirectLights[i].direction;
 
 		// Halfway Vector: A unit vector halfway between the view direction and the light direction. The closer
 		// this vector aligns with the surface normal, the higher the specular contribution.
-		const vec3 H = normalize(viewDir + Wi);
+		const vec3 H = normalize(V + Wi);
 		
 		// Radiance: The spectral radiance of the incoming light ray (represented as an RGB value).
 		const vec3 Li = u_DirectLights[i].colour.rgb;
 
-		// Cook-Torrence BRDF:
+		// Cook-Torrence BRDF: Calculates the specular component.
 		const float d = DistrubutionGGX(N, H, roughness);
-		const vec3 f = FresnelSchlick(dot(N, H), baseReflectivity);
-		const float g = GeometrySmith(N, viewDir, Wi, roughness);
+		const vec3 f = FresnelSchlick(max(dot(H, N), 0.0), F0);
+		const float g = GeometrySmith(N, V, Wi, roughness);
 
 		const vec3 kS = f;
 		// vec3 kD = vec3(1.0) - kS;
 		vec3 kD = kS * ( 1.0 - metallic );
 
 		const vec3 numerator = d * g * f;
-		const float denominator = 4.0f * max(dot(N, viewDir), 0.0) * max(dot(N, Wi), 0.0) + 0.0001;
+		const float denominator = 4.0f * max(dot(N, V), 0.0) * max(dot(N, Wi), 0.0) + 0.0001;
 		const vec3 specular = numerator / denominator;
 		
 		// calculate shadows:
@@ -284,8 +286,8 @@ void main()
 		// normal, the less impact the light ray will have on the irradiance.
 		const float cosTheta = max(dot(N, Wi), 0.0);
 
-		// Reflectance Equation: Factoring in Lambertian Diffusion (diffuse), the Cook-Torrance BRDF (specular) and the 
-		// light's radiance.
+		// Reflectance Equation: Factoring in Lambertian Diffusion (diffuse/Kd), the Cook-Torrance BRDF (specular/Ks) and the 
+		// light's spectral radiance.
 		Lo += (kD * albedo / PI + specular) * Li * cosTheta * (1.0 - shadow);
 	}
 
@@ -295,22 +297,22 @@ void main()
 		const vec3 lightPosition = u_PointLights[i].position;
 		const vec3 lightDirection = normalize(lightPosition - fragPosition);
 
-		const vec3 halfVec = normalize(viewDir + lightDirection);
+		const vec3 halfVec = normalize(V + lightDirection);
 		const float distance = length(lightPosition - fragPosition);
 		const float attenuation = 1.0 / (u_PointLights[i].constant + u_PointLights[i].linear * distance + u_PointLights[i].quadratic * (distance * distance));
 		const vec3 radiance = vec3(u_PointLights[i].colour) * attenuation;
 
 		// Cook-Torrence BRDF:
 		const float d = DistrubutionGGX(N, halfVec, roughness);
-		const vec3 f = FresnelSchlick(dot(N, halfVec), baseReflectivity);
-		const float g = GeometrySmith(N, viewDir, lightDirection, roughness);
+		const vec3 f = FresnelSchlick(dot(N, halfVec), F0);
+		const float g = GeometrySmith(N, V, lightDirection, roughness);
 
 		const vec3 kS = f;
 		// vec3 kD = vec3(1.0) - kS;
 		vec3 kD = kS * ( 1.0 - metallic );
 
 		const vec3 numerator = d * g * f;
-		const float denominator = 4.0f * max(dot(N, viewDir), 0.0) * max(dot(N, lightDirection), 0.0) + 0.0001;
+		const float denominator = 4.0f * max(dot(N, V), 0.0) * max(dot(N, lightDirection), 0.0) + 0.0001;
 		const vec3 specular = numerator / denominator;
 
 		// Add to outgoing radiance:
@@ -320,15 +322,16 @@ void main()
 
 	// calculate ambience:
 	// const vec3 ambient = vec3(0.03) * albedo * u_AmbientOcclusion;
-	const vec3 fresnel = FresnelSchlickRoughness(max(dot(N, viewDir), 0.0), baseReflectivity, roughness);
+	const vec3 fresnel = FresnelSchlickRoughness(max(dot(N, V), 0.0), F0, roughness);
 	const vec3 kS = fresnel;
 	const vec3 kD = 1.0 - kS;
 	const vec3 irradiance = texture(u_IrradianceMap, N).rgb;
 	const vec3 diffuse = irradiance * albedo;
 
 	const float maxReflectionLOD = 4.0;
-	const vec3 prefilteredColour = textureLod(u_PrefilterMap, reflectionDir, roughness * maxReflectionLOD).rgb;
-	const vec2 brdf = texture(u_BRDFLookupTexture, vec2(max(dot(N, viewDir), 0.0), roughness)).rg;
+	const vec3 R = reflect(-V, N);
+	const vec3 prefilteredColour = textureLod(u_PrefilterMap, R, roughness * maxReflectionLOD).rgb;
+	const vec2 brdf = texture(u_BRDFLookupTexture, vec2(max(dot(N, V), 0.0), roughness)).rg;
 	const vec3 specular = prefilteredColour * (fresnel * brdf.x + brdf.y);
 
 	const vec3 ambient = (kD * diffuse + specular) * u_AmbientOcclusion;
