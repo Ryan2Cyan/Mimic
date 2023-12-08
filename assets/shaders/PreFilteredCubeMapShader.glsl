@@ -50,6 +50,8 @@ float RadicalInverse_VdC(uint bits)
     return float(bits) * 2.3283064365386963e-10;
 }
 
+// Hammersley Sequence: Random low-discrepancy sequence based on the Quasi-Monte Carlo method, based on
+// the Van Der Corput sequence mirroring a decimal binary representation around its decimal point.
 vec2 Hammersley(uint i, uint N)
 {
     return vec2(float(i)/float(N), RadicalInverse_VdC(i));
@@ -80,6 +82,9 @@ vec3 ImportanceSampleGGX(vec2 Xi, vec3 N, float roughness)
 
 void main()
 {
+    // Shape of the distribution changes based on the viewing angle, so the viewing
+    // angle is assumed to be zero (n = v = r), preventing lengthy reflections at 
+    // grazing angles. 
 	vec3 N = normalize(localPosition);
     vec3 R = N;
     vec3 V = R;
@@ -97,7 +102,7 @@ void main()
         float NdotL = max(dot(N, L), 0.0);
         if(NdotL > 0.0)
         {
-            // sample from the environment's mip level based on roughness/pdf:
+            // Sample from the environment's mip level based on roughness/pdf:
             float D = DistrubutionGGX(N, H, u_Roughness);
             float NdotH = max(dot(N, H), 0.0);
             float HdotV = max(dot(H, V), 0.0);

@@ -89,7 +89,7 @@ namespace MimicRender
 		environmentCubeMap->_cubeMapShader->SetMat4("u_Projection", camera->_projectionMatrix);
 
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, environmentCubeMap->_environmentMapRenderTexture->_texture->_id);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, environmentCubeMap->_prefilteredMapRenderTexture->_texture->_id);
 		DrawUnitCube();
 		glBindVertexArray(0);
 

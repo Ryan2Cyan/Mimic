@@ -145,7 +145,7 @@ const float ShadowCalculation(const vec4 lightSpacePos, const vec3 lightDir, con
 	return shadow /= 9.0;
 }
 
-// Normal Distribution Function (Trowbridge-Reitz GGX): Approximates general value for surface's microfacets 
+// Normal Distribution Function (GGX/Trowbridge-Reitz): Approximates general value for surface's microfacets 
 // that align to the halfway vector, influenced by the surface's roughness.
 const float DistrubutionGGX(const in vec3 N, const in vec3 H, const in float a)
 {
@@ -157,7 +157,7 @@ const float DistrubutionGGX(const in vec3 N, const in vec3 H, const in float a)
 	return aPow2 / denominator;
 }
 
-// Fresnel Schlick: Calculates the contribution of the Fresnel factor to specular reflection.
+// Fresnel Schlick Approximation: Calculates the contribution of the Fresnel factor to specular reflection.
 const vec3 FresnelSchlick(const in float cosTheta, const in vec3 F0)
 {
 	return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
@@ -197,7 +197,8 @@ const float GeometrySmith(const in vec3 N, const in vec3 V, const in vec3 L, con
 	return ggx1 * ggx2;
 }
 
-// Calculates approximation of the light's outputted radiance, based on the surface's material properties: 
+// Cook-Torrance microfacet specular shading model: Calculates approximation of the light's outputted radiance, based on 
+// the surface's material properties: 
 const vec3 CookTorranceBRDF(const vec3 N, const vec3 H, const vec3 F0, const vec3 V, const vec3 Wi, const vec3 Li, const vec3 albedo, const float k, const float a, const float metallic, const int i)
 {
 	// Cook-Torrence BRDF: Calculates the specular component.

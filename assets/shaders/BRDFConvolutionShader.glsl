@@ -33,10 +33,13 @@ const float RadicalInverse_VdC(uint bits)
     return float(bits) * 2.3283064365386963e-10;
 }
 
+// Hammersley Sequence: Random low-discrepancy sequence based on the Quasi-Monte Carlo method, based on
+// the Van Der Corput sequence mirroring a decimal binary representation around its decimal point.
 const vec2 Hammersley(const uint i, const uint N)
 {
     return vec2(float(i)/float(N), RadicalInverse_VdC(i));
 }
+
 
 const vec3 ImportanceSampleGGX(const vec2 Xi, const vec3 N, const float roughness)
 {
@@ -58,27 +61,25 @@ const vec3 ImportanceSampleGGX(const vec2 Xi, const vec3 N, const float roughnes
     return normalize(sampleVec);
 }
 
-// Schlick-GGX:
-const float GeometrySchlickGGX(const in float normalDotViewDirection, const in float roughness)
+// Schlick-GGX: Calculates general value (based on roughness) for how much self-shadowing occurs on the
+// surface's microfacets.
+const float GeometrySchlickGGX(const in float NdotV, const in float k)
 {
-    const float k = (roughness * roughness) / 2.0;
-    const float nom = normalDotViewDirection;
-    const float denom = normalDotViewDirection * (1.0 - k) + k;
-
-	return nom / denom;
+	return NdotV / (NdotV * (1.0 - k) + k);
 }
 
-// Schlick-GGX combined with Smith's method:
-const float GeometrySmith(const in vec3 normal, const in vec3 viewDirection, const in vec3 lightDirection, const in float remappedRoughness)
+// Smith: Geometric shadowing model, breaks the formula into two parts (light and view), using Schlick-GGX to
+// calculate both sub-components.
+const float GeometrySmith(const in vec3 N, const in vec3 V, const in vec3 L, const in float k)
 {
-	const float normalDotView = max(dot(normal, viewDirection), 0.0);
-	const float normalDotLight = max(dot(normal, lightDirection), 0.0);
-	const float ggx1 = GeometrySchlickGGX(normalDotView, remappedRoughness);
-	const float ggx2 = GeometrySchlickGGX(normalDotLight, remappedRoughness);
+	float NdotV = max(dot(N, V), 0.0);
+	float NdotL = max(dot(N, L), 0.0);
+	float ggx1 = GeometrySchlickGGX(NdotV, k);
+	float ggx2 = GeometrySchlickGGX(NdotL, k);
 	return ggx1 * ggx2;
 }
 
-vec2 IntegrateBRDF(float NdotV, float roughness)
+vec2 IntegrateBRDF(float NdotV, float k)
 {
     const vec3 V = vec3(sqrt(1.0 - NdotV * NdotV), 0.0, NdotV);
     const vec3 N = vec3(0.0, 0.0, 1.0);
@@ -90,7 +91,7 @@ vec2 IntegrateBRDF(float NdotV, float roughness)
     for(uint i = 0u; i < sampleCount; i++)
     {
         const vec2 Xi = Hammersley(i, sampleCount);
-        const vec3 H = ImportanceSampleGGX(Xi, N, roughness);
+        const vec3 H = ImportanceSampleGGX(Xi, N, k);
         const vec3 L = normalize(2.0 * dot(V, H) * H - V);
 
         const float NdotL = max(L.z, 0.0);
@@ -99,7 +100,7 @@ vec2 IntegrateBRDF(float NdotV, float roughness)
 
         if(NdotL > 0.0)
         {
-            const float G = GeometrySmith(N, V, L, roughness);
+            const float G = GeometrySmith(N, V, L, k);
             const float G_Vis = (G * VdotH) / (NdotH * NdotV);
             const float Fc = pow(1.0 - VdotH, 5.0);
 

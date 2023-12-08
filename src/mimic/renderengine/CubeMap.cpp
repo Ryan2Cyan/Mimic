@@ -17,7 +17,8 @@ namespace MimicRender
 	const std::shared_ptr<EnvironmentCubeMap> EnvironmentCubeMap::Initialise(const std::string& hdrFileName, const glm::vec2& aspectRatio, std::shared_ptr<Renderer>& renderer)
 	{	
 		std::shared_ptr<EnvironmentCubeMap> environementMap = std::make_shared<EnvironmentCubeMap>();
-		// initialise capture views and projection matrices:
+		
+		// Initialise capture views and projection matrices:
 		const glm::mat4 captureProjection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f);
 		const std::array<glm::mat4, 6> captureViews =
 		{
@@ -29,11 +30,11 @@ namespace MimicRender
 			glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f,  0.0f, -1.0f), glm::vec3(0.0f, -1.0f,  0.0f))
 		};
 
-		// initialise file loader:
+		// Initialise file loader:
 		std::shared_ptr<MimicUtil::FileLoader> fileLoader = MimicUtil::FileLoader::Initialise();
 		const std::string assetsDirectory = fileLoader->LocateDirectory("assets").generic_string();
 
-		// load hdr texture:
+		// Load 2D HDR texture:
 		const std::shared_ptr<Texture> equirectangularTexture = Texture::Initialise(fileLoader->LocateFileInDirectory(assetsDirectory, hdrFileName), aspectRatio, Texture::MIMIC_2D_TEXTURE_PARAMS | Texture::MIMIC_FLIP_VERTICAL);
 		if (equirectangularTexture == nullptr)
 		{
@@ -41,7 +42,7 @@ namespace MimicRender
 			return environementMap;
 		}
 
-		// initialise shaders:
+		// Initialise shaders:
 		const std::shared_ptr<Shader> equirectangularToCubemapShader = Shader::Initialise(fileLoader->LocateFileInDirectory(assetsDirectory, "EquirectangularToCubemapShader.glsl"));
 		const std::shared_ptr<Shader> convolutionShader = Shader::Initialise(fileLoader->LocateFileInDirectory(assetsDirectory, "CubeMaptoConvolutedCubeMap.glsl"));
 		const std::shared_ptr<Shader> preFilteredShader = Shader::Initialise(fileLoader->LocateFileInDirectory(assetsDirectory, "PreFilteredCubeMapShader.glsl"));
@@ -49,17 +50,18 @@ namespace MimicRender
 		const std::shared_ptr<Shader> cubeMapShader = Shader::Initialise(fileLoader->LocateFileInDirectory(assetsDirectory, "EnvironmentCubeMapShader.glsl"));
 		cubeMapShader->SetInt("u_EnvironmentMap", 0);
 
-		// initialise render textures:
+		// Initialise render textures:
 		std::shared_ptr<RenderTexture> environmentMapRenderTexture = RenderTexture::Initialise();
 		environmentMapRenderTexture->SetTexture(Texture::Initialise(glm::ivec2(512, 512), Texture::MIMIC_CUBEMAP_TEXTURE_PARAMS, Texture::MIMIC_RGB16F, Texture::MIMIC_RGB));
 		std::shared_ptr<RenderTexture> irradianceRenderTexture = RenderTexture::Initialise();
 		irradianceRenderTexture->SetTexture(Texture::Initialise(glm::ivec2(32, 32), Texture::MIMIC_CUBEMAP_TEXTURE_PARAMS, Texture::MIMIC_RGB16F, Texture::MIMIC_RGB));
 		std::shared_ptr<RenderTexture> prefilteredMapRenderTexture = RenderTexture::Initialise();
-		prefilteredMapRenderTexture->SetTexture(Texture::Initialise(glm::ivec2(32, 32), Texture::MIMIC_CUBEMAP_TEXTURE_PARAMS, Texture::MIMIC_RGB16F, Texture::MIMIC_RGB));
+		prefilteredMapRenderTexture->SetTexture(Texture::Initialise(glm::ivec2(128, 128), Texture::MIMIC_PREFILTERED_CUBEMAP_TEXTURE_PARAMS, Texture::MIMIC_RGB16F, Texture::MIMIC_RGB));
 		std::shared_ptr<RenderTexture> brdfConvolutedRenderTexture = RenderTexture::Initialise();
 		brdfConvolutedRenderTexture->SetTexture(Texture::Initialise(glm::ivec2(512, 512), Texture::MIMIC_BRDF_TEXTURE_PARAMS, Texture::MIMIC_RG16F, Texture::MIMIC_RG));
 		
-		// initialise environment map:
+		// Environement Map: Convert a HDR 2D texture into a an equirectangular map, then capture that map and store
+		// the result in a cubemap.
 		std::function<void()> onDrawLambda = [&]()
 		{
 			equirectangularToCubemapShader->SetInt("u_EquirectangularMap", 1);
@@ -68,7 +70,10 @@ namespace MimicRender
 		};
 		CaptureCubeMap(onDrawLambda, equirectangularToCubemapShader, environmentMapRenderTexture, glm::ivec2(512, 512), renderer, captureProjection, captureViews);
 
-		// initialise irradiance map:
+		// Irradiance Map: Using Split Sum Approximation, the radiance integral is split into 2 parts (diffuse
+		// and specular). The diffuse section renders a bunch of sample points onto a pre-computed irradiance
+		// cube map. Each sample point averages the radiance of a large number of light directions over the
+		// hemisphere.
 		onDrawLambda = [&]()
 		{
 			convolutionShader->SetInt("u_EnvironmentMap", 1);
@@ -77,7 +82,8 @@ namespace MimicRender
 		};
 		CaptureCubeMap(onDrawLambda, convolutionShader, irradianceRenderTexture, glm::ivec2(32, 32), renderer, captureProjection, captureViews);
 
-		// initialise pre-filtered map:
+		// Pre-filtered Map: The specular part first convolutes roughness values (with the GGX Distribution 
+		// & importance sampling), storing different roughness values in map-map levels of a cubemap. 
 		prefilteredMapRenderTexture->Bind();
 		preFilteredShader->UseShader();
 		preFilteredShader->SetInt("u_EnvironmentMap", 1);
@@ -86,7 +92,7 @@ namespace MimicRender
 		glBindTexture(GL_TEXTURE_CUBE_MAP, environmentMapRenderTexture->_texture->_id);
 
 		constexpr int startTargetIndex = (int)TextureTarget::MIMIC_CUBE_MAP_POSITIVE_X;
-		constexpr unsigned int maxMipLevels = 5;
+		constexpr unsigned int maxMipLevels = 20;
 		for (unsigned int mip = 0; mip < maxMipLevels; mip++)
 		{
 			// resize framebuffer according to mip-level size:
@@ -108,7 +114,9 @@ namespace MimicRender
 		glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 		prefilteredMapRenderTexture->Unbind();
 
-		// initialise 2D BRDF roughness texture:
+		// BRDF Look-up Texture: Refactoring the specular integral lead to two input variables,
+		// Roughness and cosTheta angle). We pre-calculate the result of this function and store it
+		// in a 2D loop-up texture.
 		brdfConvolutedRenderTexture->UseRenderObject(glm::ivec2(512, 512));
 		brdfConvolutedRenderTexture->AttachTexture(TextureTarget::MIMIC_TEXTURE_2D, RenderTexture::MIMIC_DEPTH_AND_COLOR);
 		brdfConvolutionShader->UseShader();
@@ -118,7 +126,7 @@ namespace MimicRender
 
 		glViewport(0, 0, aspectRatio.x, aspectRatio.y);
 
-		// assign values:
+		// Cache values into the created struct:
 		environementMap->_irradianceRenderTexture = irradianceRenderTexture;
 		environementMap->_prefilteredMapRenderTexture = prefilteredMapRenderTexture;
 		environementMap->_brdfConvolutedRenderTexture = brdfConvolutedRenderTexture;

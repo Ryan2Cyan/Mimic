@@ -69,9 +69,8 @@ namespace MimicRender
 		MIMIC_LOG_INFO("[MimicRender::Window] Initialisation successful.");
 
 		glEnable(GL_DEPTH_TEST);
-		//glEnable(GL_BLEND);
-		//glBlendFunc(GL_ONE, GL_ONE);
 		glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+		glDepthFunc(GL_LEQUAL);
 
 		window->_aspectRatio = glm::ivec2(displayMode.w, displayMode.h);
 		window->_initialised = true;
