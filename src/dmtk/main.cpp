@@ -47,9 +47,9 @@ int main(int argc, char* argv[])
 		const std::shared_ptr<Shader> pbrShader = Shader::Initialise(fileLoader->LocateFileInDirectory(assetPath, "PBRShader.glsl"));
 		glm::vec3 albedo = glm::vec3(0.3f);
 		glm::vec3 emissive = glm::vec3(0.0f, 0.0f, 0.0f);
-		float metallic = 0.236f;
-		float roughness = 0.039f;
-		float ambientOcclusion = 0.307f;
+		float metallic = 0.5f;
+		float roughness = 0.5f;
+		float ambientOcclusion = 0.8f;
 		float alpha = 1.0f;
 
 		const std::shared_ptr<Shader> blinnPhongShader = Shader::Initialise(fileLoader->LocateFileInDirectory(assetPath, "BlinnPhongShader.glsl"));
@@ -85,24 +85,27 @@ int main(int argc, char* argv[])
 
 		// create camera:
 		std::shared_ptr<Camera> camera = Camera::Initialise(window->GetAspectRatio(), 45.0f);
-		camera->Position = glm::vec3(0.0, 1.355f, -9.180f);
-		camera->Orientation = glm::vec3(0.0, -0.756f, -3.0f);
+		camera->Position = glm::vec3(3.785, -0.541f, -5.937f);
+		camera->Orientation = glm::vec3(0.0, -0.080f, -3.0f);
 
 		// create models:
 		glm::vec3 rotation = glm::vec3(0.0f);
 		glm::vec3 position = glm::vec3(0.0f, 0.0f, -14.285f);
 		std::shared_ptr<Model> model = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "sphere.obj"));
+		std::shared_ptr<Model> model1 = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "sphere.obj"));
+		std::shared_ptr<Model> model2 = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "sphere.obj"));
+		std::shared_ptr<Model> model3 = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "sphere.obj"));
 		/*std::shared_ptr<Model> model1 = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "normal_rock_sphere.obj"));
 		std::shared_ptr<Model> model2 = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "normal_rock_sphere.obj"));
 		std::shared_ptr<Model> model3 = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "normal_rock_sphere.obj"));
 		std::shared_ptr<Model> ground = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "cube.obj"));*/
 		std::shared_ptr<Model> wall1 = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "cube.obj"));
-		glm::vec3 wallPos = glm::vec3(0.0f, -1.5f, -50.0f);
+		glm::vec3 wallPos = glm::vec3(0.0f, -1.53f, -50.0f);
 		glm::vec3 wallRot = glm::vec3(0.0f);
-		glm::vec3 wallScale = glm::vec3(43.45f, -0.595f, 50.0f);
+		glm::vec3 wallScale = glm::vec3(43.45f, -0.5f, 50.0f);
 		std::shared_ptr<Model> lightModel = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "normal_rock_sphere.obj"));
 
-		const std::vector<std::shared_ptr<Model>> sceneModels = { model, wall1/*, model1, model2, wall1*/ };
+		const std::vector<std::shared_ptr<Model>> sceneModels = { model, model1, model2, model3, wall1/*, model1, model2, wall1*/ };
 
 		// create textures:
 		std::shared_ptr<Texture> albedoTexture;
@@ -110,7 +113,28 @@ int main(int argc, char* argv[])
 		std::shared_ptr<Texture> roughnessTexture;
 		std::shared_ptr<Texture> metallicTexture;
 
-		std::shared_ptr<Texture> sphereNormalTexture = Texture::Initialise(fileLoader->LocateFileInDirectory(assetPath, "Metal046B_1K-PNG_NormalGL.png"), window->GetAspectRatio(), Texture::MIMIC_2D_TEXTURE_PARAMS, TextureType::MIMIC_NORMAL);
+		std::shared_ptr<Texture> marbleAlbedoTexture = Texture::Initialise(fileLoader->LocateFileInDirectory(assetPath, "Marble016_1K-PNG_Color.png"), window->GetAspectRatio(), Texture::MIMIC_2D_TEXTURE_PARAMS, TextureType::MIMIC_ALBEDO);
+		std::shared_ptr<Texture> marbleNormalTexture = Texture::Initialise(fileLoader->LocateFileInDirectory(assetPath, "Marble016_1K-PNG_NormalGL.png"), window->GetAspectRatio(), Texture::MIMIC_2D_TEXTURE_PARAMS, TextureType::MIMIC_NORMAL);
+		std::shared_ptr<Texture> marbleRoughnessTexture = Texture::Initialise(fileLoader->LocateFileInDirectory(assetPath, "Marble016_1K-PNG_Roughness.png"), window->GetAspectRatio(), Texture::MIMIC_2D_TEXTURE_PARAMS, TextureType::MIMIC_ROUGHNESS);
+		
+		std::shared_ptr<Texture> foilAlbedoTexture = Texture::Initialise(fileLoader->LocateFileInDirectory(assetPath, "Foil002_1K-PNG_Color.png"), window->GetAspectRatio(), Texture::MIMIC_2D_TEXTURE_PARAMS, TextureType::MIMIC_ALBEDO);
+		std::shared_ptr<Texture> foilNormalTexture = Texture::Initialise(fileLoader->LocateFileInDirectory(assetPath, "Foil002_1K-PNG_NormalGL.png"), window->GetAspectRatio(), Texture::MIMIC_2D_TEXTURE_PARAMS, TextureType::MIMIC_NORMAL);
+		std::shared_ptr<Texture> foilRoughnessTexture = Texture::Initialise(fileLoader->LocateFileInDirectory(assetPath, "Foil002_1K-PNG_Roughness.png"), window->GetAspectRatio(), Texture::MIMIC_2D_TEXTURE_PARAMS, TextureType::MIMIC_ROUGHNESS);
+		std::shared_ptr<Texture> foilMetallicTexture = Texture::Initialise(fileLoader->LocateFileInDirectory(assetPath, "Foil002_1K-PNG_Metalness.png"), window->GetAspectRatio(), Texture::MIMIC_2D_TEXTURE_PARAMS, TextureType::MIMIC_METALLIC);
+
+		std::shared_ptr<Texture> brickAlbedoTexture = Texture::Initialise(fileLoader->LocateFileInDirectory(assetPath, "Bricks084_1K-PNG_Color.png"), window->GetAspectRatio(), Texture::MIMIC_2D_TEXTURE_PARAMS, TextureType::MIMIC_ALBEDO);
+		std::shared_ptr<Texture> brickNormalTexture = Texture::Initialise(fileLoader->LocateFileInDirectory(assetPath, "Bricks084_1K-PNG_NormalGL.png"), window->GetAspectRatio(), Texture::MIMIC_2D_TEXTURE_PARAMS, TextureType::MIMIC_NORMAL);
+		std::shared_ptr<Texture> brickRoughnessTexture = Texture::Initialise(fileLoader->LocateFileInDirectory(assetPath, "Bricks084_1K-PNG_Roughness.png"), window->GetAspectRatio(), Texture::MIMIC_2D_TEXTURE_PARAMS, TextureType::MIMIC_ROUGHNESS);
+
+		std::shared_ptr<Texture> barkAlbedoTexture = Texture::Initialise(fileLoader->LocateFileInDirectory(assetPath, "Bark012_1K-PNG_Color.png"), window->GetAspectRatio(), Texture::MIMIC_2D_TEXTURE_PARAMS, TextureType::MIMIC_ALBEDO);
+		std::shared_ptr<Texture> barkNormalTexture = Texture::Initialise(fileLoader->LocateFileInDirectory(assetPath, "Bark012_1K-PNG_NormalGL.png"), window->GetAspectRatio(), Texture::MIMIC_2D_TEXTURE_PARAMS, TextureType::MIMIC_NORMAL);
+		std::shared_ptr<Texture> barkRoughnessTexture = Texture::Initialise(fileLoader->LocateFileInDirectory(assetPath, "Bark012_1K-PNG_Roughness.png"), window->GetAspectRatio(), Texture::MIMIC_2D_TEXTURE_PARAMS, TextureType::MIMIC_ROUGHNESS);
+		// std::shared_ptr<Texture> marbleMetallicTexture = Texture::Initialise(fileLoader->LocateFileInDirectory(assetPath, "rustediron2_metallic.png"), window->GetAspectRatio(), Texture::MIMIC_2D_TEXTURE_PARAMS, TextureType::MIMIC_METALLIC);
+		/*albedoTexture = Texture::Initialise(fileLoader->LocateFileInDirectory(assetPath, "rustediron2_basecolor.png"), window->GetAspectRatio(), Texture::MIMIC_2D_TEXTURE_PARAMS, TextureType::MIMIC_ALBEDO);
+		normalTexture = Texture::Initialise(fileLoader->LocateFileInDirectory(assetPath, "rustediron2_normal.png"), window->GetAspectRatio(), Texture::MIMIC_2D_TEXTURE_PARAMS, TextureType::MIMIC_NORMAL);
+		roughnessTexture = Texture::Initialise(fileLoader->LocateFileInDirectory(assetPath, "rustediron2_roughness.png"), window->GetAspectRatio(), Texture::MIMIC_2D_TEXTURE_PARAMS, TextureType::MIMIC_ROUGHNESS);
+		metallicTexture = Texture::Initialise(fileLoader->LocateFileInDirectory(assetPath, "rustediron2_metallic.png"), window->GetAspectRatio(), Texture::MIMIC_2D_TEXTURE_PARAMS, TextureType::MIMIC_METALLIC);*/
+		// std::shared_ptr<Texture> sphereNormalTexture = Texture::Initialise(fileLoader->LocateFileInDirectory(assetPath, "Metal046B_1K-PNG_NormalGL.png"), window->GetAspectRatio(), Texture::MIMIC_2D_TEXTURE_PARAMS, TextureType::MIMIC_NORMAL);
 		// std::shared_ptr<Texture> groundAlbedoTexture = Texture::Initialise(fileLoader->LocateFileInDirectory(assetPath, "Metal046B_1K-PNG_Metalness.png"), window->GetAspectRatio(), Texture::MIMIC_2D_TEXTURE_PARAMS, TextureType::MIMIC_ALBEDO);
 
 		// load lights:
@@ -119,7 +143,7 @@ int main(int argc, char* argv[])
 		int numDirectLights = 1;
 		for (size_t i = 0; i < numDirectLights; i++)
 		{
-			directLights.push_back(DirectLight::Initialise(glm::vec3(2.72f, 0.926f, -5.0f), glm::vec3(-1.0f, -1.0f, -0.246f), glm::vec3(100.0f)));
+			directLights.push_back(DirectLight::Initialise(glm::vec3(2.72f, 8.8f, -5.8f), glm::vec3(-0.24f, -1.0f, -0.246f), glm::vec3(100.0f)));
 		}
 
 		std::vector<std::shared_ptr<PointLight>> pointLights =
@@ -219,10 +243,40 @@ int main(int argc, char* argv[])
 			pbrShader->SetInt("u_PointLightsCount", pointLights.size());
 		};
 
-		std::function<void()> modelPBROnDrawLamba = [&]()
+		std::function<void()> modelPBROnDrawLamba1 = [&]()
 		{
-			// albedoTexture = nullptr;
-			normalTexture = sphereNormalTexture;
+			albedoTexture = barkAlbedoTexture;
+			normalTexture = barkNormalTexture;
+			roughnessTexture = barkRoughnessTexture;
+			metallicTexture = nullptr;
+			metallic = 0.5f;
+			pbrOnDrawLamba();
+		};
+		std::function<void()> modelPBROnDrawLamba2 = [&]()
+		{
+			albedoTexture = brickAlbedoTexture;
+			normalTexture = brickNormalTexture;
+			roughnessTexture = brickRoughnessTexture;
+			metallicTexture = nullptr;
+			metallic = 0.5f;
+			pbrOnDrawLamba();
+		};
+		std::function<void()> modelPBROnDrawLamba3 = [&]()
+		{
+			albedoTexture = foilAlbedoTexture;
+			normalTexture = foilNormalTexture;
+			roughnessTexture = foilRoughnessTexture;
+			metallicTexture = foilMetallicTexture;
+			metallic = 0.5f;
+			pbrOnDrawLamba();
+		};
+		std::function<void()> modelPBROnDrawLamba4 = [&]()
+		{
+			albedoTexture = marbleAlbedoTexture;
+			normalTexture = marbleNormalTexture;
+			roughnessTexture = marbleRoughnessTexture;
+			metallicTexture = nullptr;
+			metallic = 0.99f;
 			pbrOnDrawLamba();
 		};
 
@@ -230,7 +284,7 @@ int main(int argc, char* argv[])
 		{
 			albedo = glm::vec3(0.6f);
 			// albedoTexture = groundAlbedoTexture;
-			normalTexture = nullptr;
+			// normalTexture = nullptr;
 			pbrOnDrawLamba();
 		};
 
@@ -317,11 +371,11 @@ int main(int argc, char* argv[])
 			// #############################################################################
 
 			camera->Update();
-			model->UpdateModelMatrix(position, rotation, glm::vec3(1.0f));
-			// model1->UpdateModelMatrix(glm::vec3(-2.5f, 0.0f, -4.0f), rotation, glm::vec3(1.0f));
-			// model2->UpdateModelMatrix(glm::vec3(2.5f, 0.0f, -4.0f), rotation, glm::vec3(1.0f));
-			// model3->UpdateModelMatrix(glm::vec3(2.5f, 1.0f, -4.0f), rotation, glm::vec3(1.0f));
-			wall1->UpdateModelMatrix(wallPos, wallRot, wallScale);
+			model->UpdateModelMatrix(glm::vec3(0.0f, 0.0f, -14.0f), rotation, glm::vec3(1.0f));
+			model1->UpdateModelMatrix(glm::vec3(2.5f, 0.0f, -14.0f), rotation, glm::vec3(1.0f));
+		    model2->UpdateModelMatrix(glm::vec3(5.0f, 0.0f, -14.0f), rotation, glm::vec3(1.0f));
+			model3->UpdateModelMatrix(glm::vec3(7.5f, 0.0f, -14.0f), rotation, glm::vec3(1.0f));
+			// wall1->UpdateModelMatrix(wallPos, wallRot, wallScale);
 			lightModel->UpdateModelMatrix(directLights[0]->Position, rotation, glm::vec3(0.2f));
 
 			// #############################################################################
@@ -336,8 +390,11 @@ int main(int argc, char* argv[])
 				shadowMapper->RenderDirectLightDepthMaps(sceneModels, directLights, renderer);
 
 				// send meshes to renderer:
-				model->QueMeshesToDraw(pbrShader, pbrOnDrawLamba, renderer);
-				wall1->QueMeshesToDraw(blinnPhongShader, wallBPOnDrawLamba, renderer);
+				model->QueMeshesToDraw(pbrShader, modelPBROnDrawLamba1, renderer);
+				model1->QueMeshesToDraw(pbrShader, modelPBROnDrawLamba2, renderer);
+				model2->QueMeshesToDraw(pbrShader, modelPBROnDrawLamba3, renderer);
+				model3->QueMeshesToDraw(pbrShader, modelPBROnDrawLamba4, renderer);
+				// wall1->QueMeshesToDraw(blinnPhongShader, wallBPOnDrawLamba, renderer);
 
 				// draw:
 				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -365,7 +422,7 @@ int main(int argc, char* argv[])
 			ImGui::End();*/
 
 			ImGui::Begin("Direct Light");
-			ImGui::SliderFloat3("Position##dl1", &(directLights[0]->Position[0]), -5.0f, 5.0f);
+			ImGui::SliderFloat3("Position##dl1", &(directLights[0]->Position[0]), -30.0f, 30.0f);
 			ImGui::SliderFloat3("Direction##dl2", &(directLights[0]->Direction[0]), -1.0f, 1.0f);
 			ImGui::SliderFloat3("Colour##dl3", &(directLights[0]->Colour[0]), 0.0f, 100.0f);
 			ImGui::End();

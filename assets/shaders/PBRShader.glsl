@@ -282,7 +282,7 @@ void main()
 	// Material Properties.
 	const float roughness = RoughnessMode();
 	const float metallic = MetallicMode();
-	const vec3 albedo = mix(AlbedoMode(), vec3(0.0), metallic);
+	const vec3 albedo = AlbedoMode();
 
 	// Surface Reflection at Zero Incidence: How much the surface reflects light when looking directly at it
 	// along the surface normal. This is exclusively pre-computed for FresnelSchlick computation. For non-metallic
