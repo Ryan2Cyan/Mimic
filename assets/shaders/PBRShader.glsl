@@ -352,5 +352,5 @@ void main()
 	vec3 colour = ambient + Lo;
 	colour = colour / (colour + vec3(1.0));
 	colour = pow(colour, vec3(1.0 / 2.2));
-	FragColour = vec4( u_Emissive + colour, u_Alpha );
+	FragColour = vec4( u_Emissive + colour + vec3(0.1), u_Alpha );
 }
