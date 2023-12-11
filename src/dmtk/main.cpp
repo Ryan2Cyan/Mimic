@@ -91,7 +91,7 @@ int main(int argc, char* argv[])
 		// create models:
 		glm::vec3 rotation = glm::vec3(0.0f);
 		glm::vec3 position = glm::vec3(0.0f, 0.0f, -14.285f);
-		std::shared_ptr<Model> model = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "sphere.obj"));
+		std::shared_ptr<Model> model = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "cube.obj"));
 		// std::shared_ptr<Model> model1 = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "sphere.obj"));
 		//std::shared_ptr<Model> model2 = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "sphere.obj"));
 		// std::shared_ptr<Model> model3 = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "stanford-bunny.fbx"));
@@ -140,7 +140,7 @@ int main(int argc, char* argv[])
 		// load lights:
 		std::vector<std::shared_ptr<DirectLight>> directLights;
 
-		int numDirectLights = 25;
+		int numDirectLights = 1;
 		for (size_t i = 0; i < numDirectLights; i++)
 		{
 			directLights.push_back(DirectLight::Initialise(glm::vec3(2.72f, 8.8f, -5.8f), glm::vec3(-0.24f, -1.0f, -0.246f), glm::vec3(100.0f)));
@@ -371,7 +371,7 @@ int main(int argc, char* argv[])
 			// #############################################################################
 
 			camera->Update();
-			model->UpdateModelMatrix(glm::vec3(0.0f, 0.0f, -14.0f), rotation, glm::vec3(1.0f));
+			model->UpdateModelMatrix(position, rotation, glm::vec3(1.0f));
 			// model1->UpdateModelMatrix(glm::vec3(2.5f, 0.0f, -14.0f), rotation, glm::vec3(1.0f));
 		    // model2->UpdateModelMatrix(glm::vec3(5.0f, 0.0f, -14.0f), rotation, glm::vec3(1.0f));
 			// model3->UpdateModelMatrix(glm::vec3(7.5f, 0.0f, -14.0f), rotation, glm::vec3(0.01f));
@@ -392,7 +392,7 @@ int main(int argc, char* argv[])
 					shadowMapper->RenderDirectLightDepthMaps(sceneModels, directLights, renderer);
 				}
 				// send meshes to renderer:
-				model->QueMeshesToDraw(pbrShader, pbrOnDrawLamba, renderer);
+				model->QueMeshesToDraw(pbrShader, modelPBROnDrawLamba4, renderer);
 				// model1->QueMeshesToDraw(pbrShader, modelPBROnDrawLamba2, renderer);
 				// model2->QueMeshesToDraw(pbrShader, modelPBROnDrawLamba3, renderer);
 				// model3->QueMeshesToDraw(pbrShader, modelPBROnDrawLamba4, renderer);
@@ -414,7 +414,7 @@ int main(int argc, char* argv[])
 			ImGui::NewFrame();
 
 			// display depth maps:
-			// ImGui::Image((void*)directLights[0]->GetDepthMapTextureId(), ImVec2(800, 800));
+			ImGui::Image((void*)directLights[0]->GetDepthMapTextureId(), ImVec2(200, 200));
 			// ImGui::Image((void*)directLights[1]->GetDepthMapTextureId(), ImVec2(800, 800));
 
 			// light controls:

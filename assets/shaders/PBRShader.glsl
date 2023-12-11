@@ -131,7 +131,8 @@ const float ShadowCalculation(const vec4 lightSpacePos, const vec3 lightDir, con
 	const float currentDepth = projectedCoords.z;
 	const float shadowBias = max(0.05 * (1.0 - dot(normal, lightDir)), 0.005);
 
-	// percentage-closer filtering to create the illusion of higher resolution shadows:
+	// Percentage-Closer Filtering: Creates the illusion of higher resolution shadows, and softens
+	// the edges of shadows.
 	float shadow = 0.0;
 	const vec2 texelSize = 1.0 / textureSize(shadowMap, 0);
 	for(int x = -1; x <= 1; x++)
