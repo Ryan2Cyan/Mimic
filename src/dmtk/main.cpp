@@ -41,7 +41,7 @@ int main(int argc, char* argv[])
 		std::shared_ptr<Renderer> renderer = Renderer::Initialise();
 
 		// initialise shadow mapper:
-		std::shared_ptr<ShadowMapper> shadowMapper = ShadowMapper::Initialise(glm::ivec2(8192, 8192));
+		std::shared_ptr<ShadowMapper> shadowMapper = ShadowMapper::Initialise(glm::ivec2(4096, 4096));
 
 		// initialise shaders:
 		const std::shared_ptr<Shader> pbrShader = Shader::Initialise(fileLoader->LocateFileInDirectory(assetPath, "PBRShader.glsl"));
@@ -85,16 +85,16 @@ int main(int argc, char* argv[])
 
 		// create camera:
 		std::shared_ptr<Camera> camera = Camera::Initialise(window->GetAspectRatio(), 45.0f);
-		camera->Position = glm::vec3(3.785, -0.541f, -5.937f);
-		camera->Orientation = glm::vec3(0.0, -0.080f, -3.0f);
+		camera->Position = glm::vec3(0.0f, 0.54f, -5.937f);
+		camera->Orientation = glm::vec3(0.0, -0.49f, -3.0f);
 
 		// create models:
 		glm::vec3 rotation = glm::vec3(0.0f);
 		glm::vec3 position = glm::vec3(0.0f, 0.0f, -14.285f);
 		std::shared_ptr<Model> model = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "sphere.obj"));
-		std::shared_ptr<Model> model1 = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "sphere.obj"));
-		std::shared_ptr<Model> model2 = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "sphere.obj"));
-		std::shared_ptr<Model> model3 = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "sphere.obj"));
+		// std::shared_ptr<Model> model1 = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "sphere.obj"));
+		//std::shared_ptr<Model> model2 = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "sphere.obj"));
+		// std::shared_ptr<Model> model3 = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "stanford-bunny.fbx"));
 		/*std::shared_ptr<Model> model1 = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "normal_rock_sphere.obj"));
 		std::shared_ptr<Model> model2 = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "normal_rock_sphere.obj"));
 		std::shared_ptr<Model> model3 = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "normal_rock_sphere.obj"));
@@ -105,7 +105,7 @@ int main(int argc, char* argv[])
 		glm::vec3 wallScale = glm::vec3(43.45f, -0.5f, 50.0f);
 		std::shared_ptr<Model> lightModel = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "normal_rock_sphere.obj"));
 
-		const std::vector<std::shared_ptr<Model>> sceneModels = { model, model1, model2, model3, wall1/*, model1, model2, wall1*/ };
+		const std::vector<std::shared_ptr<Model>> sceneModels = { model, wall1/*, model1, model2, wall1*/ };
 
 		// create textures:
 		std::shared_ptr<Texture> albedoTexture;
@@ -140,7 +140,7 @@ int main(int argc, char* argv[])
 		// load lights:
 		std::vector<std::shared_ptr<DirectLight>> directLights;
 
-		int numDirectLights = 1;
+		int numDirectLights = 25;
 		for (size_t i = 0; i < numDirectLights; i++)
 		{
 			directLights.push_back(DirectLight::Initialise(glm::vec3(2.72f, 8.8f, -5.8f), glm::vec3(-0.24f, -1.0f, -0.246f), glm::vec3(100.0f)));
@@ -272,9 +272,9 @@ int main(int argc, char* argv[])
 		};
 		std::function<void()> modelPBROnDrawLamba4 = [&]()
 		{
-			albedoTexture = marbleAlbedoTexture;
+			// albedoTexture = marbleAlbedoTexture;
 			normalTexture = marbleNormalTexture;
-			roughnessTexture = marbleRoughnessTexture;
+			// roughnessTexture = marbleRoughnessTexture;
 			metallicTexture = nullptr;
 			metallic = 0.99f;
 			pbrOnDrawLamba();
@@ -372,10 +372,10 @@ int main(int argc, char* argv[])
 
 			camera->Update();
 			model->UpdateModelMatrix(glm::vec3(0.0f, 0.0f, -14.0f), rotation, glm::vec3(1.0f));
-			model1->UpdateModelMatrix(glm::vec3(2.5f, 0.0f, -14.0f), rotation, glm::vec3(1.0f));
-		    model2->UpdateModelMatrix(glm::vec3(5.0f, 0.0f, -14.0f), rotation, glm::vec3(1.0f));
-			model3->UpdateModelMatrix(glm::vec3(7.5f, 0.0f, -14.0f), rotation, glm::vec3(1.0f));
-			// wall1->UpdateModelMatrix(wallPos, wallRot, wallScale);
+			// model1->UpdateModelMatrix(glm::vec3(2.5f, 0.0f, -14.0f), rotation, glm::vec3(1.0f));
+		    // model2->UpdateModelMatrix(glm::vec3(5.0f, 0.0f, -14.0f), rotation, glm::vec3(1.0f));
+			// model3->UpdateModelMatrix(glm::vec3(7.5f, 0.0f, -14.0f), rotation, glm::vec3(0.01f));
+			wall1->UpdateModelMatrix(wallPos, wallRot, wallScale);
 			lightModel->UpdateModelMatrix(directLights[0]->Position, rotation, glm::vec3(0.2f));
 
 			// #############################################################################
@@ -386,15 +386,17 @@ int main(int argc, char* argv[])
 				glClearColor(0.77f, 0.73f, 0.97f, 1.0f);
 				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-				// update shadow maps:
-				shadowMapper->RenderDirectLightDepthMaps(sceneModels, directLights, renderer);
-
+				{
+					// update shadow maps:
+					MIMIC_PROFILE_SCOPE("Render Depth Maps");
+					shadowMapper->RenderDirectLightDepthMaps(sceneModels, directLights, renderer);
+				}
 				// send meshes to renderer:
-				model->QueMeshesToDraw(pbrShader, modelPBROnDrawLamba1, renderer);
-				model1->QueMeshesToDraw(pbrShader, modelPBROnDrawLamba2, renderer);
-				model2->QueMeshesToDraw(pbrShader, modelPBROnDrawLamba3, renderer);
-				model3->QueMeshesToDraw(pbrShader, modelPBROnDrawLamba4, renderer);
-				// wall1->QueMeshesToDraw(blinnPhongShader, wallBPOnDrawLamba, renderer);
+				model->QueMeshesToDraw(pbrShader, pbrOnDrawLamba, renderer);
+				// model1->QueMeshesToDraw(pbrShader, modelPBROnDrawLamba2, renderer);
+				// model2->QueMeshesToDraw(pbrShader, modelPBROnDrawLamba3, renderer);
+				// model3->QueMeshesToDraw(pbrShader, modelPBROnDrawLamba4, renderer);
+				wall1->QueMeshesToDraw(blinnPhongShader, wallBPOnDrawLamba, renderer);
 
 				// draw:
 				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -412,7 +414,7 @@ int main(int argc, char* argv[])
 			ImGui::NewFrame();
 
 			// display depth maps:
-			ImGui::Image((void*)directLights[0]->GetDepthMapTextureId(), ImVec2(800, 800));
+			// ImGui::Image((void*)directLights[0]->GetDepthMapTextureId(), ImVec2(800, 800));
 			// ImGui::Image((void*)directLights[1]->GetDepthMapTextureId(), ImVec2(800, 800));
 
 			// light controls:
