@@ -66,7 +66,7 @@ uniform sampler2D u_DirectShadowMaps[20];
 
 out vec4 fragColour;
 
-const float ShadowCalculation(const vec4 lightSpacePos, const vec3 lightDir, const sampler2D shadowMap, const vec3 normal)
+float ShadowCalculation(const vec4 lightSpacePos, const vec3 lightDir, const sampler2D shadowMap, const vec3 normal)
 {
 	vec3 projectedCoords = (lightSpacePos.xyz / lightSpacePos.w) * 0.5 + 0.5;
 	if(projectedCoords.z > 1.0) return 0.0;

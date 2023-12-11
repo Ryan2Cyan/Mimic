@@ -122,7 +122,7 @@ out vec4 FragColour;
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // calculate directional shadow map:
-const float ShadowCalculation(const vec4 lightSpacePos, const vec3 lightDir, const sampler2D shadowMap, const vec3 normal)
+float ShadowCalculation(const vec4 lightSpacePos, const vec3 lightDir, const sampler2D shadowMap, const vec3 normal)
 {
 	vec3 projectedCoords = (lightSpacePos.xyz / lightSpacePos.w) * 0.5 + 0.5;
 	if(projectedCoords.z > 1.0) return 0.0;
@@ -148,7 +148,7 @@ const float ShadowCalculation(const vec4 lightSpacePos, const vec3 lightDir, con
 
 // Normal Distribution Function (GGX/Trowbridge-Reitz): Approximates general value for surface's microfacets 
 // that align to the halfway vector, influenced by the surface's roughness.
-const float DistrubutionGGX(const in vec3 N, const in vec3 H, const in float a)
+float DistrubutionGGX(const in vec3 N, const in vec3 H, const in float a)
 {
 	float aPow2 = a * a;
 	float NdotH = max(dot(N, H), 0.0);
@@ -159,37 +159,37 @@ const float DistrubutionGGX(const in vec3 N, const in vec3 H, const in float a)
 }
 
 // Fresnel Schlick Approximation: Calculates the contribution of the Fresnel factor to specular reflection.
-const vec3 FresnelSchlick(const in float cosTheta, const in vec3 F0)
+vec3 FresnelSchlick(const in float cosTheta, const in vec3 F0)
 {
 	return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
 }
 
-const vec3 FresnelSchlickRoughness(const float cosTheta, const vec3 baseReflectivity, const float roughness)
+vec3 FresnelSchlickRoughness(const float cosTheta, const vec3 baseReflectivity, const float roughness)
 {
     return baseReflectivity + (max(vec3(1.0 - roughness), baseReflectivity) - baseReflectivity) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
 }  
 
 // roughness remapper (Used in Schlick-GGX):
-const float SchlickGGXRoughnessRemapperDirect(const in float a)
+float SchlickGGXRoughnessRemapperDirect(const in float a)
 { 
 	return pow((a + 1), 2.0) / 8.0; 
 }
 
-const float SchlickGGXRoughnessRemapperIBL(const in float a) 
+float SchlickGGXRoughnessRemapperIBL(const in float a) 
 { 
 	return (a * a) / 2.0; 
 }
 
 // Schlick-GGX: Calculates general value (based on roughness) for how much self-shadowing occurs on the
 // surface's microfacets.
-const float GeometrySchlickGGX(const in float NdotV, const in float k)
+float GeometrySchlickGGX(const in float NdotV, const in float k)
 {
 	return NdotV / (NdotV * (1.0 - k) + k);
 }
 
 // Smith: Geometric shadowing model, breaks the formula into two parts (light and view), using Schlick-GGX to
 // calculate both sub-components.
-const float GeometrySmith(const in vec3 N, const in vec3 V, const in vec3 L, const in float k)
+float GeometrySmith(const in vec3 N, const in vec3 V, const in vec3 L, const in float k)
 {
 	float NdotV = max(dot(N, V), 0.0);
 	float NdotL = max(dot(N, L), 0.0);
@@ -200,7 +200,7 @@ const float GeometrySmith(const in vec3 N, const in vec3 V, const in vec3 L, con
 
 // Cook-Torrance microfacet specular shading model: Calculates approximation of the light's outputted radiance, based on 
 // the surface's material properties: 
-const vec3 CookTorranceBRDF(const vec3 N, const vec3 H, const vec3 F0, const vec3 V, const vec3 Wi, const vec3 Li, const vec3 albedo, const float k, const float a, const float metallic, const int i)
+vec3 CookTorranceBRDF(const vec3 N, const vec3 H, const vec3 F0, const vec3 V, const vec3 Wi, const vec3 Li, const vec3 albedo, const float k, const float a, const float metallic, const int i, const sampler2D shadowMap)
 {
 	// Cook-Torrence BRDF: Calculates the specular component.
 	const vec3 F = FresnelSchlick(max(dot(H, N), 0.0), F0);
@@ -221,7 +221,7 @@ const vec3 CookTorranceBRDF(const vec3 N, const vec3 H, const vec3 F0, const vec
 	const vec3 specular = kS * ((F * G * D) / 4.0f * max(dot(N, V), 0.0) * cosTheta + 0.0001);
 	
 	// calculate shadows:
-	float shadow = ShadowCalculation(directionalLightSpacePositions[i], Wi, u_DirectShadowMaps[i], N);
+	float shadow = ShadowCalculation(directionalLightSpacePositions[i], Wi, shadowMap, N);
 
 	// Reflectance Equation: Factoring in Lambertian Diffusion (diffuse/Kd), the Cook-Torrance BRDF (specular/Ks) and the 
 	// light's spectral radiance (Li).
@@ -310,7 +310,7 @@ void main()
 		const float k = SchlickGGXRoughnessRemapperDirect(roughness);                
 
 		// Add returned radiance to the total irradiance.
-		Lo += CookTorranceBRDF(N, H, F0, V, Wi, Li, albedo, k, roughness, metallic, i);
+		Lo += CookTorranceBRDF(N, H, F0, V, Wi, Li, albedo, k, roughness, metallic, i, u_DirectShadowMaps[i]);
 	}
 
 	// sum radiance for all point lights:
@@ -330,7 +330,7 @@ void main()
 		const float k = SchlickGGXRoughnessRemapperDirect(roughness);  
 
 		// Add returned radiance to the total irradiance.
-		Lo += CookTorranceBRDF(N, H, F0, V, Wi, Li, albedo, k, roughness, metallic, i);
+		Lo += CookTorranceBRDF(N, H, F0, V, Wi, Li, albedo, k, roughness, metallic, i, u_DirectShadowMaps[i]); // add point light shadow maps
 	}
 
 	// Calculate ambient light:
