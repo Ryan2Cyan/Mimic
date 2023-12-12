@@ -11,23 +11,23 @@ namespace MimicRender
 	// #############################################################################
 	struct Camera
 	{
-		static const std::shared_ptr<Camera> Initialise(const glm::vec2& aspectRatio, const float& fov);
+		static std::shared_ptr<Camera> Initialise(const glm::vec2& aspectRatio, const float& fov, const glm::vec2& clippingPlane = glm::vec2(0.1f, 100.0f));
+
+		/// <summary>
+		/// Re-calculates the camera's view and projection matrices based on it's current orientation and position.
+		/// </summary>
 		void Update();
 
 		glm::vec3 Position;
-		glm::vec3 Right;
-		glm::vec3 Up;
-		glm::vec3 Direction; // needs to be reversed.
-		glm::vec3 Orientation; // needs to be reversed.
-		glm::vec3 Target;
+		glm::vec3 Orientation;
 		glm::vec2 AspectRatio;
 		glm::vec2 ClippingPlane;
 		float Fov;
-		glm::mat4 _projectionMatrix;
-		glm::mat4 _viewMatrix;
+		
 	private:
 		friend struct Renderer;
-
-	
+		glm::vec3 _up;
+		glm::mat4 _projectionMatrix;
+		glm::mat4 _viewMatrix;
 	};
 }

@@ -22,8 +22,12 @@
 using namespace MimicUtil;
 using namespace MimicRender;
 
+// Temporary structs that'll be intergrated into the engine proper during GEP implementaion:
 struct Transform 
 {
+	explicit Transform(const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& scale)
+		: Position(position), Rotation(rotation), Scale(scale) { }
+
 	glm::vec3 Position;
 	glm::vec3 Rotation;
 	glm::vec3 Scale;
@@ -43,11 +47,12 @@ int main(int argc, char* argv[])
 		// Initialise renderer:
 		std::shared_ptr<Renderer> renderer = Renderer::Initialise();
 
-		// initialise shadow mapper:
+		// Initialise shadow mapper, specifying the resolution of the depth maps it'll produce:
 		std::shared_ptr<ShadowMapper> shadowMapper = ShadowMapper::Initialise(glm::ivec2(4096, 4096));
 
-		// initialise shaders:
+		// Initialise shaders:
 		const std::shared_ptr<Shader> pbrShader = Shader::Initialise(fileLoader->LocateFileInDirectory(assetPath, "PBRShader.glsl"));
+		// Physically-based rendering material parameters:
 		glm::vec3 albedo = glm::vec3(0.3f);
 		glm::vec3 emissive = glm::vec3(0.0f, 0.0f, 0.0f);
 		float metallic = 0.5f;
@@ -56,13 +61,16 @@ int main(int argc, char* argv[])
 		float alpha = 1.0f;
 
 		const std::shared_ptr<Shader> blinnPhongShader = Shader::Initialise(fileLoader->LocateFileInDirectory(assetPath, "BlinnPhongShader.glsl"));
+		// Blinn phong material parameters:
 		glm::vec3 objectColour = glm::vec3(0.8f);
 		glm::vec3 lightColour = glm::vec3(0.3f, 0.3f, 0.3f);
 		float ambientStrength = 0.227f;
 		float specularStrength = 0.5f;
 		float shininess = 32.0f;
 
+
 		const std::shared_ptr<Shader> flatColourShader = Shader::Initialise(fileLoader->LocateFileInDirectory(assetPath, "FlatColourShader.glsl"));
+		// Flat colour material parameters:
 		constexpr glm::vec3 flatColour = glm::vec3(1.0f);
 
 
@@ -108,24 +116,23 @@ int main(int argc, char* argv[])
 			metallicManual = pbrShader->GetSubroutineIndex(GL_FRAGMENT_SHADER, "CalculateMetallicManual");
 		}
 
-		// create camera:
+		// Initialise camera:
 		std::shared_ptr<Camera> camera = Camera::Initialise(window->GetAspectRatio(), 45.0f);
 		camera->Position = glm::vec3(0.0f, 0.54f, -5.937f);
 		camera->Orientation = glm::vec3(0.0, -0.49f, -3.0f);
 
-		// create models:
-		glm::vec3 rotation = glm::vec3(0.0f);
-		glm::vec3 position = glm::vec3(0.0f, 0.0f, -14.285f);
-		std::shared_ptr<Model> model = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "stanford-bunny.fbx"));
-		std::shared_ptr<Model> wall1 = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "cube.obj"));
-		glm::vec3 wallPos = glm::vec3(0.0f, -1.53f, -50.0f);
-		glm::vec3 wallRot = glm::vec3(0.0f);
-		glm::vec3 wallScale = glm::vec3(43.45f, -0.5f, 50.0f);
+		// Initialise scene models:
+		std::shared_ptr<Model> stanfordBunnyModel = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "stanford-bunny.fbx"));
+		Transform stanfordBunnyTransform = Transform(glm::vec3(0.0f, 0.0f, -14.3f), glm::vec3(0.0f), glm::vec3(0.01f));
+
+		std::shared_ptr<Model> wallModel = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "cube.obj"));
+		Transform wallTransform = Transform(glm::vec3(0.0f, -1.5f, -50.0f), glm::vec3(0.0f), glm::vec3(43.45f, -0.5f, 50.0f));
+
 		std::shared_ptr<Model> lightModel = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "normal_rock_sphere.obj"));
 
-		const std::vector<std::shared_ptr<Model>> sceneModels = { model, wall1 };
+		const std::vector<std::shared_ptr<Model>> modelsForShadowMapping = { stanfordBunnyModel, wallModel };
 
-		// create textures:
+		// Load textures:
 		std::shared_ptr<Texture> albedoTexture;
 		std::shared_ptr<Texture> normalTexture;
 		std::shared_ptr<Texture> roughnessTexture;
@@ -148,15 +155,13 @@ int main(int argc, char* argv[])
 		std::shared_ptr<Texture> barkNormalTexture = Texture::Initialise(fileLoader->LocateFileInDirectory(assetPath, "Bark012_1K-PNG_NormalGL.png"), window->GetAspectRatio(), Texture::MIMIC_2D_TEXTURE_PARAMS, TextureType::MIMIC_NORMAL);
 		std::shared_ptr<Texture> barkRoughnessTexture = Texture::Initialise(fileLoader->LocateFileInDirectory(assetPath, "Bark012_1K-PNG_Roughness.png"), window->GetAspectRatio(), Texture::MIMIC_2D_TEXTURE_PARAMS, TextureType::MIMIC_ROUGHNESS);
 
-		// load lights:
-		std::vector<std::shared_ptr<DirectLight>> directLights;
-
-		int numDirectLights = 1;
-		for (size_t i = 0; i < numDirectLights; i++)
+		// Initialise direct lights:
+		std::vector<std::shared_ptr<DirectLight>> directLights =
 		{
-			directLights.push_back(DirectLight::Initialise(glm::vec3(2.72f, 8.8f, -5.8f), glm::vec3(-0.24f, -1.0f, -0.246f), glm::vec3(100.0f)));
-		}
+			DirectLight::Initialise(glm::vec3(2.72f, 8.8f, -5.8f), glm::vec3(-0.24f, -1.0f, -0.246f), glm::vec3(100.0f))
+		};
 
+		// Initialise point lights:
 		std::vector<std::shared_ptr<PointLight>> pointLights =
 		{
 			// PointLight::Initialise(glm::vec3(0.5f, 0.0f, 0.5f), glm::vec3(70.0f, 20.0f, 15.0f))
@@ -382,9 +387,9 @@ int main(int argc, char* argv[])
 			// #############################################################################
 
 			camera->Update();
-			model->UpdateModelMatrix(position, rotation, glm::vec3(0.01f));
-			wall1->UpdateModelMatrix(wallPos, wallRot, wallScale);
-			lightModel->UpdateModelMatrix(directLights[0]->Position, rotation, glm::vec3(0.2f));
+			stanfordBunnyModel->UpdateModelMatrix(stanfordBunnyTransform.Position, stanfordBunnyTransform.Rotation, stanfordBunnyTransform.Scale);
+			wallModel->UpdateModelMatrix(wallTransform.Position, wallTransform.Rotation, wallTransform.Scale);
+			lightModel->UpdateModelMatrix(directLights[0]->Position, glm::vec3(0.0), glm::vec3(0.2f));
 
 			// #############################################################################
 			// render scene:
@@ -397,14 +402,11 @@ int main(int argc, char* argv[])
 				{
 					// update shadow maps:
 					MIMIC_PROFILE_SCOPE("Render Depth Maps");
-					shadowMapper->RenderDirectLightDepthMaps(sceneModels, directLights, renderer);
+					shadowMapper->RenderDirectLightDepthMaps(modelsForShadowMapping, directLights, renderer);
 				}
 				// send meshes to renderer:
-				model->QueMeshesToDraw(pbrShader, modelPBROnDrawLamba4, renderer);
-				// model1->QueMeshesToDraw(pbrShader, modelPBROnDrawLamba2, renderer);
-				// model2->QueMeshesToDraw(pbrShader, modelPBROnDrawLamba3, renderer);
-				// model3->QueMeshesToDraw(pbrShader, modelPBROnDrawLamba4, renderer);
-				wall1->QueMeshesToDraw(blinnPhongShader, wallBPOnDrawLamba, renderer);
+				stanfordBunnyModel->QueMeshesToDraw(pbrShader, modelPBROnDrawLamba4, renderer);
+				wallModel->QueMeshesToDraw(blinnPhongShader, wallBPOnDrawLamba, renderer);
 
 				// draw:
 				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -422,14 +424,9 @@ int main(int argc, char* argv[])
 			ImGui::NewFrame();
 
 			// display depth maps:
-			ImGui::Image((void*)directLights[0]->GetDepthMapTextureId(), ImVec2(200, 200));
+			// ImGui::Image((void*)directLights[0]->GetDepthMapTextureId(), ImVec2(200, 200));
 			// ImGui::Image((void*)directLights[1]->GetDepthMapTextureId(), ImVec2(800, 800));
 
-			// light controls:
-			/*ImGui::Begin("Point Light");
-			ImGui::SliderFloat3("Position##pl1", &(pointLights[0]->Position[0]), -10.0f, 10.0f);
-			ImGui::SliderFloat3("Colour##pl3", &(pointLights[0]->Colour[0]), 0.0f, 100.0f);
-			ImGui::End();*/
 
 			ImGui::Begin("Direct Light");
 			ImGui::SliderFloat3("Position##dl1", &(directLights[0]->Position[0]), -30.0f, 30.0f);
@@ -468,16 +465,16 @@ int main(int argc, char* argv[])
 			ImGui::End();
 
 			// model controls:
-			ImGui::Begin("Model");
+			/*ImGui::Begin("Model");
 			ImGui::SliderFloat3("Position##m1", &(position[0]), -20.0f, 20.0f);
 			ImGui::SliderFloat3("Rotation##m2", &(rotation[0]), -5.0f, 5.0f);
-			ImGui::End();
+			ImGui::End();*/
 
-			ImGui::Begin("Wall");
+			/*ImGui::Begin("Wall");
 			ImGui::SliderFloat3("Position##w2", &(wallPos[0]), -50.0f, 50.0f);
 			ImGui::SliderFloat3("Rotation##w2", &(wallRot[0]), -50.0f, 50.0f);
 			ImGui::SliderFloat3("Scale##w3", &(wallScale[0]), 0.0f, 50.0f);
-			ImGui::End();
+			ImGui::End();*/
 
 			ImGui::Render();
 			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

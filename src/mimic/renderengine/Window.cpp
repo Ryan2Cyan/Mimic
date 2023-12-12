@@ -78,6 +78,7 @@ namespace MimicRender
 
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+		glCullFace(GL_BACK);
 
 		window->_initialised = true;
 		return window;

@@ -1,10 +1,8 @@
 #pragma once
-#include <GL/glew.h>
 #include <GLM/glm.hpp>
 #include <string>
-#include <cstdint>
-#include <vector>
 #include <memory>
+#include <GL/glew.h>
 
 namespace MimicRender
 {
@@ -39,7 +37,7 @@ namespace MimicRender
 	// Source: https://cplusplus.com/forum/general/1590/
 	struct Texture
 	{
-		// texture types:
+		// Texture types:
 		static const std::uint32_t MIMIC_2D_TEXTURE = 0b1;
 		static const std::uint32_t MIMIC_CUBEMAP_TEXTURE = 0b10;
 
@@ -51,7 +49,7 @@ namespace MimicRender
 		friend struct EnvironmentCubeMap;
 		friend struct Shader;
 
-		// texture parameters:
+		// Texture parameters:
 		static const std::uint32_t MIMIC_UNSIGNED_BYTE =				 0b100;
 		static const std::uint32_t MIMIC_FLOAT =						 0b1000;
 
@@ -78,9 +76,10 @@ namespace MimicRender
 		static const std::uint32_t MIMIC_CUBEMAP_TEXTURE_PARAMS = MIMIC_CUBEMAP_TEXTURE | MIMIC_FLOAT | MIMIC_WRAPS_CLAMP | MIMIC_WRAPT_CLAMP | MIMIC_WRAPR_CLAMP | MIMIC_MIN_LINEAR | MIMIC_MAG_LINEAR;
 		static const std::uint32_t MIMIC_PREFILTERED_CUBEMAP_TEXTURE_PARAMS = MIMIC_CUBEMAP_TEXTURE | MIMIC_FLOAT | MIMIC_WRAPS_CLAMP | MIMIC_WRAPT_CLAMP | MIMIC_WRAPR_CLAMP | MIMIC_MIN_MIPMAP_LINEAR | MIMIC_MAG_LINEAR | MIMIC_GEN_MIPMAP;
 		
-		unsigned int _id;
-		TextureType _type;
 		glm::ivec2 _aspectRatio;
+		TextureType _type;
+		unsigned int _id;
+		bool _initialised;
 
 		static const GLenum GetGLTarget(const std::uint32_t& textureParams) noexcept;
 		static const GLenum GetGLDataType(const std::uint32_t& textureParams) noexcept;
@@ -98,8 +97,12 @@ namespace MimicRender
 			MIMIC_DEPTH_COMPONENT = 0x40
 		};
 
-		static const std::shared_ptr<Texture> Initialise(const std::string& fullPath, const glm::ivec2& aspectRatio, const std::uint32_t& textureParams, const TextureType& type = TextureType::MIMIC_NO_TYPE);
-		static const std::shared_ptr<Texture> Initialise(const glm::ivec2& aspectRatio, const std::uint32_t& textureParams, const TextureFormats& internalFormat, const TextureFormats& format, const TextureType& textureType = TextureType::MIMIC_NO_TYPE);
+		static std::shared_ptr<Texture> Initialise(const std::string& fullPath, const glm::ivec2& aspectRatio, const std::uint32_t& textureParams, const TextureType& type = TextureType::MIMIC_NO_TYPE);
+		static std::shared_ptr<Texture> Initialise(const glm::ivec2& aspectRatio, const std::uint32_t& textureParams, const TextureFormats& internalFormat, const TextureFormats& format, const TextureType& textureType = TextureType::MIMIC_NO_TYPE);
+
+		/// <summary>
+		/// Set the object's type
+		/// </summary>
 		void SetType(const TextureType& textureType);
 		const glm::ivec2 GetAspectRatio() const noexcept;
 		const unsigned int GetId() const noexcept;

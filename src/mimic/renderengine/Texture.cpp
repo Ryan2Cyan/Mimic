@@ -3,20 +3,19 @@
 #define STB_IMAGE_IMPLEMENTATION
 #define STBI_ASSERT(x)
 #include <stb_image.h>
-#include <iostream>
 
 namespace MimicRender
 {
 	// #############################################################################
 	// texture functions:
 	// #############################################################################
-	const std::shared_ptr<Texture> Texture::Initialise(const std::string& fullPath, const glm::ivec2& aspectRatio, const std::uint32_t& textureParams, const TextureType& textureType)
+	std::shared_ptr<Texture> Texture::Initialise(const std::string& fullPath, const glm::ivec2& aspectRatio, const std::uint32_t& textureParams, const TextureType& textureType)
 	{
-		// generate texture ID:
+		// Generate texture ID:
 		unsigned int textureId;
 		glGenTextures(1, &textureId);
 
-		// stbi load texture data from file path:
+		// Have the stbi library load texture data from file path:
 		int width;
 		int height;
 		int componentsN;
@@ -29,7 +28,7 @@ namespace MimicRender
 			return nullptr;
 		}
 
-		// decide format from stbi load:
+		// Decide format from stbi load:
 		GLenum format = GL_RGBA;
 		switch (componentsN)
 		{
@@ -52,13 +51,13 @@ namespace MimicRender
 			}break;
 		}
 
-		// load texture parameters:
+		// Load texture parameters:
 		const GLenum target = GetGLTarget(textureParams);
 		if (target == 0) return nullptr;
 		const GLenum dataType = GetGLDataType(textureParams);
 		if (dataType == 0) return nullptr;
 
-		// create texture & send it to the GPU:
+		// Create texture & send it to the GPU:
 		glBindTexture(target, textureId);
 		glTexImage2D(target, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
 		GLTextureParams(textureParams, target);
@@ -69,19 +68,20 @@ namespace MimicRender
 		texture->_id = textureId;
 		texture->_type = textureType;
 		texture->_aspectRatio = aspectRatio;
+		texture->_initialised = true;
 		MIMIC_LOG_INFO("[MimicRender::Texture] Successfully initialised shader from filepath: \"%\"", fullPath);
 		return texture;
 	}
 
-	const std::shared_ptr<Texture> Texture::Initialise(const glm::ivec2& aspectRatio, const std::uint32_t& textureParams, const TextureFormats& internalFormat, const TextureFormats& format, const TextureType& textureType)
+	std::shared_ptr<Texture> Texture::Initialise(const glm::ivec2& aspectRatio, const std::uint32_t& textureParams, const TextureFormats& internalFormat, const TextureFormats& format, const TextureType& textureType)
 	{
-		// load texture parameters:
+		// Load texture parameters:
 		const GLenum target = GetGLTarget(textureParams);
 		if (target == 0) return nullptr;
 		const GLenum dataType = GetGLDataType(textureParams);
 		if (dataType == 0) return nullptr;
 
-		// decide internal format:
+		// Decide internal format:
 		GLint internalFormatGL = 0;
 		if (internalFormat & TextureFormats::MIMIC_RGB) internalFormatGL = GL_RGB;
 		else if (internalFormat & TextureFormats::MIMIC_RGBA) internalFormatGL = GL_RGBA;
@@ -97,7 +97,7 @@ namespace MimicRender
 			return nullptr;
 		}
 
-		// decide format:
+		// Decide format:
 		GLenum formatGL = 0;
 		if (format & TextureFormats::MIMIC_RGB) formatGL = GL_RGB;
 		else if (format & TextureFormats::MIMIC_RGBA) formatGL = GL_RGBA;
@@ -113,6 +113,7 @@ namespace MimicRender
 			return nullptr;
 		}
 
+		// Generate texture ID:
 		unsigned int textureId;
 		glGenTextures(1, &textureId);
 		glBindTexture(target, textureId);
@@ -139,6 +140,7 @@ namespace MimicRender
 		texture->_id = textureId;
 		texture->_type = textureType;
 		texture->_aspectRatio = aspectRatio;
+		texture->_initialised = true;
 		return texture;
 	}
 
@@ -198,16 +200,19 @@ namespace MimicRender
 
 	void Texture::SetType(const TextureType& textureType)
 	{
+		if (!_initialised) return;
 		_type = textureType;
 	}
 
 	const unsigned int Texture::GetId() const noexcept
 	{
+		if (!_initialised) return;
 		return _id;
 	}
 
 	const glm::ivec2 Texture::GetAspectRatio() const noexcept
 	{
+		if (!_initialised) return;
 		return _aspectRatio;
 	}
 }

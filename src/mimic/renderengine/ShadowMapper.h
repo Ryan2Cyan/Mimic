@@ -1,6 +1,5 @@
 #pragma once
 #include <memory>
-#include <functional>
 #include <glm/glm.hpp>
 #include <vector>
 
@@ -16,17 +15,15 @@ namespace MimicRender
 	struct DirectLight;
 	struct Renderer;
 
-	struct DirectLightDepthMapData
-	{
-		explicit DirectLightDepthMapData(const std::shared_ptr<RenderTexture>& depthMap, const glm::mat4& lightMatrix);
-		std::shared_ptr<RenderTexture> _depthMapRT;
-		glm::mat4 _lightMatrix;
-	};
-
 	struct ShadowMapper
 	{
 		static const std::shared_ptr<ShadowMapper> Initialise(glm::ivec2 aspectRatio = glm::ivec2(1024, 1024));
-		void RenderDirectLightDepthMaps(const std::vector<std::shared_ptr<Model>>& models, std::vector<std::shared_ptr<DirectLight>>& directLights, std::shared_ptr<Renderer>& renderer);
+
+		/// <summary>
+		/// Render all scene objects from the perspective (light space) of each direct light. Only the depth component
+		/// is rendered. The result depth maps are stored within the DirectLight struct. 
+		/// </summary>
+		void RenderDirectLightDepthMaps(const std::vector<std::shared_ptr<Model>>& models, std::vector<std::shared_ptr<DirectLight>>& directLights, std::shared_ptr<Renderer>& renderer, const glm::ivec2& clippingPlanes = glm::ivec2(1.0f, 100.0f));
 
 	private:
 		std::shared_ptr<Shader> _depthMapShader;
