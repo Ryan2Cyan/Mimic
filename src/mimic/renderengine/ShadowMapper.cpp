@@ -35,7 +35,7 @@ namespace MimicRender
 
 	void ShadowMapper::RenderDirectLightDepthMaps(const std::vector<std::shared_ptr<Model>>& models, std::vector<std::shared_ptr<DirectLight>>& directLights, std::shared_ptr<Renderer>& renderer)
 	{
-		constexpr glm::vec2 lightProjectionClippingPlanes = glm::vec2(1.0f, 25.0f);
+		constexpr glm::vec2 lightProjectionClippingPlanes = glm::vec2(1.0f, 100.0f);
 		const glm::mat4 lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, lightProjectionClippingPlanes.x, lightProjectionClippingPlanes.y);
 		glm::mat4 lightView = glm::mat4(1.0f);
 
@@ -63,7 +63,7 @@ namespace MimicRender
 			glClear(GL_DEPTH_BUFFER_BIT);
 			glCullFace(GL_FRONT); // cull front-faces to avoid Peter-Panning:
 			renderer->Draw(lightView, lightProjection);
-			renderer->ClearRenderQue();
+			renderer->ClearRenderQueue();
 			glCullFace(GL_BACK);
 
 			directLight->_depthMapRT->Unbind();

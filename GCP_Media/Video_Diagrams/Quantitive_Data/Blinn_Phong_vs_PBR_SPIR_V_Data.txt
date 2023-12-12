@@ -6,5 +6,5 @@ SPIR-V Size: 5,752 bytes
 
 PBR:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
-Lines: 337
-SPIR-V Size: 5,752 bytes
+Lines: 849 (2.5x)
+SPIR-V Size: 14,644 bytes (2.5x)

@@ -14,8 +14,21 @@ namespace MimicRender
 	{
 		~Window();
 		static std::shared_ptr<Window> Initialise(const std::string& windowName);
-		const void ResetViewPort() const noexcept;
-		const glm::vec2 GetAspectRatio() const noexcept;
+
+		/// <summary>
+		/// Reset the viewport to this window's cached aspect radio.
+		/// </summary>
+		void ResetViewPort() const noexcept;
+
+		/// <summary>
+		/// Return the aspect radio cached by this window.
+		/// </summary>
+		glm::ivec2 GetAspectRatio() const noexcept;
+
+		/// <summary>
+		/// Used in the default OpenGL double buffer context. Swaps render buffers to display the twin
+		/// buffer with the full frame's display data written to it.
+		/// </summary>
 		void SwapWindow() const;
 
 	private:

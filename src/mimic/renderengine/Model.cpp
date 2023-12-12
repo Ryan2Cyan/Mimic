@@ -55,7 +55,7 @@ namespace MimicRender
 	{
 		for (auto mesh : _meshes)
 		{
-			renderer->AddToDrawQue(RenderObject::Initialise(
+			renderer->AddToDrawQueue(RenderObject::Initialise(
 				mesh->_vertexArrayId,
 				mesh->_dataSize,
 				shader,

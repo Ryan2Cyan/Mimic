@@ -11,6 +11,7 @@ namespace MimicRender
 	{
 		std::shared_ptr<Window> window = std::make_shared<Window>();
 
+		// Initialise the SDL library:
 		if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) < 0)
 		{
 			MIMIC_LOG_FATAL("[MimicRender::Window] Failed to initialize SDL: %", SDL_GetError());
@@ -21,9 +22,12 @@ namespace MimicRender
 		 SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 		MIMIC_LOG_INFO("[MimicRender::Window] SDL initialisation successful.");
 
+		// Query the user monitors current display resolution and cache it:
 		SDL_DisplayMode displayMode;
 		SDL_GetCurrentDisplayMode(0, &displayMode);
+		window->_aspectRatio = glm::ivec2(displayMode.w, displayMode.h);
 
+		// Initialise SDL window using user's monitor resolution as the aspect:
 		window->_window = SDL_CreateWindow(windowName.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, displayMode.w, displayMode.h, SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL);
 		if (window->_window == nullptr)
 		{
@@ -32,6 +36,7 @@ namespace MimicRender
 		}
 		MIMIC_LOG_INFO("[MimicRender::Window] SDL_Window initialisation successful.");
 
+		// Initialise SDL renderer:
 		window->_renderer = SDL_CreateRenderer(window->_window, -1, SDL_RENDERER_ACCELERATED);
 		if (window->_renderer == nullptr)
 		{
@@ -40,6 +45,7 @@ namespace MimicRender
 		}
 		MIMIC_LOG_INFO("[Mimic::Window] SDL_Renderer initialisation successful.");
 
+		// Initialise SDL OpenGL context:
 		window->_glContext = SDL_GL_CreateContext(window->_window);
 		if (window->_glContext == nullptr)
 		{
@@ -48,6 +54,8 @@ namespace MimicRender
 		}
 		MIMIC_LOG_INFO("[MimicRender::Window] SDL_GL_Context initialisation successful.");
 
+
+		// Initialise ImGui library:
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
 		ImGuiIO& io = ImGui::GetIO(); (void)io;
@@ -58,7 +66,7 @@ namespace MimicRender
 		ImGui_ImplOpenGL3_Init(glslVersion);
 		MIMIC_LOG_INFO("[MimicRender::Window] ImGui initialisation successful.");
 
-		// init glew:
+		// Initialise GLEW wrangler library:
 		glewExperimental = GL_TRUE;
 		GLenum err = glewInit();
 		if (GLEW_OK != err)
@@ -70,15 +78,14 @@ namespace MimicRender
 
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
-		glDepthFunc(GL_LEQUAL);
 
-		window->_aspectRatio = glm::ivec2(displayMode.w, displayMode.h);
 		window->_initialised = true;
 		return window;
 	}
 
 	Window::~Window() 
 	{
+		// Destroy components of SDL in reverse order they were initialised:
 		if (_glContext)
 		{
 			SDL_GL_DeleteContext(_glContext);
@@ -103,13 +110,15 @@ namespace MimicRender
 		ImGui::DestroyContext();
 	}
 
-	const void Window::ResetViewPort() const noexcept
+	void Window::ResetViewPort() const noexcept
 	{
+		if (!_initialised) return;
 		glViewport(0, 0, _aspectRatio.x, _aspectRatio.y);
 	}
 
-	const glm::vec2 Window::GetAspectRatio() const noexcept
+	glm::ivec2 Window::GetAspectRatio() const noexcept
 	{
+		if (!_initialised) glm::ivec2(0);
 		return _aspectRatio;
 	}
 

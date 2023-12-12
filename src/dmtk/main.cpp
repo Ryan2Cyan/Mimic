@@ -13,12 +13,8 @@
 #include <utility/FileLoader.h>
 #include <utility/Logger.h>
 #include <utility/PerformanceCounter.h>
-#include <filesystem>
-#include <vector>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
+#include <array>
 #include <imgui.h>
-#include <iostream>
 #include <imgui_impl_opengl3.h>
 #include <imgui_impl_sdl2.h>
 #define SDL_MAIN_HANDLED
@@ -26,18 +22,25 @@
 using namespace MimicUtil;
 using namespace MimicRender;
 
+struct Transform 
+{
+	glm::vec3 Position;
+	glm::vec3 Rotation;
+	glm::vec3 Scale;
+};
+
 #undef main
 int main(int argc, char* argv[])
 {
 	{
-		// create file loader:
-		std::shared_ptr<FileLoader> fileLoader = FileLoader::Initialise();
+		// Initialise file loader struct and use it to store a path to the project's "assets/" directory:
+		const std::shared_ptr<FileLoader> fileLoader = FileLoader::Initialise();
 		const std::string assetPath = fileLoader->LocateDirectory("assets").generic_string();
 
-		// render engine code:
+		// Initialise window that will display the program and interface with SDL, OpenGL, and ImGUI:
 		const std::shared_ptr<Window> window = Window::Initialise("Mimic Render Library Test");
 
-		// initialise renderer:
+		// Initialise renderer:
 		std::shared_ptr<Renderer> renderer = Renderer::Initialise();
 
 		// initialise shadow mapper:
@@ -63,25 +66,47 @@ int main(int argc, char* argv[])
 		constexpr glm::vec3 flatColour = glm::vec3(1.0f);
 
 
-		// load shader subroutine uniforms:
-		const unsigned int albedoSubroutineUniform = pbrShader->GetSubroutineUniform(GL_FRAGMENT_SHADER, "AlbedoMode");
-		const unsigned int normalSubroutineUniform = pbrShader->GetSubroutineUniform(GL_FRAGMENT_SHADER, "NormalMode");
-		const unsigned int roughnessSubroutineUniform = pbrShader->GetSubroutineUniform(GL_FRAGMENT_SHADER, "RoughnessMode");
-		const unsigned int metallicSubroutineUniform = pbrShader->GetSubroutineUniform(GL_FRAGMENT_SHADER, "MetallicMode");
-		std::vector<unsigned int> subroutineUniformIndices = { albedoSubroutineUniform, normalSubroutineUniform, roughnessSubroutineUniform, metallicSubroutineUniform };
+		// Initialise all data required for the PBR Shader subroutines. This looks messy here but will be cleaned
+		// up in the GEP assignment.
+		std::array<unsigned int, 4> subroutineUniformIndices;
+		unsigned int albedoSubroutineUniform;
+		unsigned int normalSubroutineUniform;
+		unsigned int roughnessSubroutineUniform;
+		unsigned int metallicSubroutineUniform;
+		unsigned int albedoAuto;
+		unsigned int albedoManual;
+		unsigned int normalAuto;
+		unsigned int normalManual;
+		unsigned int roughnessAuto;
+		unsigned int roughnessManual;
+		unsigned int metallicAuto;
+		unsigned int metallicManual;
 
-		// load shader subroutine indices (functions):
-		const unsigned int albedoAuto = pbrShader->GetSubroutineIndex(GL_FRAGMENT_SHADER, "CalculateAlbedoAutoTexture");
-		const unsigned int albedoManual = pbrShader->GetSubroutineIndex(GL_FRAGMENT_SHADER, "CalculateAlbedoManual");
+		if (pbrShader)
+		{
+			// Load all subroutine uniforms and store them in an array. The array will be used to set indices in 
+			// PBR on draw function call.
+			albedoSubroutineUniform = pbrShader->GetSubroutineUniform(GL_FRAGMENT_SHADER, "AlbedoMode");
+			normalSubroutineUniform = pbrShader->GetSubroutineUniform(GL_FRAGMENT_SHADER, "NormalMode");
+			roughnessSubroutineUniform = pbrShader->GetSubroutineUniform(GL_FRAGMENT_SHADER, "RoughnessMode");
+			metallicSubroutineUniform = pbrShader->GetSubroutineUniform(GL_FRAGMENT_SHADER, "MetallicMode");
+			subroutineUniformIndices = { albedoSubroutineUniform, normalSubroutineUniform, roughnessSubroutineUniform, metallicSubroutineUniform };
 
-		const unsigned int normalAuto = pbrShader->GetSubroutineIndex(GL_FRAGMENT_SHADER, "CalculateNormalAutoTexture");
-		const unsigned int normalManual = pbrShader->GetSubroutineIndex(GL_FRAGMENT_SHADER, "CalculateNormalManual");
+			// Load all specific subroutine functions. These come in two forms : AutoTexture and Manual. AutoTexture 
+			// functions are used when the user has set a texture to the PBR parameter, otherwise (Manual) use a literal
+			// value.
+			albedoAuto = pbrShader->GetSubroutineIndex(GL_FRAGMENT_SHADER, "CalculateAlbedoAutoTexture");
+			albedoManual = pbrShader->GetSubroutineIndex(GL_FRAGMENT_SHADER, "CalculateAlbedoManual");
 
-		const unsigned int roughnessAuto = pbrShader->GetSubroutineIndex(GL_FRAGMENT_SHADER, "CalculateRoughnessAutoTexture");
-		const unsigned int roughnessManual = pbrShader->GetSubroutineIndex(GL_FRAGMENT_SHADER, "CalculateRoughnessManual");
+			normalAuto = pbrShader->GetSubroutineIndex(GL_FRAGMENT_SHADER, "CalculateNormalAutoTexture");
+			normalManual = pbrShader->GetSubroutineIndex(GL_FRAGMENT_SHADER, "CalculateNormalManual");
 
-		const unsigned int metallicAuto = pbrShader->GetSubroutineIndex(GL_FRAGMENT_SHADER, "CalculateMetallicAutoTexture");
-		const unsigned int metallicManual = pbrShader->GetSubroutineIndex(GL_FRAGMENT_SHADER, "CalculateMetallicManual");
+			roughnessAuto = pbrShader->GetSubroutineIndex(GL_FRAGMENT_SHADER, "CalculateRoughnessAutoTexture");
+			roughnessManual = pbrShader->GetSubroutineIndex(GL_FRAGMENT_SHADER, "CalculateRoughnessManual");
+
+			metallicAuto = pbrShader->GetSubroutineIndex(GL_FRAGMENT_SHADER, "CalculateMetallicAutoTexture");
+			metallicManual = pbrShader->GetSubroutineIndex(GL_FRAGMENT_SHADER, "CalculateMetallicManual");
+		}
 
 		// create camera:
 		std::shared_ptr<Camera> camera = Camera::Initialise(window->GetAspectRatio(), 45.0f);
@@ -91,21 +116,14 @@ int main(int argc, char* argv[])
 		// create models:
 		glm::vec3 rotation = glm::vec3(0.0f);
 		glm::vec3 position = glm::vec3(0.0f, 0.0f, -14.285f);
-		std::shared_ptr<Model> model = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "cube.obj"));
-		// std::shared_ptr<Model> model1 = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "sphere.obj"));
-		//std::shared_ptr<Model> model2 = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "sphere.obj"));
-		// std::shared_ptr<Model> model3 = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "stanford-bunny.fbx"));
-		/*std::shared_ptr<Model> model1 = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "normal_rock_sphere.obj"));
-		std::shared_ptr<Model> model2 = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "normal_rock_sphere.obj"));
-		std::shared_ptr<Model> model3 = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "normal_rock_sphere.obj"));
-		std::shared_ptr<Model> ground = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "cube.obj"));*/
+		std::shared_ptr<Model> model = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "stanford-bunny.fbx"));
 		std::shared_ptr<Model> wall1 = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "cube.obj"));
 		glm::vec3 wallPos = glm::vec3(0.0f, -1.53f, -50.0f);
 		glm::vec3 wallRot = glm::vec3(0.0f);
 		glm::vec3 wallScale = glm::vec3(43.45f, -0.5f, 50.0f);
 		std::shared_ptr<Model> lightModel = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "normal_rock_sphere.obj"));
 
-		const std::vector<std::shared_ptr<Model>> sceneModels = { model, wall1/*, model1, model2, wall1*/ };
+		const std::vector<std::shared_ptr<Model>> sceneModels = { model, wall1 };
 
 		// create textures:
 		std::shared_ptr<Texture> albedoTexture;
@@ -129,13 +147,6 @@ int main(int argc, char* argv[])
 		std::shared_ptr<Texture> barkAlbedoTexture = Texture::Initialise(fileLoader->LocateFileInDirectory(assetPath, "Bark012_1K-PNG_Color.png"), window->GetAspectRatio(), Texture::MIMIC_2D_TEXTURE_PARAMS, TextureType::MIMIC_ALBEDO);
 		std::shared_ptr<Texture> barkNormalTexture = Texture::Initialise(fileLoader->LocateFileInDirectory(assetPath, "Bark012_1K-PNG_NormalGL.png"), window->GetAspectRatio(), Texture::MIMIC_2D_TEXTURE_PARAMS, TextureType::MIMIC_NORMAL);
 		std::shared_ptr<Texture> barkRoughnessTexture = Texture::Initialise(fileLoader->LocateFileInDirectory(assetPath, "Bark012_1K-PNG_Roughness.png"), window->GetAspectRatio(), Texture::MIMIC_2D_TEXTURE_PARAMS, TextureType::MIMIC_ROUGHNESS);
-		// std::shared_ptr<Texture> marbleMetallicTexture = Texture::Initialise(fileLoader->LocateFileInDirectory(assetPath, "rustediron2_metallic.png"), window->GetAspectRatio(), Texture::MIMIC_2D_TEXTURE_PARAMS, TextureType::MIMIC_METALLIC);
-		/*albedoTexture = Texture::Initialise(fileLoader->LocateFileInDirectory(assetPath, "rustediron2_basecolor.png"), window->GetAspectRatio(), Texture::MIMIC_2D_TEXTURE_PARAMS, TextureType::MIMIC_ALBEDO);
-		normalTexture = Texture::Initialise(fileLoader->LocateFileInDirectory(assetPath, "rustediron2_normal.png"), window->GetAspectRatio(), Texture::MIMIC_2D_TEXTURE_PARAMS, TextureType::MIMIC_NORMAL);
-		roughnessTexture = Texture::Initialise(fileLoader->LocateFileInDirectory(assetPath, "rustediron2_roughness.png"), window->GetAspectRatio(), Texture::MIMIC_2D_TEXTURE_PARAMS, TextureType::MIMIC_ROUGHNESS);
-		metallicTexture = Texture::Initialise(fileLoader->LocateFileInDirectory(assetPath, "rustediron2_metallic.png"), window->GetAspectRatio(), Texture::MIMIC_2D_TEXTURE_PARAMS, TextureType::MIMIC_METALLIC);*/
-		// std::shared_ptr<Texture> sphereNormalTexture = Texture::Initialise(fileLoader->LocateFileInDirectory(assetPath, "Metal046B_1K-PNG_NormalGL.png"), window->GetAspectRatio(), Texture::MIMIC_2D_TEXTURE_PARAMS, TextureType::MIMIC_NORMAL);
-		// std::shared_ptr<Texture> groundAlbedoTexture = Texture::Initialise(fileLoader->LocateFileInDirectory(assetPath, "Metal046B_1K-PNG_Metalness.png"), window->GetAspectRatio(), Texture::MIMIC_2D_TEXTURE_PARAMS, TextureType::MIMIC_ALBEDO);
 
 		// load lights:
 		std::vector<std::shared_ptr<DirectLight>> directLights;
@@ -371,10 +382,7 @@ int main(int argc, char* argv[])
 			// #############################################################################
 
 			camera->Update();
-			model->UpdateModelMatrix(position, rotation, glm::vec3(1.0f));
-			// model1->UpdateModelMatrix(glm::vec3(2.5f, 0.0f, -14.0f), rotation, glm::vec3(1.0f));
-		    // model2->UpdateModelMatrix(glm::vec3(5.0f, 0.0f, -14.0f), rotation, glm::vec3(1.0f));
-			// model3->UpdateModelMatrix(glm::vec3(7.5f, 0.0f, -14.0f), rotation, glm::vec3(0.01f));
+			model->UpdateModelMatrix(position, rotation, glm::vec3(0.01f));
 			wall1->UpdateModelMatrix(wallPos, wallRot, wallScale);
 			lightModel->UpdateModelMatrix(directLights[0]->Position, rotation, glm::vec3(0.2f));
 
@@ -403,8 +411,8 @@ int main(int argc, char* argv[])
 				window->ResetViewPort();
 				renderer->Draw(camera);
 				
-				renderer->ClearRenderQue();
-				renderer->DrawCubeMap(camera, environmentCubeMap);
+				renderer->ClearRenderQueue();
+				renderer->DrawEnvironmentMap(camera, environmentCubeMap);
 			}
 			// #############################################################################
 			// gui:
