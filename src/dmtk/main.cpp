@@ -122,17 +122,18 @@ int main(int argc, char* argv[])
 		camera->Orientation = glm::vec3(0.0, -0.49f, -3.0f);
 
 		// Initialise scene models:
-		std::shared_ptr<Model> stanfordBunnyModel = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "stanford-bunny.fbx"));
-		Transform stanfordBunnyTransform = Transform(glm::vec3(0.0f, 0.0f, -14.3f), glm::vec3(0.0f), glm::vec3(0.01f));
+		std::shared_ptr<Model> sphereModel = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "sphere.obj"));
+		Transform sphereTransform = Transform(glm::vec3(0.0f, 0.0f, -14.3f), glm::vec3(0.0f), glm::vec3(1.0f));
 
 		std::shared_ptr<Model> wallModel = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "cube.obj"));
 		Transform wallTransform = Transform(glm::vec3(0.0f, -1.5f, -50.0f), glm::vec3(0.0f), glm::vec3(43.45f, -0.5f, 50.0f));
 
 		std::shared_ptr<Model> lightModel = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "normal_rock_sphere.obj"));
 
-		const std::vector<std::shared_ptr<Model>> modelsForShadowMapping = { stanfordBunnyModel, wallModel };
+		const std::vector<std::shared_ptr<Model>> modelsForShadowMapping = { sphereModel, wallModel };
 
-		// Load textures:
+		// Load textures: Note that the texture types (e.g. MIMIC_ALBEDO) aren't currently implemented. This will
+		// become relevant in the GEP assignment.
 		std::shared_ptr<Texture> albedoTexture;
 		std::shared_ptr<Texture> normalTexture;
 		std::shared_ptr<Texture> roughnessTexture;
@@ -162,10 +163,7 @@ int main(int argc, char* argv[])
 		};
 
 		// Initialise point lights:
-		std::vector<std::shared_ptr<PointLight>> pointLights =
-		{
-			// PointLight::Initialise(glm::vec3(0.5f, 0.0f, 0.5f), glm::vec3(70.0f, 20.0f, 15.0f))
-		};
+		std::vector<std::shared_ptr<PointLight>> pointLights = { };
 
 		// load hdr environment map:
 		std::shared_ptr<EnvironmentCubeMap> environmentCubeMap = EnvironmentCubeMap::Initialise("rural_asphalt_road_4k.hdr", window->GetAspectRatio(), renderer);
@@ -259,7 +257,9 @@ int main(int argc, char* argv[])
 			pbrShader->SetInt("u_PointLightsCount", pointLights.size());
 		};
 
-		std::function<void()> modelPBROnDrawLamba1 = [&]()
+		// This value works with ImGUI to decide which material to render on the Stanford Bunny model:
+		static int itemCurrent = 0;
+		std::function<void()> barkPBROnDrawLamba = [&]()
 		{
 			albedoTexture = barkAlbedoTexture;
 			normalTexture = barkNormalTexture;
@@ -268,7 +268,7 @@ int main(int argc, char* argv[])
 			metallic = 0.5f;
 			pbrOnDrawLamba();
 		};
-		std::function<void()> modelPBROnDrawLamba2 = [&]()
+		std::function<void()> brickPBROnDrawLamba = [&]()
 		{
 			albedoTexture = brickAlbedoTexture;
 			normalTexture = brickNormalTexture;
@@ -277,7 +277,7 @@ int main(int argc, char* argv[])
 			metallic = 0.5f;
 			pbrOnDrawLamba();
 		};
-		std::function<void()> modelPBROnDrawLamba3 = [&]()
+		std::function<void()> foilPBROnDrawLamba = [&]()
 		{
 			albedoTexture = foilAlbedoTexture;
 			normalTexture = foilNormalTexture;
@@ -286,21 +286,22 @@ int main(int argc, char* argv[])
 			metallic = 0.5f;
 			pbrOnDrawLamba();
 		};
-		std::function<void()> modelPBROnDrawLamba4 = [&]()
+		std::function<void()> marblePBROnDrawLamba = [&]()
 		{
-			// albedoTexture = marbleAlbedoTexture;
+			albedoTexture = marbleAlbedoTexture;
 			normalTexture = marbleNormalTexture;
-			// roughnessTexture = marbleRoughnessTexture;
+			roughnessTexture = marbleRoughnessTexture;
 			metallicTexture = nullptr;
 			metallic = 0.99f;
 			pbrOnDrawLamba();
 		};
 
-		std::function<void()> wallPBROnDrawLamba = [&]()
+		std::function<void()> noTexturesPBROnDrawLamba = [&]()
 		{
-			albedo = glm::vec3(0.6f);
-			// albedoTexture = groundAlbedoTexture;
-			// normalTexture = nullptr;
+			albedoTexture = nullptr;
+			normalTexture = nullptr;
+			roughnessTexture = nullptr;
+			metallicTexture = nullptr;
 			pbrOnDrawLamba();
 		};
 
@@ -387,7 +388,7 @@ int main(int argc, char* argv[])
 			// #############################################################################
 
 			camera->Update();
-			stanfordBunnyModel->UpdateModelMatrix(stanfordBunnyTransform.Position, stanfordBunnyTransform.Rotation, stanfordBunnyTransform.Scale);
+			sphereModel->UpdateModelMatrix(sphereTransform.Position, sphereTransform.Rotation, sphereTransform.Scale);
 			wallModel->UpdateModelMatrix(wallTransform.Position, wallTransform.Rotation, wallTransform.Scale);
 			lightModel->UpdateModelMatrix(directLights[0]->Position, glm::vec3(0.0), glm::vec3(0.2f));
 
@@ -405,8 +406,32 @@ int main(int argc, char* argv[])
 					shadowMapper->RenderDirectLightDepthMaps(modelsForShadowMapping, directLights, renderer);
 				}
 				// send meshes to renderer:
-				stanfordBunnyModel->QueMeshesToDraw(pbrShader, modelPBROnDrawLamba4, renderer);
-				wallModel->QueMeshesToDraw(blinnPhongShader, wallBPOnDrawLamba, renderer);
+				switch (itemCurrent)
+				{
+					case 0:
+					{
+						sphereModel->QueueMeshesToDraw(pbrShader, noTexturesPBROnDrawLamba, renderer);
+					}break;
+					case 1:
+					{
+						sphereModel->QueueMeshesToDraw(pbrShader, marblePBROnDrawLamba, renderer);
+					}break;
+					case 2:
+					{
+						sphereModel->QueueMeshesToDraw(pbrShader, barkPBROnDrawLamba, renderer);
+					}break;
+					case 3:
+					{
+						sphereModel->QueueMeshesToDraw(pbrShader, foilPBROnDrawLamba, renderer);
+					}break;
+					case 4:
+					{
+						sphereModel->QueueMeshesToDraw(pbrShader, brickPBROnDrawLamba, renderer);
+					}break;
+					default:
+						break;
+					}
+				wallModel->QueueMeshesToDraw(blinnPhongShader, wallBPOnDrawLamba, renderer);
 
 				// draw:
 				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -423,16 +448,23 @@ int main(int argc, char* argv[])
 			ImGui_ImplSDL2_NewFrame();
 			ImGui::NewFrame();
 
-			// display depth maps:
-			// ImGui::Image((void*)directLights[0]->GetDepthMapTextureId(), ImVec2(200, 200));
-			// ImGui::Image((void*)directLights[1]->GetDepthMapTextureId(), ImVec2(800, 800));
+			ImGui::ShowDemoWindow();
 
+			ImGui::Begin("Settings");
+			const char* items[] = { "None", "Marble", "Bark", "Foil", "Brick"};
+			ImGui::Combo("Material", &itemCurrent, items, IM_ARRAYSIZE(items));
+			ImGui::SameLine(); 
+			ImGui::End(); 
 
-			ImGui::Begin("Direct Light");
-			ImGui::SliderFloat3("Position##dl1", &(directLights[0]->Position[0]), -30.0f, 30.0f);
+			/*ImGui::Begin("Settings");
+			bool beginComboResult = ImGui::BeginCombo("Material", "Marble");
+			ImGui::Combo("Material", 0, { "Marble, Bark, Wood, Gold Tinfoil" }, 4);
+			if(beginComboResult) ImGui::EndCombo();
+			ImGui::End();*/
+
+			/*ImGui::SliderFloat3("Position##dl1", &(directLights[0]->Position[0]), -30.0f, 30.0f);
 			ImGui::SliderFloat3("Direction##dl2", &(directLights[0]->Direction[0]), -1.0f, 1.0f);
-			ImGui::SliderFloat3("Colour##dl3", &(directLights[0]->Colour[0]), 0.0f, 100.0f);
-			ImGui::End();
+			ImGui::SliderFloat3("Colour##dl3", &(directLights[0]->Colour[0]), 0.0f, 100.0f);*/
 
 			/*ImGui::Begin("Direct Light2");
 			ImGui::SliderFloat3("Position##dl1_2", &(directLights[1]->Position[0]), -5.0f, 5.0f);
@@ -440,41 +472,41 @@ int main(int argc, char* argv[])
 			ImGui::SliderFloat3("Colour##dl3_2", &(directLights[1]->Colour[0]), 0.0f, 1.0f);
 			ImGui::End();*/
 
-			// pbr material controls:
-			ImGui::Begin("PBR Material");
-			ImGui::ColorEdit3("Albedo##pbr_mat1", &(albedo[0]));
-			ImGui::ColorEdit3("Emissive##pbr_mat2", &(emissive[0]));
-			ImGui::SliderFloat("Roughness##pbr_mat3", &(roughness), 0.001f, 1.0f);
-			ImGui::SliderFloat("Metallic##pbr_mat4", &(metallic), 0.001f, 1.0f);
-			ImGui::SliderFloat("Ambient Occlusion##m6", &(ambientOcclusion), 0.0f, 1.0f);
-			ImGui::End();
+			//// pbr material controls:
+			//ImGui::Begin("PBR Material");
+			//ImGui::ColorEdit3("Albedo##pbr_mat1", &(albedo[0]));
+			//ImGui::ColorEdit3("Emissive##pbr_mat2", &(emissive[0]));
+			//ImGui::SliderFloat("Roughness##pbr_mat3", &(roughness), 0.001f, 1.0f);
+			//ImGui::SliderFloat("Metallic##pbr_mat4", &(metallic), 0.001f, 1.0f);
+			//ImGui::SliderFloat("Ambient Occlusion##m6", &(ambientOcclusion), 0.0f, 1.0f);
+			//ImGui::End();
 
-			// phong material controls:
-			ImGui::Begin("Phong Material");
-			ImGui::ColorEdit3("Object Colour##phong_mat1", &(objectColour[0]));
-			ImGui::ColorEdit3("Light Colouur##phong_mat2", &(lightColour[0]));
-			ImGui::SliderFloat("Ambient Strength##phong_mat3", &(ambientStrength), 0.0f, 1.0f);
-			ImGui::SliderFloat("Specular Strength##phong_mat5", &(specularStrength), 0.0f, 1.0f);
-			ImGui::SliderFloat("Shininess##phong_mat6", &(shininess), 0.0f, 100.0f);
-			ImGui::End();
+			//// phong material controls:
+			//ImGui::Begin("Phong Material");
+			//ImGui::ColorEdit3("Object Colour##phong_mat1", &(objectColour[0]));
+			//ImGui::ColorEdit3("Light Colouur##phong_mat2", &(lightColour[0]));
+			//ImGui::SliderFloat("Ambient Strength##phong_mat3", &(ambientStrength), 0.0f, 1.0f);
+			//ImGui::SliderFloat("Specular Strength##phong_mat5", &(specularStrength), 0.0f, 1.0f);
+			//ImGui::SliderFloat("Shininess##phong_mat6", &(shininess), 0.0f, 100.0f);
+			//ImGui::End();
 
-			// camera controls:
-			ImGui::Begin("Camera");
-			ImGui::SliderFloat3("Position##c1", &(camera->Position[0]), -20.0f, 20.0f);
-			ImGui::SliderFloat3("Orientation##c2", &(camera->Orientation[0]), -5.0f, 5.0f);
-			ImGui::End();
+			//// camera controls:
+			//ImGui::Begin("Camera");
+			//ImGui::SliderFloat3("Position##c1", &(camera->Position[0]), -20.0f, 20.0f);
+			//ImGui::SliderFloat3("Orientation##c2", &(camera->Orientation[0]), -5.0f, 5.0f);
+			//ImGui::End();
 
-			// model controls:
-			/*ImGui::Begin("Model");
-			ImGui::SliderFloat3("Position##m1", &(position[0]), -20.0f, 20.0f);
-			ImGui::SliderFloat3("Rotation##m2", &(rotation[0]), -5.0f, 5.0f);
-			ImGui::End();*/
+			//// model controls:
+			///*ImGui::Begin("Model");
+			//ImGui::SliderFloat3("Position##m1", &(position[0]), -20.0f, 20.0f);
+			//ImGui::SliderFloat3("Rotation##m2", &(rotation[0]), -5.0f, 5.0f);
+			//ImGui::End();*/
 
-			/*ImGui::Begin("Wall");
-			ImGui::SliderFloat3("Position##w2", &(wallPos[0]), -50.0f, 50.0f);
-			ImGui::SliderFloat3("Rotation##w2", &(wallRot[0]), -50.0f, 50.0f);
-			ImGui::SliderFloat3("Scale##w3", &(wallScale[0]), 0.0f, 50.0f);
-			ImGui::End();*/
+			///*ImGui::Begin("Wall");
+			//ImGui::SliderFloat3("Position##w2", &(wallPos[0]), -50.0f, 50.0f);
+			//ImGui::SliderFloat3("Rotation##w2", &(wallRot[0]), -50.0f, 50.0f);
+			//ImGui::SliderFloat3("Scale##w3", &(wallScale[0]), 0.0f, 50.0f);
+			//ImGui::End();*/
 
 			ImGui::Render();
 			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

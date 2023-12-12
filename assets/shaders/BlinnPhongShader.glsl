@@ -11,11 +11,9 @@ uniform mat4 u_View;
 uniform mat4 u_Projection;
 uniform mat4 u_DirectLightMatrices[20];
 uniform int u_DirectLightsCount;
-// uniform mat4 u_NormalMatrix;
 
 out vec3 fragPosition;
 out vec3 normal;
-// out vec4 fragPositionLightSpace;
 out vec4 directionalLightSpacePositions[20];
 
 void main()
@@ -41,16 +39,12 @@ void main()
 #version 430 core
 
 in vec3 fragPosition;
-// in vec4 fragPositionLightSpace;
 in vec3 normal;
 in vec4 directionalLightSpacePositions[20];
 
 uniform vec3 u_ObjectColour;
-// uniform vec3 u_LightColour;
-// uniform vec3 u_LightPosition;
 uniform vec3 u_CameraPosition;
 uniform float u_AmbientStrength;
-// uniform float u_DiffuseStrength;
 uniform float u_SpecularStrength;
 uniform float u_Shininess;
 
@@ -66,16 +60,20 @@ uniform sampler2D u_DirectShadowMaps[20];
 
 out vec4 fragColour;
 
-float ShadowCalculation(const vec4 lightSpacePos, const vec3 lightDir, const sampler2D shadowMap, const vec3 normal)
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+// Calculate directional shadow map:
+float ShadowCalculation(const vec4 lightSpacePos, const vec3 Wi, const sampler2D shadowMap, const vec3 N)
 {
 	vec3 projectedCoords = (lightSpacePos.xyz / lightSpacePos.w) * 0.5 + 0.5;
 	if(projectedCoords.z > 1.0) return 0.0;
 
 	const float closestDepth = texture(shadowMap, projectedCoords.xy).r;
 	const float currentDepth = projectedCoords.z;
-	const float shadowBias = max(0.05 * (1.0 - dot(normal, lightDir)), 0.005);
+	const float shadowBias = max(0.05 * (1.0 - dot(N, Wi)), 0.005);
 
-	// percentage-closer filtering to create the illusion of higher resolution shadows:
+	// Percentage-Closer Filtering: Creates the illusion of higher resolution shadows, and softens
+	// the edges of shadows.
 	float shadow = 0.0;
 	const vec2 texelSize = 1.0 / textureSize(shadowMap, 0);
 	for(int x = -1; x <= 1; x++)
@@ -89,38 +87,33 @@ float ShadowCalculation(const vec4 lightSpacePos, const vec3 lightDir, const sam
 	return shadow /= 9.0;
 }
 
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 void main()
 {
 	vec3 resultColour = vec3(0.0);
 
 	for(int i = 0; i < u_DirectLightsCount; ++i)
 	{
-		const vec3 lightColour = u_DirectLights[i].colour.rgb;
-		const vec3 lightDirection = u_DirectLights[i].direction;
+		const vec3 Li = u_DirectLights[i].colour.rgb;
+		const vec3 Wi = u_DirectLights[i].direction;
 
 		// calculate ambient:
-	    const vec3 ambient = u_AmbientStrength * lightColour;
+	    const vec3 ambient = u_AmbientStrength * Li;
 
 		// calculate diffuse light:
-		const vec3 diffuse = max(dot(normal, lightDirection), 0.0) * lightColour;
+		const vec3 diffuse = max(dot(normal, Wi), 0.0) * Li;
 
 		// Blinn-Phong specular:
-		const vec3 viewDirection = normalize(u_CameraPosition - fragPosition);
-		const vec3 halfwayDirection = normalize(lightDirection + viewDirection);
-		const vec3 specular = u_SpecularStrength * pow(max(dot(normal, halfwayDirection), 0.0), u_Shininess) * lightColour;
-
-		// Phong specular:
-		// const vec3 reflectDirection = reflect(-lightDirection, normal);
-		// const vec3 specular = u_SpecularStrength * pow(max(dot(viewDirection, reflectDirection), 0.0), u_Shininess) * u_LightColour;
+		const vec3 V = normalize(u_CameraPosition - fragPosition);
+		const vec3 H = normalize(Wi + V);
+		const vec3 specular = u_SpecularStrength * pow(max(dot(normal, H), 0.0), u_Shininess) * Li;
 
 		// calculate shadows:
-		float shadow = ShadowCalculation(directionalLightSpacePositions[i], lightDirection, u_DirectShadowMaps[i], normal);
+		float shadow = ShadowCalculation(directionalLightSpacePositions[i], Wi, u_DirectShadowMaps[i], normal);
 
 		resultColour += (ambient + (1.0 - shadow) * (diffuse + specular)) * u_ObjectColour;
 	}
-
-	// generate fragment colour:
-	// vec3 resultColour = (ambient + (1.0 - shadow) * (diffuse + specular)) * u_ObjectColour;
 
     fragColour = vec4(resultColour, 1.0);
 }

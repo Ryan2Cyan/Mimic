@@ -206,13 +206,13 @@ namespace MimicRender
 
 	const unsigned int Texture::GetId() const noexcept
 	{
-		if (!_initialised) return;
+		if (!_initialised) return 0;
 		return _id;
 	}
 
 	const glm::ivec2 Texture::GetAspectRatio() const noexcept
 	{
-		if (!_initialised) return;
+		if (!_initialised) return glm::ivec2(0.0f);
 		return _aspectRatio;
 	}
 }

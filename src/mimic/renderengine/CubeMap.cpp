@@ -4,17 +4,15 @@
 #include <renderengine/Shader.h>
 #include <renderengine/RenderTexture.h>
 #include <renderengine/Renderer.h>
-#include <stb_image.h>
-#include <functional>
 #include <glm/gtc/matrix_transform.hpp> 
-#include <glm/gtc/type_ptr.hpp>
+
 
 namespace MimicRender
 {
 	//// #############################################################################
 	//// hdr cubemap functions:
 	//// #############################################################################
-	const std::shared_ptr<EnvironmentCubeMap> EnvironmentCubeMap::Initialise(const std::string& hdrFileName, const glm::vec2& aspectRatio, std::shared_ptr<Renderer>& renderer)
+	std::shared_ptr<EnvironmentCubeMap> EnvironmentCubeMap::Initialise(const std::string& hdrFileName, const glm::vec2& aspectRatio, std::shared_ptr<Renderer>& renderer)
 	{	
 		std::shared_ptr<EnvironmentCubeMap> environementMap = std::make_shared<EnvironmentCubeMap>();
 		
@@ -144,31 +142,32 @@ namespace MimicRender
 		shader->SetMat4("u_Projection", captureProjection);
 		onDrawLambda();
 
+		// Render and capture (for each face of the cubemap) a 2D image and store it in the inputted
+		// render texture:
 		constexpr int startTargetIndex = (int)TextureTarget::MIMIC_CUBE_MAP_POSITIVE_X;
 		for (unsigned int i = 0; i < 6; i++)
 		{
 			shader->SetMat4("u_View", captureViews[i]);
 			renderTexture->AttachTexture((TextureTarget)(startTargetIndex + i), RenderTexture::MIMIC_DEPTH_AND_COLOR);
 
-			// render unit cube:
 			renderer->DrawUnitCube();
 		}
 		renderTexture->Unbind();
 	}
 
-	const unsigned int EnvironmentCubeMap::GetIrradianceId() const
+	unsigned int EnvironmentCubeMap::GetIrradianceId() const
 	{
 		if (!_initialised) return 0;
 		return _irradianceRenderTexture->_texture->_id;
 	}
 
-	const unsigned int EnvironmentCubeMap::GetPreFilteredId() const
+	unsigned int EnvironmentCubeMap::GetPreFilteredId() const
 	{
 		if (!_initialised) return 0;
 		return _prefilteredMapRenderTexture->_texture->_id;
 	}
 
-	const unsigned int EnvironmentCubeMap::GetBRDFId() const
+	unsigned int EnvironmentCubeMap::GetBRDFId() const
 	{
 		if (!_initialised) return 0;
 		return _brdfConvolutedRenderTexture->_texture->_id;

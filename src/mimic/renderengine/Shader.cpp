@@ -9,8 +9,9 @@
 
 namespace MimicRender
 {
-	const std::shared_ptr<Shader> Shader::Initialise(const std::string& path)
+	std::shared_ptr<Shader> Shader::Initialise(const std::string& path)
 	{
+		// Read the shader source file, then read and cache the shader's source code:
 		const std::string sourceCode = ReadShaderFile(path);
 		if (sourceCode.empty())
 		{
@@ -18,7 +19,12 @@ namespace MimicRender
 			return nullptr;
 		}
 
+		// Separate out the single source code into multiple pieces of data for each shader 
+		// type (e.g. fragment or vertex):
 		auto shaderSources = PreProcess(sourceCode);
+
+		// Perform all OpenGL operations on the shader to generate a shader program and
+		// attach and link shaders to it.
 		const std::shared_ptr<Shader> shader = CompileShaderText(shaderSources);
 
 		if (shader == nullptr)
@@ -38,7 +44,7 @@ namespace MimicRender
 		glUseProgram(_shaderProgramId);
 	}
 
-	const std::string Shader::ReadShaderFile(const std::string& path)
+	std::string Shader::ReadShaderFile(const std::string& path)
 	{
 		std::string result;
 		std::ifstream in(path, std::ios::in | std::ios::binary); // in = readonly, binary = reading bytes mode
@@ -63,7 +69,7 @@ namespace MimicRender
 		return 0;	
 	}
 
-	const std::unordered_map<GLuint, std::string> Shader::PreProcess(const std::string& source)
+	std::unordered_map<GLuint, std::string> Shader::PreProcess(const std::string& source)
 	{
 		// load all different shader types from one source file:
 		std::unordered_map<GLenum, std::string> shaderSources;
@@ -93,9 +99,11 @@ namespace MimicRender
 		return shaderSources;
 	}
 	
-	const std::shared_ptr<Shader> Shader::CompileShaderText(const std::unordered_map<GLenum, std::string>& shaderSources)
+	std::shared_ptr<Shader> Shader::CompileShaderText(const std::unordered_map<GLenum, std::string>& shaderSources)
 	{
 		std::shared_ptr<Shader> shader = std::make_shared<Shader>();
+
+		// Generate shader program:
 		GLuint programId = glCreateProgram();
 
 		const int numberOfShaders = shaderSources.size();
@@ -104,7 +112,7 @@ namespace MimicRender
 		std::array<GLenum, maxShadersSupported> glShaderIds;
 		int glShaderIdIndex = 0;
 		
-		// generate & attach each shader to the program:
+		// Generate & attach each shader to the shader program:
 		for (auto& shader : shaderSources)
 		{
 			GLenum shaderType = shader.first;
@@ -129,7 +137,7 @@ namespace MimicRender
 			glShaderIdIndex++;
 		}
 
-		// link shaders to program:
+		// Link shaders to program:
 		glLinkProgram(programId);
 		int success;
 		char infoLog[512];
@@ -144,7 +152,7 @@ namespace MimicRender
 			return nullptr;
 		}
 
-		// capture uniform locations:
+		// Capture key uniform locations:
 		shader->_modelMatrixUniformLocation = glGetUniformLocation(programId, "u_Model");
 		shader->_viewMatrixUniformLocation = glGetUniformLocation(programId, "u_View");
 		shader->_projectionMatrixUniformLocation = glGetUniformLocation(programId, "u_Projection");
@@ -156,7 +164,6 @@ namespace MimicRender
 		shader->_initialised = true;
 		return shader;
 	}
-
 
 	void Shader::SetBool(const char* name, const bool value) const noexcept
 	{
@@ -278,7 +285,7 @@ namespace MimicRender
 		glUniform3f(_cameraPositionUniformLocation, value.x, value.y, value.z);
 	}
 
-	const unsigned int Shader::GetSubroutineUniform(const GLenum& shaderType, const std::string& subroutineName)
+	unsigned int Shader::GetSubroutineUniform(const GLenum& shaderType, const std::string& subroutineName)
 	{
 		if (!_initialised) return 0;
 		const unsigned int subroutineLocation = glGetSubroutineUniformLocation(_shaderProgramId, shaderType, subroutineName.c_str());
@@ -286,7 +293,7 @@ namespace MimicRender
 		return subroutineLocation;
 	}
 
-	const unsigned int Shader::GetSubroutineIndex(const GLenum& shaderType, const std::string& subroutineFuncName)
+	unsigned int Shader::GetSubroutineIndex(const GLenum& shaderType, const std::string& subroutineFuncName)
 	{
 		if (!_initialised) return 0;
 		const unsigned int subroutineIndex = glGetSubroutineIndex(_shaderProgramId, shaderType, subroutineFuncName.c_str());

@@ -21,22 +21,35 @@ namespace MimicRender
 	// #############################################################################
 	// model stuct:
 	// #############################################################################
-	// struct Shader;
 
 	struct Model
 	{
-		static const std::shared_ptr<Model> Initialise();
-		static const std::shared_ptr<Model> Initialise(const std::string& path);
-		static const std::shared_ptr<Model> Initialise(const texture_vector& textures);
-		static const std::shared_ptr<Model> Initialise(const mesh_vector& meshes);
-		static const std::shared_ptr<Model> Initialise(const texture_vector& textures, const mesh_vector& meshes);
+		static std::shared_ptr<Model> Initialise();
+		static std::shared_ptr<Model> Initialise(const std::string& path);
+		static std::shared_ptr<Model> Initialise(const texture_vector& textures);
+		static std::shared_ptr<Model> Initialise(const mesh_vector& meshes);
+		static std::shared_ptr<Model> Initialise(const texture_vector& textures, const mesh_vector& meshes);
 
+		/// <summary>
+		/// Push back mesh to meshes list.
+		/// </summary>
 		void AddMesh(const std::shared_ptr<Mesh>& mesh);
+
+		/// <summary>
+		/// Push back texture to textureslist.
+		/// </summary>
 		void AddTexture(const std::shared_ptr<Texture>& texture);
+
+		/// <summary>
+		/// Update model matrix based on the model's position, rotation, and scale.
+		/// </summary>
 		void UpdateModelMatrix(const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& scale);
-		void QueMeshesToDraw(const std::shared_ptr<Shader>& shader, std::function<void()> onDrawLambda, std::shared_ptr<Renderer>& renderer);
-		// this will be private eventually:
-		// const glm::mat4 GetNormalMatrix() const noexcept;
+
+		/// <summary>
+		/// Converts all meshes into render objects and adds them to the inputted renderer's
+		/// render queue. These render objects will stay there until Renderer::Draw() is called.
+		/// </summary>
+		void QueueMeshesToDraw(const std::shared_ptr<Shader>& shader, std::function<void()> onDrawLambda, std::shared_ptr<Renderer>& renderer);
 
 	private:
 		glm::mat4 _modelMatrix = glm::mat4(1.0f);

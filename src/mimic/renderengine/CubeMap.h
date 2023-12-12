@@ -19,10 +19,22 @@ namespace MimicRender
 
 	struct EnvironmentCubeMap
 	{
-		static const std::shared_ptr<EnvironmentCubeMap> Initialise(const std::string& hdrFileName, const glm::vec2& aspectRatio, std::shared_ptr<Renderer>& renderer);
-		const unsigned int GetIrradianceId() const;
-		const unsigned int GetPreFilteredId() const;
-		const unsigned int GetBRDFId() const;
+		static std::shared_ptr<EnvironmentCubeMap> Initialise(const std::string& hdrFileName, const glm::vec2& aspectRatio, std::shared_ptr<Renderer>& renderer);
+
+		/// <summary>
+		/// Get the ID for the diffuse irradiance map.
+		/// </summary>
+		unsigned int GetIrradianceId() const;
+
+		/// <summary>
+		/// Get the ID for the specular prefiltered map.
+		/// </summary>
+		unsigned int GetPreFilteredId() const;
+
+		/// <summary>
+		/// Get the ID for the specular 2D BRDF look-up texture.
+		/// </summary>
+		unsigned int GetBRDFId() const;
 	private:
 		friend struct Shader;
 		friend struct Renderer;

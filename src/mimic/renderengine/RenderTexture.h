@@ -22,12 +22,41 @@ namespace MimicRender
 	{
 		static std::shared_ptr<RenderTexture> Initialise() noexcept;
 
+		/// <summary>
+		/// Bind render texture for drawing.
+		/// </summary>
 		void Bind() const noexcept;
+
+		/// <summary>
+		/// Unbind render texture after drawing.
+		/// </summary>
 		void Unbind() const noexcept;
+
+		/// <summary>
+		/// Sets up the stored texture within the render texture to be drawn to. The viewport is also
+		/// adjusted to match the stored texture's aspect ratio.
+		/// </summary>
 		void AttachTexture(const TextureTarget& textureTarget, const std::uint8_t& params, const RenderTextureAttachment& attachment = RenderTextureAttachment::MIMIC_COLOR, const int level = 0);
+
+		/// <summary>
+		/// Sets up the render buffer object within the render texture to be drawn to. The viewport is 
+		/// also adjusted to match the render buffer object's aspect ratio.
+		/// </summary>
 		void UseRenderObject(const glm::ivec2& aspectRatio) const;
+
+		/// <summary>
+		/// Set render texture's stored texture.
+		/// </summary>
 		void SetTexture(const std::shared_ptr<Texture>& texture);
+
+		/// <summary>
+		/// Change viewport to match the stored texture's aspect ratio.
+		/// </summary>
 		void SetTextureViewPort() const noexcept;
+
+		/// <summary>
+		/// Get stored texture ID.
+		/// </summary>
 		const unsigned int GetTextureID() const;
 
 		// render texture parameters:

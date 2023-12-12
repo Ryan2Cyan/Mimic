@@ -121,15 +121,15 @@ uniform int u_PointLightsCount;
 out vec4 FragColour;
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// calculate directional shadow map:
-float ShadowCalculation(const vec4 lightSpacePos, const vec3 lightDir, const sampler2D shadowMap, const vec3 normal)
+// Calculate directional shadow map:
+float ShadowCalculation(const vec4 lightSpacePos, const vec3 Wi, const sampler2D shadowMap, const vec3 N)
 {
 	vec3 projectedCoords = (lightSpacePos.xyz / lightSpacePos.w) * 0.5 + 0.5;
 	if(projectedCoords.z > 1.0) return 0.0;
 
 	const float closestDepth = texture(shadowMap, projectedCoords.xy).r;
 	const float currentDepth = projectedCoords.z;
-	const float shadowBias = max(0.05 * (1.0 - dot(normal, lightDir)), 0.005);
+	const float shadowBias = max(0.05 * (1.0 - dot(N, Wi)), 0.005);
 
 	// Percentage-Closer Filtering: Creates the illusion of higher resolution shadows, and softens
 	// the edges of shadows.
@@ -144,6 +144,13 @@ float ShadowCalculation(const vec4 lightSpacePos, const vec3 lightDir, const sam
 		}
 	}
 	return shadow /= 9.0;
+}
+
+// Attenuation: The fall-off of light depending on the distance from the fragment. Calculated via the light 
+// attenuation formula.
+float AttenuationFormula(const float Kc, const float Kl, const float Kq, const float d)
+{
+	return 1.0 / (Kc + Kl * d + Kq * (d * d));
 }
 
 // Normal Distribution Function (GGX/Trowbridge-Reitz): Approximates general value for surface's microfacets 
@@ -313,18 +320,18 @@ void main()
 		Lo += CookTorranceBRDF(N, H, F0, V, Wi, Li, albedo, k, roughness, metallic, i, u_DirectShadowMaps[i]);
 	}
 
-	// sum radiance for all point lights:
+	// Sum radiance for all point lights:
 	for(int i = 0; i < u_PointLightsCount; ++i)
 	{
-		const vec3 lightPosition = u_PointLights[i].position;
-		const vec3 Wi = normalize(lightPosition - fragPosition);
+		const vec3 Wi = normalize(u_PointLights[i].position - fragPosition);
 
 		const vec3 H = normalize(V + Wi);
-		const float distance = length(lightPosition - fragPosition);
-		const float attenuation = 1.0 / (u_PointLights[i].constant + u_PointLights[i].linear * distance + u_PointLights[i].quadratic * (distance * distance));
+		const float distance = length(u_PointLights[i].position - fragPosition);
+
+		const float Fatt = AttenuationFormula(u_PointLights[i].constant, u_PointLights[i].linear, u_PointLights[i].quadratic, distance);
 
 		// Radiance: The spectral radiance of the incoming light ray (represented as an RGB value).
-		const vec3 Li = vec3(u_PointLights[i].colour) * attenuation;
+		const vec3 Li = vec3(u_PointLights[i].colour) * Fatt;
 
 		// Remap roughness:
 		const float k = SchlickGGXRoughnessRemapperDirect(roughness);  

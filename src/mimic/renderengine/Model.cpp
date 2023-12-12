@@ -11,33 +11,33 @@
 
 namespace MimicRender
 {
-	const std::shared_ptr<Model> Model::Initialise()
+	std::shared_ptr<Model> Model::Initialise()
 	{
 		return std::make_shared<Model>();
 	}
 
-	const std::shared_ptr<Model> Model::Initialise(const std::string& path)
+	std::shared_ptr<Model> Model::Initialise(const std::string& path)
 	{
 		std::shared_ptr<Model> model = std::make_shared<Model>();
 		model->LoadMeshesFromFile(path);
 		return model;
 	}
 
-	const std::shared_ptr<Model> Model::Initialise(const texture_vector& textures)
+	std::shared_ptr<Model> Model::Initialise(const texture_vector& textures)
 	{
 		std::shared_ptr<Model> model = std::make_shared<Model>();
 		model->_textures = textures;
 		return model;
 	}
 
-	const std::shared_ptr<Model> Model::Initialise(const mesh_vector& meshes)
+	std::shared_ptr<Model> Model::Initialise(const mesh_vector& meshes)
 	{
 		std::shared_ptr<Model> model = std::make_shared<Model>();
 		model->_meshes = meshes;
 		return model;
 	}
 
-	const std::shared_ptr<Model> Model::Initialise(const texture_vector& textures, const mesh_vector& meshes)
+	std::shared_ptr<Model> Model::Initialise(const texture_vector& textures, const mesh_vector& meshes)
 	{
 		std::shared_ptr<Model> model = std::make_shared<Model>();
 		model->_textures = textures;
@@ -48,10 +48,9 @@ namespace MimicRender
 	void Model::UpdateModelMatrix(const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& scale)
 	{
 		_modelMatrix = glm::translate(glm::mat4(1.0f), position) * glm::mat4_cast(glm::quat(rotation)) * glm::scale(glm::mat4(1.0f), scale);
-		// _normalMatrix = glm::inverseTranspose(_modelMatrix);
 	}
 
-	void Model::QueMeshesToDraw(const std::shared_ptr<Shader>& shader, std::function<void()> onDrawLambda, std::shared_ptr<Renderer>& renderer)
+	void Model::QueueMeshesToDraw(const std::shared_ptr<Shader>& shader, std::function<void()> onDrawLambda, std::shared_ptr<Renderer>& renderer)
 	{
 		for (auto mesh : _meshes)
 		{
@@ -111,25 +110,25 @@ namespace MimicRender
 
 	void Model::ProcessNode(aiNode* node, const aiScene* scene)
 	{
-		// process all node's meshes:
+		// Process all node's meshes:
 		for (unsigned int i = 0; i < node->mNumMeshes; i++)
 		{
 			aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
 			_meshes.push_back(ProcessMesh(mesh, scene));
 		}
 
-		// do the same for each of its children:
+		// Do the same for each of its children:
 		for (unsigned int i = 0; i < node->mNumChildren; i++) ProcessNode(node->mChildren[i], scene);
 	}
 
 	const std::shared_ptr<Mesh> Model::ProcessMesh(aiMesh* mesh, const aiScene* scene) const
 	{
-		// convert aiMesh into Mimic::Mesh: (vertex, normal, tex coords):
+		// Convert aiMesh into Mimic::Mesh: (verties, normals, and texture coordinates):
 		vertex_vector vertices;
 		std::vector<unsigned int> indices;
 		const bool tangents = mesh->mTangents > 0;
 
-		// get mesh vertices:
+		// Get mesh vertices:
 		for (unsigned int i = 0; i < mesh->mNumVertices; i++)
 		{
 			const aiVector3D meshVertices = mesh->mVertices[i];
@@ -155,7 +154,7 @@ namespace MimicRender
 			vertices.push_back(vertex);
 		}
 
-		// get mesh indices:
+		// Get mesh indices:
 		for (unsigned int i = 0; i < mesh->mNumFaces; i++)
 		{
 			aiFace face = mesh->mFaces[i];
@@ -166,9 +165,4 @@ namespace MimicRender
 		std::shared_ptr<Mesh> newMesh = Mesh::Initialise(vertices, indices);
 		return newMesh;
 	}
-
-	/*const glm::mat4 Model::GetNormalMatrix() const noexcept
-	{
-		return _normalMatrix;
-	}*/
 }

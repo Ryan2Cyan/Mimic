@@ -101,10 +101,18 @@ namespace MimicRender
 		static std::shared_ptr<Texture> Initialise(const glm::ivec2& aspectRatio, const std::uint32_t& textureParams, const TextureFormats& internalFormat, const TextureFormats& format, const TextureType& textureType = TextureType::MIMIC_NO_TYPE);
 
 		/// <summary>
-		/// Set the object's type
+		/// Set the textures's type, used when materials need to interpret what texture it's looking at.
 		/// </summary>
 		void SetType(const TextureType& textureType);
+
+		/// <summary>
+		/// Get the textures's aspect ratio.
+		/// </summary>
 		const glm::ivec2 GetAspectRatio() const noexcept;
+
+		/// <summary>
+		/// Get the textures's OpenGL texture ID.
+		/// </summary>
 		const unsigned int GetId() const noexcept;
 
 		// user texture parameters:

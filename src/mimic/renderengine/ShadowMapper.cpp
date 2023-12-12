@@ -63,7 +63,7 @@ namespace MimicRender
 			directLight->_depthMapRT->SetTextureViewPort();
 
 			// Queue all models to be rendered into each direct light's 2D depth map:
-			for (auto model : models) model->QueMeshesToDraw(_depthMapShader, depthMapOnDrawLamba, renderer);
+			for (auto model : models) model->QueueMeshesToDraw(_depthMapShader, depthMapOnDrawLamba, renderer);
 			
 			glClear(GL_DEPTH_BUFFER_BIT);
 
