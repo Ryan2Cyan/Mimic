@@ -16,7 +16,7 @@ namespace MimicRender
 		std::shared_ptr<DirectLight> directLight = std::make_shared<DirectLight>();
 		directLight->Position = position;
 		directLight->Direction = direction;
-		directLight->Colour = colour;
+		directLight->Colour = glm::vec3(glm::clamp(colour, 0.0f, 1.0f));
 		return directLight;
 	}
 
