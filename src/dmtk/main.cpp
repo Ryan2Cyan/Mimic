@@ -67,20 +67,18 @@ int main(int argc, char* argv[])
 		std::shared_ptr<ShadowMapper> shadowMapper = ShadowMapper::Initialise(glm::ivec2(4096, 4096));
 
 		// Initialise shaders:
+		static int shaderUsed = 0;
 		const std::shared_ptr<Shader> pbrShader = Shader::Initialise(fileLoader->LocateFileInDirectory(assetPath, "PBRShader.glsl"));
 		const std::shared_ptr<Shader> blinnPhongShader = Shader::Initialise(fileLoader->LocateFileInDirectory(assetPath, "BlinnPhongShader.glsl"));
 		// Blinn phong material parameters:
 		glm::vec3 objectColour = glm::vec3(0.8f);
-		glm::vec3 lightColour = glm::vec3(0.3f, 0.3f, 0.3f);
 		float ambientStrength = 0.227f;
 		float specularStrength = 0.5f;
 		float shininess = 32.0f;
 
-
 		const std::shared_ptr<Shader> flatColourShader = Shader::Initialise(fileLoader->LocateFileInDirectory(assetPath, "FlatColourShader.glsl"));
 		// Flat colour material parameters:
 		constexpr glm::vec3 flatColour = glm::vec3(1.0f);
-
 
 		// Initialise all data required for the PBR Shader subroutines. This looks messy here but will be cleaned
 		// up in the GEP assignment.
@@ -166,10 +164,26 @@ int main(int argc, char* argv[])
 		std::shared_ptr<Texture> barkNormalTexture = Texture::Initialise(fileLoader->LocateFileInDirectory(assetPath, "Bark012_1K-PNG_NormalGL.png"), window->GetAspectRatio(), Texture::MIMIC_2D_TEXTURE_PARAMS, TextureType::MIMIC_NORMAL);
 		std::shared_ptr<Texture> barkRoughnessTexture = Texture::Initialise(fileLoader->LocateFileInDirectory(assetPath, "Bark012_1K-PNG_Roughness.png"), window->GetAspectRatio(), Texture::MIMIC_2D_TEXTURE_PARAMS, TextureType::MIMIC_ROUGHNESS);
 
+		std::shared_ptr<Texture> groundAlbedoTexture = Texture::Initialise(fileLoader->LocateFileInDirectory(assetPath, "Ground054_1K-PNG_Color.png"), window->GetAspectRatio(), Texture::MIMIC_2D_TEXTURE_PARAMS, TextureType::MIMIC_ALBEDO);
+		std::shared_ptr<Texture> groundNormalTexture = Texture::Initialise(fileLoader->LocateFileInDirectory(assetPath, "Ground054_1K-PNG_NormalGL.png"), window->GetAspectRatio(), Texture::MIMIC_2D_TEXTURE_PARAMS, TextureType::MIMIC_NORMAL);
+		std::shared_ptr<Texture> groundRoughnessTexture = Texture::Initialise(fileLoader->LocateFileInDirectory(assetPath, "Ground054_1K-PNG_Roughness.png"), window->GetAspectRatio(), Texture::MIMIC_2D_TEXTURE_PARAMS, TextureType::MIMIC_ROUGHNESS);
+
+		std::shared_ptr<Texture> tiles1AlbedoTexture = Texture::Initialise(fileLoader->LocateFileInDirectory(assetPath, "Tiles078_1K-PNG_Color.png"), window->GetAspectRatio(), Texture::MIMIC_2D_TEXTURE_PARAMS, TextureType::MIMIC_ALBEDO);
+		std::shared_ptr<Texture> tiles1NormalTexture = Texture::Initialise(fileLoader->LocateFileInDirectory(assetPath, "Tiles078_1K-PNG_NormalGL.png"), window->GetAspectRatio(), Texture::MIMIC_2D_TEXTURE_PARAMS, TextureType::MIMIC_NORMAL);
+		std::shared_ptr<Texture> tiles1RoughnessTexture = Texture::Initialise(fileLoader->LocateFileInDirectory(assetPath, "Tiles078_1K-PNG_Roughness.png"), window->GetAspectRatio(), Texture::MIMIC_2D_TEXTURE_PARAMS, TextureType::MIMIC_ROUGHNESS);
+
+		std::shared_ptr<Texture> tiles2AlbedoTexture = Texture::Initialise(fileLoader->LocateFileInDirectory(assetPath, "Tiles093_1K-PNG_Color.png"), window->GetAspectRatio(), Texture::MIMIC_2D_TEXTURE_PARAMS, TextureType::MIMIC_ALBEDO);
+		std::shared_ptr<Texture> tiles2NormalTexture = Texture::Initialise(fileLoader->LocateFileInDirectory(assetPath, "Tiles093_1K-PNG_NormalGL.png"), window->GetAspectRatio(), Texture::MIMIC_2D_TEXTURE_PARAMS, TextureType::MIMIC_NORMAL);
+		std::shared_ptr<Texture> tiles2RoughnessTexture = Texture::Initialise(fileLoader->LocateFileInDirectory(assetPath, "Tiles093_1K-PNG_Roughness.png"), window->GetAspectRatio(), Texture::MIMIC_2D_TEXTURE_PARAMS, TextureType::MIMIC_ROUGHNESS);
+
+		std::shared_ptr<Texture> tiles3AlbedoTexture = Texture::Initialise(fileLoader->LocateFileInDirectory(assetPath, "Tiles101_1K-PNG_Color.png"), window->GetAspectRatio(), Texture::MIMIC_2D_TEXTURE_PARAMS, TextureType::MIMIC_ALBEDO);
+		std::shared_ptr<Texture> tiles3NormalTexture = Texture::Initialise(fileLoader->LocateFileInDirectory(assetPath, "Tiles101_1K-PNG_NormalGL.png"), window->GetAspectRatio(), Texture::MIMIC_2D_TEXTURE_PARAMS, TextureType::MIMIC_NORMAL);
+		std::shared_ptr<Texture> tiles3RoughnessTexture = Texture::Initialise(fileLoader->LocateFileInDirectory(assetPath, "Tiles101_1K-PNG_Roughness.png"), window->GetAspectRatio(), Texture::MIMIC_2D_TEXTURE_PARAMS, TextureType::MIMIC_ROUGHNESS);
+
 		// Initialise direct lights:
 		std::vector<std::shared_ptr<DirectLight>> directLights =
 		{
-			DirectLight::Initialise(glm::vec3(2.72f, 8.8f, -5.8f), glm::vec3(-0.25f), glm::vec3(1.0))
+			DirectLight::Initialise(glm::vec3(0.0f, 5.0f, -14.0f), glm::vec3(-0.25f), glm::vec3(1.0))
 		};
 
 		// Initialise point lights:
@@ -302,7 +316,38 @@ int main(int argc, char* argv[])
 			metallicTexture = nullptr;
 			pbrOnDrawLamba();
 		};
-
+		std::function<void()> groundPBROnDrawLamba = [&]()
+		{
+			albedoTexture = groundAlbedoTexture;
+			normalTexture = groundNormalTexture;
+			roughnessTexture = groundRoughnessTexture;
+			metallicTexture = nullptr;
+			pbrOnDrawLamba();
+		};
+		std::function<void()> tiles1PBROnDrawLamba = [&]()
+		{
+			albedoTexture = tiles1AlbedoTexture;
+			normalTexture = tiles1NormalTexture;
+			roughnessTexture = tiles1RoughnessTexture;
+			metallicTexture = nullptr;
+			pbrOnDrawLamba();
+		};
+		std::function<void()> tiles2PBROnDrawLamba = [&]()
+		{
+			albedoTexture = tiles2AlbedoTexture;
+			normalTexture = tiles2NormalTexture;
+			roughnessTexture = tiles2RoughnessTexture;
+			metallicTexture = nullptr;
+			pbrOnDrawLamba();
+		};
+		std::function<void()> tiles3PBROnDrawLamba = [&]()
+		{
+			albedoTexture = tiles3AlbedoTexture;
+			normalTexture = tiles3NormalTexture;
+			roughnessTexture = tiles3RoughnessTexture;
+			metallicTexture = nullptr;
+			pbrOnDrawLamba();
+		};
 		std::function<void()> noTexturesPBROnDrawLamba = [&]()
 		{
 			albedoTexture = nullptr;
@@ -407,38 +452,66 @@ int main(int argc, char* argv[])
 				MIMIC_PROFILE_SCOPE("Draw Scene");
 				glClearColor(0.77f, 0.73f, 0.97f, 1.0f);
 				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 				{
 					// update shadow maps:
 					MIMIC_PROFILE_SCOPE("Render Depth Maps");
 					shadowMapper->RenderDirectLightDepthMaps(modelsForShadowMapping, directLights, renderer);
 				}
-				// send meshes to renderer:
-				switch (itemCurrent)
+				switch (shaderUsed)
 				{
 					case 0:
 					{
-						sphereModel->QueueMeshesToDraw(pbrShader, sphereBPOnDrawLamba, renderer);
+						switch (itemCurrent)
+						{
+							case 0:
+							{
+								sphereModel->QueueMeshesToDraw(pbrShader, sphereBPOnDrawLamba, renderer);
+							}break;
+							case 1:
+							{
+								sphereModel->QueueMeshesToDraw(pbrShader, marblePBROnDrawLamba, renderer);
+							}break;
+							case 2:
+							{
+								sphereModel->QueueMeshesToDraw(pbrShader, barkPBROnDrawLamba, renderer);
+							}break;
+							case 3:
+							{
+								sphereModel->QueueMeshesToDraw(pbrShader, foilPBROnDrawLamba, renderer);
+							}break;
+							case 4:
+							{
+								sphereModel->QueueMeshesToDraw(pbrShader, brickPBROnDrawLamba, renderer);
+							}break;
+							case 5:
+							{
+								sphereModel->QueueMeshesToDraw(pbrShader, groundPBROnDrawLamba, renderer);
+							}break;
+							case 6:
+							{
+								sphereModel->QueueMeshesToDraw(pbrShader, tiles1PBROnDrawLamba, renderer);
+							}break;
+							case 7:
+							{
+								sphereModel->QueueMeshesToDraw(pbrShader, tiles2PBROnDrawLamba, renderer);
+							}break;
+							case 8:
+							{
+								sphereModel->QueueMeshesToDraw(pbrShader, tiles3PBROnDrawLamba, renderer);
+							}break;
+							default:
+							break;
+						}
 					}break;
 					case 1:
 					{
-						sphereModel->QueueMeshesToDraw(pbrShader, marblePBROnDrawLamba, renderer);
-					}break;
-					case 2:
-					{
-						sphereModel->QueueMeshesToDraw(pbrShader, barkPBROnDrawLamba, renderer);
-					}break;
-					case 3:
-					{
-						sphereModel->QueueMeshesToDraw(pbrShader, foilPBROnDrawLamba, renderer);
-					}break;
-					case 4:
-					{
-						sphereModel->QueueMeshesToDraw(pbrShader, brickPBROnDrawLamba, renderer);
+						sphereModel->QueueMeshesToDraw(blinnPhongShader, blinnPhongOnDrawLamba, renderer);
 					}break;
 					default:
-						break;
-					}
+					break;
+				}
+				// send meshes to renderer:
+				
 				groundModel->QueueMeshesToDraw(pbrShader, groundBPOnDrawLamba, renderer);
 				lightModel->QueueMeshesToDraw(flatColourShader, flatColourOnDrawLamba, renderer);
 
@@ -457,10 +530,7 @@ int main(int argc, char* argv[])
 			ImGui_ImplSDL2_NewFrame();
 			ImGui::NewFrame();
 
-			ImGui::ShowDemoWindow();
-
 			ImGui::Begin("Settings");
-			ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 6.0f);
 
 			if (ImGui::CollapsingHeader("Sphere Transform"))
 			{
@@ -472,16 +542,35 @@ int main(int argc, char* argv[])
 
 			if (ImGui::CollapsingHeader("Sphere Material"))
 			{
-				const char* items[] = { "None", "Marble", "Bark", "Foil", "Brick" };
-				ImGui::Combo("Material", &itemCurrent, items, IM_ARRAYSIZE(items));
-				if (itemCurrent == 0)
+				ImGui::RadioButton("PBR##pbr_mat0", &shaderUsed, 0); ImGui::SameLine();
+				ImGui::RadioButton("Blinn Phong##pbr_mat1", &shaderUsed, 1);
+				switch (shaderUsed)
 				{
-					ImGui::ColorEdit3("Albedo##pbr_mat1", &(spherePBRMaterial.Albedo[0]));
-					ImGui::ColorEdit3("Emissive##pbr_mat2", &(spherePBRMaterial.Emissive[0]));
-					ImGui::SliderFloat("Roughness##pbr_mat3", &(spherePBRMaterial.Roughness), 0.001f, 1.0f);
-					ImGui::RadioButton("Dialectric##pbr_mat4", &spherePBRMaterial.Metallic, 0); ImGui::SameLine();
-					ImGui::RadioButton("Metallic##pbr_mat5", &spherePBRMaterial.Metallic, 1);
-					ImGui::SliderFloat("Ambient Occlusion##m6", &(spherePBRMaterial.AmbientOcclusion), 0.0f, 1.0f);
+					case 0:
+					{
+						const char* items[] = { "None", "Marble", "Bark", "Foil", "Brick", "Ground", "Tiles 1", "Tiles 2", "Tiles 3" };
+						ImGui::Combo("Material", &itemCurrent, items, IM_ARRAYSIZE(items));
+						if (itemCurrent == 0)
+						{
+							// PBR material parameters:
+							ImGui::ColorEdit3("Albedo##pbr_mat2", &(spherePBRMaterial.Albedo[0]));
+							ImGui::ColorEdit3("Emissive##pbr_mat3", &(spherePBRMaterial.Emissive[0]));
+							ImGui::SliderFloat("Roughness##pbr_mat4", &(spherePBRMaterial.Roughness), 0.001f, 1.0f);
+							ImGui::RadioButton("Dialectric##pbr_mat5", &spherePBRMaterial.Metallic, 0); ImGui::SameLine();
+							ImGui::RadioButton("Metallic##pbr_mat6", &spherePBRMaterial.Metallic, 1);
+							ImGui::SliderFloat("Ambient Occlusion##pbr_mat7", &(spherePBRMaterial.AmbientOcclusion), 0.0f, 1.0f);
+						}
+					}break;
+					case 1:
+					{
+						// Blinn Phong material parameters:
+						ImGui::ColorEdit3("Object Colour##bp_mat1", &(objectColour[0]));
+						ImGui::SliderFloat("Ambient Strength##bp_mat3", &(ambientStrength), 0.0f, 1.0f);
+						ImGui::SliderFloat("Specular Strength##bp_mat4", &(specularStrength), 0.0f, 1.0f);
+						ImGui::SliderFloat("Shininess##bp_mat5", &(shininess), 0.0f, 100.0f);
+					}break;
+					default:
+					break;
 				}
 			}
 			ImGui::Separator();
@@ -496,17 +585,12 @@ int main(int argc, char* argv[])
 
 			if (ImGui::CollapsingHeader("Ground Material"))
 			{
-				const char* items[] = { "None", "Marble", "Bark", "Foil", "Brick" };
-				ImGui::Combo("Material", &itemCurrent, items, IM_ARRAYSIZE(items));
-				if (itemCurrent == 0)
-				{
-					ImGui::ColorEdit3("Albedo##pbr_mat1", &(groundPBRMaterial.Albedo[0]));
-					ImGui::ColorEdit3("Emissive##pbr_mat2", &(groundPBRMaterial.Emissive[0]));
-					ImGui::SliderFloat("Roughness##pbr_mat3", &(groundPBRMaterial.Roughness), 0.001f, 1.0f);
-					ImGui::RadioButton("Dialectric##pbr_mat4", &groundPBRMaterial.Metallic, 0); ImGui::SameLine();
-					ImGui::RadioButton("Metallic##pbr_mat5", &groundPBRMaterial.Metallic, 1);
-					ImGui::SliderFloat("Ambient Occlusion##m6", &(groundPBRMaterial.AmbientOcclusion), 0.0f, 1.0f);
-				}
+				ImGui::ColorEdit3("Albedo##pbr_mat1", &(groundPBRMaterial.Albedo[0]));
+				ImGui::ColorEdit3("Emissive##pbr_mat2", &(groundPBRMaterial.Emissive[0]));
+				ImGui::SliderFloat("Roughness##pbr_mat3", &(groundPBRMaterial.Roughness), 0.001f, 1.0f);
+				ImGui::RadioButton("Dialectric##pbr_mat4", &groundPBRMaterial.Metallic, 0); ImGui::SameLine();
+				ImGui::RadioButton("Metallic##pbr_mat5", &groundPBRMaterial.Metallic, 1);
+				ImGui::SliderFloat("Ambient Occlusion##m6", &(groundPBRMaterial.AmbientOcclusion), 0.0f, 1.0f);
 			}
 			ImGui::Separator();
 
@@ -523,7 +607,7 @@ int main(int argc, char* argv[])
 			{
 				ImGui::SliderFloat3("Position##dl1_2", &(directLights[0]->Position[0]), -20.0f, 20.0f);
 				ImGui::SliderFloat3("Direction##dl2_2", &(directLights[0]->Direction[0]), -1.0f, 1.0f);
-				ImGui::SliderFloat3("Colour##dl3_2", &(directLights[0]->Colour[0]), 0.0f, 1.0f);
+				ImGui::SliderFloat3("Colour##dl3_2", &(directLights[0]->Colour[0]), 0.0f, 100.0f);
 			}
 			ImGui::Separator();
 

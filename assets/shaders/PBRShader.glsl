@@ -11,16 +11,14 @@ uniform vec4 u_ViewPosition;
 uniform mat4 u_Model;
 uniform mat4 u_View;
 uniform mat4 u_Projection;
-// uniform mat3 u_NormalMatrix;
 
 uniform mat4 u_DirectLightMatrices[25];
 uniform int u_DirectLightsCount;
 // uniform mat4 u_PointLightMatrices[20];
 
 out vec2 texCoord;
-// out vec3 vertexNormal;
 out vec3 fragPosition;
-out vec3 viewDirectionNormal;
+out vec3 normal;
 out mat3 TBN;
 out vec4 directionalLightSpacePositions[25];
 
@@ -36,8 +34,8 @@ void main()
 	TBN = mat3(t, b, n);
 	
 	const vec4 aPosVec4 = vec4(aPos, 1.0);
-        fragPosition = vec3(u_Model * aPosVec4);
-	viewDirectionNormal = transpose(inverse(mat3(u_Model))) * aNormal;
+    fragPosition = vec3(u_Model * aPosVec4);
+	normal = normalize(transpose(inverse(mat3(u_Model))) * aNormal);
 	
 	// calculate light space positions for shadow maps:
 	for(int i = 0; i < u_DirectLightsCount; i++)
@@ -61,10 +59,9 @@ void main()
 // Source: https://learnopengl.com/PBR/Lighting
 
 in vec2 texCoord;
-// in vec3 vertexNormal;
 
 in vec3 fragPosition;
-in vec3 viewDirectionNormal;
+in vec3 normal;
 in mat3 TBN;
 in vec4 directionalLightSpacePositions[25];
 
@@ -239,7 +236,7 @@ vec3 CookTorranceBRDF(const vec3 N, const vec3 H, const vec3 F0, const vec3 V, c
 // 'Manual' means the value is literal and set directly by the user.
 subroutine(CalculateNormal) const vec3 CalculateNormalManual()
 {
-	return viewDirectionNormal;
+	return normal;
 }
 
 subroutine(CalculateNormal) const vec3 CalculateNormalAutoTexture()
