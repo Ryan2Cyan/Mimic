@@ -1,26 +1,25 @@
 #include "MimicCore.h"
-#include <mimic_engine/ResourceManager.h>
-#include <mimic_engine/GameObject.h>
-#include <mimic_engine/Environment.h>
+#include "ResourceManager.h"
+#include "GameObject.h"
+#include "Environment.h"
 #include <mimic_render/Window.h>
-#include <mimic_render/Renderer.h>
 #include <mimic_render/Light.h>
 
 #include <GL/glew.h>
 
 namespace MimicEngine
 {
+	std::shared_ptr<MimicRender::Window> MimicCore::Window;
+	std::shared_ptr<ResourceManager> MimicCore::ResourceManager;
+	std::shared_ptr<MimicRender::Renderer> MimicCore::_renderer;
+	std::shared_ptr<Environment> MimicCore::_environment;
 	//std::shared_ptr<Camera> MimicCore::CurrentCamera;
-	// std::shared_ptr<ResourceManager> MimicCore::ResourceManager;
 	//std::vector<std::shared_ptr<GameObject>> MimicCore::_gameObjects;
 	//std::vector<std::shared_ptr<DirectLight>> MimicCore::_directLights;
 	//std::vector<std::shared_ptr<PointLight>> MimicCore::_pointLights;
 	//std::vector<std::shared_ptr<Camera>> MimicCore::_cameras;
-	//std::shared_ptr<Renderer> MimicCore::_renderer;
 	//std::shared_ptr<CubeMap> MimicCore::CubeMap;
 	//std::shared_ptr<EnvironmentCubeMap> MimicCore::EnvironmentCubeMap;
-	std::shared_ptr<MimicRender::Window> MimicCore::Window;
-	//std::shared_ptr<Environment> MimicCore::_environment;
 
 	std::shared_ptr<MimicCore> MimicCore::Initialise() 
 	{ 
@@ -41,35 +40,41 @@ namespace MimicEngine
 		Window = MimicRender::Window::Initialise("[Mimic Engine] Dungeon Master's Tool Kit");
 		initialised = Window != nullptr;
 
-		// Init resource manager:
-		// newMimicCore->ResourceManager = ResourceManager::Initialise();
-		// newMimicCore->ResourceManager->_mimicCore = newMimicCore->_self;
-		// newMimicCore->ResourceManager->_self = newMimicCore->ResourceManager;
-		MIMIC_LOG_INFO("[Mimic::ResourceManager] Initialisation successful.");
+		// Initialise resource manager:
+		newMimicCore->ResourceManager = ResourceManager::Initialise();
+		newMimicCore->ResourceManager->_mimicCore = newMimicCore->_self;
+		newMimicCore->ResourceManager->_self = newMimicCore->ResourceManager;
+		MIMIC_LOG_INFO("[MimicEngine::ResourceManager] Initialisation successful.");
 
-		// init environment:
-		// newMimicCore->_environment = newMimicCore->_environment->Initialise(70.0f);
-		MIMIC_LOG_INFO("[Mimic::Environment] Initialisation successful.");
+		// Initialise environment:
+		newMimicCore->_environment = Environment::Initialise();
+		MIMIC_LOG_INFO("[MimicEngine::Environment] Initialisation successful.");
 
-		// init renderer:
-		// newMimicCore->_renderer = Renderer::Initialise();
-		MIMIC_LOG_INFO("[Mimic::Renderer] Initialisation successful.");
+		// Initialise renderer:
+		newMimicCore->_renderer = MimicRender::Renderer::Initialise();
+		MIMIC_LOG_INFO("[MimicEngine::Renderer] Initialisation successful.");
 
 		// EnvironmentCubeMap = EnvironmentCubeMap::Initialise();
 
 		// Ensure that the core (and all of its components) are initialised:
 		if (newMimicCore == nullptr || !initialised)
 		{
-			MIMIC_LOG_FATAL("[Mimic::MimicCore] Unable to initialise MimicCore.");
+			MIMIC_LOG_FATAL("[MimicEngine::MimicCore] Unable to initialise MimicCore.");
 			throw;
 		}
 
+		MIMIC_LOG_INFO("[MimicEngine::MimicCore] Mimic Core initialisation successful.");
 		return newMimicCore;
 	}
 
 	glm::ivec2 MimicCore::GetCurrentAspect()
 	{
 		return Window->GetAspectRatio();
+	}
+
+	std::shared_ptr<ResourceManager> MimicCore::GetResourceManager()
+	{
+		return ResourceManager;
 	}
 
 	void MimicCore::Start()
@@ -80,7 +85,7 @@ namespace MimicEngine
 
 	void MimicCore::Update()
 	{
-		// _environment->CalculateDeltaTime();
+		_environment->CalculateDeltaTime();
 
 		// update game objects:
 		/*for (auto camera : _cameras)
@@ -103,7 +108,7 @@ namespace MimicEngine
 		//		camera->_projectionMatrix
 		//	);*/
 		//}
-		// _renderer->_renderQue.clear();
+		_renderer->ClearRenderQueue();
 		// _cubeMap->Draw(CurrentCamera->_viewMatrix, CurrentCamera->_projectionMatrix);
 		// EnvironmentCubeMap->Draw(CurrentCamera->_viewMatrix, CurrentCamera->_projectionMatrix);
 	}

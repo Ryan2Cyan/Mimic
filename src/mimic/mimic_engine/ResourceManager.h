@@ -47,14 +47,12 @@
 namespace MimicEngine
 {
 	// #############################################################################
-	// resource manager stuct:
+	// Resource Manager stuct:
 	// #############################################################################
 	struct Resource;
 
 	struct ResourceManager
 	{
-		explicit ResourceManager();
-
 		/// <summary>
 		/// Load resouce from the assets/ directory given a specified resource filename (file extension included).
 		/// Returns nullptr if the resource cannot be loaded. Returns nullptr is load was unsuccessful.
@@ -82,7 +80,8 @@ namespace MimicEngine
 			newResource->Path = fileName;
 			if (newResource->Name.empty()) newResource->Name = GetNameFromFilePath(filePath);
 			const int success = newResource->Load(filePath);
-			if (success == -1)
+			newResource->_initialised = success;
+			if (!success)
 			{
 				MIMIC_LOG_WARNING("[Mimic::ResourceManager] Invalid resource filepath attempted to load: \"%\"", fileName.c_str());
 				return nullptr;
@@ -103,13 +102,14 @@ namespace MimicEngine
 			std::shared_ptr<T> newResource = std::make_shared<T>();
 			newResource->_resourceManager = _self;
 
-			// if (newResource->Name.empty()) newResource->Name = GetNameFromFilePath(filePath);
 			const int success = newResource->Create(args...);
 			if (success == -1)
 			{
 				MIMIC_LOG_WARNING("[Mimic::ResourceManager] Unable to create new resource.");
 				return nullptr;
 			}
+
+			newResource->Name = GetNameFromFilePath("NewResource" + _createdResources.size());
 			_createdResources.push_back(newResource);
 			MIMIC_LOG_INFO("[Mimic::ResourceManager] Successfully created new resource");
 			return newResource;

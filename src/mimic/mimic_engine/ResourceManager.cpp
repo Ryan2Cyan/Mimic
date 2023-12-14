@@ -3,20 +3,18 @@
 namespace MimicEngine
 {
 	// #############################################################################
-	// resource manager functions:
+	// Resource Manager functions:
 	// #############################################################################
-	ResourceManager::ResourceManager() : AssetsDirectoryPath("../src/dmtk/assets/") 
-	{
-		_fileLoader = std::make_shared<MimicUtility::FileLoader>();
-		_assetsDirectory = _fileLoader->LocateDirectory("assets");
-	}
 
 	std::shared_ptr<ResourceManager> ResourceManager::Initialise()
 	{
-		return std::make_shared<ResourceManager>();
+		std::shared_ptr<ResourceManager> resourceManager = std::make_shared<ResourceManager>();
+		resourceManager->_fileLoader = MimicUtility::FileLoader::Initialise();
+		resourceManager->_assetsDirectory = resourceManager->_fileLoader->LocateDirectory("assets");
+		return resourceManager;
 	}
 
-	// Source https://www.youtube.com/watch?v=Z9LE3ksHEQQ
+	// Source: https://www.youtube.com/watch?v=Z9LE3ksHEQQ
 	const std::string ResourceManager::GetNameFromFilePath(const std::string& path) const noexcept
 	{
 		auto lastSlash = path.find_last_of("/\\");

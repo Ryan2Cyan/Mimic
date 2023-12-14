@@ -33,7 +33,6 @@ namespace MimicRender
 			return nullptr;
 		}
 		
-		MIMIC_LOG_INFO("[MimicRender::Shader] Successfully initialised shader from filepath: \"%\"", path);
 		shader->_initialised = true;
 		return shader;
 	}

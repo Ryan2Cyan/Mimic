@@ -24,9 +24,10 @@ namespace MimicEngine
 	protected:
 		friend struct ResourceManager;
 
-		std::weak_ptr<ResourceManager> _resourceManager;
-
 		// Return true on successful load, false otherwise:
-		virtual const bool Load(const std::string& path) = 0; 
+		virtual bool Load(const std::string& path) = 0; 
+
+		std::weak_ptr<ResourceManager> _resourceManager;
+		bool _initialised;
 	};
 }

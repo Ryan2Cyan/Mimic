@@ -8,7 +8,7 @@
 namespace MimicRender
 {
 	// #############################################################################
-	// texture functions:
+	// Texture functions:
 	// #############################################################################
 	std::shared_ptr<Texture> Texture::Initialise(const std::string& fullPath, const glm::ivec2& aspectRatio, const std::uint32_t& textureParams, const TextureType& textureType)
 	{
@@ -70,7 +70,6 @@ namespace MimicRender
 		texture->_type = textureType;
 		texture->_aspectRatio = aspectRatio;
 		texture->_initialised = true;
-		MIMIC_LOG_INFO("[MimicRender::Texture] Successfully initialised shader from filepath: \"%\"", fullPath);
 		return texture;
 	}
 

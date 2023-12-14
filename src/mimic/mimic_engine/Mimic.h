@@ -4,10 +4,11 @@
 
 // Mimic translation units:
 #include "MimicCore.h"
+#include "ResourceManager.h"
+#include "Environment.h"
+#include "Texture.h"
 //#include "GameObject.h"
 //#include "Component.h"
-//#include "Environment.h"
-//#include "ResourceManager.h"
 //#include "Resource.h"
 //#include "ModelRenderer.h"
 //#include "Material.h"

@@ -1,24 +1,24 @@
 #include "Environment.h"
+
 #include <SDL/SDL.h>
 
-namespace Mimic
+namespace MimicEngine
 {
-	// global: access deltaTime from anywhere.
+	// Global Access: Get current delta time value.
 	float Environment::_deltaTime;
 	float DeltaTime()
 	{
 		return Environment::GetDeltaTime();
 	}
 
-	Environment::Environment(const float idealFramerate) : _lastTimeDelta(0.0f), _idealFramerate(idealFramerate) { }
-
 	std::shared_ptr<Environment> Environment::Initialise(const float& idealFramerate)
 	{
-		return std::make_shared<Environment>(idealFramerate);
+		std::shared_ptr<Environment> environment = std::make_shared<Environment>();
+		environment->_idealFramerate = idealFramerate;
+		return environment;
 	}
 
-	// access private static member _deltaTime:
-	const float Environment::GetDeltaTime() noexcept
+	float Environment::GetDeltaTime() noexcept
 	{
 		return _deltaTime;
 	}

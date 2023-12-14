@@ -2,6 +2,7 @@
 // #include <lowlevelsystems/Camera.h>
 #include <mimic_utility/Logger.h>
 #include <mimic_render/Window.h>
+#include <mimic_render/Renderer.h>
 
 #include <GLM/glm.hpp>
 #include <memory>
@@ -9,7 +10,8 @@
 
 using namespace MimicRender;
 
-#define MIMIC_CURRENT_ASPECT()			::MimicEngine::MimicCore::GetCurrentAspect()
+#define MIMIC_CURRENT_ASPECT()					 ::MimicEngine::MimicCore::GetCurrentAspect()
+#define MIMIC_LOAD_RESOURCE(T, fileName)		 ::MimicEngine::MimicCore::GetResourceManager()->LoadResource<T>(fileName)
 
 namespace MimicEngine
 {
@@ -35,14 +37,25 @@ namespace MimicEngine
 	{
 		static std::shared_ptr<MimicCore> Initialise();
 
-		 void Start();
-		 void Update();
-		 void Draw();
+		/// <summary>
+		/// Called once before the game loop starts running.
+		/// </summary>
+		void Start();
 
 		/// <summary>
-		/// Get current aspect ratio of application window.
+		/// Called once per frame in the game loop. Updates all scene objects, cameras, and 
+		/// delta time.
 		/// </summary>
+		void Update();
+
+		/// <summary>
+		/// Called once per frame in the game loop. Draws all objects in the scene.
+		/// </summary>
+		void Draw();
+
+		
 		static glm::ivec2 GetCurrentAspect();
+		static std::shared_ptr<ResourceManager> GetResourceManager();
 
 		// std::shared_ptr<GameObject> AddEmptyGameObject() noexcept;
 		// std::shared_ptr<GameObject> AddEmptyGameObject(const std::string& name) noexcept;
@@ -63,12 +76,12 @@ namespace MimicEngine
 		friend struct PBRMaterial; 
 		friend struct EnvironmentCubeMap;
 
+		static std::shared_ptr<MimicRender::Renderer> _renderer;
+		static std::shared_ptr<Environment> _environment;
 		// static std::vector<std::shared_ptr<GameObject>> _gameObjects;
 		// static std::vector<std::shared_ptr<Camera>> _cameras;
 		// static std::vector<std::shared_ptr<DirectLight>> _directLights;
 		// static std::vector<std::shared_ptr<PointLight>> _pointLights;
-		// static std::shared_ptr<Renderer> _renderer;
-		// static std::shared_ptr<Environment> _environment;
 		std::weak_ptr<MimicCore> _self;
 		bool _initialised;
 	};

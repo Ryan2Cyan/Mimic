@@ -97,7 +97,7 @@ namespace MimicRender
 			MIMIC_DEPTH_COMPONENT = 0x40
 		};
 
-		static std::shared_ptr<Texture> Initialise(const std::string& fullPath, const glm::ivec2& aspectRatio, const std::uint32_t& textureParams, const TextureType& type = TextureType::MIMIC_NO_TYPE);
+		static std::shared_ptr<Texture> Initialise(const std::string& fullPath, const glm::ivec2& aspectRatio = glm::ivec2(0.0f), const std::uint32_t& textureParams = MIMIC_2D_TEXTURE_PARAMS, const TextureType& textureType = TextureType::MIMIC_NO_TYPE);
 		static std::shared_ptr<Texture> Initialise(const glm::ivec2& aspectRatio, const std::uint32_t& textureParams, const TextureFormats& internalFormat, const TextureFormats& format, const TextureType& textureType = TextureType::MIMIC_NO_TYPE);
 
 		/// <summary>
