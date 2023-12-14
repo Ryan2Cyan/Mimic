@@ -1,5 +1,5 @@
 #pragma once
-#include <utility/Logger.h>
+#include <mimic_utility/Logger.h>
 #include <algorithm>
 #include <chrono>
 #include <fstream>
@@ -10,17 +10,17 @@
 #include <iomanip>
 
 // Macros:
-#define MIMIC_PROFILE_BEGIN_SESSION(name, filepath) ::MimicUtil::Instrumentor::Get().BeginSession(name, filepath)
-#define MIMIC_PROFILE_END_SESSION() ::MimicUtil::Instrumentor::Get().EndSession()
-#define MIMIC_PROFILE_SCOPE_LINE2(name, line) constexpr auto fixedName##line = ::MimicUtil::InstrumentorUtils::CleanupOutputString(name, "__cdecl ");\
-																			   ::MimicUtil::InstrumentationTimer timer##line(fixedName##line.Data)
+#define MIMIC_PROFILE_BEGIN_SESSION(name, filepath) ::MimicUtility::Instrumentor::Get().BeginSession(name, filepath)
+#define MIMIC_PROFILE_END_SESSION() ::MimicUtility::Instrumentor::Get().EndSession()
+#define MIMIC_PROFILE_SCOPE_LINE2(name, line) constexpr auto fixedName##line = ::MimicUtility::InstrumentorUtils::CleanupOutputString(name, "__cdecl ");\
+																			   ::MimicUtility::InstrumentationTimer timer##line(fixedName##line.Data)
 #define MIMIC_PROFILE_SCOPE_LINE(name, line) MIMIC_PROFILE_SCOPE_LINE2(name, line)
 #define MIMIC_PROFILE_SCOPE(name) MIMIC_PROFILE_SCOPE_LINE(name, __LINE__)
 #define MIMIC_PROFILE_FUNCTION() MIMIC_PROFILE_SCOPE(__FUNCSIG__)
 
 
 // Source: https://github.com/TheCherno/Hazel/blob/master/Hazel/src/Hazel/Debug/Instrumentor.h
-namespace MimicUtil
+namespace MimicUtility
 {
 
 	using FloatingPointMicroseconds = std::chrono::duration<double, std::micro>;

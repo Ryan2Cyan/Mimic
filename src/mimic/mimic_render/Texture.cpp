@@ -1,5 +1,6 @@
 #include "Texture.h"
-# include <utility/Logger.h>
+# include <mimic_utility/Logger.h>
+
 #define STB_IMAGE_IMPLEMENTATION
 #define STBI_ASSERT(x)
 #include <stb_image.h>

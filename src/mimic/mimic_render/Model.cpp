@@ -1,11 +1,11 @@
 #include "Model.h"
-#include <utility/Logger.h>
-#include <renderengine/Vertex.h>
-#include <renderengine/Texture.h>
-#include <renderengine/Mesh.h>
+#include <mimic_utility/Logger.h>
+#include <mimic_render/Vertex.h>
+#include <mimic_render/Texture.h>
+#include <mimic_render/Renderer.h>
+#include <mimic_render/Mesh.h>
 #include <glm/gtc/matrix_transform.hpp> 
 #include <glm/gtc/type_ptr.hpp> 
-#include <renderengine/Renderer.h>
 
 // Source: https://learnopengl.com/Model-Loading/Model
 

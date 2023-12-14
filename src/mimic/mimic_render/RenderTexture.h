@@ -1,7 +1,7 @@
 #pragma once
 #include <GL/glew.h>
 #include <GLM/glm.hpp>
-#include <renderengine/Texture.h>
+#include <mimic_render/Texture.h>
 #include <memory>
 #include <cstdint>
 

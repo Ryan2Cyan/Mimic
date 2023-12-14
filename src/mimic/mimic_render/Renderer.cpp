@@ -1,8 +1,8 @@
 #include "Renderer.h"
-#include <renderengine/Shader.h>
-#include <renderengine/RenderTexture.h>
-#include <renderengine/Camera.h>
-#include <renderengine/CubeMap.h>
+#include <mimic_render/Shader.h>
+#include <mimic_render/RenderTexture.h>
+#include <mimic_render/Camera.h>
+#include <mimic_render/CubeMap.h>
 
 namespace MimicRender
 {

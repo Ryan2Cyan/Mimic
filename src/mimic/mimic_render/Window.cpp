@@ -1,5 +1,5 @@
 #include "Window.h"
-#include <utility/Logger.h>
+#include <mimic_utility/Logger.h>
 #include <imgui.h>
 #include <imgui_impl_opengl3.h>
 #include <imgui_impl_sdl2.h>
@@ -15,7 +15,7 @@ namespace MimicRender
 		if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) < 0)
 		{
 			MIMIC_LOG_FATAL("[MimicRender::Window] Failed to initialize SDL: %", SDL_GetError());
-			throw;
+			return nullptr;
 		}
 		 SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
 		 SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
@@ -32,7 +32,7 @@ namespace MimicRender
 		if (window->_window == nullptr)
 		{
 			MIMIC_LOG_FATAL("[MimicRender::Window] Failed to initialize SDL_Window: %", SDL_GetError());
-			throw;
+			return nullptr;
 		}
 		MIMIC_LOG_INFO("[MimicRender::Window] SDL_Window initialisation successful.");
 
@@ -41,7 +41,7 @@ namespace MimicRender
 		if (window->_renderer == nullptr)
 		{
 			MIMIC_LOG_FATAL("[MimicRender::Window] Failed to initialize SDL_Renderer: %", SDL_GetError());
-			throw;
+			return nullptr;
 		}
 		MIMIC_LOG_INFO("[Mimic::Window] SDL_Renderer initialisation successful.");
 
@@ -50,7 +50,7 @@ namespace MimicRender
 		if (window->_glContext == nullptr)
 		{
 			MIMIC_LOG_FATAL("[MimicRender::Window] Failed to initialize SDL_GL_Context: %", SDL_GetError());
-			throw;
+			return nullptr;
 		}
 		MIMIC_LOG_INFO("[MimicRender::Window] SDL_GL_Context initialisation successful.");
 
@@ -72,7 +72,7 @@ namespace MimicRender
 		if (GLEW_OK != err)
 		{
 			MIMIC_LOG_FATAL("[MimicRender::Window] GLEW failed to initialise with message: %", glewGetErrorString(err));
-			throw;
+			return nullptr;
 		}
 		MIMIC_LOG_INFO("[MimicRender::Window] Initialisation successful.");
 
@@ -121,6 +121,14 @@ namespace MimicRender
 	{
 		if (!_initialised) glm::ivec2(0);
 		return _aspectRatio;
+	}
+
+	void Window::ClearBuffers(const std::uint8_t& buffers)
+	{
+		if(buffers & MIMIC_CLEAR_COLOUR) glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
+		if (buffers & MIMIC_COLOUR_AND_DEPTH_BUFFERS) glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		if (buffers & MIMIC_COLOUR_BUFFER) glClear(GL_COLOR_BUFFER_BIT);
+		if (buffers & MIMIC_DEPTH_BUFFER) glClear(GL_DEPTH_BUFFER_BIT);
 	}
 
 	void Window::SwapWindow() const

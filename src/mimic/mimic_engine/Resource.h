@@ -2,7 +2,7 @@
 #include <string>
 #include <memory>
 
-namespace Mimic
+namespace MimicEngine
 {
 	// #############################################################################
 	// resource stuct:
@@ -26,7 +26,7 @@ namespace Mimic
 
 		std::weak_ptr<ResourceManager> _resourceManager;
 
-		// Return -1 on failure, 0 on success:
-		virtual const int Load(const std::string& path) = 0; 
+		// Return true on successful load, false otherwise:
+		virtual const bool Load(const std::string& path) = 0; 
 	};
 }

@@ -1,7 +1,7 @@
 #include "Mesh.h"
-#include <renderengine/Texture.h>
-#include <renderengine/Vertex.h>
-#include <utility/Logger.h>
+#include <mimic_render/Texture.h>
+#include <mimic_render/Vertex.h>
+#include <mimic_utility/Logger.h>
 #include <GL/glew.h>
 
 namespace MimicRender

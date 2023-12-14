@@ -1,6 +1,6 @@
 #pragma once
-#include <utility/Logger.h>
-#include <utility/FileLoader.h>
+#include <mimic_utility/Logger.h>
+#include <mimic_utility/FileLoader.h>
 
 #include <string>
 #include <memory>
@@ -44,7 +44,7 @@
 // Asynchronous File I/O:
 
 
-namespace Mimic
+namespace MimicEngine
 {
 	// #############################################################################
 	// resource manager stuct:
@@ -55,12 +55,16 @@ namespace Mimic
 	{
 		explicit ResourceManager();
 
-		// is resource loaded? yes: return, no: create new, store, then return:
+		/// <summary>
+		/// Load resouce from the assets/ directory given a specified resource filename (file extension included).
+		/// Returns nullptr if the resource cannot be loaded. Returns nullptr is load was unsuccessful.
+		/// </summary>
 		template<typename T> std::shared_ptr<T> LoadResource(const std::string& fileName)
 		{
-			// check if the resource is already loaded:
+			// Convert retrieve the file path from the inputted file name:
 			const std::string filePath = _fileLoader->LocateFileInDirectory(_assetsDirectory, fileName);
 
+			// Check if the resource is already cached in the loaded resources map:
 			auto iterator = _loadedResources.find(filePath);
 			if (iterator != _loadedResources.end())
 			{
@@ -69,9 +73,12 @@ namespace Mimic
 				if (loadedResource != nullptr) return loadedResource;
 			}
 
-			// load from disk:
+			// Create new resource and load its data from disk:
 			std::shared_ptr<T> newResource = std::make_shared<T>();
-			newResource->_resourceManager = _self; // just incase a Resouce needs to load Resources itself.
+
+			// Store a reference to the resource manager, just incase this resouce needs to 
+			// load Resources itself:
+			newResource->_resourceManager = _self;
 			newResource->Path = fileName;
 			if (newResource->Name.empty()) newResource->Name = GetNameFromFilePath(filePath);
 			const int success = newResource->Load(filePath);
@@ -80,11 +87,17 @@ namespace Mimic
 				MIMIC_LOG_WARNING("[Mimic::ResourceManager] Invalid resource filepath attempted to load: \"%\"", fileName.c_str());
 				return nullptr;
 			}
+
+			// Cache newly loaded resource:
 			_loadedResources[filePath] = newResource;
 			MIMIC_LOG_INFO("[Mimic::ResourceManager] Successfully loaded resource from path: \"%\".", filePath);
+
 			return newResource;
 		}
 
+		/// <summary>
+		/// Create, initialise, and return new resource. Returns nullptr is creation was unsuccessful.  
+		/// </summary>
 		template<typename T, typename... Args> std::shared_ptr<T> CreateResource(Args... args)
 		{
 			std::shared_ptr<T> newResource = std::make_shared<T>();
@@ -113,9 +126,9 @@ namespace Mimic
 
 		std::unordered_map<std::string, std::shared_ptr<Resource>> _loadedResources;
 		std::vector<std::shared_ptr<Resource>> _createdResources;
-		std::shared_ptr<FileLoader> _fileLoader;
+		std::shared_ptr<MimicUtility::FileLoader> _fileLoader;
 		std::filesystem::path _assetsDirectory;
 		std::weak_ptr<MimicCore> _mimicCore;
 		std::weak_ptr<ResourceManager> _self;
 	};
-}
+ }

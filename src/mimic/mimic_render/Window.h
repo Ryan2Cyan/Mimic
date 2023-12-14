@@ -26,11 +26,22 @@ namespace MimicRender
 		glm::ivec2 GetAspectRatio() const noexcept;
 
 		/// <summary>
+		/// 
+		/// </summary>
+		void ClearBuffers(const std::uint8_t& buffers = MIMIC_CLEAR_COLOUR | MIMIC_COLOUR_AND_DEPTH_BUFFERS);
+
+		/// <summary>
 		/// Used in the default OpenGL double buffer context. Swaps render buffers to display the twin
 		/// buffer with the full frame's display data written to it.
 		/// </summary>
 		void SwapWindow() const;
 
+		static const std::uint8_t MIMIC_CLEAR_COLOUR = 0b1;
+		static const std::uint8_t MIMIC_COLOUR_AND_DEPTH_BUFFERS = 0b1;
+		static const std::uint8_t MIMIC_COLOUR_BUFFER = 0b10;
+		static const std::uint8_t MIMIC_DEPTH_BUFFER = 0b100;
+
+		static const std::uint32_t MIMIC_WRAPT_REPEAT = 0b1'000;
 	private:
 
 		glm::ivec2 _aspectRatio;

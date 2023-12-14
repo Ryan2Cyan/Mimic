@@ -1,5 +1,5 @@
 #include "Light.h"
-#include <renderengine/RenderTexture.h>
+#include <mimic_render/RenderTexture.h>
 
 namespace MimicRender
 {

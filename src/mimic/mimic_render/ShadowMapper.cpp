@@ -1,13 +1,13 @@
 #include "ShadowMapper.h"
-#include <renderengine/RenderTexture.h>
-#include <renderengine/Shader.h>
-#include <renderengine/Model.h>
-#include <renderengine/Renderer.h>
-#include <renderengine/Light.h>
+#include <mimic_render/RenderTexture.h>
+#include <mimic_render/Shader.h>
+#include <mimic_render/Model.h>
+#include <mimic_render/Renderer.h>
+#include <mimic_render/Light.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <utility/Logger.h>
-#include <utility/FileLoader.h>
+#include <mimic_utility/Logger.h>
+#include <mimic_utility/FileLoader.h>
 
 
 namespace MimicRender
@@ -15,7 +15,7 @@ namespace MimicRender
 	const std::shared_ptr<ShadowMapper> ShadowMapper::Initialise(glm::ivec2 aspectRatio)
 	{
 		// Initialise file loader struct and use it to store a path to the project's "assets/" directory:
-		std::shared_ptr<MimicUtil::FileLoader> fileLoader = MimicUtil::FileLoader::Initialise();
+		std::shared_ptr<MimicUtility::FileLoader> fileLoader = MimicUtility::FileLoader::Initialise();
 		const std::string assetPath = fileLoader->LocateDirectory("assets").generic_string();
 
 

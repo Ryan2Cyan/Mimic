@@ -1,9 +1,10 @@
 #include "CubeMap.h"
-#include <utility/Logger.h>
-#include <utility/FileLoader.h>
-#include <renderengine/Shader.h>
-#include <renderengine/RenderTexture.h>
-#include <renderengine/Renderer.h>
+#include <mimic_utility/Logger.h>
+#include <mimic_utility/FileLoader.h>
+#include <mimic_render/Shader.h>
+#include <mimic_render/RenderTexture.h>
+#include <mimic_render/Renderer.h>
+
 #include <glm/gtc/matrix_transform.hpp> 
 
 
@@ -29,7 +30,7 @@ namespace MimicRender
 		};
 
 		// Initialise file loader:
-		std::shared_ptr<MimicUtil::FileLoader> fileLoader = MimicUtil::FileLoader::Initialise();
+		std::shared_ptr<MimicUtility::FileLoader> fileLoader = MimicUtility::FileLoader::Initialise();
 		const std::string assetsDirectory = fileLoader->LocateDirectory("assets").generic_string();
 
 		// Load 2D HDR texture:

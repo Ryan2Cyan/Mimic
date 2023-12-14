@@ -1,6 +1,6 @@
 #include "Shader.h"
-#include <renderengine/Texture.h>
-#include <utility/Logger.h>
+#include <mimic_render/Texture.h>
+#include <mimic_utility/Logger.h>
 #include <fstream>
 #include <array>
 #include <glm/gtc/type_ptr.hpp>

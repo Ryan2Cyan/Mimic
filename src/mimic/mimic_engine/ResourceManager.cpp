@@ -1,13 +1,13 @@
 #include "ResourceManager.h"
 
-namespace Mimic
+namespace MimicEngine
 {
 	// #############################################################################
 	// resource manager functions:
 	// #############################################################################
 	ResourceManager::ResourceManager() : AssetsDirectoryPath("../src/dmtk/assets/") 
 	{
-		_fileLoader = std::make_shared<FileLoader>();
+		_fileLoader = std::make_shared<MimicUtility::FileLoader>();
 		_assetsDirectory = _fileLoader->LocateDirectory("assets");
 	}
 

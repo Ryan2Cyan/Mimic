@@ -1,6 +1,6 @@
 #include "PerformanceCounter.h"
 
-namespace MimicUtil
+namespace MimicUtility
 {
 
 	// #############################################################################
