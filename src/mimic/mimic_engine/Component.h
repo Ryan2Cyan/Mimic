@@ -2,10 +2,10 @@
 #include <memory>
 #include "GameObject.h"
 
-namespace Mimic
+namespace MimicEngine
 {
 	// #############################################################################
-    // component stuct:
+    // Component stuct:
     // #############################################################################
 	struct GameObject;
 
@@ -22,6 +22,5 @@ namespace Mimic
 		std::weak_ptr<GameObject> GameObject;
 		std::weak_ptr<Component> _self;
 		bool _initialised = false;
-		bool _skipUpdate = false;
 	};
 }

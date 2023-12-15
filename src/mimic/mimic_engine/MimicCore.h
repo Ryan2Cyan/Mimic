@@ -7,6 +7,7 @@
 #include <GLM/glm.hpp>
 #include <memory>
 #include <string>
+#include <list>
 
 using namespace MimicRender;
 
@@ -38,7 +39,7 @@ namespace MimicEngine
 		static std::shared_ptr<MimicCore> Initialise();
 
 		/// <summary>
-		/// Called once before the game loop starts running.
+		/// Called once before the game loop starts running, starts the application.
 		/// </summary>
 		void Start();
 
@@ -53,15 +54,21 @@ namespace MimicEngine
 		/// </summary>
 		void Draw();
 
+		/// <summary>
+		/// End the application.
+		/// </summary>
+		void Exit();
+
+		/// <summary>
+		/// Returns true if the application is running, false otherwise.
+		/// </summary>
+		bool IsApplicationRunning() const;
 		
 		static glm::ivec2 GetCurrentAspect();
 		static std::shared_ptr<ResourceManager> GetResourceManager();
 
-		// std::shared_ptr<GameObject> AddEmptyGameObject() noexcept;
-		// std::shared_ptr<GameObject> AddEmptyGameObject(const std::string& name) noexcept;
 		// std::shared_ptr<DirectLight> AddDirectLight() noexcept;
 		// std::shared_ptr<PointLight> AddPointLight() noexcept;
-		// void AddGameObject(const std::shared_ptr<GameObject> gameObject) noexcept;
 		// void AddCamera(const std::shared_ptr<Camera> camera, const bool setToCurrent) noexcept;
 
 		// static std::shared_ptr<Camera> CurrentCamera;
@@ -69,20 +76,24 @@ namespace MimicEngine
 		static std::shared_ptr<MimicRender::Window> Window;
 		// static std::shared_ptr<CubeMap> CubeMap;
 		// static std::shared_ptr<EnvironmentCubeMap> EnvironmentCubeMap;
-		bool ApplicationRunning;
 
 	private:
 		friend struct ModelRenderer; 
 		friend struct PBRMaterial; 
 		friend struct EnvironmentCubeMap;
+		friend struct GameObject;
+
+		static void AddGameObject(const std::shared_ptr<GameObject>& gameObject);
+		static void RemoveGameObject(const std::shared_ptr<GameObject>& gameObject);
 
 		static std::shared_ptr<MimicRender::Renderer> _renderer;
 		static std::shared_ptr<Environment> _environment;
-		// static std::vector<std::shared_ptr<GameObject>> _gameObjects;
+		static std::list<std::shared_ptr<GameObject>> _gameObjects;
 		// static std::vector<std::shared_ptr<Camera>> _cameras;
 		// static std::vector<std::shared_ptr<DirectLight>> _directLights;
 		// static std::vector<std::shared_ptr<PointLight>> _pointLights;
-		std::weak_ptr<MimicCore> _self;
+		static std::weak_ptr<MimicCore> _self;
+		static bool _applicationRunning;
 		bool _initialised;
 	};
 }

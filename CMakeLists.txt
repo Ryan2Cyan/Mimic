@@ -46,14 +46,18 @@ link_directories(
     src/mimic/mimic_engine/Environment.h
     src/mimic/mimic_engine/Texture.cpp
     src/mimic/mimic_engine/Texture.h
-    # src/mimic/mimic_engine/GameObject.cpp
-    # src/mimic/mimic_engine/GameObject.h
-    # src/mimic/mimic_engine/Component.cpp
-    # src/mimic/mimic_engine/Component.h
-    # src/mimic/mimic_engine/ModelRenderer.cpp
-    # src/mimic/mimic_engine/ModelRenderer.h
-    # src/mimic/mimic_engine/Material.cpp
-    # src/mimic/mimic_engine/Material.h
+    src/mimic/mimic_engine/GameObject.cpp
+    src/mimic/mimic_engine/GameObject.h
+    src/mimic/mimic_engine/Component.cpp
+    src/mimic/mimic_engine/Component.h
+    src/mimic/mimic_engine/Model.cpp
+    src/mimic/mimic_engine/Model.h
+    src/mimic/mimic_engine/Shader.cpp
+    src/mimic/mimic_engine/Shader.h
+    src/mimic/mimic_engine/ModelRenderer.cpp
+    src/mimic/mimic_engine/ModelRenderer.h
+    src/mimic/mimic_engine/Material.cpp
+    src/mimic/mimic_engine/Material.h
 )
 
 # Implement Mimic utility library:

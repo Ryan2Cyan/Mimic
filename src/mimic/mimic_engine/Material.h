@@ -4,10 +4,10 @@
 #include <vector>
 #include <GLM/glm.hpp>
 
-namespace Mimic
+namespace MimicEngine
 {
 	// #############################################################################
-	// material stuct:
+	// Material stuct:
 	// #############################################################################
 	struct ResourceManager;
 	struct Shader;
@@ -23,42 +23,41 @@ namespace Mimic
 	protected:
 		friend struct ModelRenderer;
 
-		// void SetShader(const std::shared_ptr<Shader>& shader);
 		virtual void SetTextureMap(const std::shared_ptr<Texture>& diffuse) = 0;
 		std::weak_ptr<Shader> _shader;
 		std::weak_ptr<GameObject> _gameObject;
 	};
 
-	// #############################################################################
-	// basic material stuct:
-	// #############################################################################
-	struct BasicMaterial : Material
-	{	
-		BasicMaterial();
-		void SetDiffuse(const std::shared_ptr<Texture>& diffuse);
-		void SetSpecular(const std::shared_ptr<Texture>& specular);
-		void SetNormal(const std::shared_ptr<Texture>& normal);
-		void SetHeight(const std::shared_ptr<Texture>& height);
+	//// #############################################################################
+	//// basic material stuct:
+	//// #############################################################################
+	//struct BasicMaterial : Material
+	//{	
+	//	BasicMaterial();
+	//	void SetDiffuse(const std::shared_ptr<Texture>& diffuse);
+	//	void SetSpecular(const std::shared_ptr<Texture>& specular);
+	//	void SetNormal(const std::shared_ptr<Texture>& normal);
+	//	void SetHeight(const std::shared_ptr<Texture>& height);
 
-	protected:
-		friend struct ModelRenderer;
-		void SetTextureMap(const std::shared_ptr<Texture>& texture) override;
+	//protected:
+	//	friend struct ModelRenderer;
+	//	void SetTextureMap(const std::shared_ptr<Texture>& texture) override;
 
-	private:
-		std::weak_ptr<Texture> _diffuseTexture;
-		std::weak_ptr<Texture> _specularTexture;
-		std::weak_ptr<Texture> _normalTexture;
-		std::weak_ptr<Texture> _heightTexture;
-		void OnDraw() override;
-	};
+	//private:
+	//	std::weak_ptr<Texture> _diffuseTexture;
+	//	std::weak_ptr<Texture> _specularTexture;
+	//	std::weak_ptr<Texture> _normalTexture;
+	//	std::weak_ptr<Texture> _heightTexture;
+	//	void OnDraw() override;
+	//};
 
 	// #############################################################################
 	// pbr material stuct:
 	// #############################################################################
 	struct PBRMaterial : Material
 	{
-		PBRMaterial();
-
+		// PBRMaterial();
+		static std::shared_ptr<PBRMaterial> Initialise();
 		// void SetTextureMap(const std::shared_ptr<Texture>& texture) override;
 
 		void SetAlbedo(const glm::vec3& albedo);
@@ -68,12 +67,6 @@ namespace Mimic
 		void SetAmbientOcclusion(const float& ambientOcclusion);
 		void SetAlpha(const float& alpha);
 
-		glm::vec3 Albedo;
-		glm::vec3 Emissive;
-		float Metallic;
-		float Roughness;
-		float AmbientOcclusion;
-		float Alpha;
 		bool ManualMode; // if true will not load textures and passes in member pbr params
 
 	protected:
@@ -81,11 +74,19 @@ namespace Mimic
 
 	private:
 		std::vector<unsigned int> _subroutineIndices;
+		
+		glm::vec3 _albedo;
+		glm::vec3 _emissive;
 
 		std::weak_ptr<Texture> _albedoTexture;
 		std::weak_ptr<Texture> _metallicTexture;
 		std::weak_ptr<Texture> _roughnessTexture;
 		std::weak_ptr<Texture> _normalTexture;
+
+		float _metallic;
+		float _roughness;
+		float _ambientOcclusion;
+		float _alpha;
 
 		unsigned int _albedoSubroutineUniform;
 		unsigned int _autoAlbedo;
@@ -106,16 +107,16 @@ namespace Mimic
 	};
 
 
-	// #############################################################################
-	// cubemap stuct:
-	// #############################################################################
-	struct CubeMapMaterial : Material
-	{
-		CubeMapMaterial();
-		void SetSourceTexture(const std::shared_ptr<Texture>& texture);
-	private:
-		void OnDraw() override;
+	//// #############################################################################
+	//// cubemap stuct:
+	//// #############################################################################
+	//struct CubeMapMaterial : Material
+	//{
+	//	CubeMapMaterial();
+	//	void SetSourceTexture(const std::shared_ptr<Texture>& texture);
+	//private:
+	//	void OnDraw() override;
 
-		std::weak_ptr<Texture> _sourceTexture;
-	};
+	//	std::weak_ptr<Texture> _sourceTexture;
+	//};
 }

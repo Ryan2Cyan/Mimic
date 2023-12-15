@@ -48,9 +48,6 @@ int main(int argc, char* argv[])
 		const std::shared_ptr<FileLoader> fileLoader = FileLoader::Initialise();
 		const std::string assetPath = fileLoader->LocateDirectory("assets").generic_string();
 
-		// Initialise window that will display the program and interface with SDL, OpenGL, and ImGUI:
-		// const std::shared_ptr<MimicRender::Window> window = MimicRender::Window::Initialise("Mimic Render Library Test");
-
 		// Initialise renderer:
 		std::shared_ptr<MimicRender::Renderer> renderer = MimicRender::Renderer::Initialise();
 
@@ -61,6 +58,7 @@ int main(int argc, char* argv[])
 		static int shaderUsed = 0;
 		const std::shared_ptr<Shader> pbrShader = Shader::Initialise(fileLoader->LocateFileInDirectory(assetPath, "PBRShader.glsl"));
 		const std::shared_ptr<Shader> blinnPhongShader = Shader::Initialise(fileLoader->LocateFileInDirectory(assetPath, "BlinnPhongShader.glsl"));
+
 		// Blinn phong material parameters:
 		glm::vec3 objectColour = glm::vec3(0.8f);
 		float ambientStrength = 0.227f;
@@ -119,12 +117,12 @@ int main(int argc, char* argv[])
 		camera->Orientation = glm::vec3(0.0, -0.49f, -3.0f);
 
 		// Initialise scene models:
+		std::shared_ptr<GameObject> sphereGameObject = GameObject::Initialise(glm::vec3(0.0f, 0.0f, -14.3f), glm::vec3(0.0f), glm::vec3(1.0f));
 		std::shared_ptr<Model> sphereModel = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "sphere.obj"));
-		Transform sphereTransform = Transform(glm::vec3(0.0f, 0.0f, -14.3f), glm::vec3(0.0f), glm::vec3(1.0f));
 		PBRMaterialParameters spherePBRMaterial = PBRMaterialParameters(glm::vec3(1.0f), glm::vec3(0.0), 0.5f, 0.5f, 1.0f, 0);
 
+		std::shared_ptr<GameObject> groundGameObject = GameObject::Initialise(glm::vec3(0.0f, -1.5f, -50.0f), glm::vec3(0.0f), glm::vec3(43.45f, -0.5f, 50.0f));
 		std::shared_ptr<Model> groundModel = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "cube_3.obj"));
-		Transform groundTransform = Transform(glm::vec3(0.0f, -1.5f, -50.0f), glm::vec3(0.0f), glm::vec3(43.45f, -0.5f, 50.0f));
 		PBRMaterialParameters groundPBRMaterial = PBRMaterialParameters(glm::vec3(0.6f), glm::vec3(0.0), 0.8f, 0.5f, 1.0f, 0);
 
 		std::shared_ptr<Model> lightModel = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "sphere.obj"));
@@ -394,9 +392,9 @@ int main(int argc, char* argv[])
 		// #############################################################################
 		// Game loop:
 		// #############################################################################
-		bool applicationRunning = true;
+		mimicCore->Start();
 		MIMIC_PROFILE_BEGIN_SESSION("Render Loop", "MimicProfile.json");
-		while (applicationRunning)
+		while (mimicCore->IsApplicationRunning())
 		{
 			// #############################################################################
 			// Human interface devices:
@@ -409,19 +407,18 @@ int main(int argc, char* argv[])
 				{
 					case SDL_QUIT:
 					{
-						applicationRunning = false;
-						break;
-					}
+						mimicCore->Exit();
+					}break;
 
 					case SDL_KEYDOWN:
 					{
 						switch (event.key.keysym.sym)
 						{
 							case SDLK_ESCAPE:
-							applicationRunning = false;
-							break;
+							{
+								mimicCore->Exit();
+							}break;
 						}
-						break;
 					}
 					case SDL_KEYUP: { break; }
 				}
@@ -432,8 +429,9 @@ int main(int argc, char* argv[])
 			// #############################################################################
 
 			camera->Update();
-			sphereModel->UpdateModelMatrix(sphereTransform.Position, sphereTransform.Rotation, sphereTransform.Scale);
-			groundModel->UpdateModelMatrix(groundTransform.Position, groundTransform.Rotation, groundTransform.Scale);
+			mimicCore->Update();
+			sphereModel->UpdateModelMatrix(sphereGameObject->Position, sphereGameObject->Rotation, sphereGameObject->Scale);
+			groundModel->UpdateModelMatrix(groundGameObject->Position, groundGameObject->Rotation, groundGameObject->Scale);
 			lightModel->UpdateModelMatrix(directLights[0]->Position, glm::vec3(0.0f), glm::vec3(0.1f));
 
 			// #############################################################################
@@ -441,7 +439,6 @@ int main(int argc, char* argv[])
 			// #############################################################################
 			{
 				MIMIC_PROFILE_SCOPE("Draw Scene");
-				mimicCore->Update();
 				{
 					// update shadow maps:
 					MIMIC_PROFILE_SCOPE("Render Depth Maps");
@@ -524,9 +521,9 @@ int main(int argc, char* argv[])
 
 			if (ImGui::CollapsingHeader("Sphere Transform"))
 			{
-				ImGui::SliderFloat3("Position##m1", &(sphereTransform.Position[0]), -20.0f, 20.0f);
-				ImGui::SliderFloat3("Rotation##m2", &(sphereTransform.Rotation[0]), -5.0f, 5.0f);
-				ImGui::SliderFloat3("Scale##m3", &(sphereTransform.Scale[0]), 0.0f, 50.0f);
+				ImGui::SliderFloat3("Position##m1", &(sphereGameObject->Position[0]), -20.0f, 20.0f);
+				ImGui::SliderFloat3("Rotation##m2", &(sphereGameObject->Rotation[0]), -5.0f, 5.0f);
+				ImGui::SliderFloat3("Scale##m3", &(sphereGameObject->Scale[0]), 0.0f, 50.0f);
 			}
 			ImGui::Separator();
 
@@ -567,9 +564,9 @@ int main(int argc, char* argv[])
 
 			if (ImGui::CollapsingHeader("Ground Transform"))
 			{
-				ImGui::SliderFloat3("Position##gm1", &(groundTransform.Position[0]), -20.0f, 20.0f);
-				ImGui::SliderFloat3("Rotation##gm2", &(groundTransform.Rotation[0]), -20.0f, 20.0f);
-				ImGui::SliderFloat3("Scale##gm3", &(groundTransform.Scale[0]), 0.0f, 50.0f);
+				ImGui::SliderFloat3("Position##gm1", &(groundGameObject->Position[0]), -20.0f, 20.0f);
+				ImGui::SliderFloat3("Rotation##gm2", &(groundGameObject->Rotation[0]), -20.0f, 20.0f);
+				ImGui::SliderFloat3("Scale##gm3", &(groundGameObject->Scale[0]), 0.0f, 50.0f);
 			}
 			ImGui::Separator();
 

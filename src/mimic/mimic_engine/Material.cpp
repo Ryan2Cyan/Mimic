@@ -1,156 +1,156 @@
 #include "Material.h"
-#include <lowlevelsystems/MimicCore.h>
-#include <lowlevelsystems/ResourceManager.h>
-#include <lowlevelsystems/GameObject.h>
-#include <lowlevelsystems/CubeMap.h>
-#include <renderengine/Shader.h>
-#include <renderengine/Texture.h>
-#include <renderengine/RenderTexture.h>
+#include "MimicCore.h"
+#include "ResourceManager.h"
+#include "GameObject.h"
+#include "Shader.h"
+#include "Texture.h"
+#include <mimic_render/RenderTexture.h>
+// #include <mimic/Light.h>
+
 #include <algorithm>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <renderengine/Light.h>
 
-namespace Mimic
+namespace MimicEngine
 {
 	// #############################################################################
-	// material functions:
-	// #############################################################################
-	void Material::SetShader(const std::shared_ptr<Shader>& shader)
-	{
-		_shader = shader;
-	}
-
-
-	// #############################################################################
-	// basic material functions:
-	// #############################################################################
-	BasicMaterial::BasicMaterial()
-	{
-		_shader = MimicCore::ResourceManager->LoadResource<Shader>("BasicShader.glsl");
-	}
-
-	void BasicMaterial::OnDraw()
-	{
-		if (_shader.expired()) return;
-		const std::shared_ptr<Shader> shader = _shader.lock();
-		if (!_diffuseTexture.expired()) shader->SetTexture("u_Diffuse", _diffuseTexture.lock()->_id, 0);
-		if (!_specularTexture.expired()) shader->SetTexture("u_Specular", _specularTexture.lock()->_id, 1);
-		if (!_normalTexture.expired()) shader->SetTexture("u_Normal", _normalTexture.lock()->_id, 2);
-		if (!_heightTexture.expired()) shader->SetTexture("u_Height", _heightTexture.lock()->_id, 3);
-	}
-
-	void BasicMaterial::SetDiffuse(const std::shared_ptr<Texture>& diffuse)
-	{
-		_diffuseTexture = diffuse;
-	}
-
-	void BasicMaterial::SetSpecular(const std::shared_ptr<Texture>& specular)
-	{
-		_specularTexture = specular;
-	}
-
-	void BasicMaterial::SetNormal(const std::shared_ptr<Texture>& normal)
-	{
-		_normalTexture = normal;
-	}
-
-	void BasicMaterial::SetHeight(const std::shared_ptr<Texture>& height)
-	{
-		_heightTexture = height;
-	}
-
-	void BasicMaterial::SetTextureMap(const std::shared_ptr<Texture>& texture)
-	{
-		const int type = texture->_type;
-
-		if(type & TextureType::MIMIC_DIFFUSE) _diffuseTexture = texture;
-		else if(type & TextureType::MIMIC_SPECULAR) _specularTexture = texture;
-		else if (type & TextureType::MIMIC_HEIGHT) _heightTexture = texture;
-		else if (type & TextureType::MIMIC_NORMAL) _normalTexture = texture;
-		else MIMIC_LOG_WARNING("[Mimic::Material] Unable to set texture as it has no value type.");
-	}
-
-	// #############################################################################
-	// pbr material functions:
+	// Material functions:
 	// #############################################################################
 
-	PBRMaterial::PBRMaterial()
+
+	//// #############################################################################
+	//// basic material functions:
+	//// #############################################################################
+	//BasicMaterial::BasicMaterial()
+	//{
+	//	_shader = MimicCore::ResourceManager->LoadResource<Shader>("BasicShader.glsl");
+	//}
+
+	//void BasicMaterial::OnDraw()
+	//{
+	//	if (_shader.expired()) return;
+	//	const std::shared_ptr<Shader> shader = _shader.lock();
+	//	if (!_diffuseTexture.expired()) shader->SetTexture("u_Diffuse", _diffuseTexture.lock()->_id, 0);
+	//	if (!_specularTexture.expired()) shader->SetTexture("u_Specular", _specularTexture.lock()->_id, 1);
+	//	if (!_normalTexture.expired()) shader->SetTexture("u_Normal", _normalTexture.lock()->_id, 2);
+	//	if (!_heightTexture.expired()) shader->SetTexture("u_Height", _heightTexture.lock()->_id, 3);
+	//}
+
+	//void BasicMaterial::SetDiffuse(const std::shared_ptr<Texture>& diffuse)
+	//{
+	//	_diffuseTexture = diffuse;
+	//}
+
+	//void BasicMaterial::SetSpecular(const std::shared_ptr<Texture>& specular)
+	//{
+	//	_specularTexture = specular;
+	//}
+
+	//void BasicMaterial::SetNormal(const std::shared_ptr<Texture>& normal)
+	//{
+	//	_normalTexture = normal;
+	//}
+
+	//void BasicMaterial::SetHeight(const std::shared_ptr<Texture>& height)
+	//{
+	//	_heightTexture = height;
+	//}
+
+	//void BasicMaterial::SetTextureMap(const std::shared_ptr<Texture>& texture)
+	//{
+	//	const int type = texture->_type;
+
+	//	if(type & TextureType::MIMIC_DIFFUSE) _diffuseTexture = texture;
+	//	else if(type & TextureType::MIMIC_SPECULAR) _specularTexture = texture;
+	//	else if (type & TextureType::MIMIC_HEIGHT) _heightTexture = texture;
+	//	else if (type & TextureType::MIMIC_NORMAL) _normalTexture = texture;
+	//	else MIMIC_LOG_WARNING("[Mimic::Material] Unable to set texture as it has no value type.");
+	//}
+
+	// #############################################################################
+	// PBR Material functions:
+	// #############################################################################
+	std::shared_ptr<PBRMaterial> PBRMaterial::Initialise()
 	{
-		std::shared_ptr<Shader> shader = MimicCore::ResourceManager->LoadResource<Shader>("PBRShader.glsl");
+		auto pbrMaterial = std::shared_ptr<PBRMaterial>();
 
-		ManualMode = false;
+		auto shader = MimicCore::ResourceManager->LoadResource<Shader>("PBRShader.glsl");
 
-		// load all subroutines:
-	    // Source: https://stackoverflow.com/questions/23391311/glsl-subroutine-is-not-changed
-		_albedoSubroutineUniform = glGetSubroutineUniformLocation(shader->_shaderProgramId, GL_FRAGMENT_SHADER, "AlbedoMode");
-		_autoAlbedo = glGetSubroutineIndex(shader->_shaderProgramId, GL_FRAGMENT_SHADER, "CalculateAlbedoAutoTexture");
-		_manualAlbedo = glGetSubroutineIndex(shader->_shaderProgramId, GL_FRAGMENT_SHADER, "CalculateAlbedoManual");
+		// Source: https://stackoverflow.com/questions/23391311/glsl-subroutine-is-not-changed
+		// Load all subroutines that control how to load certain PBR parameters. 'AutoTexture' is used when 
+		// a texture of a specific type is present, whereas 'Manual' is used when no texture is present:
+		pbrMaterial->_albedoSubroutineUniform = glGetSubroutineUniformLocation(shader->GetShaderId(), GL_FRAGMENT_SHADER, "AlbedoMode");
+		pbrMaterial->_autoAlbedo = glGetSubroutineIndex(shader->GetShaderId(), GL_FRAGMENT_SHADER, "CalculateAlbedoAutoTexture");
+		pbrMaterial->_manualAlbedo = glGetSubroutineIndex(shader->GetShaderId(), GL_FRAGMENT_SHADER, "CalculateAlbedoManual");
 
-		_normalSubroutineUniform = glGetSubroutineUniformLocation(shader->_shaderProgramId, GL_FRAGMENT_SHADER, "NormalMode");
-		_autoNormal = glGetSubroutineIndex(shader->_shaderProgramId, GL_FRAGMENT_SHADER, "CalculateNormalAutoTexture");
-		_manualNormal = glGetSubroutineIndex(shader->_shaderProgramId, GL_FRAGMENT_SHADER, "CalculateNormalManual");
+		pbrMaterial->_normalSubroutineUniform = glGetSubroutineUniformLocation(shader->GetShaderId(), GL_FRAGMENT_SHADER, "NormalMode");
+		pbrMaterial->_autoNormal = glGetSubroutineIndex(shader->GetShaderId(), GL_FRAGMENT_SHADER, "CalculateNormalAutoTexture");
+		pbrMaterial->_manualNormal = glGetSubroutineIndex(shader->GetShaderId(), GL_FRAGMENT_SHADER, "CalculateNormalManual");
 
-		_roughnessSubroutineUniform = glGetSubroutineUniformLocation(shader->_shaderProgramId, GL_FRAGMENT_SHADER, "RoughnessMode");
-		_autoRoughness = glGetSubroutineIndex(shader->_shaderProgramId, GL_FRAGMENT_SHADER, "CalculateRoughnessAutoTexture");
-		_manualRoughness = glGetSubroutineIndex(shader->_shaderProgramId, GL_FRAGMENT_SHADER, "CalculateRoughnessManual");
+		pbrMaterial->_roughnessSubroutineUniform = glGetSubroutineUniformLocation(shader->GetShaderId(), GL_FRAGMENT_SHADER, "RoughnessMode");
+		pbrMaterial->_autoRoughness = glGetSubroutineIndex(shader->GetShaderId(), GL_FRAGMENT_SHADER, "CalculateRoughnessAutoTexture");
+		pbrMaterial->_manualRoughness = glGetSubroutineIndex(shader->GetShaderId(), GL_FRAGMENT_SHADER, "CalculateRoughnessManual");
 
-		_metallicSubroutineUniform = glGetSubroutineUniformLocation(shader->_shaderProgramId, GL_FRAGMENT_SHADER, "MetallicMode");
-		_autoMetallic = glGetSubroutineIndex(shader->_shaderProgramId, GL_FRAGMENT_SHADER, "CalculateMetallicAutoTexture");
-		_manualMetallic = glGetSubroutineIndex(shader->_shaderProgramId, GL_FRAGMENT_SHADER, "CalculateMetallicManual");
+		pbrMaterial->_metallicSubroutineUniform = glGetSubroutineUniformLocation(shader->GetShaderId(), GL_FRAGMENT_SHADER, "MetallicMode");
+		pbrMaterial->_autoMetallic = glGetSubroutineIndex(shader->GetShaderId(), GL_FRAGMENT_SHADER, "CalculateMetallicAutoTexture");
+		pbrMaterial->_manualMetallic = glGetSubroutineIndex(shader->GetShaderId(), GL_FRAGMENT_SHADER, "CalculateMetallicManual");
 
-		_subroutineIndices = { _albedoSubroutineUniform, _normalSubroutineUniform, _roughnessSubroutineUniform, _metallicSubroutineUniform };
+		pbrMaterial->_subroutineIndices = { pbrMaterial->_albedoSubroutineUniform, pbrMaterial->_normalSubroutineUniform, pbrMaterial->_roughnessSubroutineUniform, pbrMaterial->_metallicSubroutineUniform };
 
-		SetAlbedo(glm::vec3(1.0f));
-		SetEmissive(glm::vec3(0.0f));
-		SetMetallic(0.0f);
-		SetRoughness(0.5f);
-		SetAmbientOcclusion(0.15f);
-		SetAlpha(1.0f);
+		// Assign shader:
+		pbrMaterial->_shader = shader;
 
-		_shader = shader;
+		// Set PBR parameters to defaults:
+		pbrMaterial->SetAlbedo(glm::vec3(1.0f, 0.0f, 0.0f));
+		pbrMaterial->SetEmissive(glm::vec3(0.0f));
+		pbrMaterial->SetMetallic(0.0f);
+		pbrMaterial->SetRoughness(0.5f);
+		pbrMaterial->SetAmbientOcclusion(0.5f);
+		pbrMaterial->SetAlpha(1.0f);
+
+		return pbrMaterial;
 	}
 
 	void PBRMaterial::SetAlbedo(const glm::vec3& albedo)
 	{
-		Albedo = glm::clamp(albedo, 0.0f, 1.0f);
+		_albedo = glm::clamp(albedo, 0.0f, 1.0f);
 	}
 
 	void PBRMaterial::SetEmissive(const glm::vec3& emissive)
 	{
-		Emissive = glm::clamp(emissive, 0.0f, 1.0f);
+		_emissive = glm::clamp(emissive, 0.0f, 1.0f);
 	}
 
 	void PBRMaterial::SetMetallic(const float& metallic)
 	{
-		Metallic = std::clamp(metallic, 0.001f, 1.0f);
+		_metallic = std::clamp(metallic, 0.001f, 1.0f);
 	}
 
 	void PBRMaterial::SetRoughness(const float& roughness)
 	{
-		Roughness = std::clamp(roughness, 0.001f, 1.0f);
+		_roughness = std::clamp(roughness, 0.001f, 1.0f);
 	}
 
 	void PBRMaterial::SetAmbientOcclusion(const float& ambientOcclusion)
 	{
-		AmbientOcclusion = std::clamp(ambientOcclusion, 0.0f, 1.0f);
+		_ambientOcclusion = std::clamp(ambientOcclusion, 0.0f, 1.0f);
 	}
 
 	void PBRMaterial::SetAlpha(const float& alpha)
 	{
-		Alpha = std::clamp(alpha, 0.0f, 1.0f);
+		_alpha = std::clamp(alpha, 0.0f, 1.0f);
 	}
 
-	/*void PBRMaterial::SetTextureMap(const std::shared_ptr<Texture>& texture)
-	{
-		const int type = texture->_type;
+	///*void PBRMaterial::SetTextureMap(const std::shared_ptr<Texture>& texture)
+	//{
+	//	const int type = texture->_type;
 
-		if (type & TextureType::MIMIC_DIFFUSE || type & TextureType::MIMIC_ALBEDO) _albedoTexture = texture;
-		else if (type & TextureType::MIMIC_SPECULAR || type & TextureType::MIMIC_ROUGHNESS) _roughnessTexture = texture;
-		else if (type & TextureType::MIMIC_METALLIC) _metallicTexture = texture;
-		else if (type & TextureType::MIMIC_NORMAL) _normalTexture = texture;
-		else MIMIC_LOG_WARNING("[Mimic::Material] Unable to set texture as it has no value type.");
-	};*/
+	//	if (type & TextureType::MIMIC_DIFFUSE || type & TextureType::MIMIC_ALBEDO) _albedoTexture = texture;
+	//	else if (type & TextureType::MIMIC_SPECULAR || type & TextureType::MIMIC_ROUGHNESS) _roughnessTexture = texture;
+	//	else if (type & TextureType::MIMIC_METALLIC) _metallicTexture = texture;
+	//	else if (type & TextureType::MIMIC_NORMAL) _normalTexture = texture;
+	//	else MIMIC_LOG_WARNING("[Mimic::Material] Unable to set texture as it has no value type.");
+	//};*/
 
 	//void PBRMaterial::OnDraw()
 	//{
@@ -249,26 +249,26 @@ namespace Mimic
 	//	shader->SetInt("u_PointLightsCount", pointLights.size());
 	//}
 
-	// #############################################################################
-	// cubemap material functions:
-	// #############################################################################
-	CubeMapMaterial::CubeMapMaterial()
-	{
+	//// #############################################################################
+	//// cubemap material functions:
+	//// #############################################################################
+	//CubeMapMaterial::CubeMapMaterial()
+	//{
 
-	}
+	//}
 
-	void CubeMapMaterial::SetSourceTexture(const std::shared_ptr<Texture>& texture)
-	{
-		if (texture == nullptr)
-		{
-			MIMIC_LOG_WARNING("[Mimic::Material] Unable to set unitialised texture.");
-			return;
-		}
-		_sourceTexture = texture;
-	}
+	//void CubeMapMaterial::SetSourceTexture(const std::shared_ptr<Texture>& texture)
+	//{
+	//	if (texture == nullptr)
+	//	{
+	//		MIMIC_LOG_WARNING("[Mimic::Material] Unable to set unitialised texture.");
+	//		return;
+	//	}
+	//	_sourceTexture = texture;
+	//}
 
-	void CubeMapMaterial::OnDraw()
-	{
+	//void CubeMapMaterial::OnDraw()
+	//{
 
-	}
+	//}
 }

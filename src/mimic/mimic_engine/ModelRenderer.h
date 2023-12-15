@@ -1,9 +1,10 @@
 #pragma once
-#include <lowlevelsystems/Component.h>
+#include "Component.h"
+
 #include <memory>
 #include <string>
 
-namespace Mimic
+namespace MimicEngine
 {	
 	// #############################################################################
 	// renderer stuct:
@@ -14,11 +15,10 @@ namespace Mimic
 
 	struct ModelRenderer : Component
 	{
-		static std::shared_ptr<ModelRenderer> Initialise();
-		void Initialise(const std::string& modelFileName);
-		// void Initialise(const std::shared_ptr<Model>& model);
+		// static std::shared_ptr<ModelRenderer> Initialise();
+		// void Initialise(const std::string& modelFileName);
 
-		template <typename T> const std::shared_ptr<T> ReplaceMaterial()
+		/*template <typename T> const std::shared_ptr<T> SetMaterial()
 		{
 			std::shared_ptr<T> newMaterial = std::make_shared<T>();
 			if (newMaterial == nullptr)
@@ -56,8 +56,8 @@ namespace Mimic
 		private:
 		void Update() override;
 		const bool AttachMaterial(const std::shared_ptr<Model>& model);
-		void ProcessModel(const std::shared_ptr<Model>& model);
+		void ProcessModel(const std::shared_ptr<Model>& model);*/
 
-		std::shared_ptr<Model>_model;
+		// std::shared_ptr<Model>_model;
 	};
 }

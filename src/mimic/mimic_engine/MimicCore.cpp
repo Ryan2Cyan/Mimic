@@ -6,6 +6,7 @@
 #include <mimic_render/Light.h>
 
 #include <GL/glew.h>
+#include <algorithm>
 
 namespace MimicEngine
 {
@@ -13,8 +14,10 @@ namespace MimicEngine
 	std::shared_ptr<ResourceManager> MimicCore::ResourceManager;
 	std::shared_ptr<MimicRender::Renderer> MimicCore::_renderer;
 	std::shared_ptr<Environment> MimicCore::_environment;
+	std::list<std::shared_ptr<GameObject>> MimicCore::_gameObjects;
+	std::weak_ptr<MimicCore> MimicCore::_self;
+	bool MimicCore::_applicationRunning;
 	//std::shared_ptr<Camera> MimicCore::CurrentCamera;
-	//std::vector<std::shared_ptr<GameObject>> MimicCore::_gameObjects;
 	//std::vector<std::shared_ptr<DirectLight>> MimicCore::_directLights;
 	//std::vector<std::shared_ptr<PointLight>> MimicCore::_pointLights;
 	//std::vector<std::shared_ptr<Camera>> MimicCore::_cameras;
@@ -28,7 +31,7 @@ namespace MimicEngine
 		// core:
 		std::shared_ptr<MimicCore> newMimicCore = std::make_shared<MimicCore>();
 		newMimicCore->_self = newMimicCore;
-		newMimicCore->ApplicationRunning = false;
+		newMimicCore->_applicationRunning = false;
 		bool initialised;
 
 		// Initialise the logger utility class:
@@ -79,8 +82,9 @@ namespace MimicEngine
 
 	void MimicCore::Start()
 	{
-		// for (auto gameObject : _gameObjects) gameObject->Start();
+		 for (auto gameObject : _gameObjects) gameObject->Start();
 		// EnvironmentCubeMap->Load("rural_asphalt_road_4k.hdr");
+		 _applicationRunning = true;
 	}
 
 	void MimicCore::Update()
@@ -109,33 +113,18 @@ namespace MimicEngine
 		//	);*/
 		//}
 		_renderer->ClearRenderQueue();
-		// _cubeMap->Draw(CurrentCamera->_viewMatrix, CurrentCamera->_projectionMatrix);
 		// EnvironmentCubeMap->Draw(CurrentCamera->_viewMatrix, CurrentCamera->_projectionMatrix);
 	}
 
-	//std::shared_ptr<GameObject> MimicCore::AddEmptyGameObject() noexcept
-	//{
-	//	std::shared_ptr<GameObject> emptyGameObject = std::make_shared<GameObject>();
-	//	emptyGameObject->_self = emptyGameObject;
-	//	emptyGameObject->_mimicCore = _self;
-	//	emptyGameObject->Name = "EmptyGameObject_" + std::to_string(_gameObjects.size());
+	void MimicCore::Exit()
+	{
+		_applicationRunning = false;
+	}
 
-	//	_gameObjects.push_back(emptyGameObject);
-	//	MIMIC_LOG_INFO("[Mimic::MimicCore] Added Mimic::GameObject: \"%\".", emptyGameObject->Name);
-	//	return emptyGameObject;
-	//}
-
-	//std::shared_ptr<GameObject> MimicCore::AddEmptyGameObject(const std::string& name) noexcept
-	//{
-	//	std::shared_ptr<GameObject> emptyGameObject = std::make_shared<GameObject>();
-	//	emptyGameObject->_self = emptyGameObject;
-	//	emptyGameObject->_mimicCore = _self;
-	//	emptyGameObject->Name = name;
-
-	//	_gameObjects.push_back(emptyGameObject);
-	//	MIMIC_LOG_INFO("[Mimic::MimicCore] Added Mimic::GameObject: \"%\".", emptyGameObject->Name);
-	//	return emptyGameObject;
-	//}
+	bool MimicCore::IsApplicationRunning() const
+	{
+		return _applicationRunning;
+	}
 
 	//std::shared_ptr<DirectLight> MimicCore::AddDirectLight() noexcept
 	//{
@@ -157,17 +146,25 @@ namespace MimicEngine
 	//	return newLight;
 	//}
 
-	//void MimicCore::AddGameObject(const std::shared_ptr<GameObject> gameObject) noexcept
-	//{
-	//	if (gameObject == nullptr)
-	//	{
-	//		MIMIC_LOG_WARNING("Attempted to add null game object to hierarchy.");
-	//		return;
-	//	}
-	//	gameObject->_mimicCore = _self;
-	//	MIMIC_LOG_INFO("[Mimic::MimicCore] Added Mimic::GameObject: \"%\".", gameObject->Name);
-	//	_gameObjects.push_back(gameObject);
-	//}
+	void MimicCore::AddGameObject(const std::shared_ptr<GameObject>& gameObject)
+	{
+		if (gameObject == nullptr)
+		{
+			MIMIC_LOG_WARNING("[MimicEngine::MimicCore] Attempted to add null game object to hierarchy.");
+			return;
+		}
+		gameObject->_mimicCore = _self;
+		MIMIC_LOG_INFO("[MimicEngine::MimicCore] Added Mimic::GameObject: \"%\".", gameObject->Name);
+		_gameObjects.push_back(gameObject);
+	}
+
+	void MimicCore::RemoveGameObject(const std::shared_ptr<GameObject>& gameObject)
+	{
+		if (gameObject != nullptr)
+		{
+			_gameObjects.remove(gameObject);
+		}
+	}
 
 	//void MimicCore::AddCamera(const std::shared_ptr<Camera> camera, const bool setToCurrent) noexcept
 	//{

@@ -1,7 +1,6 @@
 #include "Component.h"
 
-
-namespace Mimic
+namespace MimicEngine
 {
 	std::shared_ptr<GameObject> Component::GetGameObject() const noexcept
 	{
