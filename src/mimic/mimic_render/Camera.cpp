@@ -6,7 +6,7 @@ namespace MimicRender
 {
 	std::shared_ptr<Camera> Camera::Initialise(const glm::vec2& aspectRatio, const float& fov, const glm::vec2& clippingPlane)
 	{
-		std::shared_ptr camera = std::make_shared<Camera>();
+		auto camera = std::make_shared<Camera>();
 
 		camera->ClippingPlane = clippingPlane;
 		camera->AspectRatio = aspectRatio;

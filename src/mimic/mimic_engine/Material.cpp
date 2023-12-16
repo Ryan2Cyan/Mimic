@@ -73,7 +73,6 @@ namespace MimicEngine
 	std::shared_ptr<PBRMaterial> PBRMaterial::Initialise()
 	{
 		auto pbrMaterial = std::shared_ptr<PBRMaterial>();
-
 		auto shader = MimicCore::ResourceManager->LoadResource<Shader>("PBRShader.glsl");
 
 		// Source: https://stackoverflow.com/questions/23391311/glsl-subroutine-is-not-changed
@@ -109,6 +108,44 @@ namespace MimicEngine
 		pbrMaterial->SetAlpha(1.0f);
 
 		return pbrMaterial;
+	}
+
+	void PBRMaterial::SetTextureMap(const std::shared_ptr<Texture>& texture, MimicRender::TextureType type)
+	{
+		if (texture == nullptr)
+		{
+			MIMIC_LOG_WARNING("[MimicEngine::PBRMaterial] Unable to set uninitialised texture of type [%]", type);
+			return;
+		}
+		switch (type)
+		{
+		case MimicRender::TextureType::MIMIC_DIFFUSE:
+			_albedoTexture = texture;
+			break;
+		case MimicRender::TextureType::MIMIC_SPECULAR:
+			_metallicTexture = texture;
+			break;
+		case MimicRender::TextureType::MIMIC_NORMAL:
+			_normalTexture = texture;
+			break;
+		case MimicRender::TextureType::MIMIC_HEIGHT:
+			break;
+		case MimicRender::TextureType::MIMIC_ALBEDO:
+			_albedoTexture = texture;
+			break;
+		case MimicRender::TextureType::MIMIC_ROUGHNESS:
+			_roughnessTexture = texture;
+			break;
+		case MimicRender::TextureType::MIMIC_METALLIC:
+			_metallicTexture = texture;
+			break;
+		case MimicRender::TextureType::MIMIC_HDRCUBEMAP:
+			break;
+		case MimicRender::TextureType::MIMIC_NO_TYPE:
+			break;
+		default:
+			break;
+		}
 	}
 
 	void PBRMaterial::SetAlbedo(const glm::vec3& albedo)

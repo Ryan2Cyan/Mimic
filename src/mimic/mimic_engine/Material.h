@@ -1,4 +1,6 @@
 #pragma once
+#include <mimic_render/Texture.h>
+
 #include <string>
 #include <memory>
 #include <vector>
@@ -19,11 +21,15 @@ namespace MimicEngine
 		virtual ~Material() = default;
 		virtual void OnDraw() = 0;
 
+		/// <summary>
+		/// Add texture material, binding it to a specific texture type. These materials will be rendered (via the
+		/// ModelRenderer component) onto the model.
+		/// </summary>
+		virtual void SetTextureMap(const std::shared_ptr<Texture>& texture, MimicRender::TextureType type) = 0;
 		
 	protected:
 		friend struct ModelRenderer;
 
-		virtual void SetTextureMap(const std::shared_ptr<Texture>& diffuse) = 0;
 		std::weak_ptr<Shader> _shader;
 		std::weak_ptr<GameObject> _gameObject;
 	};
@@ -58,7 +64,7 @@ namespace MimicEngine
 	{
 		// PBRMaterial();
 		static std::shared_ptr<PBRMaterial> Initialise();
-		// void SetTextureMap(const std::shared_ptr<Texture>& texture) override;
+		void SetTextureMap(const std::shared_ptr<Texture>& texture, MimicRender::TextureType type) override;
 
 		void SetAlbedo(const glm::vec3& albedo);
 		void SetEmissive(const glm::vec3& emissive);
