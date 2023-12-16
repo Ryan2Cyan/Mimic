@@ -51,6 +51,8 @@ namespace MimicRender
 		/// </summary>
 		void QueueMeshesToDraw(const std::shared_ptr<Shader>& shader, std::function<void()> onDrawLambda, std::shared_ptr<Renderer>& renderer);
 
+
+		std::vector<std::shared_ptr<Mesh>> GetMeshes() const;
 	private:
 		glm::mat4 _modelMatrix = glm::mat4(1.0f);
 		glm::mat4 _normalMatrix = glm::mat3(1.0f);
@@ -59,6 +61,6 @@ namespace MimicRender
 
 		const int LoadMeshesFromFile(const std::string& path);
 		void ProcessNode(aiNode* node, const aiScene* scene);
-		const std::shared_ptr<Mesh> ProcessMesh(aiMesh* mesh, const aiScene* scene) const;
+		std::shared_ptr<Mesh> ProcessMesh(aiMesh* mesh, const aiScene* scene) const;
 	};
 }

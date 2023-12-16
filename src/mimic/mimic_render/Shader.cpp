@@ -1,5 +1,4 @@
 #include "Shader.h"
-#include <mimic_render/Texture.h>
 #include <mimic_utility/Logger.h>
 #include <fstream>
 #include <array>

@@ -12,7 +12,7 @@ namespace MimicRender
 	// #############################################################################
 	// Source: https://learnopengl.com/Model-Loading/Mesh
 
-	const std::shared_ptr<Mesh> Mesh::Initialise(const vertex_vector& vertices, const std::vector<unsigned int>& indices)
+	std::shared_ptr<Mesh> Mesh::Initialise(const vertex_vector& vertices, const std::vector<unsigned int>& indices)
 	{
 		std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>();
 		constexpr size_t VERTEX_SIZE = sizeof(Vertex);
@@ -52,7 +52,7 @@ namespace MimicRender
 		return mesh;
 	}
 
-	const unsigned int Mesh::GetVertexArrayId() const noexcept
+	unsigned int Mesh::GetVertexArrayId() const noexcept
 	{
 		if (!_intialised)
 		{
@@ -60,5 +60,15 @@ namespace MimicRender
 			return 0;
 		}
 		return _vertexArrayId;
+	}
+
+	unsigned int Mesh::GetDataSize() const noexcept
+	{
+		if (!_intialised)
+		{
+			MIMIC_LOG_WARNING("[MimicRender::Mesh] Attempting to access Mesh that is uninitialised.");
+			return 0;
+		}
+		return _dataSize;
 	}
 }

@@ -14,8 +14,9 @@ namespace MimicRender
 
 	struct Mesh
 	{
-		static const std::shared_ptr<Mesh> Initialise(const vertex_vector& vertices, const std::vector<unsigned int>& indices);
-		const unsigned int GetVertexArrayId() const noexcept;
+		static std::shared_ptr<Mesh> Initialise(const vertex_vector& vertices, const std::vector<unsigned int>& indices);
+		unsigned int GetVertexArrayId() const noexcept;
+		unsigned int GetDataSize() const noexcept;
 	private:
 		friend struct Model;
 

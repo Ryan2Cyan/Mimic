@@ -90,7 +90,10 @@ namespace MimicEngine
 	void MimicCore::Update()
 	{
 		_environment->CalculateDeltaTime();
-
+		for (auto gameObject : _gameObjects)
+		{
+			gameObject->Update();
+		}
 		// update game objects:
 		/*for (auto camera : _cameras)
 		{

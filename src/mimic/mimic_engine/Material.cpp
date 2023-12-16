@@ -68,38 +68,63 @@ namespace MimicEngine
 	//}
 
 	// #############################################################################
-	// PBR Material functions:
+	// PBR Subroutine Helper Functions:
+	// #############################################################################
+	PBRSubroutineHelper::PBRSubroutineHelper(const unsigned int& uniformId, const unsigned int& autoTextureId, const unsigned int& manualTextureId)
+		: _uniformId(uniformId), _autoId(autoTextureId), _manualId(manualTextureId)
+	{
+
+	}
+
+	// #############################################################################
+	// PBR Material Functions:
 	// #############################################################################
 	std::shared_ptr<PBRMaterial> PBRMaterial::Initialise()
 	{
-		auto pbrMaterial = std::shared_ptr<PBRMaterial>();
-		auto shader = MimicCore::ResourceManager->LoadResource<Shader>("PBRShader.glsl");
+		auto pbrMaterial = std::make_shared<PBRMaterial>();
+
+		// Load and assign shader:
+		auto shaderEngine = MimicCore::ResourceManager->LoadResource<Shader>("PBRShader.glsl");
+		auto shaderRender = shaderEngine->_renderShader;
+		pbrMaterial->_shader = shaderEngine;
 
 		// Source: https://stackoverflow.com/questions/23391311/glsl-subroutine-is-not-changed
-		// Load all subroutines that control how to load certain PBR parameters. 'AutoTexture' is used when 
-		// a texture of a specific type is present, whereas 'Manual' is used when no texture is present:
-		pbrMaterial->_albedoSubroutineUniform = glGetSubroutineUniformLocation(shader->GetShaderId(), GL_FRAGMENT_SHADER, "AlbedoMode");
-		pbrMaterial->_autoAlbedo = glGetSubroutineIndex(shader->GetShaderId(), GL_FRAGMENT_SHADER, "CalculateAlbedoAutoTexture");
-		pbrMaterial->_manualAlbedo = glGetSubroutineIndex(shader->GetShaderId(), GL_FRAGMENT_SHADER, "CalculateAlbedoManual");
+		// Load and assign all subroutine uniforms, specifying which subroutine functions the shader should execute. 
+		// 'AutoTexture' is used when a texture map of a specific type is initialised, whereas 'Manual' is 
+		// used when no texture is present:
+		pbrMaterial->_albedoSubroutine = PBRSubroutineHelper(
+			shaderRender->GetSubroutineUniform(GL_FRAGMENT_SHADER, "AlbedoMode"),
+			shaderRender->GetSubroutineIndex(GL_FRAGMENT_SHADER, "CalculateAlbedoAutoTexture"),
+			shaderRender->GetSubroutineIndex(GL_FRAGMENT_SHADER, "CalculateAlbedoManual")
+		);
 
-		pbrMaterial->_normalSubroutineUniform = glGetSubroutineUniformLocation(shader->GetShaderId(), GL_FRAGMENT_SHADER, "NormalMode");
-		pbrMaterial->_autoNormal = glGetSubroutineIndex(shader->GetShaderId(), GL_FRAGMENT_SHADER, "CalculateNormalAutoTexture");
-		pbrMaterial->_manualNormal = glGetSubroutineIndex(shader->GetShaderId(), GL_FRAGMENT_SHADER, "CalculateNormalManual");
+		pbrMaterial->_normalSubroutine = PBRSubroutineHelper(
+			shaderRender->GetSubroutineUniform(GL_FRAGMENT_SHADER, "NormalMode"),
+			shaderRender->GetSubroutineIndex(GL_FRAGMENT_SHADER, "CalculateNormalAutoTexture"),
+			shaderRender->GetSubroutineIndex(GL_FRAGMENT_SHADER, "CalculateNormalManual")
+		);
 
-		pbrMaterial->_roughnessSubroutineUniform = glGetSubroutineUniformLocation(shader->GetShaderId(), GL_FRAGMENT_SHADER, "RoughnessMode");
-		pbrMaterial->_autoRoughness = glGetSubroutineIndex(shader->GetShaderId(), GL_FRAGMENT_SHADER, "CalculateRoughnessAutoTexture");
-		pbrMaterial->_manualRoughness = glGetSubroutineIndex(shader->GetShaderId(), GL_FRAGMENT_SHADER, "CalculateRoughnessManual");
+		pbrMaterial->_roughnessSubroutine = PBRSubroutineHelper(
+			shaderRender->GetSubroutineUniform(GL_FRAGMENT_SHADER, "RoughnessMode"),
+			shaderRender->GetSubroutineIndex(GL_FRAGMENT_SHADER, "CalculateRoughnessAutoTexture"),
+			shaderRender->GetSubroutineIndex(GL_FRAGMENT_SHADER, "CalculateRoughnessManual")
+		);
 
-		pbrMaterial->_metallicSubroutineUniform = glGetSubroutineUniformLocation(shader->GetShaderId(), GL_FRAGMENT_SHADER, "MetallicMode");
-		pbrMaterial->_autoMetallic = glGetSubroutineIndex(shader->GetShaderId(), GL_FRAGMENT_SHADER, "CalculateMetallicAutoTexture");
-		pbrMaterial->_manualMetallic = glGetSubroutineIndex(shader->GetShaderId(), GL_FRAGMENT_SHADER, "CalculateMetallicManual");
+		pbrMaterial->_metallicSubroutine = PBRSubroutineHelper(
+			shaderRender->GetSubroutineUniform(GL_FRAGMENT_SHADER, "MetallicMode"),
+			shaderRender->GetSubroutineIndex(GL_FRAGMENT_SHADER, "CalculateMetallicAutoTexture"),
+			shaderRender->GetSubroutineIndex(GL_FRAGMENT_SHADER, "CalculateMetallicManual")
+		);
 
-		pbrMaterial->_subroutineIndices = { pbrMaterial->_albedoSubroutineUniform, pbrMaterial->_normalSubroutineUniform, pbrMaterial->_roughnessSubroutineUniform, pbrMaterial->_metallicSubroutineUniform };
+		// Store all subroutine uniform IDs in an array:
+		pbrMaterial->_subroutineIndices = {
+			pbrMaterial->_albedoSubroutine._uniformId,
+			pbrMaterial->_normalSubroutine._uniformId,
+			pbrMaterial->_roughnessSubroutine._uniformId,
+			pbrMaterial->_metallicSubroutine._uniformId
+		};
 
-		// Assign shader:
-		pbrMaterial->_shader = shader;
-
-		// Set PBR parameters to defaults:
+		// Set PBR parameter defaults:
 		pbrMaterial->SetAlbedo(glm::vec3(1.0f, 0.0f, 0.0f));
 		pbrMaterial->SetEmissive(glm::vec3(0.0f));
 		pbrMaterial->SetMetallic(0.0f);
@@ -107,41 +132,31 @@ namespace MimicEngine
 		pbrMaterial->SetAmbientOcclusion(0.5f);
 		pbrMaterial->SetAlpha(1.0f);
 
+		// Set OnDrawLambda:
+		pbrMaterial->_onDrawLambda = [&]() { pbrMaterial->OnDraw(); };
 		return pbrMaterial;
 	}
 
-	void PBRMaterial::SetTextureMap(const std::shared_ptr<Texture>& texture, MimicRender::TextureType type)
+	void PBRMaterial::SetTextureMap(const std::shared_ptr<Texture>& texture, const MimicRender::TextureType& textureMapType)
 	{
 		if (texture == nullptr)
 		{
-			MIMIC_LOG_WARNING("[MimicEngine::PBRMaterial] Unable to set uninitialised texture of type [%]", type);
+			MIMIC_LOG_WARNING("[MimicEngine::PBRMaterial] Unable to set uninitialised texture.");
 			return;
 		}
-		switch (type)
+		switch (textureMapType)
 		{
-		case MimicRender::TextureType::MIMIC_DIFFUSE:
-			_albedoTexture = texture;
+		case MimicRender::TextureType::MIMIC_DIFFUSE: _albedoTexture = texture;
 			break;
-		case MimicRender::TextureType::MIMIC_SPECULAR:
-			_metallicTexture = texture;
+		case MimicRender::TextureType::MIMIC_SPECULAR: _metallicTexture = texture;
 			break;
-		case MimicRender::TextureType::MIMIC_NORMAL:
-			_normalTexture = texture;
+		case MimicRender::TextureType::MIMIC_NORMAL: _normalTexture = texture;
 			break;
-		case MimicRender::TextureType::MIMIC_HEIGHT:
+		case MimicRender::TextureType::MIMIC_ALBEDO: _albedoTexture = texture;
 			break;
-		case MimicRender::TextureType::MIMIC_ALBEDO:
-			_albedoTexture = texture;
+		case MimicRender::TextureType::MIMIC_ROUGHNESS: _roughnessTexture = texture;
 			break;
-		case MimicRender::TextureType::MIMIC_ROUGHNESS:
-			_roughnessTexture = texture;
-			break;
-		case MimicRender::TextureType::MIMIC_METALLIC:
-			_metallicTexture = texture;
-			break;
-		case MimicRender::TextureType::MIMIC_HDRCUBEMAP:
-			break;
-		case MimicRender::TextureType::MIMIC_NO_TYPE:
+		case MimicRender::TextureType::MIMIC_METALLIC: _metallicTexture = texture;
 			break;
 		default:
 			break;
@@ -160,12 +175,12 @@ namespace MimicEngine
 
 	void PBRMaterial::SetMetallic(const float& metallic)
 	{
-		_metallic = std::clamp(metallic, 0.001f, 1.0f);
+		_metallic = std::clamp(metallic, 0.0f, 1.0f);
 	}
 
 	void PBRMaterial::SetRoughness(const float& roughness)
 	{
-		_roughness = std::clamp(roughness, 0.001f, 1.0f);
+		_roughness = std::clamp(roughness, 0.0f, 1.0f);
 	}
 
 	void PBRMaterial::SetAmbientOcclusion(const float& ambientOcclusion)
@@ -178,113 +193,109 @@ namespace MimicEngine
 		_alpha = std::clamp(alpha, 0.0f, 1.0f);
 	}
 
-	///*void PBRMaterial::SetTextureMap(const std::shared_ptr<Texture>& texture)
-	//{
-	//	const int type = texture->_type;
+	void PBRMaterial::OnDraw()
+	{
+		if (_shader.expired()) return;
+		auto localShader = _shader.lock()->_renderShader;
 
-	//	if (type & TextureType::MIMIC_DIFFUSE || type & TextureType::MIMIC_ALBEDO) _albedoTexture = texture;
-	//	else if (type & TextureType::MIMIC_SPECULAR || type & TextureType::MIMIC_ROUGHNESS) _roughnessTexture = texture;
-	//	else if (type & TextureType::MIMIC_METALLIC) _metallicTexture = texture;
-	//	else if (type & TextureType::MIMIC_NORMAL) _normalTexture = texture;
-	//	else MIMIC_LOG_WARNING("[Mimic::Material] Unable to set texture as it has no value type.");
-	//};*/
+		// For each texture map used in the PBR shader, check if the texture map is initialised, if not
+		// set a literal PBR parameter instead:
+	
+		// Query albedo subroutine:
+		if (!_albedoTexture.expired() && !NoTextureMode)
+		{
+			_subroutineIndices[_albedoSubroutine._uniformId] = _albedoSubroutine._autoId;
+			localShader->SetTexture("u_AlbedoMap", _albedoTexture.lock()->GetId(), 0);
+		}
+		else
+		{
+			_subroutineIndices[_albedoSubroutine._uniformId] = _albedoSubroutine._manualId;
+			localShader->SetVector3("u_Albedo", _albedo);
+		}
 
-	//void PBRMaterial::OnDraw()
-	//{
-	//	if (_shader.expired()) return;
-	//	const std::shared_ptr<Shader> shader = _shader.lock();
-
-	//	// load albedo (map_kd):
-	//	if (!_albedoTexture.expired() && !ManualMode)
-	//	{
-	//		_subroutineIndices[_albedoSubroutineUniform] = _autoAlbedo;
-	//		shader->SetTexture("u_AlbedoMap", _albedoTexture.lock()->_id, 1); // texture unit slots start at 1.
-	//	}
-	//	else
-	//	{
-	//		_subroutineIndices[_albedoSubroutineUniform] = _manualAlbedo;
-	//		shader->SetVector3("u_Albedo", Albedo);
-	//	}
-
-	//	// load roughness(map_ks):
-	//	if (!_roughnessTexture.expired() && !ManualMode)
-	//	{
-	//		_subroutineIndices[_roughnessSubroutineUniform] = _autoRoughness;
-	//		shader->SetTexture("u_RoughnessMap", _roughnessTexture.lock()->_id, 2);
-	//	}
-	//	else
-	//	{
-	//		_subroutineIndices[_roughnessSubroutineUniform] = _manualRoughness;
-	//		shader->SetFloat("u_Roughness", Roughness);
-	//	}
+		// Query roughness subroutine:
+		if (!_roughnessTexture.expired() && !NoTextureMode)
+		{
+			_subroutineIndices[_roughnessSubroutine._uniformId] = _roughnessSubroutine._autoId;
+			localShader->SetTexture("u_RoughnessMap", _roughnessTexture.lock()->GetId(), 1);
+		}
+		else
+		{
+			_subroutineIndices[_roughnessSubroutine._uniformId] = _roughnessSubroutine._autoId;
+			localShader->SetFloat("u_Roughness", _roughness);
+		}
 
 
-	//	// load normals (map_Bump):
-	//	if (!_normalTexture.expired() && !ManualMode)
-	//	{
-	//		_subroutineIndices[_normalSubroutineUniform] = _autoNormal;
-	//		shader->SetTexture("u_NormalMap", _normalTexture.lock()->_id, 3);
-	//	}
-	//	else _subroutineIndices[_normalSubroutineUniform] = _manualNormal;
+		// Query normal subroutine:
+		if (!_normalTexture.expired() && !NoTextureMode)
+		{
+			_subroutineIndices[_normalSubroutine._uniformId] = _normalSubroutine._autoId;
+			localShader->SetTexture("u_NormalMap", _normalTexture.lock()->GetId(), 2);
+		}
+		else _subroutineIndices[_normalSubroutine._uniformId] = _normalSubroutine._manualId;
 
-	//	// load metallic (must be specified by user):
-	//	if (!_metallicTexture.expired() && !ManualMode)
-	//	{
-	//		_subroutineIndices[_metallicSubroutineUniform] = _autoMetallic;
-	//		shader->SetTexture("u_MetallicMap", _metallicTexture.lock()->_id, 4);
-	//	}
-	//	else
-	//	{
-	//		_subroutineIndices[_metallicSubroutineUniform] = _manualMetallic;
-	//		shader->SetFloat("u_Metallic", Metallic);
-	//	}
+		// Query metallic subroutine:
+		if (!_metallicTexture.expired() && !NoTextureMode)
+		{
+			_subroutineIndices[_metallicSubroutine._uniformId] = _metallicSubroutine._autoId;
+			localShader->SetTexture("u_MetallicMap", _metallicTexture.lock()->GetId(), 3);
+		}
+		else
+		{
+			_subroutineIndices[_metallicSubroutine._uniformId] = _metallicSubroutine._manualId;
+			localShader->SetFloat("u_Metallic", _metallic);
+		}
 
-	//	glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, _subroutineIndices.size(), _subroutineIndices.data());
-
-	//	shader->SetInt("u_IrradianceMap", 5);
-	//	glActiveTexture(GL_TEXTURE5);
-	//	glBindTexture(GL_TEXTURE_CUBE_MAP, MimicCore::EnvironmentCubeMap->_irradianceRenderTexture->_texture->_id);
-
-	//	shader->SetInt("u_PrefilterMap", 6);
-	//	glActiveTexture(GL_TEXTURE6);
-	//	glBindTexture(GL_TEXTURE_CUBE_MAP, MimicCore::EnvironmentCubeMap->_prefilteredMapRenderTexture->_texture->_id);
-
-	//	shader->SetInt("u_BRDFLookupTexture", 7);
-	//	glActiveTexture(GL_TEXTURE7);
-	//	glBindTexture(GL_TEXTURE_2D, MimicCore::EnvironmentCubeMap->_brdfConvolutedRenderTexture->_texture->_id);
-	//	
-	//	shader->SetVector3("u_Emissive", Emissive);
-	//	shader->SetFloat("u_Alpha", Alpha);
-	//	shader->SetFloat("u_AmbientOcclusion", AmbientOcclusion);
-
-	//	// direct lights:
-	//	const std::vector<std::shared_ptr<DirectLight>> directLights = MimicCore::_directLights;
-	//	for (int i = 0; i < directLights.size(); i++)
-	//	{
-	//		const std::string currentLight = "u_DirectLights[" + std::to_string(i) + "]";
-
-	//		shader->SetVector3((currentLight + ".direction").c_str(), glm::normalize(-directLights[i]->Direction));
-	//		const glm::vec4 colour = glm::vec4(directLights[i]->Colour.x, directLights[i]->Colour.y, directLights[i]->Colour.z, 1.0f);
-	//		shader->SetVector4((currentLight + ".colour").c_str(), colour);
-	//	}
-	//	shader->SetInt("u_DirectLightsCount", directLights.size());
+		// Send all subroutine selection data to the GPU, telling the shader which subroutines to query:
+		glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, _subroutineIndices.size(), _subroutineIndices.data());
 
 
-	//	// point lights:
-	//	const std::vector<std::shared_ptr<PointLight>> pointLights = MimicCore::_pointLights;
-	//	for (int i = 0; i < pointLights.size(); i++)
-	//	{
-	//		const std::string currentLight = "u_PointLights[" + std::to_string(i) + "]";
+		// Set remaining PBR literal parameters that are not tied to texture maps:
+		localShader->SetVector3("u_Emissive", _emissive);
+		localShader->SetFloat("u_Alpha", _alpha);
+		localShader->SetFloat("u_AmbientOcclusion", _ambientOcclusion);
 
-	//		shader->SetVector3((currentLight + ".position").c_str(), pointLights[i]->Position);
-	//		const glm::vec4 colour = glm::vec4(pointLights[i]->Colour.x, pointLights[i]->Colour.y, pointLights[i]->Colour.z, 1.0f);
-	//		shader->SetVector4((currentLight + ".colour").c_str(), colour);
-	//		shader->SetFloat((currentLight + ".constant").c_str(), pointLights[i]->Constant);
-	//		shader->SetFloat((currentLight + ".linear").c_str(), pointLights[i]->Linear);
-	//		shader->SetFloat((currentLight + ".quadratic").c_str(), pointLights[i]->Quadratic);
-	//	}
-	//	shader->SetInt("u_PointLightsCount", pointLights.size());
-	//}
+		//// Set uniforms for each direct light:
+		//const std::vector<std::shared_ptr<DirectLight>> directLights = MimicCore::_directLights;
+		//for (int i = 0; i < directLights.size(); i++)
+		//{
+		//	const std::string currentLight = "u_DirectLights[" + std::to_string(i) + "]";
+
+		//	localShader->SetVector3((currentLight + ".direction").c_str(), glm::normalize(-directLights[i]->Direction));
+		//	const glm::vec4 colour = glm::vec4(directLights[i]->Colour.x, directLights[i]->Colour.y, directLights[i]->Colour.z, 1.0f);
+		//	localShader->SetVector4((currentLight + ".colour").c_str(), colour);
+		//}
+		//localShader->SetInt("u_DirectLightsCount", directLights.size());
+
+
+		//// Set uniforms for each point light:
+		//const std::vector<std::shared_ptr<PointLight>> pointLights = MimicCore::_pointLights;
+		//for (int i = 0; i < pointLights.size(); i++)
+		//{
+		//	const std::string currentLight = "u_PointLights[" + std::to_string(i) + "]";
+
+		//	localShader->SetVector3((currentLight + ".position").c_str(), pointLights[i]->Position);
+		//	const glm::vec4 colour = glm::vec4(pointLights[i]->Colour.x, pointLights[i]->Colour.y, pointLights[i]->Colour.z, 1.0f);
+		//	localShader->SetVector4((currentLight + ".colour").c_str(), colour);
+		//	localShader->SetFloat((currentLight + ".constant").c_str(), pointLights[i]->Constant);
+		//	localShader->SetFloat((currentLight + ".linear").c_str(), pointLights[i]->Linear);
+		//	localShader->SetFloat((currentLight + ".quadratic").c_str(), pointLights[i]->Quadratic);
+		//}
+		//localShader->SetInt("u_PointLightsCount", pointLights.size());
+
+		// Bind all environment cube map textures to the corresponding texture units:
+		// localShader->SetInt("u_IrradianceMap", 5);
+		// glActiveTexture(GL_TEXTURE5);
+		//glBindTexture(GL_TEXTURE_CUBE_MAP, MimicCore::EnvironmentCubeMap->_irradianceRenderTexture->_texture->_id);
+
+		/*localShader->SetInt("u_PrefilterMap", 6);
+		glActiveTexture(GL_TEXTURE6);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, MimicCore::EnvironmentCubeMap->_prefilteredMapRenderTexture->_texture->_id);
+
+		localShader->SetInt("u_BRDFLookupTexture", 7);
+		glActiveTexture(GL_TEXTURE7);
+		glBindTexture(GL_TEXTURE_2D, MimicCore::EnvironmentCubeMap->_brdfConvolutedRenderTexture->_texture->_id);*/
+	}
 
 	//// #############################################################################
 	//// cubemap material functions:

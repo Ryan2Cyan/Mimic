@@ -7,57 +7,56 @@
 namespace MimicEngine
 {	
 	// #############################################################################
-	// renderer stuct:
+	// Renderer Stuct:
 	// #############################################################################
 	struct Model;
 	struct Shader;
 	struct Material;
 
+
 	struct ModelRenderer : Component
 	{
-		// static std::shared_ptr<ModelRenderer> Initialise();
-		// void Initialise(const std::string& modelFileName);
+		static std::shared_ptr<ModelRenderer> Initialise();
 
-		/*template <typename T> const std::shared_ptr<T> SetMaterial()
+		template <typename T> void SetMaterial(const std::shared_ptr<T>& material)
 		{
-			std::shared_ptr<T> newMaterial = std::make_shared<T>();
-			if (newMaterial == nullptr)
+			if (material == nullptr)
 			{
-				MIMIC_LOG_WARNING("[ModelRenderer]\"%\" Unable to assign material.", GetGameObject()->Name);
-				return nullptr;
+				MIMIC_LOG_WARNING("[MimicEngine::ModelRenderer]\"%\" unable to assign uninitialised material.", GetGameObject()->Name);
+				return;
 			}
-			else
+			auto downCastMaterial = std::dynamic_pointer_cast<T>(material);
+			if (downCastMaterial == nullptr)
 			{
-				Material = newMaterial;
-				if (!AttachMaterial(_model))
-				{
-					MIMIC_LOG_WARNING("[Mimic::ModelRenderer]\"%\" Unable to attach material to model.", GetGameObject()->Name);
-					Material = std::make_shared<BasicMaterial>;
-					return nullptr;
-				}
-				return newMaterial;
+				MIMIC_LOG_WARNING("[MimicEngine::ModelRenderer]\"%\" unable to assign material, unrecognised Material type.", GetGameObject()->Name);
+				return;
 			}
+			_material = downCastMaterial;
 		}
 
 		template <typename T> const std::shared_ptr<T> GetMaterial() const
 		{
-			if (Material== nullptr)
+			if (_material == nullptr)
 			{
-				MIMIC_LOG_WARNING("[Mimic::ModelRenderer]\"%\" Unable to fetch material, it is unassigned or nullptr.", GetGameObject()->Name);
+				MIMIC_LOG_WARNING("[MimicEngine::ModelRenderer]\"%\" Unable to get unassigned material.", GetGameObject()->Name);
+				return nullptr;
+			}
+			auto downCastMaterial = std::dynamic_pointer_cast<T>(_material);
+			if (downCastMaterial == nullptr)
+			{
+				MIMIC_LOG_WARNING("[MimicEngine::ModelRenderer]\"%\" Unable to get material, unrecognised Material type", GetGameObject()->Name);
 				return nullptr;
 			}
 			return std::dynamic_pointer_cast<T>(Material);
 		}
-		void SetModel(const std::string& fileName);
+
 		void SetModel(const std::shared_ptr<Model>& model);
 
-		std::shared_ptr<Material> Material;
-
 		private:
+		void Start() override;
 		void Update() override;
-		const bool AttachMaterial(const std::shared_ptr<Model>& model);
-		void ProcessModel(const std::shared_ptr<Model>& model);*/
 
-		// std::shared_ptr<Model>_model;
+		 std::shared_ptr<Model>_model;
+		 std::shared_ptr<Material> _material;
 	};
 }

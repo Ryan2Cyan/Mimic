@@ -5,6 +5,7 @@
 #include <memory>
 #include <vector>
 #include <GLM/glm.hpp>
+#include <functional>
 
 namespace MimicEngine
 {
@@ -19,19 +20,23 @@ namespace MimicEngine
 	struct Material
 	{
 		virtual ~Material() = default;
+
+		// This function<void> is passed into the renderer via a render object struct as a lambda.
+		// This function is used primarily to set uniform values in the corresponding material shader.
 		virtual void OnDraw() = 0;
 
 		/// <summary>
 		/// Add texture material, binding it to a specific texture type. These materials will be rendered (via the
 		/// ModelRenderer component) onto the model.
 		/// </summary>
-		virtual void SetTextureMap(const std::shared_ptr<Texture>& texture, MimicRender::TextureType type) = 0;
+		virtual void SetTextureMap(const std::shared_ptr<Texture>& texture, const MimicRender::TextureType& textureMapType) = 0;
 		
 	protected:
 		friend struct ModelRenderer;
-
+		
 		std::weak_ptr<Shader> _shader;
 		std::weak_ptr<GameObject> _gameObject;
+		std::function<void()> _onDrawLambda;
 	};
 
 	//// #############################################################################
@@ -60,12 +65,30 @@ namespace MimicEngine
 	// #############################################################################
 	// pbr material stuct:
 	// #############################################################################
+	struct PBRSubroutineHelper
+	{
+	private:
+		friend struct PBRMaterial; 
+
+		PBRSubroutineHelper() = default;
+		PBRSubroutineHelper(const unsigned int& uniformId, const unsigned int& autoTextureId, const unsigned int& manualTextureId);
+
+		unsigned int _uniformId;
+		unsigned int _autoId;
+		unsigned int _manualId;
+	};
+
 	struct PBRMaterial : Material
 	{
-		// PBRMaterial();
 		static std::shared_ptr<PBRMaterial> Initialise();
-		void SetTextureMap(const std::shared_ptr<Texture>& texture, MimicRender::TextureType type) override;
 
+		/// <summary>
+		/// Sets and binds texture map to corresponding texture type.
+		/// </summary>
+		void SetTextureMap(const std::shared_ptr<Texture>& texture, const MimicRender::TextureType& textureMapType) override;
+
+		// PBR Literal parameter functions, these will be used if a corresponding texture map is
+		// not provided:
 		void SetAlbedo(const glm::vec3& albedo);
 		void SetEmissive(const glm::vec3& emissive);
 		void SetMetallic(const float& metallic);
@@ -73,14 +96,22 @@ namespace MimicEngine
 		void SetAmbientOcclusion(const float& ambientOcclusion);
 		void SetAlpha(const float& alpha);
 
-		bool ManualMode; // if true will not load textures and passes in member pbr params
+		// Set by the user, if true will not load textures, using literal pbr params instead:
+		bool NoTextureMode;
 
 	protected:
 		friend struct ModelRenderer;
 
 	private:
+		void OnDraw() override;
+
 		std::vector<unsigned int> _subroutineIndices;
-		
+
+		PBRSubroutineHelper _albedoSubroutine;
+		PBRSubroutineHelper _normalSubroutine;
+		PBRSubroutineHelper _roughnessSubroutine;
+		PBRSubroutineHelper _metallicSubroutine;
+
 		glm::vec3 _albedo;
 		glm::vec3 _emissive;
 
@@ -93,23 +124,6 @@ namespace MimicEngine
 		float _roughness;
 		float _ambientOcclusion;
 		float _alpha;
-
-		unsigned int _albedoSubroutineUniform;
-		unsigned int _autoAlbedo;
-		unsigned int _manualAlbedo;
-
-		unsigned int _normalSubroutineUniform;
-		unsigned int _autoNormal;
-		unsigned int _manualNormal;
-
-		unsigned int _roughnessSubroutineUniform;
-		unsigned int _autoRoughness;
-		unsigned int _manualRoughness;
-
-		unsigned int _metallicSubroutineUniform;
-		unsigned int _autoMetallic;
-		unsigned int _manualMetallic;
-		// void OnDraw() override;
 	};
 
 

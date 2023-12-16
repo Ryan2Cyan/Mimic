@@ -1,4 +1,6 @@
 #pragma once
+#include <mimic_render/Texture.h>
+
 #include <string>
 #include <memory>
 #include <unordered_map>
@@ -10,7 +12,7 @@
 namespace MimicRender
 {
 	// #############################################################################
-	// shader stuct:
+	// Shader stuct:
 	// #############################################################################
 	struct Shader
 	{
@@ -21,7 +23,7 @@ namespace MimicRender
 		void SetProjectionMatrix(const glm::mat4& value) noexcept;
 		void SetCameraPosition(const glm::vec3& value) noexcept;
 
-		void SetTexture(const char* name, const int& textureId, const int& bindPoint, const std::uint32_t& textureParams);
+		void SetTexture(const char* name, const int& textureId, const int& bindPoint, const std::uint32_t& textureParams = MimicRender::Texture::MIMIC_2D_TEXTURE);
 		void SetBool(const char* name, const bool value) const noexcept;
 		void SetInt(const char* name, const int value) const noexcept;
 		void SetFloat(const char* name, const float value) const noexcept;

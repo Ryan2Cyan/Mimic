@@ -17,6 +17,7 @@ namespace MimicEngine
 
 	protected:
 		friend struct GameObject;
+		virtual void Start() = 0;
 		virtual void Update() = 0;
 
 		std::weak_ptr<GameObject> GameObject;

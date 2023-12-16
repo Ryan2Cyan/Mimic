@@ -64,6 +64,11 @@ namespace MimicRender
 		}
 	}
 
+	std::vector<std::shared_ptr<Mesh>> Model::GetMeshes() const
+	{
+		return _meshes;
+	}
+
 	void Model::AddMesh(const std::shared_ptr<Mesh>& mesh)
 	{
 		if (mesh == nullptr)
@@ -121,7 +126,7 @@ namespace MimicRender
 		for (unsigned int i = 0; i < node->mNumChildren; i++) ProcessNode(node->mChildren[i], scene);
 	}
 
-	const std::shared_ptr<Mesh> Model::ProcessMesh(aiMesh* mesh, const aiScene* scene) const
+	std::shared_ptr<Mesh> Model::ProcessMesh(aiMesh* mesh, const aiScene* scene) const
 	{
 		// Convert aiMesh into Mimic::Mesh: (verties, normals, and texture coordinates):
 		vertex_vector vertices;

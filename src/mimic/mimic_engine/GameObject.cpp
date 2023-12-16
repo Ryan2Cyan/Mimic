@@ -52,6 +52,7 @@ namespace MimicEngine
 
 	void GameObject::Start()
 	{
+		for (std::shared_ptr<Component> component : _components) component->Start();
 	}
 
 	void GameObject::Update()
@@ -60,7 +61,7 @@ namespace MimicEngine
 		UpdateModelMatrix();
 
 		// Update all components attached to the game object:
-		for (std::shared_ptr<Component> component : _initialisedComponents) component->Update();
+		for (std::shared_ptr<Component> component : _components) component->Update();
 	}
 
 	void GameObject::UpdateModelMatrix()

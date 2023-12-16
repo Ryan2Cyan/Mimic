@@ -17,9 +17,11 @@ namespace MimicEngine
     private:
         friend struct ResourceManager;
         friend struct PBRMaterial;
+        friend struct ModelRenderer;
 
         bool Load(const std::string& path) override;
         unsigned int GetShaderId();
-        std::shared_ptr<MimicRender::Shader> _shader;
+
+        std::shared_ptr<MimicRender::Shader> _renderShader;
     };
 }

@@ -56,8 +56,8 @@ int main(int argc, char* argv[])
 
 		// Initialise shaders:
 		static int shaderUsed = 0;
-		const std::shared_ptr<Shader> pbrShader = Shader::Initialise(fileLoader->LocateFileInDirectory(assetPath, "PBRShader.glsl"));
-		const std::shared_ptr<Shader> blinnPhongShader = Shader::Initialise(fileLoader->LocateFileInDirectory(assetPath, "BlinnPhongShader.glsl"));
+		const std::shared_ptr<MimicRender::Shader> pbrShader = MimicRender::Shader::Initialise(fileLoader->LocateFileInDirectory(assetPath, "PBRShader.glsl"));
+		const std::shared_ptr<MimicRender::Shader> blinnPhongShader = MimicRender::Shader::Initialise(fileLoader->LocateFileInDirectory(assetPath, "BlinnPhongShader.glsl"));
 
 		// Blinn phong material parameters:
 		glm::vec3 objectColour = glm::vec3(0.8f);
@@ -65,7 +65,7 @@ int main(int argc, char* argv[])
 		float specularStrength = 0.5f;
 		float shininess = 32.0f;
 
-		const std::shared_ptr<Shader> flatColourShader = Shader::Initialise(fileLoader->LocateFileInDirectory(assetPath, "FlatColourShader.glsl"));
+		const std::shared_ptr<MimicRender::Shader> flatColourShader = MimicRender::Shader::Initialise(fileLoader->LocateFileInDirectory(assetPath, "FlatColourShader.glsl"));
 		// Flat colour material parameters:
 		constexpr glm::vec3 flatColour = glm::vec3(1.0f);
 
@@ -118,16 +118,21 @@ int main(int argc, char* argv[])
 
 		// Initialise scene models:
 		std::shared_ptr<GameObject> sphereGameObject = GameObject::Initialise(glm::vec3(0.0f, 0.0f, -14.3f), glm::vec3(0.0f), glm::vec3(1.0f));
-		std::shared_ptr<Model> sphereModel = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "sphere.obj"));
-		PBRMaterialParameters spherePBRMaterial = PBRMaterialParameters(glm::vec3(1.0f), glm::vec3(0.0), 0.5f, 0.5f, 1.0f, 0);
+		auto sphereModelRenderer = sphereGameObject->AddComponent<ModelRenderer>();
+		auto spherePBRMaterial = PBRMaterial::Initialise();
+		sphereModelRenderer->SetMaterial<PBRMaterial>(spherePBRMaterial);
+		sphereModelRenderer->SetModel(MimicCore::ResourceManager->LoadResource<MimicEngine::Model>("sphere.obj"));
+
+		// std::shared_ptr<MimicRender::Model> sphereModel = MimicRender::Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "sphere.obj"));
+		// PBRMaterialParameters spherePBRMaterial = PBRMaterialParameters(glm::vec3(1.0f), glm::vec3(0.0), 0.5f, 0.5f, 1.0f, 0);
 
 		std::shared_ptr<GameObject> groundGameObject = GameObject::Initialise(glm::vec3(0.0f, -1.5f, -50.0f), glm::vec3(0.0f), glm::vec3(43.45f, -0.5f, 50.0f));
-		std::shared_ptr<Model> groundModel = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "cube_3.obj"));
+		std::shared_ptr<MimicRender::Model> groundModel = MimicRender::Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "cube_3.obj"));
 		PBRMaterialParameters groundPBRMaterial = PBRMaterialParameters(glm::vec3(0.6f), glm::vec3(0.0), 0.8f, 0.5f, 1.0f, 0);
 
-		std::shared_ptr<Model> lightModel = Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "sphere.obj"));
+		std::shared_ptr<MimicRender::Model> lightModel = MimicRender::Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "sphere.obj"));
 
-		const std::vector<std::shared_ptr<Model>> modelsForShadowMapping = { sphereModel, groundModel };
+		const std::vector<std::shared_ptr<MimicRender::Model>> modelsForShadowMapping = { /*sphereModel,*/ groundModel};
 
 		// Load textures: Note that the texture types (e.g. MIMIC_ALBEDO) aren't currently implemented. This will
 		// become relevant in the GEP assignment.
@@ -345,7 +350,6 @@ int main(int argc, char* argv[])
 			metallicTexture = nullptr;
 			pbrOnDrawLamba();
 		};
-
 		std::function<void()> blinnPhongOnDrawLamba = [&]()
 		{
 			// Set uniforms:
@@ -370,10 +374,9 @@ int main(int argc, char* argv[])
 			}
 			blinnPhongShader->SetInt("u_DirectLightsCount", directLights.size());
 		};
-
 		std::function<void()> sphereBPOnDrawLamba = [&]()
 		{
-			pbrMaterial = spherePBRMaterial;
+			// pbrMaterial = spherePBRMaterial;
 			noTexturesPBROnDrawLamba();
 		};
 		std::function<void()> groundBPOnDrawLamba = [&]()
@@ -382,7 +385,6 @@ int main(int argc, char* argv[])
 			noTexturesPBROnDrawLamba();
 			normalTexture = marbleNormalTexture;
 		};
-
 		std::function<void()> flatColourOnDrawLamba = [&]()
 		{
 			// Set uniforms:
@@ -427,10 +429,9 @@ int main(int argc, char* argv[])
 			// #############################################################################
 			// Update scene:
 			// #############################################################################
-
-			camera->Update();
 			mimicCore->Update();
-			sphereModel->UpdateModelMatrix(sphereGameObject->Position, sphereGameObject->Rotation, sphereGameObject->Scale);
+			camera->Update();
+			// sphereModel->UpdateModelMatrix(sphereGameObject->Position, sphereGameObject->Rotation, sphereGameObject->Scale);
 			groundModel->UpdateModelMatrix(groundGameObject->Position, groundGameObject->Rotation, groundGameObject->Scale);
 			lightModel->UpdateModelMatrix(directLights[0]->Position, glm::vec3(0.0f), glm::vec3(0.1f));
 
@@ -444,7 +445,7 @@ int main(int argc, char* argv[])
 					MIMIC_PROFILE_SCOPE("Render Depth Maps");
 					shadowMapper->RenderDirectLightDepthMaps(modelsForShadowMapping, directLights, renderer);
 				}
-				switch (shaderUsed)
+				/*switch (shaderUsed)
 				{
 					case 0:
 					{
@@ -496,13 +497,14 @@ int main(int argc, char* argv[])
 					}break;
 					default:
 					break;
-				}
+				}*/
 				// send meshes to renderer:
 				
 				groundModel->QueueMeshesToDraw(pbrShader, groundBPOnDrawLamba, renderer);
 				lightModel->QueueMeshesToDraw(flatColourShader, flatColourOnDrawLamba, renderer);
 
 				// Draw:
+				mimicCore->Draw();
 				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 				MimicCore::Window->ResetViewPort();
 				renderer->Draw(camera);
@@ -539,13 +541,13 @@ int main(int argc, char* argv[])
 						ImGui::Combo("Material", &itemCurrent, items, IM_ARRAYSIZE(items));
 						if (itemCurrent == 0)
 						{
-							// PBR material parameters:
-							ImGui::ColorEdit3("Albedo##pbr_mat2", &(spherePBRMaterial.Albedo[0]));
-							ImGui::ColorEdit3("Emissive##pbr_mat3", &(spherePBRMaterial.Emissive[0]));
-							ImGui::SliderFloat("Roughness##pbr_mat4", &(spherePBRMaterial.Roughness), 0.001f, 1.0f);
-							ImGui::RadioButton("Dialectric##pbr_mat5", &spherePBRMaterial.Metallic, 0); ImGui::SameLine();
-							ImGui::RadioButton("Metallic##pbr_mat6", &spherePBRMaterial.Metallic, 1);
-							ImGui::SliderFloat("Ambient Occlusion##pbr_mat7", &(spherePBRMaterial.AmbientOcclusion), 0.0f, 1.0f);
+							//// PBR material parameters:
+							//ImGui::ColorEdit3("Albedo##pbr_mat2", &(spherePBRMaterial.Albedo[0]));
+							//ImGui::ColorEdit3("Emissive##pbr_mat3", &(spherePBRMaterial.Emissive[0]));
+							//ImGui::SliderFloat("Roughness##pbr_mat4", &(spherePBRMaterial.Roughness), 0.001f, 1.0f);
+							//ImGui::RadioButton("Dialectric##pbr_mat5", &spherePBRMaterial.Metallic, 0); ImGui::SameLine();
+							//ImGui::RadioButton("Metallic##pbr_mat6", &spherePBRMaterial.Metallic, 1);
+							//ImGui::SliderFloat("Ambient Occlusion##pbr_mat7", &(spherePBRMaterial.AmbientOcclusion), 0.0f, 1.0f);
 						}
 					}break;
 					case 1:

@@ -9,9 +9,10 @@
 #include "Texture.h"
 #include "GameObject.h"
 #include "Component.h"
-//#include "Resource.h"
-//#include "ModelRenderer.h"
-//#include "Material.h"
+#include "Resource.h"
+#include "ModelRenderer.h"
+#include "Material.h"
+#include "Model.h"
 
 // MimicRender translation units:
 #include <mimic_render/Light.h>

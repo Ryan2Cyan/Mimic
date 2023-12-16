@@ -3,6 +3,7 @@
 #include <mimic_render/Model.h>
 
 #include <memory>
+#include <vector>
 
 namespace MimicEngine
 {
@@ -10,12 +11,15 @@ namespace MimicEngine
     // Model stuct (engine):
     // #############################################################################
     struct MimicRender::Model;
+    struct MimicRender::Mesh;
 
     struct Model : Resource
     {
         bool Load(const std::string& path) override;
 
     private:
-        std::shared_ptr<MimicRender::Model> _model;
+        friend struct ModelRenderer;
+
+        std::shared_ptr<MimicRender::Model> _renderModel;
     };
 }

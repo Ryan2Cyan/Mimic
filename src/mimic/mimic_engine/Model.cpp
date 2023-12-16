@@ -5,8 +5,8 @@ namespace MimicEngine
 {
 	bool Model::Load(const std::string& path)
 	{
-		_model = MimicRender::Model::Initialise(path);
-		if (_model == nullptr) return false;
+		_renderModel = MimicRender::Model::Initialise(path);
+		if (_renderModel == nullptr) return false;
 
 		return true;
 	}
