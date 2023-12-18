@@ -22,10 +22,8 @@ namespace MimicEngine
 		static std::shared_ptr<GameObject> Initialise();
 		static std::shared_ptr<GameObject> Initialise(const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& scale);
 
-		/// <summary>
-		/// Add new component of specified type. If the component already exists on this game object, nothing will be
-		/// added.
-		/// </summary>
+		/// <summary> Add new component of specified type. If the component already exists on this game object, nothing will be
+		/// added. </summary>
 		template <typename T> std::shared_ptr<T> AddComponent()
 		{
 			std::shared_ptr<T> newComponent = std::make_shared<T>();
@@ -36,9 +34,7 @@ namespace MimicEngine
 			return newComponent;
 		}
 
-		/// <summary>
-		/// Get component of specified type.
-		/// </summary>
+		/// <summary> Get component of specified type. </summary>
 		template <typename T> std::shared_ptr<T> GetComponent() const
 		{
 			for (auto component : _components)
@@ -51,9 +47,7 @@ namespace MimicEngine
 			return nullptr;
 		}
 
-		/// <summary>
-		/// Set all transform parameters in one function call.
-		/// </summary>
+		/// <summary> Set all transform parameters in one function call. </summary>
 		void Transform(const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& scale);
 
 		std::shared_ptr<MimicCore> GetMimicCore() const noexcept;

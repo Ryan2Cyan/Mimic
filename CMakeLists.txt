@@ -58,6 +58,10 @@ link_directories(
     src/mimic/mimic_engine/ModelRenderer.h
     src/mimic/mimic_engine/Material.cpp
     src/mimic/mimic_engine/Material.h
+    src/mimic/mimic_engine/Camera.cpp
+    src/mimic/mimic_engine/Camera.h
+    src/mimic/mimic_engine/Light.cpp
+    src/mimic/mimic_engine/Light.h
 )
 
 # Implement Mimic utility library:

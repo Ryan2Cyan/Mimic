@@ -4,7 +4,7 @@
 namespace MimicRender
 {
 	// #############################################################################
-	// direct light functions:
+	// Direct light functions:
 	// #############################################################################
 	std::shared_ptr<DirectLight> DirectLight::Initialise() noexcept
 	{
@@ -32,7 +32,7 @@ namespace MimicRender
 
 
 	// #############################################################################
-	// point light functions:
+	// Point light functions:
 	// #############################################################################
 	std::shared_ptr<PointLight> PointLight::Initialise() noexcept
 	{

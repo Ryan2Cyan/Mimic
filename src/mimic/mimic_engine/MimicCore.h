@@ -27,6 +27,7 @@ namespace MimicEngine
 	struct PointLight;
 	struct CubeMap;
 	struct EnvironmentCubeMap;
+	struct Camera;
 
 	// #############################################################################
 	// mimic core struct:
@@ -67,14 +68,9 @@ namespace MimicEngine
 		static glm::ivec2 GetCurrentAspect();
 		static std::shared_ptr<ResourceManager> GetResourceManager();
 
-		// std::shared_ptr<DirectLight> AddDirectLight() noexcept;
-		// std::shared_ptr<PointLight> AddPointLight() noexcept;
-		// void AddCamera(const std::shared_ptr<Camera> camera, const bool setToCurrent) noexcept;
-
-		// static std::shared_ptr<Camera> CurrentCamera;
+		static std::shared_ptr<Camera> CurrentCamera;
 		static std::shared_ptr<ResourceManager> ResourceManager;
 		static std::shared_ptr<MimicRender::Window> Window;
-		// static std::shared_ptr<CubeMap> CubeMap;
 		// static std::shared_ptr<EnvironmentCubeMap> EnvironmentCubeMap;
 
 	private:
@@ -82,16 +78,24 @@ namespace MimicEngine
 		friend struct PBRMaterial; 
 		friend struct EnvironmentCubeMap;
 		friend struct GameObject;
+		friend struct Camera;
+		friend struct DirectLight;
 
 		static void AddGameObject(const std::shared_ptr<GameObject>& gameObject);
 		static void RemoveGameObject(const std::shared_ptr<GameObject>& gameObject);
+		static void AddCamera(const std::shared_ptr<Camera>& camera);
+		static void RemoveCamera(const std::shared_ptr<Camera>& camera);
+		static void AddDirectLight(const std::shared_ptr<DirectLight>& directLight);
+		static void RemoveDirectLight(const std::shared_ptr<DirectLight>& directLight);
+		// std::shared_ptr<PointLight> AddPointLight() noexcept;
 
 		static std::shared_ptr<MimicRender::Renderer> _renderer;
 		static std::shared_ptr<Environment> _environment;
 		static std::list<std::shared_ptr<GameObject>> _gameObjects;
-		// static std::vector<std::shared_ptr<Camera>> _cameras;
-		// static std::vector<std::shared_ptr<DirectLight>> _directLights;
-		// static std::vector<std::shared_ptr<PointLight>> _pointLights;
+		static std::list<std::shared_ptr<Camera>> _cameras;
+		static std::list<std::shared_ptr<DirectLight>> _directLights;
+		// static std::vector<std::shared_ptr<MimicRender::PointLight>> _pointLights;
+
 		static std::weak_ptr<MimicCore> _self;
 		static bool _applicationRunning;
 		bool _initialised;

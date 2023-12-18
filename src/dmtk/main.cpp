@@ -11,17 +11,6 @@ using namespace MimicEngine;
 using namespace MimicRender;
 using namespace MimicUtility;
 
-// Temporary structs that'll be intergrated into the engine proper during GEP implementaion:
-struct Transform 
-{
-	explicit Transform(const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& scale)
-		: Position(position), Rotation(rotation), Scale(scale) { }
-
-	glm::vec3 Position;
-	glm::vec3 Rotation;
-	glm::vec3 Scale;
-};
-
 struct PBRMaterialParameters
 {
 	explicit PBRMaterialParameters(const glm::vec3& albedo, const glm::vec3& emissive, const float& roughness, const float& ambientOcclusion, const float& alpha, const int& metallic)
@@ -112,9 +101,9 @@ int main(int argc, char* argv[])
 		}
 
 		// Initialise camera:
-		std::shared_ptr<MimicRender::Camera> camera = MimicRender::Camera::Initialise(MIMIC_CURRENT_ASPECT(), 45.0f);
-		camera->Position = glm::vec3(0.0f, 0.54f, -5.937f);
-		camera->Orientation = glm::vec3(0.0, -0.49f, -3.0f);
+		std::shared_ptr<MimicEngine::Camera> camera = MimicEngine::Camera::Initialise(MIMIC_CURRENT_ASPECT(), 45.0f);
+		camera->SetPosition(glm::vec3(0.0f, 0.54f, -5.937f));
+		camera->SetOrientation(glm::vec3(0.0, -0.49f, -3.0f));
 
 		// Initialise scene models:
 		std::shared_ptr<GameObject> sphereGameObject = GameObject::Initialise(glm::vec3(0.0f, 0.0f, -14.3f), glm::vec3(0.0f), glm::vec3(1.0f));
@@ -430,8 +419,7 @@ int main(int argc, char* argv[])
 			// Update scene:
 			// #############################################################################
 			mimicCore->Update();
-			camera->Update();
-			// sphereModel->UpdateModelMatrix(sphereGameObject->Position, sphereGameObject->Rotation, sphereGameObject->Scale);
+		
 			groundModel->UpdateModelMatrix(groundGameObject->Position, groundGameObject->Rotation, groundGameObject->Scale);
 			lightModel->UpdateModelMatrix(directLights[0]->Position, glm::vec3(0.0f), glm::vec3(0.1f));
 
@@ -445,61 +433,8 @@ int main(int argc, char* argv[])
 					MIMIC_PROFILE_SCOPE("Render Depth Maps");
 					shadowMapper->RenderDirectLightDepthMaps(modelsForShadowMapping, directLights, renderer);
 				}
-				/*switch (shaderUsed)
-				{
-					case 0:
-					{
-						switch (itemCurrent)
-						{
-							case 0:
-							{
-								sphereModel->QueueMeshesToDraw(pbrShader, sphereBPOnDrawLamba, renderer);
-							}break;
-							case 1:
-							{
-								sphereModel->QueueMeshesToDraw(pbrShader, marblePBROnDrawLamba, renderer);
-							}break;
-							case 2:
-							{
-								sphereModel->QueueMeshesToDraw(pbrShader, barkPBROnDrawLamba, renderer);
-							}break;
-							case 3:
-							{
-								sphereModel->QueueMeshesToDraw(pbrShader, foilPBROnDrawLamba, renderer);
-							}break;
-							case 4:
-							{
-								sphereModel->QueueMeshesToDraw(pbrShader, brickPBROnDrawLamba, renderer);
-							}break;
-							case 5:
-							{
-								sphereModel->QueueMeshesToDraw(pbrShader, groundPBROnDrawLamba, renderer);
-							}break;
-							case 6:
-							{
-								sphereModel->QueueMeshesToDraw(pbrShader, tiles1PBROnDrawLamba, renderer);
-							}break;
-							case 7:
-							{
-								sphereModel->QueueMeshesToDraw(pbrShader, tiles2PBROnDrawLamba, renderer);
-							}break;
-							case 8:
-							{
-								sphereModel->QueueMeshesToDraw(pbrShader, tiles3PBROnDrawLamba, renderer);
-							}break;
-							default:
-							break;
-						}
-					}break;
-					case 1:
-					{
-						sphereModel->QueueMeshesToDraw(blinnPhongShader, blinnPhongOnDrawLamba, renderer);
-					}break;
-					default:
-					break;
-				}*/
-				// send meshes to renderer:
-				
+
+				// Send meshes to renderer:
 				groundModel->QueueMeshesToDraw(pbrShader, groundBPOnDrawLamba, renderer);
 				lightModel->QueueMeshesToDraw(flatColourShader, flatColourOnDrawLamba, renderer);
 
@@ -507,10 +442,10 @@ int main(int argc, char* argv[])
 				mimicCore->Draw();
 				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 				MimicCore::Window->ResetViewPort();
-				renderer->Draw(camera);
+				// renderer->Draw(camera);
 				
 				renderer->ClearRenderQueue();
-				renderer->DrawEnvironmentMap(camera, environmentCubeMap);
+				// renderer->DrawEnvironmentMap(camera, environmentCubeMap);
 			}
 			// #############################################################################
 			// GUI:
@@ -585,10 +520,10 @@ int main(int argc, char* argv[])
 
 			if (ImGui::CollapsingHeader("Camera"))
 			{
-				ImGui::SliderFloat3("Position##c1", &(camera->Position[0]), -20.0f, 20.0f);
+				/*ImGui::SliderFloat3("Position##c1", &(camera->Position[0]), -20.0f, 20.0f);
 				ImGui::SliderFloat3("Orientation##c2", &(camera->Orientation[0]), -5.0f, 5.0f);
 				ImGui::SliderFloat2("Clipping Planes##c3", &(camera->ClippingPlane[0]), 0.001f, 500.0f);
-				ImGui::SliderFloat("FOV##c4", &(camera->Fov), 0.0f, 100.0f);
+				ImGui::SliderFloat("FOV##c4", &(camera->Fov), 0.0f, 100.0f);*/
 			}
 			ImGui::Separator();
 

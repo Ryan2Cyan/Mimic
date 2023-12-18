@@ -1,5 +1,4 @@
 #pragma once
-
 // Mega header-file (for user-usage only):
 
 // Mimic translation units:
@@ -13,6 +12,8 @@
 #include "ModelRenderer.h"
 #include "Material.h"
 #include "Model.h"
+#include "Camera.h"
+#include "Light.h"
 
 // MimicRender translation units:
 #include <mimic_render/Light.h>

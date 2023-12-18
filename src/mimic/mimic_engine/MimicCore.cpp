@@ -2,6 +2,8 @@
 #include "ResourceManager.h"
 #include "GameObject.h"
 #include "Environment.h"
+#include "Camera.h"
+#include "Light.h"
 #include <mimic_render/Window.h>
 #include <mimic_render/Light.h>
 
@@ -15,13 +17,12 @@ namespace MimicEngine
 	std::shared_ptr<MimicRender::Renderer> MimicCore::_renderer;
 	std::shared_ptr<Environment> MimicCore::_environment;
 	std::list<std::shared_ptr<GameObject>> MimicCore::_gameObjects;
+	std::list<std::shared_ptr<Camera>> MimicCore::_cameras;
 	std::weak_ptr<MimicCore> MimicCore::_self;
 	bool MimicCore::_applicationRunning;
-	//std::shared_ptr<Camera> MimicCore::CurrentCamera;
-	//std::vector<std::shared_ptr<DirectLight>> MimicCore::_directLights;
-	//std::vector<std::shared_ptr<PointLight>> MimicCore::_pointLights;
-	//std::vector<std::shared_ptr<Camera>> MimicCore::_cameras;
-	//std::shared_ptr<CubeMap> MimicCore::CubeMap;
+	std::shared_ptr<Camera> MimicCore::CurrentCamera;
+	std::list<std::shared_ptr<DirectLight>> MimicCore::_directLights;
+	// std::vector<std::shared_ptr<MimicRender::PointLight>> MimicCore::_pointLights;
 	//std::shared_ptr<EnvironmentCubeMap> MimicCore::EnvironmentCubeMap;
 
 	std::shared_ptr<MimicCore> MimicCore::Initialise() 
@@ -89,19 +90,14 @@ namespace MimicEngine
 
 	void MimicCore::Update()
 	{
+		// Re-calculate delta time for this frame:
 		_environment->CalculateDeltaTime();
-		for (auto gameObject : _gameObjects)
-		{
-			gameObject->Update();
-		}
-		// update game objects:
-		/*for (auto camera : _cameras)
-		{
-			for (auto gameObject : _gameObjects)
-			{
-				gameObject->Update();
-			}
-		}*/
+
+		// Update all active game objects:
+		for (auto gameObject : _gameObjects) gameObject->Update();
+		
+		// Update all active cameras:
+		for (auto camera : _cameras) camera->Update();
 	}
 
 	void MimicCore::Draw()
@@ -129,26 +125,6 @@ namespace MimicEngine
 		return _applicationRunning;
 	}
 
-	//std::shared_ptr<DirectLight> MimicCore::AddDirectLight() noexcept
-	//{
-	//	std::shared_ptr<DirectLight> newLight = std::make_shared<DirectLight>();
-	//	newLight->Name = "DirectLight_" + _directLights.size();
-
-	//	_directLights.push_back(newLight);
-	//	MIMIC_LOG_INFO("[Mimic::MimicCore] Added Mimic::DirectLight: \"%\".", newLight->Name);
-	//	return newLight;
-	//}
-
-	//std::shared_ptr<PointLight> MimicCore::AddPointLight() noexcept
-	//{
-	//	std::shared_ptr<PointLight> newLight = std::make_shared<PointLight>();
-	//	newLight->Name = "PointLight_" + _directLights.size();
-
-	//	_pointLights.push_back(newLight);
-	//	MIMIC_LOG_INFO("[Mimic::MimicCore] Added Mimic::PointLight: \"%\".", newLight->Name);
-	//	return newLight;
-	//}
-
 	void MimicCore::AddGameObject(const std::shared_ptr<GameObject>& gameObject)
 	{
 		if (gameObject == nullptr)
@@ -157,30 +133,62 @@ namespace MimicEngine
 			return;
 		}
 		gameObject->_mimicCore = _self;
+		gameObject->Name = "GameObject_" + _gameObjects.size();
 		MIMIC_LOG_INFO("[MimicEngine::MimicCore] Added Mimic::GameObject: \"%\".", gameObject->Name);
 		_gameObjects.push_back(gameObject);
 	}
 
 	void MimicCore::RemoveGameObject(const std::shared_ptr<GameObject>& gameObject)
 	{
-		if (gameObject != nullptr)
-		{
-			_gameObjects.remove(gameObject);
-		}
+		if (gameObject != nullptr) _gameObjects.remove(gameObject);
 	}
 
-	//void MimicCore::AddCamera(const std::shared_ptr<Camera> camera, const bool setToCurrent) noexcept
-	//{
-	//	if (camera == nullptr)
-	//	{
-	//		MIMIC_LOG_WARNING("Attempted to add null camera to hierarchy.");
-	//		return;
-	//	}
-	//	_cameras.push_back(camera);
+	void MimicCore::AddCamera(const std::shared_ptr<Camera>& camera)
+	{
+		if (camera == nullptr)
+		{
+			MIMIC_LOG_WARNING("[MimicEngine::MimicCore] Attempted to add null camera to hierarchy.");
+			return;
+		}
 
+		// A reference to the MimicCore may be needed later on:
+		// camera->_mimicCore = _self;
 
-	//	if (!setToCurrent) return;
-	//	CurrentCamera = camera;
-	//	MIMIC_LOG_INFO("[Mimic::MimicCore] Added Mimic::Camera: \"%\".", camera->GetGameObject()->Name);
-	//}
+		camera->Name = "Camera_" + _cameras.size();
+		MIMIC_LOG_INFO("[MimicEngine::MimicCore] Added Mimic::GameObject: \"%\".", camera->Name);
+		_cameras.push_back(camera);
+	}
+
+	void MimicCore::RemoveCamera(const std::shared_ptr<Camera>& camera)
+	{
+		if (camera != nullptr) _cameras.remove(camera);
+	}
+
+	void MimicCore::AddDirectLight(const std::shared_ptr<DirectLight>& directLight)
+	{
+		if (directLight == nullptr)
+		{
+			MIMIC_LOG_WARNING("[MimicEngine::MimicCore] Attempted to add null direct light to hierarchy.");
+			return;
+		}
+
+		directLight->Name = "DirectLight_" + _directLights.size();
+		MIMIC_LOG_INFO("[MimicEngine::MimicCore] Added Mimic::GameObject: \"%\".", directLight->Name);
+		_directLights.push_back(directLight);
+	}
+
+	void MimicCore::RemoveDirectLight(const std::shared_ptr<DirectLight>& directLight)
+	{
+		if (directLight != nullptr) _directLights.remove(directLight);
+	}
+
+	/*std::shared_ptr<PointLight> MimicCore::AddPointLight() noexcept
+	{
+		std::shared_ptr<PointLight> newLight = std::make_shared<PointLight>();
+		newLight->Name = "PointLight_" + _directLights.size();
+
+		_pointLights.push_back(newLight);
+		MIMIC_LOG_INFO("[Mimic::MimicCore] Added Mimic::PointLight: \"%\".", newLight->Name);
+		return newLight;
+	}*/
 }
