@@ -13,6 +13,10 @@ namespace MimicEngine
 		void SetPosition(const glm::vec3& position);
 		void SetDirection(const glm::vec3& direction);
 		void SetColour(const glm::vec3& colour);
+		
+		glm::vec3 GetPosition() const;
+		glm::vec3 GetDirection() const;
+		glm::vec3 GetColour() const;
 		std::string Name;
 
 	private:

@@ -27,4 +27,19 @@ namespace MimicEngine
 	{
 		_renderDirectLight->Colour = colour;
 	}
+
+	glm::vec3 DirectLight::GetPosition() const
+	{
+		return _renderDirectLight->Position;
+	}
+
+	glm::vec3 DirectLight::GetDirection() const
+	{
+		return _renderDirectLight->Direction;
+	}
+
+	glm::vec3 DirectLight::GetColour() const
+	{
+		return _renderDirectLight->Colour;
+	}
 }

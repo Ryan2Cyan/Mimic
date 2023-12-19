@@ -4,8 +4,8 @@
 #include "GameObject.h"
 #include "Shader.h"
 #include "Texture.h"
+#include "Light.h"
 #include <mimic_render/RenderTexture.h>
-// #include <mimic/Light.h>
 
 #include <algorithm>
 #include <glm/gtc/matrix_transform.hpp>
@@ -225,7 +225,6 @@ namespace MimicEngine
 			localShader->SetFloat("u_Roughness", _roughness);
 		}
 
-
 		// Query normal subroutine:
 		if (!_normalTexture.expired() && !NoTextureMode)
 		{
@@ -255,18 +254,19 @@ namespace MimicEngine
 		localShader->SetFloat("u_Alpha", _alpha);
 		localShader->SetFloat("u_AmbientOcclusion", _ambientOcclusion);
 
-		//// Set uniforms for each direct light:
-		//const std::vector<std::shared_ptr<DirectLight>> directLights = MimicCore::_directLights;
-		//for (int i = 0; i < directLights.size(); i++)
-		//{
-		//	const std::string currentLight = "u_DirectLights[" + std::to_string(i) + "]";
-
-		//	localShader->SetVector3((currentLight + ".direction").c_str(), glm::normalize(-directLights[i]->Direction));
-		//	const glm::vec4 colour = glm::vec4(directLights[i]->Colour.x, directLights[i]->Colour.y, directLights[i]->Colour.z, 1.0f);
-		//	localShader->SetVector4((currentLight + ".colour").c_str(), colour);
-		//}
-		//localShader->SetInt("u_DirectLightsCount", directLights.size());
-
+		// Set uniforms for each direct light:
+		int index = 0;
+		for (auto directLight : MimicCore::_directLights)
+		{
+			// Assign a new direct light into an array within the PBR shader, along with the
+			// light's attributes (direction & colour):
+			const std::string lightUniformId = "u_DirectLights[" + std::to_string(index) + "]";
+			localShader->SetVector3((lightUniformId + ".direction").c_str(), glm::normalize(-directLight->GetDirection()));
+			const glm::vec3 colour = directLight->GetColour();
+			localShader->SetVector4((lightUniformId + ".colour").c_str(), glm::vec4(colour, _alpha));
+			index++;
+		}
+		localShader->SetInt("u_DirectLightsCount", MimicCore::_directLights.size());
 
 		//// Set uniforms for each point light:
 		//const std::vector<std::shared_ptr<PointLight>> pointLights = MimicCore::_pointLights;

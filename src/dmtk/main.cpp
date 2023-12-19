@@ -164,13 +164,13 @@ int main(int argc, char* argv[])
 		std::shared_ptr<MimicEngine::Texture> tiles3RoughnessTexture	= MIMIC_LOAD_RESOURCE(MimicEngine::Texture, "Tiles101_1K-PNG_Roughness.png");
 
 		// Initialise direct lights:
-		std::vector<std::shared_ptr<MimicRender::DirectLight>> directLights =
+		std::vector<std::shared_ptr<MimicEngine::DirectLight>> directLights =
 		{
-			MimicRender::DirectLight::Initialise(glm::vec3(0.0f, 5.0f, -14.0f), glm::vec3(-0.25f), glm::vec3(1.0))
+			MimicEngine::DirectLight::Initialise(glm::vec3(0.0f, 5.0f, -14.0f), glm::vec3(-0.25f), glm::vec3(1.0))
 		};
 
 		// Initialise point lights:
-		std::vector<std::shared_ptr<MimicRender::PointLight>> pointLights = { };
+		// std::vector<std::shared_ptr<MimicRender::PointLight>> pointLights = { };
 
 		// load hdr environment map:
 		// std::shared_ptr<MimicRender::EnvironmentCubeMap> environmentCubeMap = MimicRender::EnvironmentCubeMap::Initialise("rural_asphalt_road_4k.hdr", MIMIC_CURRENT_ASPECT(), renderer);
@@ -529,9 +529,9 @@ int main(int argc, char* argv[])
 
 			if (ImGui::CollapsingHeader("Direct Light Transform"))
 			{
-				ImGui::SliderFloat3("Position##dl1_2", &(directLights[0]->Position[0]), -20.0f, 20.0f);
+				/*ImGui::SliderFloat3("Position##dl1_2", &(directLights[0]->Position[0]), -20.0f, 20.0f);
 				ImGui::SliderFloat3("Direction##dl2_2", &(directLights[0]->Direction[0]), -1.0f, 1.0f);
-				ImGui::SliderFloat3("Colour##dl3_2", &(directLights[0]->Colour[0]), 0.0f, 100.0f);
+				ImGui::SliderFloat3("Colour##dl3_2", &(directLights[0]->Colour[0]), 0.0f, 100.0f);*/
 			}
 			ImGui::Separator();
 
