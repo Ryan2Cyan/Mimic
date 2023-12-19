@@ -82,9 +82,7 @@ namespace MimicEngine
 	{
 		static std::shared_ptr<PBRMaterial> Initialise();
 
-		/// <summary>
-		/// Sets and binds texture map to corresponding texture type.
-		/// </summary>
+		/// <summary>  Sets and binds texture map to corresponding texture type. /// </summary>
 		void SetTextureMap(const std::shared_ptr<Texture>& texture, const MimicRender::TextureType& textureMapType) override;
 
 		// PBR Literal parameter functions, these will be used if a corresponding texture map is

@@ -125,15 +125,15 @@ namespace MimicEngine
 		};
 
 		// Set PBR parameter defaults:
-		pbrMaterial->SetAlbedo(glm::vec3(1.0f, 0.0f, 0.0f));
+		pbrMaterial->SetAlbedo(glm::vec3(1.0f));
 		pbrMaterial->SetEmissive(glm::vec3(0.0f));
 		pbrMaterial->SetMetallic(0.0f);
 		pbrMaterial->SetRoughness(0.5f);
 		pbrMaterial->SetAmbientOcclusion(0.5f);
 		pbrMaterial->SetAlpha(1.0f);
 
-		// Set OnDrawLambda:
-		pbrMaterial->_onDrawLambda = [&]() { pbrMaterial->OnDraw(); };
+		//// Set OnDrawLambda:
+		//pbrMaterial->_onDrawLambda = [&]() { pbrMaterial->OnDraw(); };
 		return pbrMaterial;
 	}
 

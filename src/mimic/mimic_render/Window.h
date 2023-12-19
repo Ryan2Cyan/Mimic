@@ -15,25 +15,17 @@ namespace MimicRender
 		~Window();
 		static std::shared_ptr<Window> Initialise(const std::string& windowName);
 
-		/// <summary>
-		/// Reset the viewport to this window's cached aspect radio.
-		/// </summary>
+		/// <summary> /// Reset the viewport to this window's cached aspect radio. </summary>
 		void ResetViewPort() const noexcept;
 
-		/// <summary>
-		/// Return the aspect radio cached by this window.
-		/// </summary>
+		/// <summary> Return the aspect radio cached by this window. </summary>
 		glm::ivec2 GetAspectRatio() const noexcept;
 
-		/// <summary>
-		/// 
-		/// </summary>
+		/// <summary> Clear OpenGL buffers (colour, depth, and or stencil). </summary>
 		void ClearBuffers(const std::uint8_t& buffers = MIMIC_CLEAR_COLOUR | MIMIC_COLOUR_AND_DEPTH_BUFFERS);
 
-		/// <summary>
-		/// Used in the default OpenGL double buffer context. Swaps render buffers to display the twin
-		/// buffer with the full frame's display data written to it.
-		/// </summary>
+		/// <summary> /// Used in the default OpenGL double buffer context. Swaps render buffers to display the twin
+		/// buffer with the full frame's display data written to it. </summary>
 		void SwapWindow() const;
 
 		static const std::uint8_t MIMIC_CLEAR_COLOUR = 0b1;

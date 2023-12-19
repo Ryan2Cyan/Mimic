@@ -20,7 +20,7 @@ namespace MimicEngine
 		virtual void Start() = 0;
 		virtual void Update() = 0;
 
-		std::weak_ptr<GameObject> GameObject;
+		std::weak_ptr<GameObject> _gameObject;
 		std::weak_ptr<Component> _self;
 		bool _initialised = false;
 	};

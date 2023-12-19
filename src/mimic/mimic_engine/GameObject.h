@@ -28,7 +28,7 @@ namespace MimicEngine
 		{
 			std::shared_ptr<T> newComponent = std::make_shared<T>();
 			newComponent->_self = newComponent;
-			newComponent->GameObject = _self;
+			newComponent->_gameObject = _self;
 
 			_components.push_back(newComponent);
 			return newComponent;

@@ -103,15 +103,10 @@ namespace MimicEngine
 	void MimicCore::Draw()
 	{
 		Window->ClearBuffers();
-		//for (auto camera : _cameras)
-		//{
-		//	/*_renderer->Draw(
-		//		camera->GetGameObject()->Position, 
-		//		camera->_viewMatrix, 
-		//		camera->_projectionMatrix
-		//	);*/
-		//}
+
+		for (auto camera : _cameras) _renderer->Draw(camera->_renderCamera);
 		_renderer->ClearRenderQueue();
+
 		// EnvironmentCubeMap->Draw(CurrentCamera->_viewMatrix, CurrentCamera->_projectionMatrix);
 	}
 

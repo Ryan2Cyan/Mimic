@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <string>
+#include <functional>
 
 namespace MimicEngine
 {	
@@ -20,18 +21,15 @@ namespace MimicEngine
 
 		template <typename T> void SetMaterial(const std::shared_ptr<T>& material)
 		{
+			const auto gameObjectParent = GetGameObject();
 			if (material == nullptr)
 			{
-				MIMIC_LOG_WARNING("[MimicEngine::ModelRenderer]\"%\" unable to assign uninitialised material.", GetGameObject()->Name);
+				MIMIC_LOG_WARNING("[MimicEngine::ModelRenderer]\"%\" unable to assign uninitialised material.", gameObjectParent->Name);
 				return;
 			}
-			auto downCastMaterial = std::dynamic_pointer_cast<T>(material);
-			if (downCastMaterial == nullptr)
-			{
-				MIMIC_LOG_WARNING("[MimicEngine::ModelRenderer]\"%\" unable to assign material, unrecognised Material type.", GetGameObject()->Name);
-				return;
-			}
-			_material = downCastMaterial;
+			_material = material;
+			_material->_gameObject = gameObjectParent;
+			// _onDrawLambda{ _material->OnDraw() };
 		}
 
 		template <typename T> const std::shared_ptr<T> GetMaterial() const
@@ -41,8 +39,8 @@ namespace MimicEngine
 				MIMIC_LOG_WARNING("[MimicEngine::ModelRenderer]\"%\" Unable to get unassigned material.", GetGameObject()->Name);
 				return nullptr;
 			}
-			auto downCastMaterial = std::dynamic_pointer_cast<T>(_material);
-			if (downCastMaterial == nullptr)
+			auto forwardCastMaterial = std::dynamic_pointer_cast<T>(_material);
+			if (forwardCastMaterial == nullptr)
 			{
 				MIMIC_LOG_WARNING("[MimicEngine::ModelRenderer]\"%\" Unable to get material, unrecognised Material type", GetGameObject()->Name);
 				return nullptr;
@@ -58,5 +56,6 @@ namespace MimicEngine
 
 		 std::shared_ptr<Model>_model;
 		 std::shared_ptr<Material> _material;
+		 std::function<void()> _onDrawLambda;
 	};
 }

@@ -8,7 +8,6 @@
 #include <mimic_render/Renderer.h>
 #include <mimic_render/Mesh.h>
 
-#include <functional>
 #include <GLM/glm.hpp>
 
 namespace MimicEngine
@@ -37,6 +36,9 @@ namespace MimicEngine
 	{
 		if (!_initialised) return;
 		
+		// Set OnDrawLambda:
+		std::function<void()> onDrawLambda = [&]() { _material->OnDraw(); };
+
 		for (auto mesh : _model->_renderModel->GetMeshes())
 		{
 			MimicCore::_renderer->AddToDrawQueue(
@@ -45,7 +47,7 @@ namespace MimicEngine
 					mesh->GetDataSize(),
 					_material->_shader.lock()->_renderShader,
 					GetGameObject()->_modelMatrix,
-					_material->_onDrawLambda
+					onDrawLambda
 				)
 			);
 		}

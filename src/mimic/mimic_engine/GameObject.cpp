@@ -29,11 +29,9 @@ namespace MimicEngine
 
 		// Cache game object in a list at the top of the hierarchy:
 		MimicCore::AddGameObject(newGameObject);
-		auto refCheck = newGameObject->_self.lock();
 
 		// Assign Transform component variables:
 		newGameObject->Transform(position, rotation, scale);
-		newGameObject->UpdateModelMatrix();
 
 		return newGameObject;
 	}

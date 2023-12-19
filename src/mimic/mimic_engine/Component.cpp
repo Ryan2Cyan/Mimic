@@ -4,6 +4,6 @@ namespace MimicEngine
 {
 	std::shared_ptr<GameObject> Component::GetGameObject() const noexcept
 	{
-		return GameObject.lock();
+		return _gameObject.lock();
 	}
 }

@@ -125,7 +125,7 @@ namespace MimicRender
 
 	void Window::ClearBuffers(const std::uint8_t& buffers)
 	{
-		if(buffers & MIMIC_CLEAR_COLOUR) glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
+		if(buffers & MIMIC_CLEAR_COLOUR) glClearColor(0.1f, 0.3f, 0.5f, 1.0f);
 		if (buffers & MIMIC_COLOUR_AND_DEPTH_BUFFERS) glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		if (buffers & MIMIC_COLOUR_BUFFER) glClear(GL_COLOR_BUFFER_BIT);
 		if (buffers & MIMIC_DEPTH_BUFFER) glClear(GL_DEPTH_BUFFER_BIT);
