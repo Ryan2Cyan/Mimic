@@ -12,7 +12,7 @@
 
 namespace MimicRender
 {
-	const std::shared_ptr<ShadowMapper> ShadowMapper::Initialise(glm::ivec2 aspectRatio)
+	const std::shared_ptr<ShadowMapper> ShadowMapper::Initialise(glm::ivec2 depthMapDimensions)
 	{
 		// Initialise file loader struct and use it to store a path to the project's "assets/" directory:
 		std::shared_ptr<MimicUtility::FileLoader> fileLoader = MimicUtility::FileLoader::Initialise();
@@ -24,7 +24,7 @@ namespace MimicRender
 		// Load depth map shader:
 		shadowMapper->_depthMapShader = Shader::Initialise(fileLoader->LocateFileInDirectory(assetPath, "DepthMapShader.glsl"));
 
-		shadowMapper->_depthMapAspect = aspectRatio;
+		shadowMapper->_depthMapDimensions = depthMapDimensions;
 		shadowMapper->_initialised = true;
 		return shadowMapper;
 	}
@@ -55,7 +55,7 @@ namespace MimicRender
 			if (directLight->_depthMapRT == nullptr)
 			{
 				directLight->_depthMapRT = RenderTexture::Initialise();
-				directLight->_depthMapRT->SetTexture(Texture::Initialise(_depthMapAspect, Texture::MIMIC_DEPTH_MAP_PARAMS, Texture::MIMIC_DEPTH_COMPONENT, Texture::MIMIC_DEPTH_COMPONENT));
+				directLight->_depthMapRT->SetTexture(Texture::Initialise(_depthMapDimensions, Texture::MIMIC_DEPTH_MAP_PARAMS, Texture::MIMIC_DEPTH_COMPONENT, Texture::MIMIC_DEPTH_COMPONENT));
 			}
 
 			// Bind light's render texture in preparation for rendering:

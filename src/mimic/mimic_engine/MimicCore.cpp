@@ -4,7 +4,6 @@
 #include "Environment.h"
 #include "Camera.h"
 #include "Light.h"
-#include <mimic_render/Window.h>
 #include <mimic_render/Light.h>
 
 #include <GL/glew.h>
@@ -22,53 +21,43 @@ namespace MimicEngine
 	bool MimicCore::_applicationRunning;
 	std::shared_ptr<Camera> MimicCore::CurrentCamera;
 	std::list<std::shared_ptr<DirectLight>> MimicCore::_directLights;
+	std::shared_ptr<MimicRender::ShadowMapper> MimicCore::_shadowMapper;
+	std::shared_ptr<MimicRender::EnvironmentCubeMap> MimicCore::_environmentCubeMap;
 	// std::vector<std::shared_ptr<MimicRender::PointLight>> MimicCore::_pointLights;
-	//std::shared_ptr<EnvironmentCubeMap> MimicCore::EnvironmentCubeMap;
 
 	std::shared_ptr<MimicCore> MimicCore::Initialise() 
 	{ 
 		// Initialise a new core and store a reference to itself. This "self" reference will
 		// be accessed by game objects and components to access certain data contained within
 		// core:
-		std::shared_ptr<MimicCore> newMimicCore = std::make_shared<MimicCore>();
-		newMimicCore->_self = newMimicCore;
-		newMimicCore->_applicationRunning = false;
+		std::shared_ptr<MimicCore> mimicCore = std::make_shared<MimicCore>();
+		mimicCore->_self = mimicCore;
+		mimicCore->_applicationRunning = false;
 		bool initialised;
 
-		// Initialise the logger utility class:
+		// Initialise all key components:
 		Logger::Init();
 		initialised = Logger::GetCoreLogger() != nullptr;
-
-		// Initialise SDL_Window, SDL_Renderer, & GL_Context, SDL, GLEW, and ImGui. Additionally sets up 
-		// OpenGL for rendering:
 		Window = MimicRender::Window::Initialise("[Mimic Engine] Dungeon Master's Tool Kit");
 		initialised = Window != nullptr;
-
-		// Initialise resource manager:
-		newMimicCore->ResourceManager = ResourceManager::Initialise();
-		newMimicCore->ResourceManager->_mimicCore = newMimicCore->_self;
-		newMimicCore->ResourceManager->_self = newMimicCore->ResourceManager;
-		MIMIC_LOG_INFO("[MimicEngine::ResourceManager] Initialisation successful.");
-
-		// Initialise environment:
-		newMimicCore->_environment = Environment::Initialise();
-		MIMIC_LOG_INFO("[MimicEngine::Environment] Initialisation successful.");
-
-		// Initialise renderer:
-		newMimicCore->_renderer = MimicRender::Renderer::Initialise();
-		MIMIC_LOG_INFO("[MimicEngine::Renderer] Initialisation successful.");
-
-		// EnvironmentCubeMap = EnvironmentCubeMap::Initialise();
+		mimicCore->ResourceManager = ResourceManager::Initialise();
+		mimicCore->ResourceManager->_mimicCore = mimicCore->_self;
+		mimicCore->ResourceManager->_self = mimicCore->ResourceManager;
+		mimicCore->_environment = Environment::Initialise();
+		mimicCore->_renderer = MimicRender::Renderer::Initialise();
+		mimicCore->_environmentCubeMap = MimicRender::EnvironmentCubeMap::Initialise("rural_asphalt_road_4k.hdr", GetCurrentAspect(), mimicCore->_renderer);
+		mimicCore->_shadowMapper = MimicRender::ShadowMapper::Initialise();
+		
 
 		// Ensure that the core (and all of its components) are initialised:
-		if (newMimicCore == nullptr || !initialised)
+		if (mimicCore == nullptr || !initialised)
 		{
 			MIMIC_LOG_FATAL("[MimicEngine::MimicCore] Unable to initialise MimicCore.");
 			throw;
 		}
 
 		MIMIC_LOG_INFO("[MimicEngine::MimicCore] Mimic Core initialisation successful.");
-		return newMimicCore;
+		return mimicCore;
 	}
 
 	glm::ivec2 MimicCore::GetCurrentAspect()
@@ -84,7 +73,6 @@ namespace MimicEngine
 	void MimicCore::Start()
 	{
 		 for (auto gameObject : _gameObjects) gameObject->Start();
-		// EnvironmentCubeMap->Load("rural_asphalt_road_4k.hdr");
 		 _applicationRunning = true;
 	}
 
@@ -93,21 +81,25 @@ namespace MimicEngine
 		// Re-calculate delta time for this frame:
 		_environment->CalculateDeltaTime();
 
-		// Update all active game objects:
+		// Update all scene objects:
 		for (auto gameObject : _gameObjects) gameObject->Update();
-		
-		// Update all active cameras:
 		for (auto camera : _cameras) camera->Update();
 	}
 
 	void MimicCore::Draw()
 	{
+		// Clear depth and colour buffers, then return the viewport to the dimensions of window:
 		Window->ClearBuffers();
+		Window->ResetViewPort();
 
-		for (auto camera : _cameras) _renderer->Draw(camera->_renderCamera);
+		// For each camera, render each render object in the renderer and the environment map. Then
+		// clear the render object list to prevent a memory leak:
+		for (auto camera : _cameras)
+		{
+			_renderer->Draw(camera->_renderCamera);
+			_renderer->DrawEnvironmentMap(camera->_renderCamera, _environmentCubeMap);
+		}
 		_renderer->ClearRenderQueue();
-
-		// EnvironmentCubeMap->Draw(CurrentCamera->_viewMatrix, CurrentCamera->_projectionMatrix);
 	}
 
 	void MimicCore::Exit()
@@ -146,7 +138,7 @@ namespace MimicEngine
 			return;
 		}
 
-		// A reference to the MimicCore may be needed later on:
+		// NOTE: A reference to the MimicCore may be needed later on:
 		// camera->_mimicCore = _self;
 
 		camera->Name = "Camera_" + _cameras.size();

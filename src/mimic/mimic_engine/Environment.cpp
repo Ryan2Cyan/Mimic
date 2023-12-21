@@ -1,4 +1,5 @@
 #include "Environment.h"
+#include <mimic_utility/Logger.h>
 
 #include <SDL/SDL.h>
 
@@ -30,7 +31,7 @@ namespace MimicEngine
 		const float deltaTime = difference / 1000.0f;
 		_lastTimeDelta = time;
 
-		// delay program to prevent CPU from doing unnecessary calculations:
+		// Delay program to prevent CPU from doing extra unnecessary calculations:
 		const float idealTime = 1.0f / _idealFramerate;
 		if (idealTime > deltaTime) SDL_Delay((idealTime - deltaTime) * 1000.0f);
 		Environment::_deltaTime = deltaTime;

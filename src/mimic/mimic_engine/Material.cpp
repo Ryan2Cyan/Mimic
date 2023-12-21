@@ -245,9 +245,13 @@ namespace MimicEngine
 			localShader->SetFloat("u_Metallic", _metallic);
 		}
 
+		// Set texture units for all environment map data (used for image-based rendering):
+		localShader->SetTexture("u_IrradianceMap", MimicCore::_environmentCubeMap->GetIrradianceId(), 4, MimicRender::Texture::MIMIC_CUBEMAP_TEXTURE);
+		localShader->SetTexture("u_PrefilterMap", MimicCore::_environmentCubeMap->GetPreFilteredId(), 5, MimicRender::Texture::MIMIC_CUBEMAP_TEXTURE);
+		localShader->SetTexture("u_BRDFLookupTexture", MimicCore::_environmentCubeMap->GetBRDFId(), 6, MimicRender::Texture::MIMIC_2D_TEXTURE);
+		 
 		// Send all subroutine selection data to the GPU, telling the shader which subroutines to query:
 		glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, _subroutineIndices.size(), _subroutineIndices.data());
-
 
 		// Set remaining PBR literal parameters that are not tied to texture maps:
 		localShader->SetVector3("u_Emissive", _emissive);
@@ -282,19 +286,6 @@ namespace MimicEngine
 		//	localShader->SetFloat((currentLight + ".quadratic").c_str(), pointLights[i]->Quadratic);
 		//}
 		//localShader->SetInt("u_PointLightsCount", pointLights.size());
-
-		// Bind all environment cube map textures to the corresponding texture units:
-		// localShader->SetInt("u_IrradianceMap", 5);
-		// glActiveTexture(GL_TEXTURE5);
-		//glBindTexture(GL_TEXTURE_CUBE_MAP, MimicCore::EnvironmentCubeMap->_irradianceRenderTexture->_texture->_id);
-
-		/*localShader->SetInt("u_PrefilterMap", 6);
-		glActiveTexture(GL_TEXTURE6);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, MimicCore::EnvironmentCubeMap->_prefilteredMapRenderTexture->_texture->_id);
-
-		localShader->SetInt("u_BRDFLookupTexture", 7);
-		glActiveTexture(GL_TEXTURE7);
-		glBindTexture(GL_TEXTURE_2D, MimicCore::EnvironmentCubeMap->_brdfConvolutedRenderTexture->_texture->_id);*/
 	}
 
 	//// #############################################################################

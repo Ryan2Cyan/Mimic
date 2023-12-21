@@ -33,19 +33,11 @@ int main(int argc, char* argv[])
 		// Initialise core:
 		std::shared_ptr<MimicCore> mimicCore = MimicCore::Initialise();
 
-		// Initialise file loader struct and use it to store a path to the project's "assets/" directory:
-		// const std::shared_ptr<FileLoader> fileLoader = FileLoader::Initialise();
-		// const std::string assetPath = fileLoader->LocateDirectory("assets").generic_string();
-
-		// Initialise renderer:
-		// std::shared_ptr<MimicRender::Renderer> renderer = MimicRender::Renderer::Initialise();
-
 		// Initialise shadow mapper, specifying the resolution of the depth maps it'll produce:
 		// std::shared_ptr<ShadowMapper> shadowMapper = ShadowMapper::Initialise(glm::ivec2(4096, 4096));
 
 		// Initialise shaders:
 		static int shaderUsed = 0;
-		// const std::shared_ptr<MimicRender::Shader> pbrShader = MimicRender::Shader::Initialise(fileLoader->LocateFileInDirectory(assetPath, "PBRShader.glsl"));
 		// const std::shared_ptr<MimicRender::Shader> blinnPhongShader = MimicRender::Shader::Initialise(fileLoader->LocateFileInDirectory(assetPath, "BlinnPhongShader.glsl"));
 
 		//// Blinn phong material parameters:
@@ -58,48 +50,6 @@ int main(int argc, char* argv[])
 		//// Flat colour material parameters:
 		//constexpr glm::vec3 flatColour = glm::vec3(1.0f);
 
-		// Initialise all data required for the PBR Shader subroutines. This looks messy here but will be cleaned
-		// up in the GEP assignment.
-		//std::array<unsigned int, 4> subroutineUniformIndices;
-		//unsigned int albedoSubroutineUniform;
-		//unsigned int normalSubroutineUniform;
-		//unsigned int roughnessSubroutineUniform;
-		//unsigned int metallicSubroutineUniform;
-		//unsigned int albedoAuto;
-		//unsigned int albedoManual;
-		//unsigned int normalAuto;
-		//unsigned int normalManual;
-		//unsigned int roughnessAuto;
-		//unsigned int roughnessManual;
-		//unsigned int metallicAuto;
-		//unsigned int metallicManual;
-
-		//if (pbrShader)
-		//{
-		//	// Load all subroutine uniforms and store them in an array. The array will be used to set indices in 
-		//	// PBR on draw function call.
-		//	albedoSubroutineUniform = pbrShader->GetSubroutineUniform(GL_FRAGMENT_SHADER, "AlbedoMode");
-		//	normalSubroutineUniform = pbrShader->GetSubroutineUniform(GL_FRAGMENT_SHADER, "NormalMode");
-		//	roughnessSubroutineUniform = pbrShader->GetSubroutineUniform(GL_FRAGMENT_SHADER, "RoughnessMode");
-		//	metallicSubroutineUniform = pbrShader->GetSubroutineUniform(GL_FRAGMENT_SHADER, "MetallicMode");
-		//	subroutineUniformIndices = { albedoSubroutineUniform, normalSubroutineUniform, roughnessSubroutineUniform, metallicSubroutineUniform };
-
-		//	// Load all specific subroutine functions. These come in two forms : AutoTexture and Manual. AutoTexture 
-		//	// functions are used when the user has set a texture to the PBR parameter, otherwise (Manual) use a literal
-		//	// value.
-		//	albedoAuto = pbrShader->GetSubroutineIndex(GL_FRAGMENT_SHADER, "CalculateAlbedoAutoTexture");
-		//	albedoManual = pbrShader->GetSubroutineIndex(GL_FRAGMENT_SHADER, "CalculateAlbedoManual");
-
-		//	normalAuto = pbrShader->GetSubroutineIndex(GL_FRAGMENT_SHADER, "CalculateNormalAutoTexture");
-		//	normalManual = pbrShader->GetSubroutineIndex(GL_FRAGMENT_SHADER, "CalculateNormalManual");
-
-		//	roughnessAuto = pbrShader->GetSubroutineIndex(GL_FRAGMENT_SHADER, "CalculateRoughnessAutoTexture");
-		//	roughnessManual = pbrShader->GetSubroutineIndex(GL_FRAGMENT_SHADER, "CalculateRoughnessManual");
-
-		//	metallicAuto = pbrShader->GetSubroutineIndex(GL_FRAGMENT_SHADER, "CalculateMetallicAutoTexture");
-		//	metallicManual = pbrShader->GetSubroutineIndex(GL_FRAGMENT_SHADER, "CalculateMetallicManual");
-		//}
-
 		// Initialise camera:
 		std::shared_ptr<MimicEngine::Camera> camera = MimicEngine::Camera::Initialise(MimicCore::GetCurrentAspect(), 45.0f);
 		camera->SetPosition(glm::vec3(0.0f, 0.54f, -5.937f));
@@ -111,9 +61,6 @@ int main(int argc, char* argv[])
 		auto spherePBRMaterial = PBRMaterial::Initialise();
 		sphereModelRenderer->SetMaterial<PBRMaterial>(spherePBRMaterial);
 		sphereModelRenderer->SetModel(MimicCore::ResourceManager->LoadResource<MimicEngine::Model>("sphere.obj"));
-
-		// std::shared_ptr<MimicRender::Model> sphereModel = MimicRender::Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "sphere.obj"));
-		// PBRMaterialParameters spherePBRMaterial = PBRMaterialParameters(glm::vec3(1.0f), glm::vec3(0.0), 0.5f, 0.5f, 1.0f, 0);
 
 		/*std::shared_ptr<GameObject> groundGameObject = GameObject::Initialise(glm::vec3(0.0f, -1.5f, -50.0f), glm::vec3(0.0f), glm::vec3(43.45f, -0.5f, 50.0f));
 		std::shared_ptr<MimicRender::Model> groundModel = MimicRender::Model::Initialise(fileLoader->LocateFileInDirectory(assetPath, "cube_3.obj"));
@@ -130,38 +77,38 @@ int main(int argc, char* argv[])
 		std::shared_ptr<MimicEngine::Texture> roughnessTexture;
 		std::shared_ptr<MimicEngine::Texture> metallicTexture;
 
-		std::shared_ptr<MimicEngine::Texture> marbleAlbedoTexture		= MIMIC_LOAD_RESOURCE(MimicEngine::Texture, "Marble016_1K-PNG_Color.png");
-		std::shared_ptr<MimicEngine::Texture> marbleNormalTexture		= MIMIC_LOAD_RESOURCE(MimicEngine::Texture, "Marble016_1K-PNG_NormalGL.png");
-		std::shared_ptr<MimicEngine::Texture> marbleRoughnessTexture	= MIMIC_LOAD_RESOURCE(MimicEngine::Texture, "Marble016_1K-PNG_Roughness.png");
+		std::shared_ptr<MimicEngine::Texture> marbleAlbedoTexture		= MimicCore::ResourceManager->LoadResource<MimicEngine::Texture>("Marble016_1K-PNG_Color.png");
+		std::shared_ptr<MimicEngine::Texture> marbleNormalTexture		= MimicCore::ResourceManager->LoadResource<MimicEngine::Texture>("Marble016_1K-PNG_NormalGL.png");
+		std::shared_ptr<MimicEngine::Texture> marbleRoughnessTexture	= MimicCore::ResourceManager->LoadResource<MimicEngine::Texture>("Marble016_1K-PNG_Roughness.png");
 		
-		std::shared_ptr<MimicEngine::Texture> foilAlbedoTexture			= MIMIC_LOAD_RESOURCE(MimicEngine::Texture, "Foil002_1K-PNG_Color.png");
-		std::shared_ptr<MimicEngine::Texture> foilNormalTexture			= MIMIC_LOAD_RESOURCE(MimicEngine::Texture, "Foil002_1K-PNG_NormalGL.png");
-		std::shared_ptr<MimicEngine::Texture> foilRoughnessTexture		= MIMIC_LOAD_RESOURCE(MimicEngine::Texture, "Foil002_1K-PNG_Roughness.png");
-		std::shared_ptr<MimicEngine::Texture> foilMetallicTexture		= MIMIC_LOAD_RESOURCE(MimicEngine::Texture, "Foil002_1K-PNG_Metalness.png");
+		std::shared_ptr<MimicEngine::Texture> foilAlbedoTexture			= MimicCore::ResourceManager->LoadResource<MimicEngine::Texture>("Foil002_1K-PNG_Color.png");
+		std::shared_ptr<MimicEngine::Texture> foilNormalTexture			= MimicCore::ResourceManager->LoadResource<MimicEngine::Texture>("Foil002_1K-PNG_NormalGL.png");
+		std::shared_ptr<MimicEngine::Texture> foilRoughnessTexture		= MimicCore::ResourceManager->LoadResource<MimicEngine::Texture>("Foil002_1K-PNG_Roughness.png");
+		std::shared_ptr<MimicEngine::Texture> foilMetallicTexture		= MimicCore::ResourceManager->LoadResource<MimicEngine::Texture>("Foil002_1K-PNG_Metalness.png");
 
-		std::shared_ptr<MimicEngine::Texture> brickAlbedoTexture		= MIMIC_LOAD_RESOURCE(MimicEngine::Texture, "Bricks084_1K-PNG_Color.png");
-		std::shared_ptr<MimicEngine::Texture> brickNormalTexture		= MIMIC_LOAD_RESOURCE(MimicEngine::Texture, "Bricks084_1K-PNG_NormalGL.png");
-		std::shared_ptr<MimicEngine::Texture> brickRoughnessTexture		= MIMIC_LOAD_RESOURCE(MimicEngine::Texture, "Bricks084_1K-PNG_Roughness.png");
+		std::shared_ptr<MimicEngine::Texture> brickAlbedoTexture		= MimicCore::ResourceManager->LoadResource<MimicEngine::Texture>("Bricks084_1K-PNG_Color.png");
+		std::shared_ptr<MimicEngine::Texture> brickNormalTexture		= MimicCore::ResourceManager->LoadResource<MimicEngine::Texture>("Bricks084_1K-PNG_NormalGL.png");
+		std::shared_ptr<MimicEngine::Texture> brickRoughnessTexture		= MimicCore::ResourceManager->LoadResource<MimicEngine::Texture>("Bricks084_1K-PNG_Roughness.png");
 
-		std::shared_ptr<MimicEngine::Texture> barkAlbedoTexture			= MIMIC_LOAD_RESOURCE(MimicEngine::Texture, "Bark012_1K-PNG_Color.png");
-		std::shared_ptr<MimicEngine::Texture> barkNormalTexture			= MIMIC_LOAD_RESOURCE(MimicEngine::Texture, "Bark012_1K-PNG_NormalGL.png");
-		std::shared_ptr<MimicEngine::Texture> barkRoughnessTexture		= MIMIC_LOAD_RESOURCE(MimicEngine::Texture, "Bark012_1K-PNG_Roughness.png");
+		std::shared_ptr<MimicEngine::Texture> barkAlbedoTexture			= MimicCore::ResourceManager->LoadResource<MimicEngine::Texture>("Bark012_1K-PNG_Color.png");
+		std::shared_ptr<MimicEngine::Texture> barkNormalTexture			= MimicCore::ResourceManager->LoadResource<MimicEngine::Texture>("Bark012_1K-PNG_NormalGL.png");
+		std::shared_ptr<MimicEngine::Texture> barkRoughnessTexture		= MimicCore::ResourceManager->LoadResource<MimicEngine::Texture>("Bark012_1K-PNG_Roughness.png");
 
-		std::shared_ptr<MimicEngine::Texture> groundAlbedoTexture		= MIMIC_LOAD_RESOURCE(MimicEngine::Texture, "Ground054_1K-PNG_Color.png");
-		std::shared_ptr<MimicEngine::Texture> groundNormalTexture		= MIMIC_LOAD_RESOURCE(MimicEngine::Texture, "Ground054_1K-PNG_NormalGL.png");
-		std::shared_ptr<MimicEngine::Texture> groundRoughnessTexture	= MIMIC_LOAD_RESOURCE(MimicEngine::Texture, "Ground054_1K-PNG_Roughness.png");
+		std::shared_ptr<MimicEngine::Texture> groundAlbedoTexture		= MimicCore::ResourceManager->LoadResource<MimicEngine::Texture>("Ground054_1K-PNG_Color.png");
+		std::shared_ptr<MimicEngine::Texture> groundNormalTexture		= MimicCore::ResourceManager->LoadResource<MimicEngine::Texture>("Ground054_1K-PNG_NormalGL.png");
+		std::shared_ptr<MimicEngine::Texture> groundRoughnessTexture	= MimicCore::ResourceManager->LoadResource<MimicEngine::Texture>("Ground054_1K-PNG_Roughness.png");
 
-		std::shared_ptr<MimicEngine::Texture> tiles1AlbedoTexture		= MIMIC_LOAD_RESOURCE(MimicEngine::Texture, "Tiles078_1K-PNG_Color.png");
-		std::shared_ptr<MimicEngine::Texture> tiles1NormalTexture		= MIMIC_LOAD_RESOURCE(MimicEngine::Texture, "Tiles078_1K-PNG_NormalGL.png");
-		std::shared_ptr<MimicEngine::Texture> tiles1RoughnessTexture	= MIMIC_LOAD_RESOURCE(MimicEngine::Texture, "Tiles078_1K-PNG_Roughness.png");
+		std::shared_ptr<MimicEngine::Texture> tiles1AlbedoTexture		= MimicCore::ResourceManager->LoadResource<MimicEngine::Texture>("Tiles078_1K-PNG_Color.png");
+		std::shared_ptr<MimicEngine::Texture> tiles1NormalTexture		= MimicCore::ResourceManager->LoadResource<MimicEngine::Texture>("Tiles078_1K-PNG_NormalGL.png");
+		std::shared_ptr<MimicEngine::Texture> tiles1RoughnessTexture	= MimicCore::ResourceManager->LoadResource<MimicEngine::Texture>("Tiles078_1K-PNG_Roughness.png");
 
-		std::shared_ptr<MimicEngine::Texture> tiles2AlbedoTexture		= MIMIC_LOAD_RESOURCE(MimicEngine::Texture, "Tiles093_1K-PNG_Color.png");
-		std::shared_ptr<MimicEngine::Texture> tiles2NormalTexture		= MIMIC_LOAD_RESOURCE(MimicEngine::Texture, "Tiles093_1K-PNG_NormalGL.png");
-		std::shared_ptr<MimicEngine::Texture> tiles2RoughnessTexture	= MIMIC_LOAD_RESOURCE(MimicEngine::Texture, "Tiles093_1K-PNG_Roughness.png");
+		std::shared_ptr<MimicEngine::Texture> tiles2AlbedoTexture		= MimicCore::ResourceManager->LoadResource<MimicEngine::Texture>("Tiles093_1K-PNG_Color.png");
+		std::shared_ptr<MimicEngine::Texture> tiles2NormalTexture		= MimicCore::ResourceManager->LoadResource<MimicEngine::Texture>("Tiles093_1K-PNG_NormalGL.png");
+		std::shared_ptr<MimicEngine::Texture> tiles2RoughnessTexture	= MimicCore::ResourceManager->LoadResource<MimicEngine::Texture>("Tiles093_1K-PNG_Roughness.png");
 
-		std::shared_ptr<MimicEngine::Texture> tiles3AlbedoTexture		= MIMIC_LOAD_RESOURCE(MimicEngine::Texture, "Tiles101_1K-PNG_Color.png");
-		std::shared_ptr<MimicEngine::Texture> tiles3NormalTexture		= MIMIC_LOAD_RESOURCE(MimicEngine::Texture, "Tiles101_1K-PNG_NormalGL.png");
-		std::shared_ptr<MimicEngine::Texture> tiles3RoughnessTexture	= MIMIC_LOAD_RESOURCE(MimicEngine::Texture, "Tiles101_1K-PNG_Roughness.png");
+		std::shared_ptr<MimicEngine::Texture> tiles3AlbedoTexture		= MimicCore::ResourceManager->LoadResource<MimicEngine::Texture>("Tiles101_1K-PNG_Color.png");
+		std::shared_ptr<MimicEngine::Texture> tiles3NormalTexture		= MimicCore::ResourceManager->LoadResource<MimicEngine::Texture>("Tiles101_1K-PNG_NormalGL.png");
+		std::shared_ptr<MimicEngine::Texture> tiles3RoughnessTexture	= MimicCore::ResourceManager->LoadResource<MimicEngine::Texture>("Tiles101_1K-PNG_Roughness.png");
 
 		// Initialise direct lights:
 		std::vector<std::shared_ptr<MimicEngine::DirectLight>> directLights =
@@ -172,173 +119,6 @@ int main(int argc, char* argv[])
 		// Initialise point lights:
 		// std::vector<std::shared_ptr<MimicRender::PointLight>> pointLights = { };
 
-		// load hdr environment map:
-		// std::shared_ptr<MimicRender::EnvironmentCubeMap> environmentCubeMap = MimicRender::EnvironmentCubeMap::Initialise("rural_asphalt_road_4k.hdr", MIMIC_CURRENT_ASPECT(), renderer);
-
-		//// render-shader lambdas:
-		//PBRMaterialParameters pbrMaterial = PBRMaterialParameters(glm::vec3(0.6f), glm::vec3(0.0), 0.8f, 0.5f, 1.0f, 0);
-		//std::function<void()> pbrOnDrawLamba = [&]()
-		//{
-		//	// load albedo (map_kd):
-		//	if (albedoTexture)
-		//	{
-		//		subroutineUniformIndices[albedoSubroutineUniform] = albedoAuto;
-		//		pbrShader->SetTexture("u_AlbedoMap", albedoTexture->GetId(), 0, MimicRender::Texture::MIMIC_2D_TEXTURE);
-		//	}
-		//	else
-		//	{
-		//		subroutineUniformIndices[albedoSubroutineUniform] = albedoManual;
-		//		pbrShader->SetVector3("u_Albedo", pbrMaterial.Albedo);
-		//	}
-
-		//	// load normals (map_Bump):
-		//	if (normalTexture)
-		//	{
-		//		subroutineUniformIndices[normalSubroutineUniform] = normalAuto;
-		//		pbrShader->SetTexture("u_NormalMap", normalTexture->GetId(), 1, MimicRender::Texture::MIMIC_2D_TEXTURE);
-		//	}
-		//	else subroutineUniformIndices[normalSubroutineUniform] = normalManual;
-
-		//	// load roughness(map_ks):
-		//	if (roughnessTexture)
-		//	{
-		//		subroutineUniformIndices[roughnessSubroutineUniform] = roughnessAuto;
-		//		pbrShader->SetTexture("u_RoughnessMap", roughnessTexture->GetId(), 2, MimicRender::Texture::MIMIC_2D_TEXTURE);
-		//	}
-		//	else
-		//	{
-		//		subroutineUniformIndices[roughnessSubroutineUniform] = roughnessManual;
-		//		pbrShader->SetFloat("u_Roughness", pbrMaterial.Roughness);
-		//	}
-
-		//	// load metallic (must be specified by user):
-		//	if (metallicTexture)
-		//	{
-		//		subroutineUniformIndices[metallicSubroutineUniform] = metallicAuto;
-		//		pbrShader->SetTexture("u_MetallicMap", metallicTexture->GetId(), 3, MimicRender::Texture::MIMIC_2D_TEXTURE);
-		//	}
-		//	else
-		//	{
-		//		subroutineUniformIndices[metallicSubroutineUniform] = metallicManual;
-		//		pbrShader->SetFloat("u_Metallic", pbrMaterial.Metallic);
-		//	}
-
-		//	glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, subroutineUniformIndices.size(), subroutineUniformIndices.data());
-
-		//	pbrShader->SetTexture("u_IrradianceMap", environmentCubeMap->GetIrradianceId(), 4, MimicRender::Texture::MIMIC_CUBEMAP_TEXTURE);
-		//	pbrShader->SetTexture("u_PrefilterMap", environmentCubeMap->GetPreFilteredId(), 5, MimicRender::Texture::MIMIC_CUBEMAP_TEXTURE);
-		//	pbrShader->SetTexture("u_BRDFLookupTexture", environmentCubeMap->GetBRDFId(), 6, MimicRender::Texture::MIMIC_2D_TEXTURE);
-
-		//	pbrShader->SetVector3("u_Emissive", pbrMaterial.Emissive);
-		//	pbrShader->SetFloat("u_Alpha", pbrMaterial.Alpha);
-		//	pbrShader->SetFloat("u_AmbientOcclusion", pbrMaterial.AmbientOcclusion);
-
-		//	// direct lights
-		//	for (int i = 0; i < directLights.size(); i++)
-		//	{
-		//		const std::string index = std::to_string(i);
-		//		const std::string currentLight = "u_DirectLights[" + index + "]";
-		//		const std::string currentLightMatrix = "u_DirectLightMatrices[" + index + "]";
-		//		const std::string currentShadowMap = "u_DirectShadowMaps[" + index + "]";
-
-		//		pbrShader->SetVector3((currentLight + ".direction").c_str(), glm::normalize(-directLights[i]->Direction));
-		//		const glm::vec4 colour = glm::vec4(directLights[i]->Colour.x, directLights[i]->Colour.y, directLights[i]->Colour.z, 1.0f);
-		//		pbrShader->SetVector4((currentLight + ".colour").c_str(), colour);
-		//		pbrShader->SetMat4(currentLightMatrix.c_str(), directLights[i]->GetLightMatrix());
-		//		pbrShader->SetTexture(currentShadowMap.c_str(), directLights[i]->GetDepthMapTextureId(), 7, MimicRender::Texture::MIMIC_2D_TEXTURE);
-		//	}
-		//	pbrShader->SetInt("u_DirectLightsCount", directLights.size());
-
-
-		//	// point lights:
-		//	for (int i = 0; i < pointLights.size(); i++)
-		//	{
-		//		const std::string currentLight = "u_PointLights[" + std::to_string(i) + "]";
-
-		//		pbrShader->SetVector3((currentLight + ".position").c_str(), pointLights[i]->Position);
-		//		const glm::vec4 colour = glm::vec4(pointLights[i]->Colour.x, pointLights[i]->Colour.y, pointLights[i]->Colour.z, 1.0f);
-		//		pbrShader->SetVector4((currentLight + ".colour").c_str(), colour);
-		//		pbrShader->SetFloat((currentLight + ".constant").c_str(), pointLights[i]->GetConstant());
-		//		pbrShader->SetFloat((currentLight + ".linear").c_str(), pointLights[i]->GetLinear());
-		//		pbrShader->SetFloat((currentLight + ".quadratic").c_str(), pointLights[i]->GetQuadratic());
-		//	}
-		//	pbrShader->SetInt("u_PointLightsCount", pointLights.size());
-		//};
-
-		//// This value works with ImGUI to decide which material to render on the Stanford Bunny model:
-		//static int itemCurrent = 0;
-		//std::function<void()> barkPBROnDrawLamba = [&]()
-		//{
-		//	albedoTexture = barkAlbedoTexture;
-		//	normalTexture = barkNormalTexture;
-		//	roughnessTexture = barkRoughnessTexture;
-		//	metallicTexture = nullptr;
-		//	pbrOnDrawLamba();
-		//};
-		//std::function<void()> brickPBROnDrawLamba = [&]()
-		//{
-		//	albedoTexture = brickAlbedoTexture;
-		//	normalTexture = brickNormalTexture;
-		//	roughnessTexture = brickRoughnessTexture;
-		//	metallicTexture = nullptr;
-		//	pbrOnDrawLamba();
-		//};
-		//std::function<void()> foilPBROnDrawLamba = [&]()
-		//{
-		//	albedoTexture = foilAlbedoTexture;
-		//	normalTexture = foilNormalTexture;
-		//	roughnessTexture = foilRoughnessTexture;
-		//	metallicTexture = foilMetallicTexture;
-		//	pbrOnDrawLamba();
-		//};
-		//std::function<void()> marblePBROnDrawLamba = [&]()
-		//{
-		//	albedoTexture = marbleAlbedoTexture;
-		//	normalTexture = marbleNormalTexture;
-		//	roughnessTexture = marbleRoughnessTexture;
-		//	metallicTexture = nullptr;
-		//	pbrOnDrawLamba();
-		//};
-		//std::function<void()> groundPBROnDrawLamba = [&]()
-		//{
-		//	albedoTexture = groundAlbedoTexture;
-		//	normalTexture = groundNormalTexture;
-		//	roughnessTexture = groundRoughnessTexture;
-		//	metallicTexture = nullptr;
-		//	pbrOnDrawLamba();
-		//};
-		//std::function<void()> tiles1PBROnDrawLamba = [&]()
-		//{
-		//	albedoTexture = tiles1AlbedoTexture;
-		//	normalTexture = tiles1NormalTexture;
-		//	roughnessTexture = tiles1RoughnessTexture;
-		//	metallicTexture = nullptr;
-		//	pbrOnDrawLamba();
-		//};
-		//std::function<void()> tiles2PBROnDrawLamba = [&]()
-		//{
-		//	albedoTexture = tiles2AlbedoTexture;
-		//	normalTexture = tiles2NormalTexture;
-		//	roughnessTexture = tiles2RoughnessTexture;
-		//	metallicTexture = nullptr;
-		//	pbrOnDrawLamba();
-		//};
-		//std::function<void()> tiles3PBROnDrawLamba = [&]()
-		//{
-		//	albedoTexture = tiles3AlbedoTexture;
-		//	normalTexture = tiles3NormalTexture;
-		//	roughnessTexture = tiles3RoughnessTexture;
-		//	metallicTexture = nullptr;
-		//	pbrOnDrawLamba();
-		//};
-		//std::function<void()> noTexturesPBROnDrawLamba = [&]()
-		//{
-		//	albedoTexture = nullptr;
-		//	normalTexture = nullptr;
-		//	roughnessTexture = nullptr;
-		//	metallicTexture = nullptr;
-		//	pbrOnDrawLamba();
-		//};
 		//std::function<void()> blinnPhongOnDrawLamba = [&]()
 		//{
 		//	// Set uniforms:
@@ -419,9 +199,6 @@ int main(int argc, char* argv[])
 			// Update scene:
 			// #############################################################################
 			mimicCore->Update();
-		
-			// groundModel->UpdateModelMatrix(groundGameObject->Position, groundGameObject->Rotation, groundGameObject->Scale);
-			// lightModel->UpdateModelMatrix(directLights[0]->Position, glm::vec3(0.0f), glm::vec3(0.1f));
 
 			// #############################################################################
 			// Render scene:
@@ -434,18 +211,9 @@ int main(int argc, char* argv[])
 					// shadowMapper->RenderDirectLightDepthMaps(modelsForShadowMapping, directLights, renderer);
 				}
 
-				// Send meshes to renderer:
-				// groundModel->QueueMeshesToDraw(pbrShader, groundBPOnDrawLamba, renderer);
-				// lightModel->QueueMeshesToDraw(flatColourShader, flatColourOnDrawLamba, renderer);
-
 				// Draw:
-				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 				MimicCore::Window->ResetViewPort();
 				mimicCore->Draw();
-				// renderer->Draw(camera);
-				
-				// renderer->ClearRenderQueue();
-				// renderer->DrawEnvironmentMap(camera, environmentCubeMap);
 			}
 			// #############################################################################
 			// GUI:
