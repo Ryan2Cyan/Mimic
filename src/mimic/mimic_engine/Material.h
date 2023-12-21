@@ -21,14 +21,12 @@ namespace MimicEngine
 	{
 		virtual ~Material() = default;
 
-		// This function<void> is passed into the renderer via a render object struct as a lambda.
-		// This function is used primarily to set uniform values in the corresponding material shader.
+		/// <summary> This function<void> is passed into the renderer via a render object struct as a lambda.
+		// This function is used primarily to set uniform values in the corresponding material shader. </summary>
 		virtual void OnDraw() = 0;
 
-		/// <summary>
-		/// Add texture material, binding it to a specific texture type. These materials will be rendered (via the
-		/// ModelRenderer component) onto the model.
-		/// </summary>
+		/// <summary> Add texture material, binding it to a specific texture type. These materials will be rendered (via the
+		/// ModelRenderer component) onto the model. </summary>
 		virtual void SetTextureMap(const std::shared_ptr<Texture>& texture, const MimicRender::TextureType& textureMapType) = 0;
 		
 	protected:
@@ -39,31 +37,34 @@ namespace MimicEngine
 		std::function<void()> _onDrawLambda;
 	};
 
-	//// #############################################################################
-	//// basic material stuct:
-	//// #############################################################################
-	//struct BasicMaterial : Material
-	//{	
-	//	BasicMaterial();
-	//	void SetDiffuse(const std::shared_ptr<Texture>& diffuse);
-	//	void SetSpecular(const std::shared_ptr<Texture>& specular);
-	//	void SetNormal(const std::shared_ptr<Texture>& normal);
-	//	void SetHeight(const std::shared_ptr<Texture>& height);
+	// #############################################################################
+	// Blinn-Phong Material stuct:
+	// #############################################################################
+	struct BlinnPhongMaterial : Material
+	{	
+		static std::shared_ptr<BlinnPhongMaterial> Initialise();
+		void SetTextureMap(const std::shared_ptr<Texture>& texture, const MimicRender::TextureType& textureMapType) override;
 
-	//protected:
-	//	friend struct ModelRenderer;
-	//	void SetTextureMap(const std::shared_ptr<Texture>& texture) override;
+		// Blinn-Phong parameter setters:
+		void SetObjectColour(const glm::vec3& colour);
+		void SetAmbientStrength(const float& ambientStrength);
+		void SetSpecularStrength(const float& specularStrength);
+		void SetShininess(const float& shininess);
 
-	//private:
-	//	std::weak_ptr<Texture> _diffuseTexture;
-	//	std::weak_ptr<Texture> _specularTexture;
-	//	std::weak_ptr<Texture> _normalTexture;
-	//	std::weak_ptr<Texture> _heightTexture;
-	//	void OnDraw() override;
-	//};
+	protected:
+		friend struct ModelRenderer;
+
+	private:
+		void OnDraw() override;
+
+		glm::vec3 _objectColour;
+		float _ambientStrength;
+		float _specularStrength;
+		float _shininess;
+	};
 
 	// #############################################################################
-	// pbr material stuct:
+	// PBR Material stuct:
 	// #############################################################################
 	struct PBRSubroutineHelper
 	{
@@ -81,11 +82,9 @@ namespace MimicEngine
 	struct PBRMaterial : Material
 	{
 		static std::shared_ptr<PBRMaterial> Initialise();
-
-		/// <summary>  Sets and binds texture map to corresponding texture type. /// </summary>
 		void SetTextureMap(const std::shared_ptr<Texture>& texture, const MimicRender::TextureType& textureMapType) override;
 
-		// PBR Literal parameter functions, these will be used if a corresponding texture map is
+		// PBR Literal parameter setters, these will be used if a corresponding texture map is
 		// not provided:
 		void SetAlbedo(const glm::vec3& albedo);
 		void SetEmissive(const glm::vec3& emissive);

@@ -80,6 +80,9 @@ int main(int argc, char* argv[])
 		std::shared_ptr<MimicEngine::Texture> marbleAlbedoTexture		= MimicCore::ResourceManager->LoadResource<MimicEngine::Texture>("Marble016_1K-PNG_Color.png");
 		std::shared_ptr<MimicEngine::Texture> marbleNormalTexture		= MimicCore::ResourceManager->LoadResource<MimicEngine::Texture>("Marble016_1K-PNG_NormalGL.png");
 		std::shared_ptr<MimicEngine::Texture> marbleRoughnessTexture	= MimicCore::ResourceManager->LoadResource<MimicEngine::Texture>("Marble016_1K-PNG_Roughness.png");
+		spherePBRMaterial->SetTextureMap(marbleAlbedoTexture, TextureType::MIMIC_ALBEDO);
+		spherePBRMaterial->SetTextureMap(marbleNormalTexture, TextureType::MIMIC_NORMAL);
+		spherePBRMaterial->SetTextureMap(marbleRoughnessTexture, TextureType::MIMIC_ROUGHNESS);
 		
 		std::shared_ptr<MimicEngine::Texture> foilAlbedoTexture			= MimicCore::ResourceManager->LoadResource<MimicEngine::Texture>("Foil002_1K-PNG_Color.png");
 		std::shared_ptr<MimicEngine::Texture> foilNormalTexture			= MimicCore::ResourceManager->LoadResource<MimicEngine::Texture>("Foil002_1K-PNG_NormalGL.png");

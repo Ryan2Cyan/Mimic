@@ -132,8 +132,8 @@ namespace MimicEngine
 		pbrMaterial->SetAmbientOcclusion(0.5f);
 		pbrMaterial->SetAlpha(1.0f);
 
-		//// Set OnDrawLambda:
-		//pbrMaterial->_onDrawLambda = [&]() { pbrMaterial->OnDraw(); };
+		// Set OnDrawLambda:
+		pbrMaterial->_onDrawLambda = [&]() { pbrMaterial->OnDraw(); };
 		return pbrMaterial;
 	}
 

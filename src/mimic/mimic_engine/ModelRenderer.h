@@ -8,7 +8,7 @@
 namespace MimicEngine
 {	
 	// #############################################################################
-	// Renderer Stuct:
+	// Renderer Struct:
 	// #############################################################################
 	struct Model;
 	struct Shader;
@@ -29,7 +29,6 @@ namespace MimicEngine
 			}
 			_material = material;
 			_material->_gameObject = gameObjectParent;
-			// _onDrawLambda{ _material->OnDraw() };
 		}
 
 		template <typename T> const std::shared_ptr<T> GetMaterial() const
@@ -51,11 +50,10 @@ namespace MimicEngine
 		void SetModel(const std::shared_ptr<Model>& model);
 
 		private:
-		void Start() override;
-		void Update() override;
+			void Start() override;
+			void Update() override;
 
-		 std::shared_ptr<Model>_model;
-		 std::shared_ptr<Material> _material;
-		 std::function<void()> _onDrawLambda;
+			std::shared_ptr<Model>_model;
+			std::shared_ptr<Material> _material;
 	};
 }

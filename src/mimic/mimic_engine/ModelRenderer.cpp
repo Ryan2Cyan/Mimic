@@ -47,7 +47,7 @@ namespace MimicEngine
 					mesh->GetDataSize(),
 					_material->_shader.lock()->_renderShader,
 					GetGameObject()->_modelMatrix,
-					onDrawLambda
+					_material->_onDrawLambda
 				)
 			);
 		}
