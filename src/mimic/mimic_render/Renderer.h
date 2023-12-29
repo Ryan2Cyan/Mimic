@@ -16,8 +16,19 @@ namespace MimicRender
 
 	struct RenderObject
 	{
+		template<typename T>
 		static std::shared_ptr<RenderObject> Initialise(const unsigned int& vaoId, const unsigned int& dataSize, const std::shared_ptr<Shader>& shader,
-			const glm::mat4& modelMatrix, std::function<void()>& onDrawLambda);
+			const glm::mat4& modelMatrix, T& onDrawLambda)
+		{
+			std::shared_ptr<RenderObject> renderObject = std::make_shared<RenderObject>();
+			renderObject->_vertexArrayId = vaoId;
+			renderObject->_dataSize = dataSize;
+			renderObject->_shader = shader;
+			renderObject->_modelMatrix = modelMatrix;
+			renderObject->_onDraw = onDrawLambda;
+
+			return renderObject;
+		}
 
 	private:
 		friend struct Renderer;

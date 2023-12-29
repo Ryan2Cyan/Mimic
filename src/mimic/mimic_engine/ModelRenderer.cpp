@@ -35,10 +35,11 @@ namespace MimicEngine
 	void ModelRenderer::Update() 
 	{
 		if (!_initialised) return;
-		
-		// Set OnDrawLambda:
-		std::function<void()> onDrawLambda = [&]() { _material->OnDraw(); };
+		// NOTE: Temporarily updating model to game object's model matrix:
+		auto gameObject = GetGameObject();
+		_model->_renderModel->UpdateModelMatrix(gameObject->Position, gameObject->Rotation, gameObject->Scale);
 
+		// Add this model to the draw queue:
 		for (auto mesh : _model->_renderModel->GetMeshes())
 		{
 			MimicCore::_renderer->AddToDrawQueue(
@@ -47,7 +48,7 @@ namespace MimicEngine
 					mesh->GetDataSize(),
 					_material->_shader.lock()->_renderShader,
 					GetGameObject()->_modelMatrix,
-					_material->_onDrawLambda
+					[&mat = _material]() { mat->OnDraw(); }
 				)
 			);
 		}

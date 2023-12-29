@@ -17,9 +17,7 @@ namespace MimicEngine
 
 	private:
 		friend struct MimicCore;
-
-		void Update();
-
 		std::shared_ptr<MimicRender::Camera> _renderCamera;
+		void Update();
 	};
 }

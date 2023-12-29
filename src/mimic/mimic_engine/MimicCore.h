@@ -2,7 +2,6 @@
 #include <mimic_utility/Logger.h>
 #include <mimic_render/Window.h>
 #include <mimic_render/Renderer.h>
-#include <mimic_render/ShadowMapper.h>
 #include <mimic_render/CubeMap.h>
 
 #include <GLM/glm.hpp>
@@ -59,6 +58,11 @@ namespace MimicEngine
 		static std::shared_ptr<Camera> CurrentCamera;
 		static std::shared_ptr<ResourceManager> ResourceManager;
 		static std::shared_ptr<MimicRender::Window> Window;
+		
+
+		// NOTE: Move to private:
+		static std::shared_ptr<MimicRender::Renderer> _renderer;
+		static std::list<std::shared_ptr<DirectLight>> _directLights;
 
 	private:
 		friend struct ModelRenderer; 
@@ -67,6 +71,7 @@ namespace MimicEngine
 		friend struct GameObject;
 		friend struct Camera;
 		friend struct DirectLight;
+		friend struct ShadowMapper;
 
 		static void AddGameObject(const std::shared_ptr<GameObject>& gameObject);
 		static void RemoveGameObject(const std::shared_ptr<GameObject>& gameObject);
@@ -76,13 +81,11 @@ namespace MimicEngine
 		static void RemoveDirectLight(const std::shared_ptr<DirectLight>& directLight);
 		// std::shared_ptr<PointLight> AddPointLight() noexcept;
 
-		static std::shared_ptr<MimicRender::Renderer> _renderer;
 		static std::shared_ptr<Environment> _environment;
 		static std::list<std::shared_ptr<GameObject>> _gameObjects;
 		static std::list<std::shared_ptr<Camera>> _cameras;
-		static std::list<std::shared_ptr<DirectLight>> _directLights;
-		static std::shared_ptr<MimicRender::ShadowMapper> _shadowMapper;
 		static std::shared_ptr<MimicRender::EnvironmentCubeMap> _environmentCubeMap;
+		static std::shared_ptr<ShadowMapper> _shadowMapper;
 		// static std::vector<std::shared_ptr<MimicRender::PointLight>> _pointLights;
 
 		static std::weak_ptr<MimicCore> _self;

@@ -48,12 +48,13 @@ namespace MimicEngine
 		}
 
 		void SetModel(const std::shared_ptr<Model>& model);
+		
+		std::shared_ptr<Model> _model; // NOTE: Set to private
 
 		private:
 			void Start() override;
 			void Update() override;
 
-			std::shared_ptr<Model>_model;
 			std::shared_ptr<Material> _material;
 	};
 }

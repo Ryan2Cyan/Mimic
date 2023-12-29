@@ -128,12 +128,10 @@ namespace MimicEngine
 		pbrMaterial->SetAlbedo(glm::vec3(1.0f));
 		pbrMaterial->SetEmissive(glm::vec3(0.0f));
 		pbrMaterial->SetMetallic(0.0f);
-		pbrMaterial->SetRoughness(0.5f);
-		pbrMaterial->SetAmbientOcclusion(0.5f);
+		pbrMaterial->SetRoughness(0.9f);
+		pbrMaterial->SetAmbientOcclusion(0.1f);
 		pbrMaterial->SetAlpha(1.0f);
 
-		// Set OnDrawLambda:
-		pbrMaterial->_onDrawLambda = [&]() { pbrMaterial->OnDraw(); };
 		return pbrMaterial;
 	}
 
@@ -266,8 +264,14 @@ namespace MimicEngine
 			// light's attributes (direction & colour):
 			const std::string lightUniformId = "u_DirectLights[" + std::to_string(index) + "]";
 			localShader->SetVector3((lightUniformId + ".direction").c_str(), glm::normalize(-directLight->GetDirection()));
-			const glm::vec3 colour = directLight->GetColour();
-			localShader->SetVector4((lightUniformId + ".colour").c_str(), glm::vec4(colour, _alpha));
+			localShader->SetVector4((lightUniformId + ".colour").c_str(), glm::vec4(directLight->GetColour(), _alpha));
+
+			// Assign depth map for this direct light:
+			const std::string currentShadowMap = "u_DirectShadowMaps[" + std::to_string(index) + "]";
+			localShader->SetTexture(currentShadowMap.c_str(), directLight->_renderDirectLight->GetDepthMapTextureId(), 7, MimicRender::Texture::MIMIC_2D_TEXTURE);
+
+			const std::string currentLightMatrix = "u_DirectLightMatrices[" + std::to_string(index) + "]";
+			localShader->SetMat4(currentLightMatrix.c_str(), directLight->_renderDirectLight->GetLightMatrix());
 			index++;
 		}
 		localShader->SetInt("u_DirectLightsCount", MimicCore::_directLights.size());

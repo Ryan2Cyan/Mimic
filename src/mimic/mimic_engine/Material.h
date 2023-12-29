@@ -34,7 +34,6 @@ namespace MimicEngine
 		
 		std::weak_ptr<Shader> _shader;
 		std::weak_ptr<GameObject> _gameObject;
-		std::function<void()> _onDrawLambda;
 	};
 
 	// #############################################################################

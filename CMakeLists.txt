@@ -62,6 +62,8 @@ link_directories(
     src/mimic/mimic_engine/Camera.h
     src/mimic/mimic_engine/Light.cpp
     src/mimic/mimic_engine/Light.h
+    src/mimic/mimic_engine/ShadowMapper.cpp
+    src/mimic/mimic_engine/ShadowMapper.h
 )
 
 # Implement Mimic utility library:

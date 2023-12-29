@@ -18,10 +18,10 @@ namespace MimicEngine
 		glm::vec3 GetDirection() const;
 		glm::vec3 GetColour() const;
 		std::string Name;
-
+		
+		std::shared_ptr<MimicRender::DirectLight> _renderDirectLight; // NOTE: Move to private.
 	private:
 		friend struct MimicCore;
 
-		std::shared_ptr<MimicRender::DirectLight> _renderDirectLight;
 	};
 }

@@ -4,6 +4,7 @@
 #include "Environment.h"
 #include "Camera.h"
 #include "Light.h"
+#include "ShadowMapper.h"
 #include <mimic_render/Light.h>
 
 #include <GL/glew.h>
@@ -11,19 +12,20 @@
 
 namespace MimicEngine
 {
-	std::shared_ptr<MimicRender::Window> MimicCore::Window;
 	std::shared_ptr<ResourceManager> MimicCore::ResourceManager;
-	std::shared_ptr<MimicRender::Renderer> MimicCore::_renderer;
 	std::shared_ptr<Environment> MimicCore::_environment;
+	std::shared_ptr<ShadowMapper> MimicCore::_shadowMapper;
 	std::list<std::shared_ptr<GameObject>> MimicCore::_gameObjects;
 	std::list<std::shared_ptr<Camera>> MimicCore::_cameras;
 	std::weak_ptr<MimicCore> MimicCore::_self;
 	bool MimicCore::_applicationRunning;
 	std::shared_ptr<Camera> MimicCore::CurrentCamera;
 	std::list<std::shared_ptr<DirectLight>> MimicCore::_directLights;
-	std::shared_ptr<MimicRender::ShadowMapper> MimicCore::_shadowMapper;
-	std::shared_ptr<MimicRender::EnvironmentCubeMap> MimicCore::_environmentCubeMap;
 	// std::vector<std::shared_ptr<MimicRender::PointLight>> MimicCore::_pointLights;
+
+	std::shared_ptr<MimicRender::Window> MimicCore::Window;
+	std::shared_ptr<MimicRender::Renderer> MimicCore::_renderer;
+	std::shared_ptr<MimicRender::EnvironmentCubeMap> MimicCore::_environmentCubeMap;
 
 	std::shared_ptr<MimicCore> MimicCore::Initialise() 
 	{ 
@@ -46,7 +48,7 @@ namespace MimicEngine
 		mimicCore->_environment = Environment::Initialise();
 		mimicCore->_renderer = MimicRender::Renderer::Initialise();
 		mimicCore->_environmentCubeMap = MimicRender::EnvironmentCubeMap::Initialise("rural_asphalt_road_4k.hdr", GetCurrentAspect(), mimicCore->_renderer);
-		mimicCore->_shadowMapper = MimicRender::ShadowMapper::Initialise();
+		mimicCore->_shadowMapper = ShadowMapper::Initialise(glm::ivec2(4096, 4096));
 		
 
 		// Ensure that the core (and all of its components) are initialised:
@@ -90,6 +92,11 @@ namespace MimicEngine
 	{
 		// Clear depth and colour buffers, then return the viewport to the dimensions of window:
 		Window->ClearBuffers();
+
+		for (auto directLight : _directLights) _shadowMapper->_depthMapDirectLights.push_back(directLight->_renderDirectLight);
+		_shadowMapper->RenderDirectLightDepthMaps();
+		_shadowMapper->_depthMapDirectLights.clear();
+
 		Window->ResetViewPort();
 
 		// For each camera, render each render object in the renderer and the environment map. Then
@@ -166,7 +173,8 @@ namespace MimicEngine
 
 	void MimicCore::RemoveDirectLight(const std::shared_ptr<DirectLight>& directLight)
 	{
-		if (directLight != nullptr) _directLights.remove(directLight);
+		if (directLight == nullptr) return;
+		_directLights.remove(directLight);
 	}
 
 	/*std::shared_ptr<PointLight> MimicCore::AddPointLight() noexcept

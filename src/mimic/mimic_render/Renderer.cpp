@@ -7,23 +7,6 @@
 namespace MimicRender
 {
 	// #############################################################################
-	// render object member functions:
-	// #############################################################################
-
-	std::shared_ptr<RenderObject> RenderObject::Initialise(const unsigned int& vaoId, const unsigned int& dataSize, const std::shared_ptr<Shader>& shader,
-		const glm::mat4& modelMatrix, std::function<void()>& onDrawLambda)
-	{
-		std::shared_ptr<RenderObject> renderObject = std::make_shared<RenderObject>();
-		renderObject->_vertexArrayId = vaoId;
-		renderObject->_dataSize = dataSize;
-		renderObject->_shader = shader;
-		renderObject->_modelMatrix = modelMatrix;
-		renderObject->_onDraw = onDrawLambda;
-
-		return renderObject;
-	}
-
-	// #############################################################################
 	// renderer functions:
 	// #############################################################################
 	std::shared_ptr<Renderer> Renderer::Initialise()
