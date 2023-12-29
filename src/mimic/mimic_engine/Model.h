@@ -17,9 +17,9 @@ namespace MimicEngine
     {
         bool Load(const std::string& path) override;
         
-        std::shared_ptr<MimicRender::Model> _renderModel; // NOTE: move to private
     private:
         friend struct ModelRenderer;
 
+        std::shared_ptr<MimicRender::Model> _renderModel;
     };
 }

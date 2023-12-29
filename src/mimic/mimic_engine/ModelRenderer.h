@@ -14,7 +14,6 @@ namespace MimicEngine
 	struct Shader;
 	struct Material;
 
-
 	struct ModelRenderer : Component
 	{
 		static std::shared_ptr<ModelRenderer> Initialise();
@@ -48,13 +47,12 @@ namespace MimicEngine
 		}
 
 		void SetModel(const std::shared_ptr<Model>& model);
-		
-		std::shared_ptr<Model> _model; // NOTE: Set to private
 
 		private:
 			void Start() override;
 			void Update() override;
 
+			std::shared_ptr<Model> _model; 
 			std::shared_ptr<Material> _material;
 	};
 }
