@@ -25,6 +25,7 @@ namespace MimicEngine
 	struct EnvironmentCubeMap;
 	struct ShadowMapper;
 	struct Camera;
+	struct InputHandler;
 
 	// #############################################################################
 	// Mimic Core Struct:
@@ -50,7 +51,7 @@ namespace MimicEngine
 		void Exit();
 
 		/// <summary> Returns true if the application is running, false otherwise. </summary>
-		bool IsApplicationRunning() const;
+		static bool IsApplicationRunning();
 		
 		static glm::ivec2 GetCurrentAspect();
 		static std::shared_ptr<ResourceManager> GetResourceManager();
@@ -67,6 +68,7 @@ namespace MimicEngine
 		friend struct Camera;
 		friend struct DirectLight;
 		friend struct ShadowMapper;
+		friend struct InputHandler;
 
 		static void AddGameObject(const std::shared_ptr<GameObject>& gameObject);
 		static void RemoveGameObject(const std::shared_ptr<GameObject>& gameObject);
@@ -82,6 +84,7 @@ namespace MimicEngine
 		static std::list<std::shared_ptr<GameObject>> _gameObjects;
 		static std::list<std::shared_ptr<Camera>> _cameras;
 		static std::shared_ptr<ShadowMapper> _shadowMapper;
+		static std::shared_ptr<InputHandler> _inputHandler;
 
 		static std::shared_ptr<MimicRender::Renderer> _renderer;
 		static std::shared_ptr<MimicRender::EnvironmentCubeMap> _environmentCubeMap;

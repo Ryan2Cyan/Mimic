@@ -47,12 +47,12 @@ int main(int argc, char* argv[])
 		// Game loop:
 		// #############################################################################
 		bool applicationRunning = true;
-		while (applicationRunning)
+		while (MimicCore::IsApplicationRunning())
 		{
 			// #############################################################################
 			// Human interface devices:
 			// #############################################################################
-			SDL_Event event;
+			/*SDL_Event event;
 			while (SDL_PollEvent(&event))
 			{
 				ImGui_ImplSDL2_ProcessEvent(&event);
@@ -76,7 +76,7 @@ int main(int argc, char* argv[])
 					}
 					case SDL_KEYUP: { break; }
 				}
-			}
+			}*/
 
 			// #############################################################################
 			// Update scene:

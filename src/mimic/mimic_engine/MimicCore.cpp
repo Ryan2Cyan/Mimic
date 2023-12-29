@@ -5,10 +5,12 @@
 #include "Camera.h"
 #include "Light.h"
 #include "ShadowMapper.h"
+#include "InputHandler.h"
 #include <mimic_render/Light.h>
 
 #include <GL/glew.h>
 #include <algorithm>
+#include <SDL/SDL.h>
 
 namespace MimicEngine
 {
@@ -20,6 +22,7 @@ namespace MimicEngine
 	std::weak_ptr<MimicCore> MimicCore::_self;
 	bool MimicCore::_applicationRunning;
 	std::shared_ptr<Camera> MimicCore::CurrentCamera;
+	std::shared_ptr<InputHandler> MimicCore::_inputHandler;
 	std::list<std::shared_ptr<DirectLight>> MimicCore::_directLights;
 	// std::vector<std::shared_ptr<MimicRender::PointLight>> MimicCore::_pointLights;
 
@@ -49,6 +52,7 @@ namespace MimicEngine
 		mimicCore->_renderer = MimicRender::Renderer::Initialise();
 		mimicCore->_environmentCubeMap = MimicRender::EnvironmentCubeMap::Initialise("rural_asphalt_road_4k.hdr", GetCurrentAspect(), mimicCore->_renderer);
 		mimicCore->_shadowMapper = ShadowMapper::Initialise(glm::ivec2(4096, 4096));
+		mimicCore->_inputHandler = InputHandler::Initialise();
 		
 
 		// Ensure that the core (and all of its components) are initialised:
@@ -80,6 +84,11 @@ namespace MimicEngine
 
 	void MimicCore::Update()
 	{
+		// Handle inputs:
+		_inputHandler->ClearTemp();
+		_inputHandler->Update();
+		if(_inputHandler->IsKey(SDLK_ESCAPE)) _applicationRunning = false;
+
 		// Re-calculate delta time for this frame:
 		_environment->CalculateDeltaTime();
 
@@ -114,7 +123,7 @@ namespace MimicEngine
 		_applicationRunning = false;
 	}
 
-	bool MimicCore::IsApplicationRunning() const
+	bool MimicCore::IsApplicationRunning()
 	{
 		return _applicationRunning;
 	}
