@@ -3,6 +3,7 @@
 
 namespace MimicEngine
 {
+
 	void BoxCollider::Start()
 	{
 

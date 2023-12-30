@@ -19,8 +19,8 @@ int main(int argc, char* argv[])
 
 		// Initialise camera:
 		std::shared_ptr<MimicEngine::Camera> camera = MimicEngine::Camera::Initialise(MimicEngine::MimicCore::GetCurrentAspect(), 45.0f);
-		camera->SetPosition(glm::vec3(0.0f, 0.54f, -5.937f));
-		camera->SetOrientation(glm::vec3(0.0, -0.49f, -3.0f));
+		camera->SetPosition(glm::vec3(0.0f, 0.54f, 10.0f));
+		camera->SetOrientation(glm::vec3(0.0, 0.0f, -1.0f));
 
 		// Initialise direct lights:
 		std::vector<std::shared_ptr<MimicEngine::DirectLight>> directLights =
@@ -29,7 +29,7 @@ int main(int argc, char* argv[])
 		};
 
 		// Initialise scene models:
-		std::shared_ptr<GameObject> sphereGameObject = GameObject::Initialise(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(1.0f));
+		std::shared_ptr<GameObject> sphereGameObject = GameObject::Initialise(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f));
 		auto sphereModelRenderer = sphereGameObject->AddComponent<ModelRenderer>();
 		auto spherePBRMaterial = PBRMaterial::Initialise();
 		sphereModelRenderer->SetMaterial<PBRMaterial>(spherePBRMaterial);
@@ -40,7 +40,7 @@ int main(int argc, char* argv[])
 		farthestPoint = sphereModelBoxCollider->GetFarthestPoint(glm::vec3(1.0f, 0.0f, 0.0f));
 		farthestPoint = sphereModelBoxCollider->GetFarthestPoint(glm::vec3(0.0f, 0.0f, 1.0f));
 
-		std::shared_ptr<MimicEngine::GameObject> groundGameObject = GameObject::Initialise(glm::vec3(0.0f, -1.5f, -50.0f), glm::vec3(0.0f), glm::vec3(43.45f, -0.5f, 50.0f));
+		std::shared_ptr<MimicEngine::GameObject> groundGameObject = GameObject::Initialise(glm::vec3(0.0f, -1.5f, 0.0f), glm::vec3(0.0f), glm::vec3(43.45f, -0.5f, 50.0f));
 		auto groundModelRenderer = groundGameObject->AddComponent<ModelRenderer>();
 		auto groundPBRMaterial = PBRMaterial::Initialise();
 		groundModelRenderer->SetMaterial<PBRMaterial>(groundPBRMaterial);
@@ -58,6 +58,16 @@ int main(int argc, char* argv[])
 			// Update scene:
 			// #############################################################################
 			mimicCore->Update();
+			auto camPos = camera->GetPosition();
+			auto camSpeed = 10.0f;
+			if (MimicCore::InputHandler->IsKey(SDLK_d)) camPos.x += (camSpeed * DeltaTime());
+			if (MimicCore::InputHandler->IsKey(SDLK_a)) camPos.x -= (camSpeed * DeltaTime());
+			if (MimicCore::InputHandler->IsKey(SDLK_w)) camPos.z -= (camSpeed * DeltaTime());
+			if (MimicCore::InputHandler->IsKey(SDLK_s)) camPos.z += (camSpeed * DeltaTime());
+			if (MimicCore::InputHandler->IsKey(SDLK_q)) camPos.y += (camSpeed * DeltaTime());
+			if (MimicCore::InputHandler->IsKey(SDLK_e)) camPos.y -= (camSpeed * DeltaTime());
+
+			camera->SetPosition(camPos);
 
 			// #############################################################################
 			// Render scene:

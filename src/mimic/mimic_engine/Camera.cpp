@@ -22,6 +22,16 @@ namespace MimicEngine
 		_renderCamera->Orientation = orientation;
 	}
 
+	glm::vec3 Camera::GetPosition()
+	{
+		return _renderCamera->Position;
+	}
+
+	glm::vec3 Camera::GetOrientation()
+	{
+		return _renderCamera->Orientation;
+	}
+
 	void Camera::Update()
 	{
 		_renderCamera->Update();

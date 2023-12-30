@@ -27,7 +27,6 @@ namespace MimicEngine
 		glm::vec3 GetFarthestPoint(const glm::vec3 direction) const;
 
 	private:
-		
 
 		glm::vec3 _size;
 		glm::vec3 _offset;

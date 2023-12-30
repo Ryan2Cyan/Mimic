@@ -4,6 +4,7 @@
 #include <mimic_render/Renderer.h>
 #include <mimic_render/CubeMap.h>
 
+
 #include <GLM/glm.hpp>
 #include <memory>
 #include <string>
@@ -59,6 +60,7 @@ namespace MimicEngine
 		static std::shared_ptr<Camera> CurrentCamera;
 		static std::shared_ptr<ResourceManager> ResourceManager;
 		static std::shared_ptr<MimicRender::Window> Window;
+		static std::shared_ptr<InputHandler> InputHandler;
 
 	private:
 		friend struct ModelRenderer; 
@@ -84,7 +86,6 @@ namespace MimicEngine
 		static std::list<std::shared_ptr<GameObject>> _gameObjects;
 		static std::list<std::shared_ptr<Camera>> _cameras;
 		static std::shared_ptr<ShadowMapper> _shadowMapper;
-		static std::shared_ptr<InputHandler> _inputHandler;
 
 		static std::shared_ptr<MimicRender::Renderer> _renderer;
 		static std::shared_ptr<MimicRender::EnvironmentCubeMap> _environmentCubeMap;
