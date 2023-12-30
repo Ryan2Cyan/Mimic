@@ -14,6 +14,7 @@
 #include "Model.h"
 #include "Camera.h"
 #include "Light.h"
+#include "BoxCollider.h"
 
 // MimicRender translation units:
 #include <mimic_render/Light.h>

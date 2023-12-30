@@ -66,6 +66,8 @@ link_directories(
     src/mimic/mimic_engine/ShadowMapper.h
     src/mimic/mimic_engine/InputHandler.cpp
     src/mimic/mimic_engine/InputHandler.h
+    src/mimic/mimic_engine/BoxCollider.cpp
+    src/mimic/mimic_engine/BoxCollider.h
 )
 
 # Implement Mimic utility library:

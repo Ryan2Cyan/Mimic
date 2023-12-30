@@ -29,11 +29,16 @@ int main(int argc, char* argv[])
 		};
 
 		// Initialise scene models:
-		std::shared_ptr<GameObject> sphereGameObject = GameObject::Initialise(glm::vec3(0.0f, 0.0f, -14.3f), glm::vec3(0.0f), glm::vec3(1.0f));
+		std::shared_ptr<GameObject> sphereGameObject = GameObject::Initialise(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(1.0f));
 		auto sphereModelRenderer = sphereGameObject->AddComponent<ModelRenderer>();
 		auto spherePBRMaterial = PBRMaterial::Initialise();
 		sphereModelRenderer->SetMaterial<PBRMaterial>(spherePBRMaterial);
 		sphereModelRenderer->SetModel(MimicCore::ResourceManager->LoadResource<MimicEngine::Model>("sphere.obj"));
+		auto sphereModelBoxCollider = sphereGameObject->AddComponent<BoxCollider>();
+		sphereModelBoxCollider->SetSize(glm::vec3(10.0f));
+		auto farthestPoint = sphereModelBoxCollider->GetFarthestPoint(glm::vec3(0.2f, 1.0f, -0.5f));
+		farthestPoint = sphereModelBoxCollider->GetFarthestPoint(glm::vec3(1.0f, 0.0f, 0.0f));
+		farthestPoint = sphereModelBoxCollider->GetFarthestPoint(glm::vec3(0.0f, 0.0f, 1.0f));
 
 		std::shared_ptr<MimicEngine::GameObject> groundGameObject = GameObject::Initialise(glm::vec3(0.0f, -1.5f, -50.0f), glm::vec3(0.0f), glm::vec3(43.45f, -0.5f, 50.0f));
 		auto groundModelRenderer = groundGameObject->AddComponent<ModelRenderer>();
@@ -49,35 +54,6 @@ int main(int argc, char* argv[])
 		bool applicationRunning = true;
 		while (MimicCore::IsApplicationRunning())
 		{
-			// #############################################################################
-			// Human interface devices:
-			// #############################################################################
-			/*SDL_Event event;
-			while (SDL_PollEvent(&event))
-			{
-				ImGui_ImplSDL2_ProcessEvent(&event);
-				switch (event.type)
-				{
-					case SDL_QUIT:
-					{
-						applicationRunning = false;
-						break;
-					}
-
-					case SDL_KEYDOWN:
-					{
-						switch (event.key.keysym.sym)
-						{
-							case SDLK_ESCAPE:
-							applicationRunning = false;
-							break;
-						}
-						break;
-					}
-					case SDL_KEYUP: { break; }
-				}
-			}*/
-
 			// #############################################################################
 			// Update scene:
 			// #############################################################################
