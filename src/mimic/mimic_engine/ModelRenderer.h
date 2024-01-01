@@ -49,6 +49,8 @@ namespace MimicEngine
 		void SetModel(const std::shared_ptr<Model>& model);
 
 		private:
+			friend struct MeshCollider;
+
 			void Start() override;
 			void Update() override;
 

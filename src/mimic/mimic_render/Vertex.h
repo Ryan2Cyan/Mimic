@@ -8,11 +8,12 @@ namespace MimicRender
 	struct Vertex
 	{
 		static Vertex Initialise(const glm::vec3& position, const glm::vec3& normal, const glm::vec3& tangent, const glm::vec3& biTangent, const glm::vec2& textureCoordinates);
+		glm::vec3 Position;
+
 	private:
 		friend struct Mesh;
 		friend struct Model;
 
-		glm::vec3 _position;
 		glm::vec3 _normal;
 		glm::vec3 _tangent;
 		glm::vec3 _biTangent;

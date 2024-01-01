@@ -10,6 +10,179 @@
 using namespace MimicEngine;
 using namespace MimicUtility;
 
+struct Simplex
+{
+	Simplex() : _size(0), _points({glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(0.0f) }) {}
+
+	Simplex& operator=(const std::initializer_list<glm::vec3>& list)
+	{
+		for (auto v = list.begin(); v != list.end(); v++) _points[std::distance(list.begin(), v)] = *v;
+		_size = list.size();
+		return *this;
+	}
+	
+	glm::vec3& operator[](const unsigned& i) 
+	{
+		return _points[i]; 
+	}
+
+	void PushFront(const glm::vec3& point)
+	{
+		_points = { point, _points[0], _points[1], _points[2] };
+		_size = std::min(_size + 1, 4u);
+	}
+
+	unsigned GetSize() const
+	{
+		return _size;
+	}
+
+	auto Begin() const
+	{
+		return _points.begin();
+	}
+
+	auto End() const
+	{
+		return _points.end() - (4 - _size);
+	}
+
+private:
+	std::array<glm::vec3, 4> _points;
+	unsigned _size;
+};
+
+bool SameDirection(const glm::vec3& direction, const glm::vec3& ao)
+{
+	return glm::dot(direction, ao) > 0;
+}
+
+glm::vec3 Support(const std::shared_ptr<MeshCollider>& colA, const std::shared_ptr<MeshCollider>& colB, const glm::vec3& direction)
+{
+	auto a = colA->GetFarthestPoint(direction);
+	auto b = colB->GetFarthestPoint(-direction);
+	return a - b;
+};
+
+bool Line(Simplex& points, glm::vec3& direction)
+{
+	const glm::vec3 a = points[0];
+	const glm::vec3 b = points[1];
+	const glm::vec3 ab = b - a;
+	const glm::vec3 ao = -a;
+
+	if (SameDirection(ab, ao)) direction = glm::cross(glm::cross(ab, ao), ab);
+	else
+	{
+		points = { a };
+		direction = ao;
+	}
+	return false;
+}
+
+bool Triangle(Simplex& points, glm::vec3& direction)
+{
+	const glm::vec3 a = points[0];
+	const glm::vec3 b = points[1];
+	const glm::vec3 c = points[2];
+
+	const glm::vec3 ab = b - a;
+	const glm::vec3 ac = c - a;
+	const glm::vec3 ao = -a;
+
+	const glm::vec3 abc = glm::cross(ab, ac);
+
+	if (SameDirection(glm::cross(abc, ac), ao))
+	{
+		if (SameDirection(ac, ao))
+		{
+			points = { a, c };
+			direction = glm::cross(glm::cross(ac, ao), ac);
+		}
+		else return Line(points = { a, b }, direction);
+	}
+	else
+	{
+		if (SameDirection(glm::cross(ab, abc), ao)) return Line(points = { a, b }, direction);
+		else
+		{
+			if (SameDirection(abc, ao)) direction = abc;
+			else
+			{
+				points = { a, c, b };
+				direction = -abc;
+			}
+		}
+	}
+
+	return false;
+}
+
+bool Tetrahedron(Simplex& points, glm::vec3& direction)
+{
+	const glm::vec3 a = points[0];
+	const glm::vec3 b = points[1];
+	const glm::vec3 c = points[2];
+	const glm::vec3 d = points[3];
+
+	const glm::vec3 ab = b - a;
+	const glm::vec3 ac = c - a;
+	const glm::vec3 ad = d - a;
+	const glm::vec3 ao = -a;
+
+	const glm::vec3 abc = glm::cross(ab, ac);
+	const glm::vec3 acd = glm::cross(ac, ad);
+	const glm::vec3 adb = glm::cross(ad, ab);
+
+	if (SameDirection(abc, ao)) return Triangle(points = { a, b, c }, direction);
+	if (SameDirection(acd, ao)) return Triangle(points = { a, c, d }, direction);
+	if (SameDirection(adb, ao)) return Triangle(points = { a, d, b }, direction);
+	
+	return true;
+}
+
+bool NextSimplex(Simplex& points, glm::vec3& direction)
+{
+	switch (points.GetSize())
+	{
+		case 2: return Line(points, direction);
+		case 3: return Triangle(points, direction);
+		case 4: return Tetrahedron(points, direction);
+		break;
+	}
+	MIMIC_LOG_WARNING("Error: GJK cannot identify point size of: %", points.GetSize());
+	return false; 
+}
+
+bool GJKCollisionDetection(const std::shared_ptr<MeshCollider>& colA, const std::shared_ptr<MeshCollider>& colB)
+{
+	// Get initial support point in any direction:
+	glm::vec3 support = Support(colA, colB, glm::vec3(1.0f, 0.0f, 0.0f));
+	MIMIC_DEBUG_LOG("First Support: %, %, %", support.x, support.y, support.z);
+
+	// Simplex is an array of points, max count is 4:
+	Simplex points;
+	points.PushFront(support);
+
+	// New direction is towards the origin:
+	glm::vec3 direction = -support;
+
+	while (true)
+	{
+		support = Support(colA, colB, direction);
+		auto dot = glm::dot(support, direction);
+		MIMIC_DEBUG_LOG("First Dot: %", dot);
+
+		if(dot <= 0)
+		{
+			return false; // No collision
+		}
+
+		points.PushFront(support);
+		if (NextSimplex(points, direction)) return true; // Collision
+	}
+}
+
 #undef main
 int main(int argc, char* argv[])
 {
@@ -29,22 +202,27 @@ int main(int argc, char* argv[])
 		};
 
 		// Initialise scene models:
-		std::shared_ptr<GameObject> sphereGameObject = GameObject::Initialise(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f));
-		auto sphereModelRenderer = sphereGameObject->AddComponent<ModelRenderer>();
-		auto spherePBRMaterial = PBRMaterial::Initialise();
-		sphereModelRenderer->SetMaterial<PBRMaterial>(spherePBRMaterial);
-		sphereModelRenderer->SetModel(MimicCore::ResourceManager->LoadResource<MimicEngine::Model>("sphere.obj"));
-		auto sphereModelBoxCollider = sphereGameObject->AddComponent<BoxCollider>();
-		sphereModelBoxCollider->SetSize(glm::vec3(10.0f));
-		auto farthestPoint = sphereModelBoxCollider->GetFarthestPoint(glm::vec3(0.2f, 1.0f, -0.5f));
-		farthestPoint = sphereModelBoxCollider->GetFarthestPoint(glm::vec3(1.0f, 0.0f, 0.0f));
-		farthestPoint = sphereModelBoxCollider->GetFarthestPoint(glm::vec3(0.0f, 0.0f, 1.0f));
+		std::shared_ptr<GameObject> cube0 = GameObject::Initialise(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f));
+		auto cube0ModelRenderer = cube0->AddComponent<ModelRenderer>();
+		auto cube0PBRMaterial = PBRMaterial::Initialise();
+		cube0PBRMaterial->SetAlbedo(glm::vec3(1.0f, 0.0f, 0.0f));
+		cube0ModelRenderer->SetMaterial<PBRMaterial>(cube0PBRMaterial);
+		cube0ModelRenderer->SetModel(MimicCore::ResourceManager->LoadResource<MimicEngine::Model>("sphere.obj"));
+		auto cube0BoxCollider = cube0->AddComponent<MeshCollider>();
 
-		std::shared_ptr<MimicEngine::GameObject> groundGameObject = GameObject::Initialise(glm::vec3(0.0f, -1.5f, 0.0f), glm::vec3(0.0f), glm::vec3(43.45f, -0.5f, 50.0f));
+		std::shared_ptr<GameObject> cube1 = GameObject::Initialise(glm::vec3(2.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f));
+		auto cube1ModelRenderer = cube1->AddComponent<ModelRenderer>();
+		auto cube1PBRMaterial = PBRMaterial::Initialise();
+		cube1PBRMaterial->SetAlbedo(glm::vec3(0.0f, 0.0f, 1.0f));
+		cube1ModelRenderer->SetMaterial<PBRMaterial>(cube1PBRMaterial);
+		cube1ModelRenderer->SetModel(MimicCore::ResourceManager->LoadResource<MimicEngine::Model>("sphere.obj"));
+		auto cube1BoxCollider = cube1->AddComponent<MeshCollider>();
+
+		/*std::shared_ptr<MimicEngine::GameObject> groundGameObject = GameObject::Initialise(glm::vec3(0.0f, -1.5f, 0.0f), glm::vec3(0.0f), glm::vec3(43.45f, -0.5f, 50.0f));
 		auto groundModelRenderer = groundGameObject->AddComponent<ModelRenderer>();
 		auto groundPBRMaterial = PBRMaterial::Initialise();
 		groundModelRenderer->SetMaterial<PBRMaterial>(groundPBRMaterial);
-		groundModelRenderer->SetModel(MimicCore::ResourceManager->LoadResource<MimicEngine::Model>("cube.obj"));
+		groundModelRenderer->SetModel(MimicCore::ResourceManager->LoadResource<MimicEngine::Model>("cube.obj"));*/
 
 
 		mimicCore->Start();
@@ -58,6 +236,8 @@ int main(int argc, char* argv[])
 			// Update scene:
 			// #############################################################################
 			mimicCore->Update();
+
+			// User Input:
 			auto camPos = camera->GetPosition();
 			auto camSpeed = 10.0f;
 			if (MimicCore::InputHandler->IsKey(SDLK_d)) camPos.x += (camSpeed * DeltaTime());
@@ -66,8 +246,25 @@ int main(int argc, char* argv[])
 			if (MimicCore::InputHandler->IsKey(SDLK_s)) camPos.z += (camSpeed * DeltaTime());
 			if (MimicCore::InputHandler->IsKey(SDLK_q)) camPos.y += (camSpeed * DeltaTime());
 			if (MimicCore::InputHandler->IsKey(SDLK_e)) camPos.y -= (camSpeed * DeltaTime());
-
 			camera->SetPosition(camPos);
+
+			if (MimicCore::InputHandler->IsKey(SDLK_f)) cube0->Position.x -= (camSpeed * DeltaTime());
+			if (MimicCore::InputHandler->IsKey(SDLK_h)) cube0->Position.x += (camSpeed * DeltaTime());
+			if (MimicCore::InputHandler->IsKey(SDLK_t)) cube0->Position.y += (camSpeed * DeltaTime());
+			if (MimicCore::InputHandler->IsKey(SDLK_g)) cube0->Position.y -= (camSpeed * DeltaTime());
+			if (MimicCore::InputHandler->IsKey(SDLK_r)) cube0->Position.z += (camSpeed * DeltaTime());
+			if (MimicCore::InputHandler->IsKey(SDLK_y)) cube0->Position.z -= (camSpeed * DeltaTime());
+
+			// Collisions:
+			if (GJKCollisionDetection(cube0BoxCollider, cube1BoxCollider))
+			{
+				MIMIC_DEBUG_LOG("Colliding");
+				cube0PBRMaterial->SetAlbedo(glm::vec3(1.0f, 0.0f, 0.0f));
+			}
+			else
+			{
+				cube0PBRMaterial->SetAlbedo(glm::vec3(0.2f, 0.4f, 0.9f));
+			}
 
 			// #############################################################################
 			// Render scene:

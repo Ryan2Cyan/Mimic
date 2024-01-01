@@ -1,14 +1,18 @@
 #pragma once
 #include "Component.h"
+#include <mimic_render/Vertex.h>
 
 #include <GLM/glm.hpp>
+#include <vector>
 
 namespace MimicEngine
 {
 	// #############################################################################
 	// Box Collider Struct:
 	// #############################################################################
-	struct BoxCollider : Component
+	struct MimicRender::Vertex;
+
+	struct MeshCollider : Component
 	{
 		void Start() override;
 		void Update() override;
@@ -20,15 +24,9 @@ namespace MimicEngine
 		/// (not colliding anymore) the collision. </summary>
 		glm::vec3 GetCollisionResponse(const glm::vec3& position, const glm::vec3 size);
 
-		/// <summary> Box collider setter.</summary>
-		void SetSize(const glm::vec3& size);
-		void SetOffset(const glm::vec3& offset);
-
 		glm::vec3 GetFarthestPoint(const glm::vec3 direction) const;
 
 	private:
-
-		glm::vec3 _size;
-		glm::vec3 _offset;
+		std::vector<glm::vec3> _vertices;
 	};
 }

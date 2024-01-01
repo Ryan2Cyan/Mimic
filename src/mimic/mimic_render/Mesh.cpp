@@ -48,7 +48,7 @@ namespace MimicRender
 		glBindVertexArray(0);
 		mesh->_intialised = true;
 		mesh->_dataSize = static_cast<unsigned int>(indices.size());
-
+		mesh->_vertices = vertices;
 		return mesh;
 	}
 
@@ -70,5 +70,15 @@ namespace MimicRender
 			return 0;
 		}
 		return _dataSize;
+	}
+
+	vertex_vector Mesh::GetVertices() const noexcept
+	{
+		if (!_intialised)
+		{
+			MIMIC_LOG_WARNING("[MimicRender::Mesh] Attempting to access Mesh that is uninitialised.");
+			return { };
+		}
+		return _vertices;
 	}
 }

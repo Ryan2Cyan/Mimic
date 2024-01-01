@@ -1,73 +1,66 @@
 #include "BoxCollider.h"
+#include "GameObject.h"
+#include "ModelRenderer.h"
+#include "Model.h"
+#include <mimic_render/Model.h>
+#include <mimic_render/Mesh.h>
 #include <mimic_utility/Logger.h>
+
+#include <limits>
 
 namespace MimicEngine
 {
 
-	void BoxCollider::Start()
+	void MeshCollider::Start()
+	{
+		// If the game object has a model renderer then capture all vertices
+		// from all meshes:
+		if (auto modelRenderer = GetGameObject()->GetComponent<ModelRenderer>())
+		{
+			auto meshes = modelRenderer->_model->_renderModel->GetMeshes();
+			for (auto mesh : meshes)
+			{
+				const auto vertices = mesh->GetVertices();
+				for (auto vertex : vertices) _vertices.push_back(vertex.Position);
+			}
+		}
+	}
+
+	void MeshCollider::Update()
 	{
 
 	}
 
-	void BoxCollider::Update()
-	{
-
-	}
-
-	bool BoxCollider::IsColliding(const glm::vec3& position, const glm::vec3 size)
+	bool MeshCollider::IsColliding(const glm::vec3& position, const glm::vec3 size)
 	{
 		return false;
 	}
 
-	glm::vec3 BoxCollider::GetCollisionResponse(const glm::vec3& position, const glm::vec3 size)
+	glm::vec3 MeshCollider::GetCollisionResponse(const glm::vec3& position, const glm::vec3 size)
 	{
 		return glm::vec3(0.0f);
 	}
 
-	void BoxCollider::SetSize(const glm::vec3& size)
-	{
-		_size = size;
-	}
-
-	void BoxCollider::SetOffset(const glm::vec3& offset)
-	{
-		_offset = offset;
-	}
-
-	glm::vec3 BoxCollider::GetFarthestPoint(const glm::vec3 direction) const
+	glm::vec3 MeshCollider::GetFarthestPoint(const glm::vec3 direction) const
 	{
 		// Add position onto each point to get it's world pos:
-		auto position = GetGameObject()->Position + _offset;
-		auto halfSize = _size * 0.5f;
-		auto vertices =
-		{
-			position + glm::vec3(-halfSize.x, halfSize.y, -halfSize.z),
-			position + glm::vec3(-halfSize.x, -halfSize.y, -halfSize.z),
-			position + glm::vec3(halfSize.x, halfSize.y, -halfSize.z),
-			position + glm::vec3(halfSize.x, -halfSize.y, -halfSize.z),
-
-			position + glm::vec3(-halfSize.x, halfSize.y, halfSize.z),
-			position + glm::vec3(-halfSize.x, -halfSize.y, halfSize.z),
-			position + glm::vec3(halfSize.x, halfSize.y, halfSize.z),
-			position + glm::vec3(halfSize.x, -halfSize.y, halfSize.z)
-		};
-
+		auto position = GetGameObject()->Position;
 		auto farthestPoint = glm::vec3(0);
-		float max = 0.0f;
+		float max = std::numeric_limits<float>::min();
 
 		// Loop through all vertices, check the dot product with the direction,
 		// and cache result if larger than the last, whilst caching the furthest
 		// point:
-		for (auto vertex : vertices)
+		for (auto vertex : _vertices)
 		{
-			const float projection = glm::dot(direction, vertex);
+			const auto adjVert = position + vertex;
+			const float projection = glm::dot(adjVert, direction);
 			if (projection > max)
 			{
-				farthestPoint = vertex;
+				farthestPoint = adjVert;
 				max = projection;
 			}
 		}
-		MIMIC_DEBUG_LOG("Result: (%, %, %)", farthestPoint.x, farthestPoint.y, farthestPoint.z);
 		return farthestPoint;
 	}
 }

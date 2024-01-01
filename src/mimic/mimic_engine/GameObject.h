@@ -62,6 +62,7 @@ namespace MimicEngine
 		friend struct ModelRenderer; 
 		friend struct Material; 
 		friend struct PBRMaterial; 
+		friend struct MeshCollider;
 
 		void Start();
 		void Update();
