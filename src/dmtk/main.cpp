@@ -12,7 +12,7 @@ using namespace MimicUtility;
 
 struct Simplex
 {
-	Simplex() : _size(0), _points({glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(0.0f) }) {}
+	Simplex() : _size(0) {}
 
 	Simplex& operator=(const std::initializer_list<glm::vec3>& list)
 	{
@@ -68,6 +68,7 @@ bool Line(Simplex& points, glm::vec3& direction)
 {
 	const glm::vec3 a = points[0];
 	const glm::vec3 b = points[1];
+
 	const glm::vec3 ab = b - a;
 	const glm::vec3 ao = -a;
 

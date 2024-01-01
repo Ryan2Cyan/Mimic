@@ -44,7 +44,6 @@ namespace MimicEngine
 	glm::vec3 MeshCollider::GetFarthestPoint(const glm::vec3 direction) const
 	{
 		// Add position onto each point to get it's world pos:
-		auto position = GetGameObject()->Position;
 		auto farthestPoint = glm::vec3(0);
 		float max = std::numeric_limits<float>::min();
 
@@ -53,14 +52,13 @@ namespace MimicEngine
 		// point:
 		for (auto vertex : _vertices)
 		{
-			const auto adjVert = position + vertex;
-			const float projection = glm::dot(adjVert, direction);
+			const float projection = glm::dot(vertex, direction);
 			if (projection > max)
 			{
-				farthestPoint = adjVert;
+				farthestPoint = vertex;
 				max = projection;
 			}
 		}
-		return farthestPoint;
+		return farthestPoint + GetGameObject()->Position;
 	}
 }
