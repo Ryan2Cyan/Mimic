@@ -66,8 +66,8 @@ link_directories(
     src/mimic/mimic_engine/ShadowMapper.h
     src/mimic/mimic_engine/InputHandler.cpp
     src/mimic/mimic_engine/InputHandler.h
-    src/mimic/mimic_engine/BoxCollider.cpp
-    src/mimic/mimic_engine/BoxCollider.h
+    src/mimic/mimic_engine/Collider.cpp
+    src/mimic/mimic_engine/Collider.h
 )
 
 # Implement Mimic utility library:
@@ -112,6 +112,14 @@ add_library(MIMIC_RENDERER
     SDKs/stbi/include/stb_image.h
 )
 
+# Implement Mimic physics library:
+add_library(MIMIC_PHYSICS
+
+    src/mimic/mimic_physics/Collision.h
+    src/mimic/mimic_physics/Collider.cpp
+    src/mimic/mimic_physics/Collider.h
+)
+
 # Implement static IMGUI library:
 add_library(IMGUI_LIB
 
@@ -151,6 +159,7 @@ target_link_libraries(MIMIC
     IMGUI_LIB
     MIMIC_UTILITY
     MIMIC_RENDERER
+    MIMIC_PHYSICS
 )
 
 #############################################################################

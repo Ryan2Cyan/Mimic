@@ -15,7 +15,7 @@
 #include "Camera.h"
 #include "Light.h"
 #include "InputHandler.h"
-#include "BoxCollider.h"
+#include "Collider.h"
 
 // MimicRender translation units:
 #include <mimic_render/Light.h>
@@ -35,3 +35,7 @@
 #include <mimic_utility/PerformanceCounter.h>
 #include <mimic_utility/Logger.h>
 #include <mimic_utility/FileLoader.h>
+
+// MimicPhysics translation units:
+#include <mimic_physics/Collision.h>
+#include <mimic_physics/Collider.h>
