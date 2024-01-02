@@ -12,7 +12,7 @@ using namespace MimicUtility;
 
 struct Simplex
 {
-	Simplex() : _size(0) {}
+	Simplex() : _size(0), _points({glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(0.0f) }) {}
 
 	Simplex& operator=(const std::initializer_list<glm::vec3>& list)
 	{
@@ -68,7 +68,6 @@ bool Line(Simplex& points, glm::vec3& direction)
 {
 	const glm::vec3 a = points[0];
 	const glm::vec3 b = points[1];
-
 	const glm::vec3 ab = b - a;
 	const glm::vec3 ao = -a;
 
@@ -155,6 +154,9 @@ bool NextSimplex(Simplex& points, glm::vec3& direction)
 	return false; 
 }
 
+// Source: https://winter.dev/articles/gjk-algorithm
+// Source: https://www.youtube.com/watch?v=Qupqu1xe7Io&t=576s
+// Source: https://www.medien.ifi.lmu.de/lehre/ss10/ps/Ausarbeitung_Beispiel.pdf
 bool GJKCollisionDetection(const std::shared_ptr<MeshCollider>& colA, const std::shared_ptr<MeshCollider>& colB)
 {
 	// Get initial support point in any direction:
@@ -208,7 +210,7 @@ int main(int argc, char* argv[])
 		auto cube0PBRMaterial = PBRMaterial::Initialise();
 		cube0PBRMaterial->SetAlbedo(glm::vec3(1.0f, 0.0f, 0.0f));
 		cube0ModelRenderer->SetMaterial<PBRMaterial>(cube0PBRMaterial);
-		cube0ModelRenderer->SetModel(MimicCore::ResourceManager->LoadResource<MimicEngine::Model>("sphere.obj"));
+		cube0ModelRenderer->SetModel(MimicCore::ResourceManager->LoadResource<MimicEngine::Model>("cube.obj"));
 		auto cube0BoxCollider = cube0->AddComponent<MeshCollider>();
 
 		std::shared_ptr<GameObject> cube1 = GameObject::Initialise(glm::vec3(2.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f));

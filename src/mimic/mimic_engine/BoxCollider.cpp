@@ -41,6 +41,7 @@ namespace MimicEngine
 		return glm::vec3(0.0f);
 	}
 
+	// Source: https://en.wikipedia.org/wiki/Minkowski_addition
 	glm::vec3 MeshCollider::GetFarthestPoint(const glm::vec3 direction) const
 	{
 		// Add position onto each point to get it's world pos:
