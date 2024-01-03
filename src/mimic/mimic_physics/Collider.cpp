@@ -6,9 +6,24 @@ namespace MimicPhysics
 	// #############################################################################
 	// Collider functions:
 	// #############################################################################
+	void Collider::SetPosition(const glm::vec3& position)
+	{
+		_position = position;
+	}
+
 	void Collider::SetOffset(const glm::vec3& offset)
 	{
 		_offset = offset;
+	}
+
+	std::vector<glm::vec3> Collider::GetVertices() const
+	{
+		return _vertices;
+	}
+
+	glm::vec3 Collider::GetPosition() const
+	{
+		return _position;
 	}
 
 	glm::vec3 Collider::GetOffset() const
@@ -19,6 +34,37 @@ namespace MimicPhysics
 	bool Collider::IsInitialised() const
 	{
 		return _initialised;
+	}
+
+	// #############################################################################
+	// BoxCollider functions:
+	// #############################################################################
+	std::shared_ptr<BoxCollider> BoxCollider::Initialise(const glm::vec3& size, const glm::vec3& offset)
+	{
+		auto boxCollider = std::make_shared<BoxCollider>();
+		boxCollider->_self = boxCollider;
+		boxCollider->_vertices =
+		{
+			glm::vec3(-1.0f, 1.0f, -1.0f),
+			glm::vec3(1.0f, 1.0f, -1.0f),
+			glm::vec3(-1.0f, -1.0f, -1.0f),
+			glm::vec3(1.0f, -1.0f, -1.0f),
+			glm::vec3(-1.0f, 1.0f, 1.0f),
+			glm::vec3(-1.0f, -1.0f, 1.0f),
+			glm::vec3(1.0f, 1.0f, 1.0f),
+			glm::vec3(1.0f, -1.0f, 1.0f)
+		};
+		return boxCollider;
+	}
+
+	/*bool BoxCollider::IsColliding(const std::shared_ptr<BoxCollider>& collider) const
+	{
+		return false;
+	}*/
+
+	void BoxCollider::SetSize(const glm::vec3& size)
+	{
+		_size = size;
 	}
 
 	// #############################################################################
@@ -38,32 +84,5 @@ namespace MimicPhysics
 	bool MeshCollider::IsColliding(const std::shared_ptr<MeshCollider>& collider) const
 	{
 		return GJKCollisionDetection(_self.lock(), collider);
-	}
-
-	std::vector<glm::vec3> MeshCollider::GetVertices() const
-	{
-		return _vertices;
-	}
-
-
-	glm::vec3 MeshCollider::GetFarthestPoint(const glm::vec3& direction) const
-	{
-		// Source: https://en.wikipedia.org/wiki/Minkowski_addition
-
-		auto farthestPoint = glm::vec3(0);
-		float max = std::numeric_limits<float>::min();
-
-		// Loop through all vertices, check the dot product with the input direction,
-		// and cache result if larger than the last:
-		for (auto vertex : _vertices)
-		{
-			const float projection = glm::dot(vertex, direction);
-			if (projection > max)
-			{
-				farthestPoint = vertex;
-				max = projection;
-			}
-		}
-		return farthestPoint + _offset;
 	}
 }

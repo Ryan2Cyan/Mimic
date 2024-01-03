@@ -159,19 +159,43 @@ namespace MimicPhysics
 		return false;
 	}
 	
+	/// <summary> Given any 3D shape's vertices, Returns the furthest vertex in any given direction. 
+	/// The translate input is added onto the return vertex to convert its position to world space. </summary>
+	static glm::vec3 GetFarthestPoint(const std::vector<glm::vec3>& vertices, const glm::vec3& direction, const glm::vec3& translate)
+	{
+		// Source: https://en.wikipedia.org/wiki/Minkowski_addition
+
+		auto farthestPoint = glm::vec3(0);
+		float max = std::numeric_limits<float>::min();
+
+		// Loop through all vertices, check the dot product with the input direction,
+		// and cache result if larger than the last:
+		for (auto vertex : vertices)
+		{
+			const float projection = glm::dot(vertex, direction);
+			if (projection > max)
+			{
+				farthestPoint = vertex;
+				max = projection;
+			}
+		}
+		return farthestPoint + translate;
+	}
+
 	/// <summary> GJK collision detection helper function. Based on the Minkowski Difference,
 	/// calculates the "most-extreme" points in two shapes (vertices farthest in a given direction),
 	/// and returns the difference. </summary>
-	static glm::vec3 Support(const std::shared_ptr<MeshCollider>& colA, const std::shared_ptr<MeshCollider>& colB, const glm::vec3& direction)
+	static glm::vec3 Support(const std::shared_ptr<Collider>& colA, const std::shared_ptr<Collider>& colB, const glm::vec3& direction)
 	{
-		return colA->GetFarthestPoint(direction) - colB->GetFarthestPoint(-direction);
+		return GetFarthestPoint(colA->GetVertices(), direction, colA->GetPosition() + colA->GetOffset()) - 
+			   GetFarthestPoint(colB->GetVertices(), -direction, colB->GetPosition() + colB->GetOffset());
 	};
 
 	/// <summary> GJK collision detection algorithm. Calculates the outer-hull of the Minkowski   
 	/// Difference (difference between two shapes), if the origin is located within this new 
 	/// shape, return true, otherwise false. Using a support function, a simplex is created around 
 	/// the origin. </summary>
-	static bool GJKCollisionDetection(const std::shared_ptr<MeshCollider>& colA, const std::shared_ptr<MeshCollider>& colB)
+	static bool GJKCollisionDetection(const std::shared_ptr<Collider>& colA, const std::shared_ptr<Collider>& colB)
 	{
 		// Source: https://winter.dev/articles/gjk-algorithm
 		// Source: https://www.youtube.com/watch?v=Qupqu1xe7Io&t=576s
@@ -201,4 +225,10 @@ namespace MimicPhysics
 			if (NextSimplex(points, direction)) return true; 
 		}
 	}
+
+
+
+	// #############################################################################
+	// Axis Aligned Algorithm:
+	// #############################################################################
 }

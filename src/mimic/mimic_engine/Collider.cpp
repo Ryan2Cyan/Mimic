@@ -32,7 +32,7 @@ namespace MimicEngine
 
 	void MeshCollider::Update()
 	{
-		_physicsMeshCollider->SetOffset(GetGameObject()->Position);
+		_physicsMeshCollider->SetPosition(GetGameObject()->Position);
 	}
 
 	bool MeshCollider::IsColliding(const std::shared_ptr<MeshCollider> collider)
