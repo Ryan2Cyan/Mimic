@@ -54,17 +54,18 @@ namespace MimicPhysics
 			glm::vec3(1.0f, 1.0f, 1.0f),
 			glm::vec3(1.0f, -1.0f, 1.0f)
 		};
+		boxCollider->_type = ColliderType::Box;
 		return boxCollider;
 	}
-
-	/*bool BoxCollider::IsColliding(const std::shared_ptr<BoxCollider>& collider) const
-	{
-		return false;
-	}*/
 
 	void BoxCollider::SetSize(const glm::vec3& size)
 	{
 		_size = size;
+	}
+
+	glm::vec3 BoxCollider::GetSize() const
+	{
+		return _size;
 	}
 
 	// #############################################################################
@@ -77,12 +78,8 @@ namespace MimicPhysics
 		auto meshCollider = std::make_shared<MeshCollider>();
 		meshCollider->_vertices = vertices;
 		meshCollider->_initialised = true;
+		meshCollider->_type = ColliderType::Mesh;
 		meshCollider->_self = meshCollider;
 		return meshCollider;
-	}
-
-	bool MeshCollider::IsColliding(const std::shared_ptr<MeshCollider>& collider) const
-	{
-		return GJKCollisionDetection(_self.lock(), collider);
 	}
 }

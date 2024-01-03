@@ -6,6 +6,13 @@
 
 namespace MimicPhysics
 {
+	enum class ColliderType
+	{
+		Box,
+		Sphere,
+		Mesh
+	};
+
 	// #############################################################################
 	// Collider struct:
 	// #############################################################################
@@ -20,11 +27,13 @@ namespace MimicPhysics
 		glm::vec3 GetPosition() const;
 		glm::vec3 GetOffset() const;
 		bool IsInitialised() const;
+		
 
 	protected:
 		std::vector<glm::vec3> _vertices;
 		glm::vec3 _offset;
 		glm::vec3 _position;
+		ColliderType _type;
 		bool _initialised;
 	};
 
@@ -38,23 +47,24 @@ namespace MimicPhysics
 		/// <summary> Returns true if colliding with another mesh collider, otherwise 
 		/// false </summary>
 		template<typename T>
-		bool IsColliding(const std::shared_ptr<T>& collider) const
+		bool IsColliding(const std::shared_ptr<T>& collider, const bool& aligned) const
 		{
 			// Check which type of collide has been inputted, and call the appropriate collision
 			// detection algorithm:
 			if (auto boxCollider = std::dynamic_pointer_cast<BoxCollider>(collider))
 			{
-
+				if (aligned) return AxisAlignedCollisionDetection(_self.lock(), boxCollider);
+				return GJKCollisionDetection(_self.lock(), boxCollider);
 			}
-			if (auto meshCollider = std::dynamic_pointer_cast<MeshCollider>(collider))
-			{
-				GJKCollisionDetection(_self.lock(), meshCollider);
-			}
+			if (auto meshCollider = std::dynamic_pointer_cast<MeshCollider>(collider)) return GJKCollisionDetection(_self.lock(), meshCollider);
+			
 			MIMIC_LOG_WARNING("[MimicPhysics::BoxCollider] Invalid collider data type input, unable to deduce collision detection function");
 			return false;
 		}
 
 		void SetSize(const glm::vec3& size);
+
+		glm::vec3 GetSize() const;
 
 	private:
 		glm::vec3 _size;
@@ -70,7 +80,17 @@ namespace MimicPhysics
 
 		/// <summary> Returns true if colliding with another mesh collider, otherwise 
 		/// false </summary>
-		bool IsColliding(const std::shared_ptr<MeshCollider>& collider) const;
+		template<typename T>
+		bool IsColliding(const std::shared_ptr<MeshCollider>& collider, const bool& aligned) const
+		{
+			// Check which type of collide has been inputted, and call the appropriate collision
+			// detection algorithm:
+			if (auto boxCollider = std::dynamic_pointer_cast<BoxCollider>(collider)) return GJKCollisionDetection(_self.lock(), boxCollider);
+			if (auto meshCollider = std::dynamic_pointer_cast<MeshCollider>(collider)) return GJKCollisionDetection(_self.lock(), meshCollider);
+
+			MIMIC_LOG_WARNING("[MimicPhysics::BoxCollider] Invalid collider data type input, unable to deduce collision detection function");
+			return false;
+		}
 
  	private:
 		std::weak_ptr<MeshCollider> _self;

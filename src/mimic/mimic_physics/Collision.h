@@ -231,4 +231,21 @@ namespace MimicPhysics
 	// #############################################################################
 	// Axis Aligned Algorithm:
 	// #############################################################################
+	static bool AxisAlignedCollisionDetection(const std::shared_ptr<BoxCollider>& colA, const std::shared_ptr<BoxCollider>& colB)
+	{
+		// Source: https://developer.mozilla.org/en-US/docs/Games/Techniques/3D_collision_detection
+		auto aPos = colA->GetPosition();
+		auto aSize = colA->GetSize() / 2.0f;
+
+		auto bPos = colB->GetPosition();
+		auto bSize = colB->GetSize();
+
+		if (aPos.x - aSize.x > bPos.x + bSize.x) return false;
+		if (aPos.x + aSize.x < bPos.x - bSize.x) return false;
+		if (aPos.y - aSize.y > bPos.y + bSize.y) return false;
+		if (aPos.y + aSize.y < bPos.y - bSize.y) return false;
+		if (aPos.z - aSize.z > bPos.z + bSize.z) return false;
+		if (aPos.z + aSize.z < bPos.z - bSize.z) return false;
+		return true;
+	}
 }

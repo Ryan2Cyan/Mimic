@@ -30,21 +30,23 @@ int main(int argc, char* argv[])
 		};
 
 		// Initialise scene models:
-		std::shared_ptr<GameObject> cube0 = GameObject::Initialise(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f));
+		std::shared_ptr<GameObject> cube0 = GameObject::Initialise(glm::vec3(3.8f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f));
 		auto cube0ModelRenderer = cube0->AddComponent<ModelRenderer>();
 		auto cube0PBRMaterial = PBRMaterial::Initialise();
 		cube0PBRMaterial->SetAlbedo(glm::vec3(1.0f, 0.0f, 0.0f));
 		cube0ModelRenderer->SetMaterial<PBRMaterial>(cube0PBRMaterial);
-		cube0ModelRenderer->SetModel(MimicCore::ResourceManager->LoadResource<MimicEngine::Model>("sphere.obj"));
-		auto cube0MeshCollider = cube0->AddComponent<MimicEngine::MeshCollider>();
+		cube0ModelRenderer->SetModel(MimicCore::ResourceManager->LoadResource<MimicEngine::Model>("cube.obj"));
+		auto cube0BoxCollider = cube0->AddComponent<MimicEngine::BoxCollider>();
+		cube0BoxCollider->SetSize(glm::vec3(1.3f));
 
 		std::shared_ptr<GameObject> cube1 = GameObject::Initialise(glm::vec3(2.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f));
 		auto cube1ModelRenderer = cube1->AddComponent<ModelRenderer>();
 		auto cube1PBRMaterial = PBRMaterial::Initialise();
 		cube1PBRMaterial->SetAlbedo(glm::vec3(0.0f, 0.0f, 1.0f));
 		cube1ModelRenderer->SetMaterial<PBRMaterial>(cube1PBRMaterial);
-		cube1ModelRenderer->SetModel(MimicCore::ResourceManager->LoadResource<MimicEngine::Model>("sphere.obj"));
-		auto cube1MeshCollider = cube1->AddComponent<MimicEngine::MeshCollider>();
+		cube1ModelRenderer->SetModel(MimicCore::ResourceManager->LoadResource<MimicEngine::Model>("cube.obj"));
+		auto cube1BoxCollider = cube1->AddComponent<MimicEngine::BoxCollider>();
+		cube1BoxCollider->SetSize(glm::vec3(1.3f));
 
 		/*std::shared_ptr<MimicEngine::GameObject> groundGameObject = GameObject::Initialise(glm::vec3(0.0f, -1.5f, 0.0f), glm::vec3(0.0f), glm::vec3(43.45f, -0.5f, 50.0f));
 		auto groundModelRenderer = groundGameObject->AddComponent<ModelRenderer>();
@@ -84,7 +86,7 @@ int main(int argc, char* argv[])
 			if (MimicCore::InputHandler->IsKey(SDLK_y)) cube0->Position.z -= (camSpeed * DeltaTime());
 
 			// Collisions:
-			if(cube0MeshCollider->IsColliding(cube1MeshCollider))
+			if(cube0BoxCollider->IsColliding<MimicPhysics::BoxCollider>(cube1BoxCollider->GetPhysicsCollider(), cube0->Rotation == cube1->Rotation))
 			{
 				cube0PBRMaterial->SetAlbedo(glm::vec3(1.0f, 0.0f, 0.0f));
 			}
