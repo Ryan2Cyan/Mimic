@@ -54,7 +54,6 @@ namespace MimicPhysics
 			glm::vec3(1.0f, 1.0f, 1.0f),
 			glm::vec3(1.0f, -1.0f, 1.0f)
 		};
-		boxCollider->_type = ColliderType::Box;
 		return boxCollider;
 	}
 
@@ -78,7 +77,6 @@ namespace MimicPhysics
 		auto meshCollider = std::make_shared<MeshCollider>();
 		meshCollider->_vertices = vertices;
 		meshCollider->_initialised = true;
-		meshCollider->_type = ColliderType::Mesh;
 		meshCollider->_self = meshCollider;
 		return meshCollider;
 	}

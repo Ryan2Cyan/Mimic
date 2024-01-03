@@ -86,7 +86,7 @@ int main(int argc, char* argv[])
 			if (MimicCore::InputHandler->IsKey(SDLK_y)) cube0->Position.z -= (camSpeed * DeltaTime());
 
 			// Collisions:
-			if(cube0BoxCollider->IsColliding<MimicPhysics::BoxCollider>(cube1BoxCollider->GetPhysicsCollider(), cube0->Rotation == cube1->Rotation))
+			if(cube0BoxCollider->IsColliding(cube1BoxCollider, cube0->Rotation == cube1->Rotation))
 			{
 				cube0PBRMaterial->SetAlbedo(glm::vec3(1.0f, 0.0f, 0.0f));
 			}

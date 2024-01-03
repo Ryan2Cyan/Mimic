@@ -43,9 +43,9 @@ namespace MimicEngine
 
 		/// <summary> Returns true if colliding with another mesh collider, otherwise 
 		/// false </summary>
-		template<typename T> bool IsColliding(const std::shared_ptr<T> collider, const bool& aligned)
+		template<typename T> bool IsColliding(const std::shared_ptr<T> collider, const bool& aligned = false)
 		{
-			return _physicsCollider->IsColliding<T>(collider, aligned);
+			return _physicsCollider->IsColliding(collider->GetPhysicsCollider(), aligned);
 		}
 
 	protected:

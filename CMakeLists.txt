@@ -118,6 +118,10 @@ add_library(MIMIC_PHYSICS
     src/mimic/mimic_physics/Collision.h
     src/mimic/mimic_physics/Collider.cpp
     src/mimic/mimic_physics/Collider.h
+    src/mimic/mimic_physics/Rigidbody.cpp
+    src/mimic/mimic_physics/Rigidbody.h
+    src/mimic/mimic_physics/Simulation.cpp
+    src/mimic/mimic_physics/Simulation.h
 )
 
 # Implement static IMGUI library:

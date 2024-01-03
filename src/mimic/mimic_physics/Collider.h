@@ -6,15 +6,8 @@
 
 namespace MimicPhysics
 {
-	enum class ColliderType
-	{
-		Box,
-		Sphere,
-		Mesh
-	};
-
 	// #############################################################################
-	// Collider struct:
+	// Collider Struct:
 	// #############################################################################
 	struct Collider
 	{
@@ -33,12 +26,11 @@ namespace MimicPhysics
 		std::vector<glm::vec3> _vertices;
 		glm::vec3 _offset;
 		glm::vec3 _position;
-		ColliderType _type;
 		bool _initialised;
 	};
 
 	// #############################################################################
-	// BoxCollider struct:
+	// BoxCollider Struct:
 	// #############################################################################
 	struct BoxCollider : Collider 
 	{
@@ -72,7 +64,7 @@ namespace MimicPhysics
 	};
 
 	// #############################################################################
-	// MeshCollider struct:
+	// MeshCollider Struct:
 	// #############################################################################
 	struct MeshCollider : Collider
 	{
