@@ -115,7 +115,6 @@ add_library(MIMIC_RENDERER
 # Implement Mimic physics library:
 add_library(MIMIC_PHYSICS
 
-    src/mimic/mimic_physics/Collision.h
     src/mimic/mimic_physics/Collider.cpp
     src/mimic/mimic_physics/Collider.h
     src/mimic/mimic_physics/Rigidbody.cpp

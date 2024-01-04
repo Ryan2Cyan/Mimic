@@ -4,7 +4,6 @@
 #include <mimic_render/Renderer.h>
 #include <mimic_render/CubeMap.h>
 
-
 #include <GLM/glm.hpp>
 #include <memory>
 #include <string>

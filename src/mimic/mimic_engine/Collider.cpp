@@ -18,15 +18,15 @@ namespace MimicEngine
 	// #############################################################################
 	void BoxCollider::Start()
 	{
-		_physicsCollider = MimicPhysics::BoxCollider::Initialise(_size, _offset);
-		Collider::Start();
+		_physicsBoxCollider = MimicPhysics::BoxCollider::Initialise(_size, _offset);
 	}
 
 	void BoxCollider::Update()
 	{
-		Collider::Update();
-		_physicsCollider->SetSize(_size);
+		_physicsBoxCollider->SetPosition(GetGameObject()->Position);
+		_physicsBoxCollider->SetOffset(_offset);
 	}
+
 	void BoxCollider::SetSize(const glm::vec3& size)
 	{
 		_size = size;
@@ -35,6 +35,21 @@ namespace MimicEngine
 	glm::vec3 BoxCollider::GetSize() const
 	{
 		return _size;
+	}
+
+	bool BoxCollider::IsInitialised() const
+	{
+		return _physicsBoxCollider->IsInitialised();
+	}
+
+	bool BoxCollider::IsColliding(const std::shared_ptr<BoxCollider> collider, const bool& aligned)
+	{
+		return _physicsBoxCollider->IsColliding(collider->_physicsBoxCollider, aligned);
+	}
+
+	bool BoxCollider::IsColliding(const std::shared_ptr<MeshCollider> collider)
+	{
+		return _physicsBoxCollider->IsColliding(collider->_physicsMeshCollider);
 	}
 
 	// #############################################################################
@@ -53,14 +68,33 @@ namespace MimicEngine
 				const auto vertices = mesh->GetVertices();
 				for (auto vertex : vertices) vertexCache.push_back(vertex.Position);
 			}
-			_physicsCollider = MimicPhysics::MeshCollider::Initialise(vertexCache);
-			Collider::Start();
+			_physicsMeshCollider = MimicPhysics::MeshCollider::Initialise(vertexCache);
+			_physicsMeshCollider->SetPosition(GetGameObject()->Position);
 			return;
 		}
 		MIMIC_LOG_WARNING("[MimicEngine::MeshCollider] Unable to initialise without ModelRenderer component attached to GameObject.");
 	}
 
+	void MeshCollider::Update()
+	{
+		_physicsMeshCollider->SetPosition(GetGameObject()->Position);
+		_physicsMeshCollider->SetOffset(_offset);
+	}
 
+	bool MeshCollider::IsInitialised() const
+	{
+		return _physicsMeshCollider->IsInitialised();
+	}
+
+	bool MeshCollider::IsColliding(const std::shared_ptr<BoxCollider> collider)
+	{
+		return _physicsMeshCollider->IsColliding(collider->_physicsBoxCollider);
+	}
+
+	bool MeshCollider::IsColliding(const std::shared_ptr<MeshCollider> collider)
+	{
+		return _physicsMeshCollider->IsColliding(collider->_physicsMeshCollider);
+	}
 
 	/*bool MeshCollider::IsColliding(const std::shared_ptr<MeshCollider> collider)
 	{

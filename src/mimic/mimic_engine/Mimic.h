@@ -37,5 +37,4 @@
 #include <mimic_utility/FileLoader.h>
 
 // MimicPhysics translation units:
-#include <mimic_physics/Collision.h>
 #include <mimic_physics/Collider.h>

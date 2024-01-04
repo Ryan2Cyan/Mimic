@@ -1,5 +1,4 @@
 #include "Collider.h"
-#include "Collision.h"
 
 namespace MimicPhysics
 {
@@ -43,16 +42,17 @@ namespace MimicPhysics
 	{
 		auto boxCollider = std::make_shared<BoxCollider>();
 		boxCollider->_self = boxCollider;
+		boxCollider->_size = size;
 		boxCollider->_vertices =
 		{
-			glm::vec3(-1.0f, 1.0f, -1.0f),
-			glm::vec3(1.0f, 1.0f, -1.0f),
-			glm::vec3(-1.0f, -1.0f, -1.0f),
-			glm::vec3(1.0f, -1.0f, -1.0f),
-			glm::vec3(-1.0f, 1.0f, 1.0f),
-			glm::vec3(-1.0f, -1.0f, 1.0f),
-			glm::vec3(1.0f, 1.0f, 1.0f),
-			glm::vec3(1.0f, -1.0f, 1.0f)
+			glm::vec3(-1.0f, 1.0f, -1.0f) * size,
+			glm::vec3(1.0f, 1.0f, -1.0f) * size,
+			glm::vec3(-1.0f, -1.0f, -1.0f) * size,
+			glm::vec3(1.0f, -1.0f, -1.0f) * size,
+			glm::vec3(-1.0f, 1.0f, 1.0f) * size,
+			glm::vec3(-1.0f, -1.0f, 1.0f) * size,
+			glm::vec3(1.0f, 1.0f, 1.0f) * size,
+			glm::vec3(1.0f, -1.0f, 1.0f) * size
 		};
 		return boxCollider;
 	}
@@ -60,6 +60,17 @@ namespace MimicPhysics
 	void BoxCollider::SetSize(const glm::vec3& size)
 	{
 		_size = size;
+		_vertices =
+		{
+			glm::vec3(-1.0f, 1.0f, -1.0f) * size,
+			glm::vec3(1.0f, 1.0f, -1.0f) * size,
+			glm::vec3(-1.0f, -1.0f, -1.0f) * size,
+			glm::vec3(1.0f, -1.0f, -1.0f) * size,
+			glm::vec3(-1.0f, 1.0f, 1.0f) * size,
+			glm::vec3(-1.0f, -1.0f, 1.0f) * size,
+			glm::vec3(1.0f, 1.0f, 1.0f) * size,
+			glm::vec3(1.0f, -1.0f, 1.0f) * size
+		};
 	}
 
 	glm::vec3 BoxCollider::GetSize() const
