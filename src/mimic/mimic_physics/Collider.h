@@ -7,6 +7,14 @@
 namespace MimicPhysics
 {
 	// #############################################################################
+	// Collision Data Struct:
+	// #############################################################################
+	struct CollisionData
+	{
+		glm::vec3 CollisionPoint;
+	};
+
+	// #############################################################################
 	// Collider Struct:
 	// #############################################################################
 	struct Collider
@@ -21,8 +29,8 @@ namespace MimicPhysics
 		glm::vec3 GetOffset() const;
 		bool IsInitialised() const;
 		
-
-	protected:
+		std::vector<CollisionData> CollisionData;
+	protected: 
 		std::vector<glm::vec3> _vertices;
 		glm::vec3 _offset;
 		glm::vec3 _position;

@@ -49,19 +49,24 @@ namespace MimicPhysics
 		_velocityBody = velocityBody;
 	}
 
+	void Rigidbody::SetEularAngles(const glm::vec3& eularAngles)
+	{
+		_eularAngles = eularAngles;
+	}
+
 	void Rigidbody::SetQuatOrientation(const Quaternion& orientation)
 	{
 		_quatOrientation = orientation;
 	}
 
-	void Rigidbody::SetOrientation(const float& orientation)
-	{
-		_orientation = orientation;
-	}
-
 	void Rigidbody::SetMass(const float& mass)
 	{
 		_mass = mass;
+	}
+
+	void Rigidbody::SetSpeed(const float& speed)
+	{
+		_speed = speed;
 	}
 
 	void Rigidbody::SetInertia(const float& inertia)
@@ -114,19 +119,24 @@ namespace MimicPhysics
 		return _velocityBody;
 	}
 
+	glm::vec3 Rigidbody::GetEularAngles() const
+	{
+		return _eularAngles;
+	}
+
 	Quaternion Rigidbody::GetQuatOrientation() const
 	{
 		return _quatOrientation;
 	}
 
-	float Rigidbody::GetOrientation() const
-	{
-		return _orientation;
-	}
-
 	float Rigidbody::GetMass() const
 	{
 		return _mass;
+	}
+
+	float Rigidbody::GetSpeed() const
+	{
+		return _speed;
 	}
 
 	float Rigidbody::GetInertia() const

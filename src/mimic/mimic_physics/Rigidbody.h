@@ -24,9 +24,10 @@ namespace MimicPhysics
 		void SetAngularVelocity(const glm::vec3& angVelocity);
 		void SetAngularAcceleration(const glm::vec3& angAcceleration);
 		void SetVelocityBody(const glm::vec3& velocityBody);
+		void SetEularAngles(const glm::vec3& eularAngles);
 		void SetQuatOrientation(const Quaternion& orientation);
-		void SetOrientation(const float& orientation);
 		void SetMass(const float& mass);
+		void SetSpeed(const float& speed);
 		void SetInertia(const float& inertia);
 		void SetInertiaInverse(const float& inertiaInv);
 
@@ -38,9 +39,10 @@ namespace MimicPhysics
 		glm::vec3 GetAngularVelocity() const;
 		glm::vec3 GetAngularAcceleration() const;
 		glm::vec3 GetVelocityBody() const;
+		glm::vec3 GetEularAngles() const;
 		Quaternion GetQuatOrientation() const;
-		float GetOrientation() const;
 		float GetMass() const;
+		float GetSpeed() const;
 		float GetInertiaInverse() const;
 		float GetInertia() const;
 		bool IsInitialised() const;
@@ -59,8 +61,9 @@ namespace MimicPhysics
 		glm::vec3 _angularVelocity;
 		glm::vec3 _angularAcceleration;
 		glm::vec3 _velocityBody;
+		glm::vec3 _eularAngles;
 		Quaternion _quatOrientation;
-		float _orientation;
+		float _speed;
 		float _mass;
 		float _inertia;
 		float _inertiaInverse;

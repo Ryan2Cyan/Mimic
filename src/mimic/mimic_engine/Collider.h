@@ -45,7 +45,9 @@ namespace MimicEngine
 		/// false </summary>
 		template<typename T> bool IsColliding(const std::shared_ptr<T> collider, const bool& aligned = false)
 		{
-			return _physicsCollider->IsColliding(collider->GetPhysicsCollider(), aligned);
+			auto colliding = _physicsCollider->IsColliding(collider->GetPhysicsCollider(), aligned);
+			if (colliding) _physicsCollider->CollisionData.push_back(CollisionData());
+			return colliding;
 		}
 
 	protected:

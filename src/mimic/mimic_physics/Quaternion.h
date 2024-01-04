@@ -2,6 +2,8 @@
 #include <glm/glm.hpp>
 #include <cmath>
 
+# define PI           3.14159265358979323846
+
 namespace MimicPhysics
 {
 	// #############################################################################
@@ -97,6 +99,89 @@ namespace MimicPhysics
 	static glm::vec3 QuatVec3Rotate(const glm::vec3& vector, const Quaternion& quat)
 	{
 		return (quat * vector * (~quat)).GetVector();
+	}
+
+	/// <summary> Convert a value from degrees to radians. </summary>
+	static float DegreesToRadians(const float& degrees)
+	{
+		return degrees * PI / 180.0f;
+	}
+
+	/// <summary> Convert a value from radians to degrees. </summary>
+	static float RadiansToDegrees(const float& radians)
+	{
+		return radians * 180.0f / PI;
+	}
+
+	/// <summary> Constructs a quaternion from a set of eular angles (yaw, pitch, roll) by
+	/// creating a unique quaternion for each Eular angle, then returning the three multiplied
+	/// together. </summary>
+	static Quaternion QuatFromEularAngles(const glm::vec3& eularAngles)
+	{
+		// Extract the roll (x), pitch(y), and yaw(z):
+		const glm::vec3 radianEularAngles = glm::vec3(
+			DegreesToRadians(eularAngles.x),
+			DegreesToRadians(eularAngles.y),
+			DegreesToRadians(eularAngles.z)
+		);
+
+		const auto cosRoll = cos(0.5f * radianEularAngles.x);
+		const auto cosPitch = cos(0.5f * radianEularAngles.y);
+		const auto cosYaw = cos(0.5f * radianEularAngles.z);
+
+		const auto sinRoll = sin(0.5f * radianEularAngles.x);
+		const auto sinPitch = sin(0.5f * radianEularAngles.y);
+		const auto sinYaw = sin(0.5f * radianEularAngles.z);
+
+		const auto cosYawCosPitch = cosYaw * cosPitch;
+		const auto sinYawSinPitch = sinYaw * sinPitch;
+		const auto cosYawSinPitch = cosYaw * sinPitch;
+		const auto sinYawCosPitch = sinYaw * cosPitch;
+
+		return Quaternion(
+			cosYawCosPitch * cosRoll + sinYawSinPitch * sinRoll,
+			cosYawCosPitch * sinRoll - sinYawSinPitch * cosRoll,
+			cosYawSinPitch * cosRoll + sinYawCosPitch * sinRoll,
+			sinYawCosPitch * cosRoll - cosYawSinPitch * sinRoll
+		);
+	}
+
+	/// <summary> Extract three eular angles from the input quaternion. The quaternion is
+	/// converted into a rotation matrix, in which the eular angles are extracted from. </summary>
+	static glm::vec3 EularAnglesFromQuat(const Quaternion& quat)
+	{
+		const auto qScalar = quat.GetScalar();
+		const auto qVector = quat.GetVector();
+
+		const auto q00 = qScalar * qScalar;
+		const auto q11 = qVector.x * qVector.x;
+		const auto q22 = qVector.y * qVector.y;
+		const auto q33 = qVector.z * qVector.z;
+
+		const auto r11 = q00 + q11 - q22 - q33;
+		const auto r21 = 2.0f * (qVector.x * qVector.y + qScalar * qVector.z);
+		const auto r31 = 2.0f * (qVector.x * qVector.z - qScalar * qVector.y);
+		const auto r32 = 2.0f * (qVector.y * qVector.z + qScalar * qVector.x);
+		const auto r33 = q00 - q11 - q22 + q33;
+
+		const auto temp = fabs(r31);
+		if (temp > 0.999999f)
+		{
+			const auto r12 = 2.0f * (qVector.x * qVector.y - qScalar * qVector.z);
+			const auto r13 = 2.0f * (qVector.x * qVector.y + qScalar * qVector.y);
+
+			return glm::vec3(
+				RadiansToDegrees(0.0f),							// roll
+				RadiansToDegrees((-PI / 2.0f) * r31 / temp),	// pitch
+				RadiansToDegrees(atan2(-r12, -r31 * r13))		// yaw
+			);
+		}
+
+		return glm::vec3(
+			RadiansToDegrees(atan2(r32, r33)),	// roll
+			RadiansToDegrees(asin(-r31)),		// pitch
+			RadiansToDegrees(atan2(r21, r11))	// yaw
+		);
 	}
 
 	static Quaternion operator+(const Quaternion& quatA, const Quaternion& quatB)
