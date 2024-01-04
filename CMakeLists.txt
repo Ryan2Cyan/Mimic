@@ -122,6 +122,8 @@ add_library(MIMIC_PHYSICS
     src/mimic/mimic_physics/Rigidbody.h
     src/mimic/mimic_physics/Simulation.cpp
     src/mimic/mimic_physics/Simulation.h
+    src/mimic/mimic_physics/Quaternion.cpp
+    src/mimic/mimic_physics/Quaternion.h
 )
 
 # Implement static IMGUI library:

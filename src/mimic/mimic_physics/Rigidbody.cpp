@@ -39,9 +39,19 @@ namespace MimicPhysics
 		_angularVelocity = angVelocity;
 	}
 
+	void Rigidbody::SetAngularAcceleration(const glm::vec3& angAcceleration)
+	{
+		_angularAcceleration = angAcceleration;
+	}
+
 	void Rigidbody::SetVelocityBody(const glm::vec3& velocityBody)
 	{
 		_velocityBody = velocityBody;
+	}
+
+	void Rigidbody::SetQuatOrientation(const Quaternion& orientation)
+	{
+		_quatOrientation = orientation;
 	}
 
 	void Rigidbody::SetOrientation(const float& orientation)
@@ -57,6 +67,11 @@ namespace MimicPhysics
 	void Rigidbody::SetInertia(const float& inertia)
 	{
 		_inertia = inertia;
+	}
+
+	void Rigidbody::SetInertiaInverse(const float& inertiaInv)
+	{
+		_inertiaInverse = inertiaInv;
 	}
 
 	glm::vec3 Rigidbody::GetPosition() const
@@ -89,9 +104,19 @@ namespace MimicPhysics
 		return _angularVelocity;
 	}
 
+	glm::vec3 Rigidbody::GetAngularAcceleration() const
+	{
+		return _angularAcceleration;
+	}
+
 	glm::vec3 Rigidbody::GetVelocityBody() const
 	{
 		return _velocityBody;
+	}
+
+	Quaternion Rigidbody::GetQuatOrientation() const
+	{
+		return _quatOrientation;
 	}
 
 	float Rigidbody::GetOrientation() const
@@ -107,6 +132,11 @@ namespace MimicPhysics
 	float Rigidbody::GetInertia() const
 	{
 		return _inertia;
+	}
+
+	float Rigidbody::GetInertiaInverse() const
+	{
+		return _inertiaInverse;
 	}
 
 	bool Rigidbody::IsInitialised() const
