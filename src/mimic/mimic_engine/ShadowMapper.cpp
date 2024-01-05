@@ -10,8 +10,8 @@ namespace MimicEngine
 		return shadowMapper;
 	}
 
-	void ShadowMapper::RenderDirectLightDepthMaps(const glm::ivec2& clippingPlanes)
+	void ShadowMapper::RenderDirectLightDepthMaps(std::shared_ptr<MimicRender::Renderer>& renderer, const glm::ivec2& clippingPlanes)
 	{
-		_renderShadowMapper->RenderDirectLightDepthMaps(_depthMapDirectLights, MimicCore::_renderer, clippingPlanes);
+		_renderShadowMapper->RenderDirectLightDepthMaps(_depthMapDirectLights, renderer, clippingPlanes);
 	}
 }

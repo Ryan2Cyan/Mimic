@@ -19,9 +19,6 @@ namespace MimicEngine
 
 	struct GameObject
 	{
-		static std::shared_ptr<GameObject> Initialise();
-		static std::shared_ptr<GameObject> Initialise(const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& scale);
-
 		/// <summary> Add new component of specified type. If the component already exists on this game object, nothing will be
 		/// added. </summary>
 		template <typename T> std::shared_ptr<T> AddComponent()
@@ -29,8 +26,9 @@ namespace MimicEngine
 			std::shared_ptr<T> newComponent = std::make_shared<T>();
 			newComponent->_self = newComponent;
 			newComponent->_gameObject = _self;
-
+		
 			_components.push_back(newComponent);
+			newComponent->Initialise();
 			return newComponent;
 		}
 
@@ -59,6 +57,10 @@ namespace MimicEngine
 
 	private:
 		friend struct MimicCore;
+
+		static std::shared_ptr<GameObject> Initialise();
+		static std::shared_ptr<GameObject> Initialise(const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& scale);
+
 		friend struct ModelRenderer; 
 		friend struct Material; 
 		friend struct PBRMaterial; 

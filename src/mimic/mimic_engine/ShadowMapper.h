@@ -18,7 +18,7 @@ namespace MimicEngine
 
 	private:
 		friend struct MimicCore;
-		void RenderDirectLightDepthMaps(const glm::ivec2& clippingPlanes = glm::ivec2(1.0f, 100.0f));
+		void RenderDirectLightDepthMaps(std::shared_ptr<MimicRender::Renderer>& renderer, const glm::ivec2& clippingPlanes = glm::ivec2(1.0f, 100.0f));
 
 		std::vector<std::shared_ptr<MimicRender::DirectLight>> _depthMapDirectLights;
 		std::shared_ptr<MimicRender::ShadowMapper> _renderShadowMapper;

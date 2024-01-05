@@ -16,7 +16,6 @@ namespace MimicEngine
 
 	struct ModelRenderer : Component
 	{
-		static std::shared_ptr<ModelRenderer> Initialise();
 
 		template <typename T> void SetMaterial(const std::shared_ptr<T>& material)
 		{
@@ -37,24 +36,21 @@ namespace MimicEngine
 				MIMIC_LOG_WARNING("[MimicEngine::ModelRenderer]\"%\" Unable to get unassigned material.", GetGameObject()->Name);
 				return nullptr;
 			}
-			auto forwardCastMaterial = std::dynamic_pointer_cast<T>(_material);
-			if (forwardCastMaterial == nullptr)
-			{
-				MIMIC_LOG_WARNING("[MimicEngine::ModelRenderer]\"%\" Unable to get material, unrecognised Material type", GetGameObject()->Name);
-				return nullptr;
-			}
-			return std::dynamic_pointer_cast<T>(Material);
+			return std::dynamic_pointer_cast<T>(_material);
 		}
 
 		void SetModel(const std::shared_ptr<Model>& model);
 
 		private:
 			friend struct MeshCollider;
+			friend struct GameObject; 
 
 			void Start() override;
 			void Update() override;
+			void Initialise() override;
 
 			std::shared_ptr<Model> _model; 
 			std::shared_ptr<Material> _material;
+
 	};
 }

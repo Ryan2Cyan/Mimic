@@ -12,13 +12,35 @@
 
 namespace MimicEngine
 {
+	// #############################################################################
+	// Collider Functions:
+	// #############################################################################
+	void Collider::SetOffset(const glm::vec3& offset)
+	{
+		_offset = offset;
+	}
+
+	void Collider::SetPreviousPosition(const glm::vec3& prevPos)
+	{
+		_previousPosition = prevPos;
+	}
+
+	glm::vec3 Collider::GetOffset() const
+	{
+		return _offset;
+	}
 
 	// #############################################################################
 	// BoxCollider Functions:
 	// #############################################################################
-	void BoxCollider::Start()
+	void BoxCollider::Initialise()
 	{
 		_physicsBoxCollider = MimicPhysics::BoxCollider::Initialise(_size, _offset);
+	}
+
+	void BoxCollider::Start()
+	{
+		
 	}
 
 	void BoxCollider::Update()
@@ -55,7 +77,7 @@ namespace MimicEngine
 	// #############################################################################
 	// MeshCollider Functions:
 	// #############################################################################
-	void MeshCollider::Start()
+	void MeshCollider::Initialise()
 	{
 		std::vector<glm::vec3> vertexCache;
 
@@ -73,6 +95,11 @@ namespace MimicEngine
 			return;
 		}
 		MIMIC_LOG_WARNING("[MimicEngine::MeshCollider] Unable to initialise without ModelRenderer component attached to GameObject.");
+	}
+
+	void MeshCollider::Start()
+	{
+		
 	}
 
 	void MeshCollider::Update()

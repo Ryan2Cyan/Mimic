@@ -5,9 +5,11 @@
 
 namespace MimicEngine
 {
-	std::shared_ptr<InputHandler> InputHandler::Initialise()
+	std::shared_ptr<InputHandler> InputHandler::Initialise(bool& applicationRunning)
 	{
-		return std::make_shared<InputHandler>();
+		auto inputHandler = std::make_shared<InputHandler>();
+		inputHandler->_applicationRunning = applicationRunning;
+		return inputHandler;
 	}
 
 	bool InputHandler::IsKey(const int key)
@@ -35,6 +37,7 @@ namespace MimicEngine
 
 	void InputHandler::Update()
 	{
+		ClearTemp();
 		SDL_Event event;
 		while (SDL_PollEvent(&event))
 		{
@@ -42,7 +45,7 @@ namespace MimicEngine
 			{
 				case SDL_QUIT:
 				{
-					MimicCore::_applicationRunning = false;
+					_applicationRunning = false;
 					break;
 				}
 

@@ -8,7 +8,6 @@ namespace MimicEngine
 		auto camera = std::make_shared<Camera>();
 
 		camera->_renderCamera = MimicRender::Camera::Initialise(aspectRatio, fov, clippingPlane);
-		MimicCore::AddCamera(camera);
 		return camera;
 	}
 

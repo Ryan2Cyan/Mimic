@@ -14,60 +14,6 @@
 namespace MimicEngine
 {
 	// #############################################################################
-	// Material functions:
-	// #############################################################################
-
-
-	//// #############################################################################
-	//// basic material functions:
-	//// #############################################################################
-	//BasicMaterial::BasicMaterial()
-	//{
-	//	_shader = MimicCore::ResourceManager->LoadResource<Shader>("BasicShader.glsl");
-	//}
-
-	//void BasicMaterial::OnDraw()
-	//{
-	//	if (_shader.expired()) return;
-	//	const std::shared_ptr<Shader> shader = _shader.lock();
-	//	if (!_diffuseTexture.expired()) shader->SetTexture("u_Diffuse", _diffuseTexture.lock()->_id, 0);
-	//	if (!_specularTexture.expired()) shader->SetTexture("u_Specular", _specularTexture.lock()->_id, 1);
-	//	if (!_normalTexture.expired()) shader->SetTexture("u_Normal", _normalTexture.lock()->_id, 2);
-	//	if (!_heightTexture.expired()) shader->SetTexture("u_Height", _heightTexture.lock()->_id, 3);
-	//}
-
-	//void BasicMaterial::SetDiffuse(const std::shared_ptr<Texture>& diffuse)
-	//{
-	//	_diffuseTexture = diffuse;
-	//}
-
-	//void BasicMaterial::SetSpecular(const std::shared_ptr<Texture>& specular)
-	//{
-	//	_specularTexture = specular;
-	//}
-
-	//void BasicMaterial::SetNormal(const std::shared_ptr<Texture>& normal)
-	//{
-	//	_normalTexture = normal;
-	//}
-
-	//void BasicMaterial::SetHeight(const std::shared_ptr<Texture>& height)
-	//{
-	//	_heightTexture = height;
-	//}
-
-	//void BasicMaterial::SetTextureMap(const std::shared_ptr<Texture>& texture)
-	//{
-	//	const int type = texture->_type;
-
-	//	if(type & TextureType::MIMIC_DIFFUSE) _diffuseTexture = texture;
-	//	else if(type & TextureType::MIMIC_SPECULAR) _specularTexture = texture;
-	//	else if (type & TextureType::MIMIC_HEIGHT) _heightTexture = texture;
-	//	else if (type & TextureType::MIMIC_NORMAL) _normalTexture = texture;
-	//	else MIMIC_LOG_WARNING("[Mimic::Material] Unable to set texture as it has no value type.");
-	//}
-
-	// #############################################################################
 	// PBR Subroutine Helper Functions:
 	// #############################################################################
 	PBRSubroutineHelper::PBRSubroutineHelper(const unsigned int& uniformId, const unsigned int& autoTextureId, const unsigned int& manualTextureId)
@@ -79,12 +25,18 @@ namespace MimicEngine
 	// #############################################################################
 	// PBR Material Functions:
 	// #############################################################################
-	std::shared_ptr<PBRMaterial> PBRMaterial::Initialise()
+	std::shared_ptr<PBRMaterial> PBRMaterial::Initialise(const std::weak_ptr<GameObject>& gameObject)
 	{
-		auto pbrMaterial = std::make_shared<PBRMaterial>();
+		if (gameObject.expired())
+		{
+			MIMIC_LOG_WARNING("[MimicEngine::Material] Unable to initialise material, model renderer holds no valid reference to a GameObject.");
+			return nullptr;
+		}
 
+		auto pbrMaterial = std::make_shared<PBRMaterial>();
+		pbrMaterial->_gameObject = gameObject;
 		// Load and assign shader:
-		auto shaderEngine = MimicCore::ResourceManager->LoadResource<Shader>("PBRShader.glsl");
+		auto shaderEngine = gameObject.lock()->GetMimicCore()->_resourceManager->LoadResource<Shader>("PBRShader.glsl");
 		auto shaderRender = shaderEngine->_renderShader;
 		pbrMaterial->_shader = shaderEngine;
 
@@ -244,38 +196,44 @@ namespace MimicEngine
 		}
 
 		// Set texture units for all environment map data (used for image-based rendering):
-		localShader->SetTexture("u_IrradianceMap", MimicCore::_environmentCubeMap->GetIrradianceId(), 4, MimicRender::Texture::MIMIC_CUBEMAP_TEXTURE);
-		localShader->SetTexture("u_PrefilterMap", MimicCore::_environmentCubeMap->GetPreFilteredId(), 5, MimicRender::Texture::MIMIC_CUBEMAP_TEXTURE);
-		localShader->SetTexture("u_BRDFLookupTexture", MimicCore::_environmentCubeMap->GetBRDFId(), 6, MimicRender::Texture::MIMIC_2D_TEXTURE);
+		if (auto environmentMap = _gameObject.lock()->GetMimicCore()->_environmentCubeMap)
+		{
+			localShader->SetTexture("u_IrradianceMap", environmentMap->GetIrradianceId(), 4, MimicRender::Texture::MIMIC_CUBEMAP_TEXTURE);
+			localShader->SetTexture("u_PrefilterMap", environmentMap->GetPreFilteredId(), 5, MimicRender::Texture::MIMIC_CUBEMAP_TEXTURE);
+			localShader->SetTexture("u_BRDFLookupTexture", environmentMap->GetBRDFId(), 6, MimicRender::Texture::MIMIC_2D_TEXTURE);
+		}
 		 
-		// Send all subroutine selection data to the GPU, telling the shader which subroutines to query:
+		// Send all subroutine selection data to the GPU, telling the shader which subroutines to query.
 		glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, _subroutineIndices.size(), _subroutineIndices.data());
 
-		// Set remaining PBR literal parameters that are not tied to texture maps:
+		// Set remaining PBR literal parameters that are not tied to texture maps.
 		localShader->SetVector3("u_Emissive", _emissive);
 		localShader->SetFloat("u_Alpha", _alpha);
 		localShader->SetFloat("u_AmbientOcclusion", _ambientOcclusion);
 
-		// Set uniforms for each direct light:
-		int index = 0;
-		for (auto directLight : MimicCore::_directLights)
+		// Set uniforms for each direct light.
+		auto directLights = _gameObject.lock()->GetMimicCore()->_directLights;
+		if (!directLights.empty())
 		{
-			// Assign a new direct light into an array within the PBR shader, along with the
-			// light's attributes (direction & colour):
-			const std::string lightUniformId = "u_DirectLights[" + std::to_string(index) + "]";
-			localShader->SetVector3((lightUniformId + ".direction").c_str(), glm::normalize(-directLight->GetDirection()));
-			localShader->SetVector4((lightUniformId + ".colour").c_str(), glm::vec4(directLight->GetColour(), _alpha));
+			int index = 0;
+			for (auto directLight : directLights)
+			{
+				// Assign a new direct light into an array within the PBR shader, along with the
+				// light's attributes (direction & colour):
+				const std::string lightUniformId = "u_DirectLights[" + std::to_string(index) + "]";
+				localShader->SetVector3((lightUniformId + ".direction").c_str(), glm::normalize(-directLight->GetDirection()));
+				localShader->SetVector4((lightUniformId + ".colour").c_str(), glm::vec4(directLight->GetColour(), _alpha));
 
-			// Assign depth map for this direct light:
-			const std::string currentShadowMap = "u_DirectShadowMaps[" + std::to_string(index) + "]";
-			localShader->SetTexture(currentShadowMap.c_str(), directLight->_renderDirectLight->GetDepthMapTextureId(), 7, MimicRender::Texture::MIMIC_2D_TEXTURE);
+				// Assign depth map for this direct light:
+				const std::string currentShadowMap = "u_DirectShadowMaps[" + std::to_string(index) + "]";
+				localShader->SetTexture(currentShadowMap.c_str(), directLight->_renderDirectLight->GetDepthMapTextureId(), 7, MimicRender::Texture::MIMIC_2D_TEXTURE);
 
-			const std::string currentLightMatrix = "u_DirectLightMatrices[" + std::to_string(index) + "]";
-			localShader->SetMat4(currentLightMatrix.c_str(), directLight->_renderDirectLight->GetLightMatrix());
-			index++;
+				const std::string currentLightMatrix = "u_DirectLightMatrices[" + std::to_string(index) + "]";
+				localShader->SetMat4(currentLightMatrix.c_str(), directLight->_renderDirectLight->GetLightMatrix());
+				index++;
+			}
+			localShader->SetInt("u_DirectLightsCount", directLights.size());
 		}
-		localShader->SetInt("u_DirectLightsCount", MimicCore::_directLights.size());
-
 		//// Set uniforms for each point light:
 		//const std::vector<std::shared_ptr<PointLight>> pointLights = MimicCore::_pointLights;
 		//for (int i = 0; i < pointLights.size(); i++)
@@ -291,27 +249,4 @@ namespace MimicEngine
 		//}
 		//localShader->SetInt("u_PointLightsCount", pointLights.size());
 	}
-
-	//// #############################################################################
-	//// cubemap material functions:
-	//// #############################################################################
-	//CubeMapMaterial::CubeMapMaterial()
-	//{
-
-	//}
-
-	//void CubeMapMaterial::SetSourceTexture(const std::shared_ptr<Texture>& texture)
-	//{
-	//	if (texture == nullptr)
-	//	{
-	//		MIMIC_LOG_WARNING("[Mimic::Material] Unable to set unitialised texture.");
-	//		return;
-	//	}
-	//	_sourceTexture = texture;
-	//}
-
-	//void CubeMapMaterial::OnDraw()
-	//{
-
-	//}
 }

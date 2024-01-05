@@ -8,7 +8,6 @@ namespace MimicEngine
 		std::shared_ptr<DirectLight> directLight = std::make_shared<DirectLight>();
 
 		directLight->_renderDirectLight = MimicRender::DirectLight::Initialise(position, direction, colour);
-		MimicCore::AddDirectLight(directLight);
 
 		return directLight;
 	}

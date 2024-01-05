@@ -9,17 +9,13 @@ namespace MimicEngine
 	// #############################################################################
 	struct Collider
 	{
-		void SetOffset(const glm::vec3& offset)
-		{
-			_offset = offset;
-		}
+		void SetOffset(const glm::vec3& offset);
+		void SetPreviousPosition(const glm::vec3& prevPos);
 
-		glm::vec3 GetOffset() const
-		{
-			return _offset;
-		}
+		glm::vec3 GetOffset() const;
 
 	protected:
+		glm::vec3 _previousPosition = glm::vec3(0.0f);
 		glm::vec3 _offset = glm::vec3(0.0f);
 	};
 
@@ -28,6 +24,7 @@ namespace MimicEngine
 	// #############################################################################
 	struct BoxCollider : Collider, Component
 	{
+		void Initialise() override;
 		void Start() override;
 		void Update() override;
 
@@ -55,6 +52,7 @@ namespace MimicEngine
 	// #############################################################################
 	struct MeshCollider : Collider, Component
 	{
+		void Initialise() override;
 		void Start() override;
 		void Update() override;
 

@@ -36,31 +36,31 @@ namespace MimicEngine
 		std::weak_ptr<GameObject> _gameObject;
 	};
 
-	// #############################################################################
-	// Blinn-Phong Material stuct:
-	// #############################################################################
-	struct BlinnPhongMaterial : Material
-	{	
-		static std::shared_ptr<BlinnPhongMaterial> Initialise();
-		void SetTextureMap(const std::shared_ptr<Texture>& texture, const MimicRender::TextureType& textureMapType) override;
+	//// #############################################################################
+	//// Blinn-Phong Material stuct:
+	//// #############################################################################
+	//struct BlinnPhongMaterial : Material
+	//{	
+	//	static std::shared_ptr<BlinnPhongMaterial> Initialise();
+	//	void SetTextureMap(const std::shared_ptr<Texture>& texture, const MimicRender::TextureType& textureMapType) override;
 
-		// Blinn-Phong parameter setters:
-		void SetObjectColour(const glm::vec3& colour);
-		void SetAmbientStrength(const float& ambientStrength);
-		void SetSpecularStrength(const float& specularStrength);
-		void SetShininess(const float& shininess);
+	//	// Blinn-Phong parameter setters:
+	//	void SetObjectColour(const glm::vec3& colour);
+	//	void SetAmbientStrength(const float& ambientStrength);
+	//	void SetSpecularStrength(const float& specularStrength);
+	//	void SetShininess(const float& shininess);
 
-	protected:
-		friend struct ModelRenderer;
+	//protected:
+	//	friend struct ModelRenderer;
 
-	private:
-		void OnDraw() override;
+	//private:
+	//	void OnDraw() override;
 
-		glm::vec3 _objectColour;
-		float _ambientStrength;
-		float _specularStrength;
-		float _shininess;
-	};
+	//	glm::vec3 _objectColour;
+	//	float _ambientStrength;
+	//	float _specularStrength;
+	//	float _shininess;
+	//};
 
 	// #############################################################################
 	// PBR Material stuct:
@@ -80,7 +80,6 @@ namespace MimicEngine
 
 	struct PBRMaterial : Material
 	{
-		static std::shared_ptr<PBRMaterial> Initialise();
 		void SetTextureMap(const std::shared_ptr<Texture>& texture, const MimicRender::TextureType& textureMapType) override;
 
 		// PBR Literal parameter setters, these will be used if a corresponding texture map is
@@ -95,10 +94,11 @@ namespace MimicEngine
 		// Set by the user, if true will not load textures, using literal pbr params instead:
 		bool NoTextureMode;
 
-	protected:
-		friend struct ModelRenderer;
-
 	private:
+
+		friend struct ModelRenderer;
+		static std::shared_ptr<PBRMaterial> Initialise(const std::weak_ptr<GameObject>& gameObject);
+
 		void OnDraw() override;
 
 		std::vector<unsigned int> _subroutineIndices;

@@ -10,10 +10,6 @@ namespace MimicEngine
 		auto newGameObject = std::make_shared<GameObject>();
 		newGameObject->_self = newGameObject;
 
-		// Cache game object in a list at the top of the hierarchy:
-		MimicCore::AddGameObject(newGameObject);
-		auto refCheck = newGameObject->_self.lock();
-
 		// Assign Transform component variables:
 		newGameObject->_modelMatrix = glm::mat4(1.0f);
 		newGameObject->Transform(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(1.0f));
@@ -26,9 +22,6 @@ namespace MimicEngine
 	{
 		auto newGameObject = std::make_shared<GameObject>();
 		newGameObject->_self = newGameObject;
-
-		// Cache game object in a list at the top of the hierarchy:
-		MimicCore::AddGameObject(newGameObject);
 
 		// Assign Transform component variables:
 		newGameObject->Transform(position, rotation, scale);

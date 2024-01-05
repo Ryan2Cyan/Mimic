@@ -10,8 +10,6 @@ namespace MimicEngine
 	// #############################################################################
 	struct InputHandler
 	{
-		static std::shared_ptr<InputHandler> Initialise();
-
 		/// <summary> Return true if key is pressed or held, otherwise false. </summary>
 		bool IsKey(const int key);
 
@@ -24,11 +22,14 @@ namespace MimicEngine
 	private:
 		friend struct MimicCore;
 
+		static std::shared_ptr<InputHandler> Initialise(bool& applicationRunning);
+
 		void Update();
 		void ClearTemp();
 
 		std::list<int> _keys;
 		std::vector<int> _keysPressed;
 		std::vector<int> _keysReleased;
+		bool _applicationRunning;
 	};
 }

@@ -17,6 +17,8 @@ namespace MimicEngine
 
 	protected:
 		friend struct GameObject;
+		
+		virtual void Initialise() = 0;
 		virtual void Start() = 0;
 		virtual void Update() = 0;
 

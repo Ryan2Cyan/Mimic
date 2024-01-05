@@ -12,9 +12,9 @@
 
 namespace MimicEngine
 {
-	std::shared_ptr<ModelRenderer> ModelRenderer::Initialise()
+	void ModelRenderer::Initialise()
 	{
-		return std::make_shared<ModelRenderer>();
+		_material = PBRMaterial::Initialise(_gameObject);
 	}
 
 	void ModelRenderer::SetModel(const std::shared_ptr<Model>& model)
@@ -35,19 +35,20 @@ namespace MimicEngine
 	void ModelRenderer::Update() 
 	{
 		if (!_initialised) return;
-		// NOTE: Temporarily updating model to game object's model matrix:
-		auto gameObject = GetGameObject();
+		const auto gameObject = GetGameObject();
+
+		// Temporarily updating model to game object's model matrix.
 		_model->_renderModel->UpdateModelMatrix(gameObject->Position, gameObject->Rotation, gameObject->Scale);
 
-		// Add this model to the draw queue:
+		// Using both a valid model and material, create a render object, of which is passed into MimicCore's
+		// primary renderer to be drawn.
 		for (auto mesh : _model->_renderModel->GetMeshes())
 		{
-			MimicCore::_renderer->AddToDrawQueue(
-				MimicRender::RenderObject::Initialise(
+			gameObject->GetMimicCore()->_renderer->AddToDrawQueue(MimicRender::RenderObject::Initialise(
 					mesh->GetVertexArrayId(),
 					mesh->GetDataSize(),
 					_material->_shader.lock()->_renderShader,
-					GetGameObject()->_modelMatrix,
+					gameObject->_modelMatrix,
 					[&mat = _material]() { mat->OnDraw(); }
 				)
 			);

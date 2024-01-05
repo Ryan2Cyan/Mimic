@@ -15,36 +15,34 @@ using namespace MimicPhysics;
 int main(int argc, char* argv[])
 {
 	{
-		// Initialise core:
+		// Initialise core.
 		std::shared_ptr<MimicEngine::MimicCore> mimicCore = MimicEngine::MimicCore::Initialise();
 
-		// Initialise camera:
-		std::shared_ptr<MimicEngine::Camera> camera = MimicEngine::Camera::Initialise(MimicEngine::MimicCore::GetCurrentAspect(), 45.0f);
+		// Initialise camera [aspect ratio, and fov].
+		std::shared_ptr<MimicEngine::Camera> camera = mimicCore->AddCamera(mimicCore->GetWindow()->GetAspectRatio(), 45.0f);
 		camera->SetPosition(glm::vec3(0.0f, 0.54f, 10.0f));
 		camera->SetOrientation(glm::vec3(0.0, 0.0f, -1.0f));
 
-		// Initialise direct lights:
+		// Initialise vector of direct lights [position, direction, & colour].
 		std::vector<std::shared_ptr<MimicEngine::DirectLight>> directLights =
 		{
-			MimicEngine::DirectLight::Initialise(glm::vec3(0.0f, 5.0f, -14.0f), glm::vec3(-0.25f), glm::vec3(1.0))
+			mimicCore->AddDirectLight(glm::vec3(0.0f, 5.0f, -14.0f), glm::vec3(-0.25f), glm::vec3(1.0))
 		};
 
-		// Initialise scene models:
-		std::shared_ptr<GameObject> cube0 = GameObject::Initialise(glm::vec3(3.8f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f));
+		// Initialise scene models.
+		std::shared_ptr<GameObject> cube0 = mimicCore->AddGameObject(glm::vec3(3.8f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f));
 		auto cube0ModelRenderer = cube0->AddComponent<ModelRenderer>();
-		auto cube0PBRMaterial = PBRMaterial::Initialise();
+		auto cube0PBRMaterial = cube0ModelRenderer->GetMaterial<PBRMaterial>();
 		cube0PBRMaterial->SetAlbedo(glm::vec3(1.0f, 0.0f, 0.0f));
-		cube0ModelRenderer->SetMaterial<PBRMaterial>(cube0PBRMaterial);
-		cube0ModelRenderer->SetModel(MimicCore::ResourceManager->LoadResource<MimicEngine::Model>("sphere.obj"));
+		cube0ModelRenderer->SetModel(mimicCore->GetResourceManager()->LoadResource<MimicEngine::Model>("sphere.obj"));
 		auto cube0MeshCollider = cube0->AddComponent<MimicEngine::MeshCollider>();
 		// cube0BoxCollider->SetSize(glm::vec3(1.3f));
 
-		std::shared_ptr<GameObject> cube1 = GameObject::Initialise(glm::vec3(2.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f));
+		std::shared_ptr<GameObject> cube1 = mimicCore->AddGameObject(glm::vec3(2.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f));
 		auto cube1ModelRenderer = cube1->AddComponent<ModelRenderer>();
-		auto cube1PBRMaterial = PBRMaterial::Initialise();
+		auto cube1PBRMaterial = cube1ModelRenderer->GetMaterial<PBRMaterial>();
 		cube1PBRMaterial->SetAlbedo(glm::vec3(0.0f, 0.0f, 1.0f));
-		cube1ModelRenderer->SetMaterial<PBRMaterial>(cube1PBRMaterial);
-		cube1ModelRenderer->SetModel(MimicCore::ResourceManager->LoadResource<MimicEngine::Model>("cube.obj"));
+		cube1ModelRenderer->SetModel(mimicCore->GetResourceManager()->LoadResource<MimicEngine::Model>("cube.obj"));
 		auto cube1BoxCollider = cube1->AddComponent<MimicEngine::BoxCollider>();
 		cube1BoxCollider->SetSize(glm::vec3(1.0f));
 
@@ -60,7 +58,7 @@ int main(int argc, char* argv[])
 		// Game loop:
 		// #############################################################################
 		bool applicationRunning = true;
-		while (MimicCore::IsApplicationRunning())
+		while (mimicCore->IsApplicationRunning())
 		{
 			// #############################################################################
 			// Update scene:
@@ -68,33 +66,29 @@ int main(int argc, char* argv[])
 			// mimicCore->FixedUpdate();
 			mimicCore->Update();
 
-			// User Input:
+			// User-defined keyboard input. The MimicCore's input handler can check if any particular
+			// key is down, pressed, or released each frame.
 			auto camPos = camera->GetPosition();
 			auto camSpeed = 10.0f;
-			if (MimicCore::InputHandler->IsKey(SDLK_d)) camPos.x += (camSpeed * DeltaTime());
-			if (MimicCore::InputHandler->IsKey(SDLK_a)) camPos.x -= (camSpeed * DeltaTime());
-			if (MimicCore::InputHandler->IsKey(SDLK_w)) camPos.z -= (camSpeed * DeltaTime());
-			if (MimicCore::InputHandler->IsKey(SDLK_s)) camPos.z += (camSpeed * DeltaTime());
-			if (MimicCore::InputHandler->IsKey(SDLK_q)) camPos.y += (camSpeed * DeltaTime());
-			if (MimicCore::InputHandler->IsKey(SDLK_e)) camPos.y -= (camSpeed * DeltaTime());
+			const auto inputHandler = mimicCore->GetInputHandler();
+			if (inputHandler->IsKey(SDLK_d)) camPos.x += (camSpeed * DeltaTime());
+			if (inputHandler->IsKey(SDLK_a)) camPos.x -= (camSpeed * DeltaTime());
+			if (inputHandler->IsKey(SDLK_w)) camPos.z -= (camSpeed * DeltaTime());
+			if (inputHandler->IsKey(SDLK_s)) camPos.z += (camSpeed * DeltaTime());
+			if (inputHandler->IsKey(SDLK_q)) camPos.y += (camSpeed * DeltaTime());
+			if (inputHandler->IsKey(SDLK_e)) camPos.y -= (camSpeed * DeltaTime());
 			camera->SetPosition(camPos);
 
-			if (MimicCore::InputHandler->IsKey(SDLK_f)) cube0->Position.x -= (camSpeed * DeltaTime());
-			if (MimicCore::InputHandler->IsKey(SDLK_h)) cube0->Position.x += (camSpeed * DeltaTime());
-			if (MimicCore::InputHandler->IsKey(SDLK_t)) cube0->Position.y += (camSpeed * DeltaTime());
-			if (MimicCore::InputHandler->IsKey(SDLK_g)) cube0->Position.y -= (camSpeed * DeltaTime());
-			if (MimicCore::InputHandler->IsKey(SDLK_r)) cube0->Position.z += (camSpeed * DeltaTime());
-			if (MimicCore::InputHandler->IsKey(SDLK_y)) cube0->Position.z -= (camSpeed * DeltaTime());
+			if (inputHandler->IsKey(SDLK_f)) cube0->Position.x -= (camSpeed * DeltaTime());
+			if (inputHandler->IsKey(SDLK_h)) cube0->Position.x += (camSpeed * DeltaTime());
+			if (inputHandler->IsKey(SDLK_t)) cube0->Position.y += (camSpeed * DeltaTime());
+			if (inputHandler->IsKey(SDLK_g)) cube0->Position.y -= (camSpeed * DeltaTime());
+			if (inputHandler->IsKey(SDLK_r)) cube0->Position.z += (camSpeed * DeltaTime());
+			if (inputHandler->IsKey(SDLK_y)) cube0->Position.z -= (camSpeed * DeltaTime());
 
 			// Collisions:
-			if(cube0MeshCollider->IsColliding(cube1BoxCollider))
-			{
-				cube0PBRMaterial->SetAlbedo(glm::vec3(1.0f, 0.0f, 0.0f));
-			}
-			else
-			{
-				cube0PBRMaterial->SetAlbedo(glm::vec3(0.2f, 0.4f, 0.9f));
-			}
+			if(cube0MeshCollider->IsColliding(cube1BoxCollider)) cube0PBRMaterial->SetAlbedo(glm::vec3(1.0f, 0.0f, 0.0f));
+			else cube0PBRMaterial->SetAlbedo(glm::vec3(0.2f, 0.4f, 0.9f));
 
 			// #############################################################################
 			// Render scene:
@@ -225,7 +219,7 @@ int main(int argc, char* argv[])
 //
 //			ImGui::Render();
 //			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-			MimicCore::Window->SwapWindow();
+			mimicCore->GetWindow()->SwapWindow();
 		}
 	}
 }
