@@ -20,11 +20,6 @@ namespace MimicEngine
 		_offset = offset;
 	}
 
-	void Collider::SetPreviousPosition(const glm::vec3& prevPos)
-	{
-		_previousPosition = prevPos;
-	}
-
 	glm::vec3 Collider::GetOffset() const
 	{
 		return _offset;
@@ -77,6 +72,96 @@ namespace MimicEngine
 	bool BoxCollider::IsColliding(const std::shared_ptr<MeshCollider> collider)
 	{
 		return _physicsBoxCollider->IsColliding(collider->_physicsMeshCollider);
+	}
+
+	glm::vec3 BoxCollider::GetCollisionResponse(const std::shared_ptr<BoxCollider> collider)
+	{
+		const auto colliding = [&]() { return IsColliding(collider); };
+
+		auto amount = 0.1f;
+		const auto step = 0.1f;
+
+		const auto addToPosition = [&col = _physicsBoxCollider](auto& val) { col->SetPosition(col->GetPosition() + val); };
+
+
+		while (true)
+		{
+			if (!colliding()) break;
+
+			// X-axis:
+			addToPosition(glm::vec3(amount, 0.0f, 0.0f));
+			if (!colliding()) break;
+			addToPosition(glm::vec3(-amount, 0.0f, 0.0f));
+			addToPosition(glm::vec3(-amount, 0.0f, 0.0f));
+			if (!colliding()) break;
+			addToPosition(glm::vec3(amount, 0.0f, 0.0f));
+
+			// Z-axis:
+			addToPosition(glm::vec3(0.0f, 0.0f, amount));
+			if (!colliding()) break;
+			addToPosition(glm::vec3(0.0f, 0.0f, -amount));
+			addToPosition(glm::vec3(0.0f, 0.0f, -amount));
+			if (!colliding()) break;
+			addToPosition(glm::vec3(0.0f, 0.0f, amount));
+
+			// Y-axis:
+			addToPosition(glm::vec3(0.0f, amount, 0.0f));
+			if (!colliding()) break;
+			addToPosition(glm::vec3(0.0f, -amount, 0.0f));
+			addToPosition(glm::vec3(0.0f, -amount, 0.0f));
+			if (!colliding()) break;
+			addToPosition(glm::vec3(0.0f, amount, 0.0f));
+
+			// Increment the amount by the step to increase the distance we
+			// move away from the collided object:
+			amount += step;
+		}
+		return _physicsBoxCollider->GetPosition();
+	}
+
+	glm::vec3 BoxCollider::GetCollisionResponse(const std::shared_ptr<MeshCollider> collider)
+	{
+		const auto colliding = [&]() { return IsColliding(collider); };
+
+		auto amount = 0.1f;
+		const auto step = 0.1f;
+
+		const auto addToPosition = [&col = _physicsBoxCollider](auto& val) { col->SetPosition(col->GetPosition() + val); };
+
+
+		while (true)
+		{
+			if (!colliding()) break;
+
+			// X-axis:
+			addToPosition(glm::vec3(amount, 0.0f, 0.0f));
+			if (!colliding()) break;
+			addToPosition(glm::vec3(-amount, 0.0f, 0.0f));
+			addToPosition(glm::vec3(-amount, 0.0f, 0.0f));
+			if (!colliding()) break;
+			addToPosition(glm::vec3(amount, 0.0f, 0.0f));
+
+			// Z-axis:
+			addToPosition(glm::vec3(0.0f, 0.0f, amount));
+			if (!colliding()) break;
+			addToPosition(glm::vec3(0.0f, 0.0f, -amount));
+			addToPosition(glm::vec3(0.0f, 0.0f, -amount));
+			if (!colliding()) break;
+			addToPosition(glm::vec3(0.0f, 0.0f, amount));
+
+			// Y-axis:
+			addToPosition(glm::vec3(0.0f, amount, 0.0f));
+			if (!colliding()) break;
+			addToPosition(glm::vec3(0.0f, -amount, 0.0f));
+			addToPosition(glm::vec3(0.0f, -amount, 0.0f));
+			if (!colliding()) break;
+			addToPosition(glm::vec3(0.0f, amount, 0.0f));
+
+			// Increment the amount by the step to increase the distance we
+			// move away from the collided object:
+			amount += step;
+		}
+		return _physicsBoxCollider->GetPosition();
 	}
 
 	// #############################################################################
@@ -142,15 +227,93 @@ namespace MimicEngine
 		return _physicsMeshCollider->IsColliding(collider->_physicsMeshCollider);
 	}
 
-	/*bool MeshCollider::IsColliding(const std::shared_ptr<MeshCollider> collider)
+	glm::vec3 MeshCollider::GetCollisionResponse(const std::shared_ptr<BoxCollider> collider)
 	{
-		if (!_physicsMeshCollider->IsInitialised()) return false;
-		
-		return _physicsMeshCollider->IsColliding(collider->_physicsMeshCollider);
-	}*/
+		const auto colliding = [&]() { return IsColliding(collider); };
 
-	/*glm::vec3 MeshCollider::GetCollisionResponse(const glm::vec3& position, const glm::vec3 size)
+		auto amount = 0.1f;
+		const auto step = 0.1f;
+
+		const auto addToPosition = [&col = _physicsMeshCollider](auto& val) { col->SetPosition(col->GetPosition() + val); };
+		
+
+		while (true)
+		{
+			if (!colliding()) break;
+			
+			// X-axis:
+			addToPosition(glm::vec3(amount, 0.0f, 0.0f));
+			if (!colliding()) break;
+			addToPosition(glm::vec3(-amount, 0.0f, 0.0f));
+			addToPosition(glm::vec3(-amount, 0.0f, 0.0f));
+			if (!colliding()) break;
+			addToPosition(glm::vec3(amount, 0.0f, 0.0f));
+
+			// Z-axis:
+			addToPosition(glm::vec3(0.0f, 0.0f, amount));
+			if (!colliding()) break;
+			addToPosition(glm::vec3(0.0f, 0.0f, -amount));
+			addToPosition(glm::vec3(0.0f, 0.0f, -amount));
+			if (!colliding()) break;
+			addToPosition(glm::vec3(0.0f, 0.0f, amount));
+
+			// Y-axis:
+			addToPosition(glm::vec3(0.0f, amount, 0.0f));
+			if (!colliding()) break;
+			addToPosition(glm::vec3(0.0f, -amount, 0.0f));
+			addToPosition(glm::vec3(0.0f, -amount, 0.0f));
+			if (!colliding()) break;
+			addToPosition(glm::vec3(0.0f, amount, 0.0f));
+
+			// Increment the amount by the step to increase the distance we
+			// move away from the collided object:
+			amount += step;
+		}
+		return _physicsMeshCollider->GetPosition();
+	}
+
+	glm::vec3 MeshCollider::GetCollisionResponse(const std::shared_ptr<MeshCollider> collider)
 	{
-		return glm::vec3(0.0f);
-	}*/
+		const auto colliding = [&]() { return IsColliding(collider); };
+
+		auto amount = 0.1f;
+		const auto step = 0.1f;
+
+		const auto addToPosition = [&col = _physicsMeshCollider](auto& val) { col->SetPosition(col->GetPosition() + val); };
+
+
+		while (true)
+		{
+			if (!colliding()) break;
+
+			// X-axis:
+			addToPosition(glm::vec3(amount, 0.0f, 0.0f));
+			if (!colliding()) break;
+			addToPosition(glm::vec3(-amount, 0.0f, 0.0f));
+			addToPosition(glm::vec3(-amount, 0.0f, 0.0f));
+			if (!colliding()) break;
+			addToPosition(glm::vec3(amount, 0.0f, 0.0f));
+
+			// Z-axis:
+			addToPosition(glm::vec3(0.0f, 0.0f, amount));
+			if (!colliding()) break;
+			addToPosition(glm::vec3(0.0f, 0.0f, -amount));
+			addToPosition(glm::vec3(0.0f, 0.0f, -amount));
+			if (!colliding()) break;
+			addToPosition(glm::vec3(0.0f, 0.0f, amount));
+
+			// Y-axis:
+			addToPosition(glm::vec3(0.0f, amount, 0.0f));
+			if (!colliding()) break;
+			addToPosition(glm::vec3(0.0f, -amount, 0.0f));
+			addToPosition(glm::vec3(0.0f, -amount, 0.0f));
+			if (!colliding()) break;
+			addToPosition(glm::vec3(0.0f, amount, 0.0f));
+
+			// Increment the amount by the step to increase the distance we
+			// move away from the collided object:
+			amount += step;
+		}
+		return _physicsMeshCollider->GetPosition();
+	}
 }

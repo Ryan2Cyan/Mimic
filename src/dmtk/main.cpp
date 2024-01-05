@@ -30,7 +30,7 @@ int main(int argc, char* argv[])
 		};
 
 		// Initialise scene models.
-		std::shared_ptr<GameObject> cube0 = mimicCore->AddGameObject(glm::vec3(3.8f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f));
+		std::shared_ptr<GameObject> cube0 = mimicCore->AddGameObject(glm::vec3(5.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f));
 		auto cube0ModelRenderer = cube0->AddComponent<ModelRenderer>();
 		auto cube0PBRMaterial = cube0ModelRenderer->GetMaterial<PBRMaterial>();
 		auto cube0Rigidbody = cube0->AddComponent<Rigidbody>();

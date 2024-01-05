@@ -10,12 +10,10 @@ namespace MimicEngine
 	struct Collider
 	{
 		void SetOffset(const glm::vec3& offset);
-		void SetPreviousPosition(const glm::vec3& prevPos);
 
 		glm::vec3 GetOffset() const;
 
 	protected:
-		glm::vec3 _previousPosition = glm::vec3(0.0f);
 		glm::vec3 _offset = glm::vec3(0.0f);
 	};
 
@@ -37,9 +35,10 @@ namespace MimicEngine
 		bool IsColliding(const std::shared_ptr<BoxCollider> collider, const bool& aligned = false);
 		bool IsColliding(const std::shared_ptr<MeshCollider> collider);
 
-		/*/// <summary> Returns a translation vector 3 in response to a collision, to resolve
+		/// <summary> Returns a translation vector 3 in response to a collision, to resolve
 		/// (not colliding anymore) the collision. </summary>
-		glm::vec3 GetCollisionResponse(const glm::vec3& position, const glm::vec3 size);*/
+		glm::vec3 GetCollisionResponse(const std::shared_ptr<BoxCollider> collider);
+		glm::vec3 GetCollisionResponse(const std::shared_ptr<MeshCollider> collider);
 
 	private:
 		friend struct MeshCollider;
@@ -64,9 +63,10 @@ namespace MimicEngine
 		bool IsColliding(const std::shared_ptr<BoxCollider> collider);
 		bool IsColliding(const std::shared_ptr<MeshCollider> collider);
 
-		/*/// <summary> Returns a translation vector 3 in response to a collision, to resolve
+		/// <summary> Returns a translation vector 3 in response to a collision, to resolve
 		/// (not colliding anymore) the collision. </summary>
-		glm::vec3 GetCollisionResponse(const glm::vec3& position, const glm::vec3 size);*/
+		glm::vec3 GetCollisionResponse(const std::shared_ptr<BoxCollider> collider);
+		glm::vec3 GetCollisionResponse(const std::shared_ptr<MeshCollider> collider);
 
 	private:
 		friend struct BoxCollider;

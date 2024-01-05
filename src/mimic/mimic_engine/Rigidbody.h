@@ -16,10 +16,14 @@ namespace MimicEngine
 		void Update() override;
 		void FixedUpdate() override;
 
+		void SetPreviousPosition(const glm::vec3& prevPos);
+		void ResolveCollision(const glm::vec3& response);
+
 	private:
 		friend struct MimicCore;
 
 		std::vector<BoxCollider> _boxColliders;
 		std::vector<MeshCollider> _meshColliders;
+		glm::vec3 _previousPosition;
 	};
 }
