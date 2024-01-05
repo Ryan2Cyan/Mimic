@@ -27,6 +27,7 @@ namespace MimicEngine
 		void Initialise() override;
 		void Start() override;
 		void Update() override;
+		void FixedUpdate() override;
 
 		void SetSize(const glm::vec3& size);
 		glm::vec3 GetSize() const;
@@ -55,6 +56,7 @@ namespace MimicEngine
 		void Initialise() override;
 		void Start() override;
 		void Update() override;
+		void FixedUpdate() override;
 
 		bool IsInitialised() const;
 

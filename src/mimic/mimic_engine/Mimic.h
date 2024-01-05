@@ -16,6 +16,7 @@
 #include "Light.h"
 #include "InputHandler.h"
 #include "Collider.h"
+#include "Rigidbody.h"
 
 // MimicRender translation units:
 #include <mimic_render/Light.h>

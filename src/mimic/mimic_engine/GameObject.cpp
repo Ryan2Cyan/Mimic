@@ -51,8 +51,14 @@ namespace MimicEngine
 		// Update the game object's model matrix according to its position, rotation, and scale:
 		UpdateModelMatrix();
 
-		// Update all components attached to the game object:
+		// Update all components attached to the GameObject.
 		for (std::shared_ptr<Component> component : _components) component->Update();
+	}
+
+	void GameObject::FixedUpdate()
+	{
+		// Update all components attached to the GameObject.
+		for (std::shared_ptr<Component> component : _components) component->FixedUpdate();
 	}
 
 	void GameObject::UpdateModelMatrix()

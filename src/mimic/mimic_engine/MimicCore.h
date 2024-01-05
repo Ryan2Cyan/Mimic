@@ -44,6 +44,9 @@ namespace MimicEngine
 		/// delta time. </summary>
 		void Update();
 
+		/// <summary> Called once per physics fixed time step in the game loop. Updates all physics objects. </summary>
+		void FixedUpdate();
+
 		/// <summary> Called once per frame in the game loop. Draws all objects in the scene. </summary>
 		void Draw();
 
@@ -52,6 +55,22 @@ namespace MimicEngine
 
 		/// <summary> Returns true if the application is running, false otherwise. </summary>
 		bool IsApplicationRunning();
+
+		/// <summary> Loops through all scene GameObjects and returns a vector of a found type. </summary>
+		template<typename T>
+		std::vector<std::shared_ptr<T>> Find()
+		{
+			std::vector<std::shared_ptr<T>> result;
+			for (const auto gameObject : _gameObjects)
+			{
+				for (const auto component : gameObject->_components)
+				{
+					if(std::shared_ptr<T> temp = std::dynamic_pointer_cast<T>(component)) result.push_back(temp);
+				}
+			}
+
+			return result;
+		}
 		
 		std::shared_ptr<ResourceManager> GetResourceManager() const;
 		std::shared_ptr<InputHandler> GetInputHandler() const;

@@ -86,6 +86,15 @@ namespace MimicEngine
 		for (auto camera : _cameras) camera->Update();
 	}
 
+	void MimicCore::FixedUpdate()
+	{
+		// Wait for the fixed time tick before executing.
+		if (!_environment->FixedTimeTick()) return;
+
+		// Update all scene objects.
+		for (auto gameObject : _gameObjects) gameObject->FixedUpdate();
+	}
+
 	void MimicCore::Draw()
 	{
 		// Clear depth and colour buffers, then return the viewport to the dimensions of window:

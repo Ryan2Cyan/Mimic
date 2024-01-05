@@ -45,8 +45,13 @@ namespace MimicEngine
 
 	void BoxCollider::Update()
 	{
+
+	}
+
+
+	void BoxCollider::FixedUpdate()
+	{
 		_physicsBoxCollider->SetPosition(GetGameObject()->Position);
-		_physicsBoxCollider->SetOffset(_offset);
 	}
 
 	void BoxCollider::SetSize(const glm::vec3& size)
@@ -79,11 +84,10 @@ namespace MimicEngine
 	// #############################################################################
 	void MeshCollider::Initialise()
 	{
-		std::vector<glm::vec3> vertexCache;
-
 		// If the game object has a model renderer then capture all vertices from all meshes:
 		if (auto modelRenderer = GetGameObject()->GetComponent<ModelRenderer>())
 		{
+			std::vector<glm::vec3> vertexCache;
 			auto meshes = modelRenderer->_model->_renderModel->GetMeshes();
 			for (auto mesh : meshes)
 			{
@@ -94,7 +98,6 @@ namespace MimicEngine
 			_physicsMeshCollider->SetPosition(GetGameObject()->Position);
 			return;
 		}
-		MIMIC_LOG_WARNING("[MimicEngine::MeshCollider] Unable to initialise without ModelRenderer component attached to GameObject.");
 	}
 
 	void MeshCollider::Start()
@@ -104,8 +107,24 @@ namespace MimicEngine
 
 	void MeshCollider::Update()
 	{
-		_physicsMeshCollider->SetPosition(GetGameObject()->Position);
-		_physicsMeshCollider->SetOffset(_offset);
+	
+	}
+
+	void MeshCollider::FixedUpdate()
+	{
+		// If the game object has a model renderer then capture all vertices from all meshes:
+		if (auto modelRenderer = GetGameObject()->GetComponent<ModelRenderer>())
+		{
+			std::vector<glm::vec3> vertexCache;
+			auto meshes = modelRenderer->_model->_renderModel->GetMeshes();
+			for (auto mesh : meshes)
+			{
+				const auto vertices = mesh->GetVertices();
+				for (auto vertex : vertices) vertexCache.push_back(vertex.Position);
+			}
+			_physicsMeshCollider->SetPosition(GetGameObject()->Position);
+			return;
+		}
 	}
 
 	bool MeshCollider::IsInitialised() const

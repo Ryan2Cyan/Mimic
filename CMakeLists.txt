@@ -68,6 +68,8 @@ link_directories(
     src/mimic/mimic_engine/InputHandler.h
     src/mimic/mimic_engine/Collider.cpp
     src/mimic/mimic_engine/Collider.h
+    src/mimic/mimic_engine/Rigidbody.cpp
+    src/mimic/mimic_engine/Rigidbody.h
 )
 
 # Implement Mimic utility library:

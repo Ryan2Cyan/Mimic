@@ -33,7 +33,7 @@ int main(int argc, char* argv[])
 		std::shared_ptr<GameObject> cube0 = mimicCore->AddGameObject(glm::vec3(3.8f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f));
 		auto cube0ModelRenderer = cube0->AddComponent<ModelRenderer>();
 		auto cube0PBRMaterial = cube0ModelRenderer->GetMaterial<PBRMaterial>();
-		cube0PBRMaterial->SetAlbedo(glm::vec3(1.0f, 0.0f, 0.0f));
+		auto cube0Rigidbody = cube0->AddComponent<Rigidbody>();
 		cube0ModelRenderer->SetModel(mimicCore->GetResourceManager()->LoadResource<MimicEngine::Model>("sphere.obj"));
 		auto cube0MeshCollider = cube0->AddComponent<MimicEngine::MeshCollider>();
 		// cube0BoxCollider->SetSize(glm::vec3(1.3f));
@@ -63,7 +63,7 @@ int main(int argc, char* argv[])
 			// #############################################################################
 			// Update scene:
 			// #############################################################################
-			// mimicCore->FixedUpdate();
+			mimicCore->FixedUpdate();
 			mimicCore->Update();
 
 			// User-defined keyboard input. The MimicCore's input handler can check if any particular

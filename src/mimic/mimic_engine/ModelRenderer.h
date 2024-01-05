@@ -45,9 +45,10 @@ namespace MimicEngine
 			friend struct MeshCollider;
 			friend struct GameObject; 
 
+			void Initialise() override;
 			void Start() override;
 			void Update() override;
-			void Initialise() override;
+			void FixedUpdate() override;
 
 			std::shared_ptr<Model> _model; 
 			std::shared_ptr<Material> _material;

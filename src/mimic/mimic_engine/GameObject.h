@@ -40,8 +40,6 @@ namespace MimicEngine
 				std::shared_ptr<T> componentDynCast = std::dynamic_pointer_cast<T>(component);
 				if (componentDynCast != nullptr) return componentDynCast;
 			}
-
-			MIMIC_LOG_WARNING("[GameObject] \"%\" Could not find component of specified type.", Name);
 			return nullptr;
 		}
 
@@ -68,6 +66,7 @@ namespace MimicEngine
 
 		void Start();
 		void Update();
+		void FixedUpdate();
 		void UpdateModelMatrix();
 
 		components_vector _components;

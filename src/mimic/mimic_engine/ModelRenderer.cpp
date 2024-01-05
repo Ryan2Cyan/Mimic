@@ -54,4 +54,9 @@ namespace MimicEngine
 			);
 		}
 	}
+
+	void ModelRenderer::FixedUpdate()
+	{
+
+	}
 }
