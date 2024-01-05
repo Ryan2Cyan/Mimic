@@ -20,9 +20,19 @@ namespace MimicEngine
 		_offset = offset;
 	}
 
+	void Collider::SetIsColliding(const bool& colliding)
+	{
+		_colliding = colliding;
+	}
+
 	glm::vec3 Collider::GetOffset() const
 	{
 		return _offset;
+	}
+
+	bool Collider::IsColliding() const
+	{
+		return _colliding;
 	}
 
 	// #############################################################################
@@ -163,6 +173,11 @@ namespace MimicEngine
 		}
 		return _physicsBoxCollider->GetPosition();
 	}
+
+	//void BoxCollider::OnCollisionEnter()
+	//{
+
+	//}
 
 	// #############################################################################
 	// MeshCollider Functions:
@@ -316,4 +331,9 @@ namespace MimicEngine
 		}
 		return _physicsMeshCollider->GetPosition();
 	}
+
+	//void MeshCollider::OnCollisionEnter()
+	//{
+
+	//}
 }

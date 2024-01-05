@@ -2,6 +2,7 @@
 #include "Component.h"
 #include <mimic_physics/Collider.h>
 
+#include <functional>
 namespace MimicEngine
 {
 	// #############################################################################
@@ -10,11 +11,14 @@ namespace MimicEngine
 	struct Collider
 	{
 		void SetOffset(const glm::vec3& offset);
+		void SetIsColliding(const bool& colliding);
 
 		glm::vec3 GetOffset() const;
+		bool IsColliding() const;
 
 	protected:
 		glm::vec3 _offset = glm::vec3(0.0f);
+		bool _colliding;
 	};
 
 	// #############################################################################
@@ -39,6 +43,12 @@ namespace MimicEngine
 		/// (not colliding anymore) the collision. </summary>
 		glm::vec3 GetCollisionResponse(const std::shared_ptr<BoxCollider> collider);
 		glm::vec3 GetCollisionResponse(const std::shared_ptr<MeshCollider> collider);
+
+		/// <summary> Called when a collision occurs. </summary>
+		std::function<void()> OnCollisionEnter;
+
+		/// <summary> Called when a collision has ceased. </summary>
+		std::function<void()> OnCollisionExit;
 
 	private:
 		friend struct MeshCollider;
@@ -67,6 +77,12 @@ namespace MimicEngine
 		/// (not colliding anymore) the collision. </summary>
 		glm::vec3 GetCollisionResponse(const std::shared_ptr<BoxCollider> collider);
 		glm::vec3 GetCollisionResponse(const std::shared_ptr<MeshCollider> collider);
+
+		/// <summary> Called when a collision occurs. </summary>
+		std::function<void()> OnCollisionEnter;
+
+		/// <summary> Called when a collision has ceased. </summary>
+		std::function<void()> OnCollisionExit;
 
 	private:
 		friend struct BoxCollider;

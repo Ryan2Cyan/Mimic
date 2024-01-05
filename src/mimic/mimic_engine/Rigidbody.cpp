@@ -40,9 +40,16 @@ namespace MimicEngine
 				if (boxCollider == boxIter) continue;
 				if (boxCollider->IsColliding(boxIter))
 				{
-					// Call on-collision:
+					// Box-Box collision:
 					MIMIC_DEBUG_LOG("box-box collision");
+					boxCollider->SetIsColliding(true);
+					if (boxCollider->OnCollisionEnter) boxCollider->OnCollisionEnter();
 					ResolveCollision(boxCollider->GetCollisionResponse(boxIter));
+				}
+				else
+				{
+					boxCollider->SetIsColliding(false);
+					if (boxCollider->OnCollisionExit) boxCollider->OnCollisionExit();
 				}
 			}
 
@@ -50,9 +57,16 @@ namespace MimicEngine
 			{
 				if (boxCollider->IsColliding(meshIter))
 				{
-					// Call on-collision:
+					// Box-Mesh collision:
 					MIMIC_DEBUG_LOG("box-mesh collision");
+					boxCollider->SetIsColliding(true);
+					if (boxCollider->OnCollisionEnter) boxCollider->OnCollisionEnter();
 					ResolveCollision(boxCollider->GetCollisionResponse(meshIter));
+				}
+				else
+				{
+					boxCollider->SetIsColliding(false);
+					if (boxCollider->OnCollisionExit) boxCollider->OnCollisionExit();
 				}
 			}
 		}
@@ -64,9 +78,16 @@ namespace MimicEngine
 			{
 				if (meshCollider->IsColliding(boxIter))
 				{
-					// Call on-collision:
+					// Mesh-Box collision:
 					MIMIC_DEBUG_LOG("mesh-box collision");
+					meshCollider->SetIsColliding(true);
+					if (meshCollider->OnCollisionEnter) meshCollider->OnCollisionEnter();
 					ResolveCollision(meshCollider->GetCollisionResponse(boxIter));
+				}
+				else
+				{
+					meshCollider->SetIsColliding(false);
+					if (meshCollider->OnCollisionExit) meshCollider->OnCollisionExit();
 				}
 			}
 
@@ -75,9 +96,16 @@ namespace MimicEngine
 				if (meshCollider == meshIter) continue;
 				if (meshCollider->IsColliding(meshIter))
 				{
-					// Call on-collision:
+					// Mesh-Mesh collision:
 					MIMIC_DEBUG_LOG("mesh-mesh collision");
+					meshCollider->SetIsColliding(true);
+					if (meshCollider->OnCollisionEnter) meshCollider->OnCollisionEnter();
 					ResolveCollision(meshCollider->GetCollisionResponse(meshIter));
+				}
+				else
+				{
+					meshCollider->SetIsColliding(false);
+					if (meshCollider->OnCollisionExit) meshCollider->OnCollisionExit();
 				}
 			}
 		}

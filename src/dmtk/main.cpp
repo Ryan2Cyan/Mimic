@@ -36,7 +36,8 @@ int main(int argc, char* argv[])
 		auto cube0Rigidbody = cube0->AddComponent<Rigidbody>();
 		cube0ModelRenderer->SetModel(mimicCore->GetResourceManager()->LoadResource<MimicEngine::Model>("sphere.obj"));
 		auto cube0MeshCollider = cube0->AddComponent<MimicEngine::MeshCollider>();
-		// cube0BoxCollider->SetSize(glm::vec3(1.3f));
+		cube0MeshCollider->OnCollisionEnter = [ &m = cube0PBRMaterial]() { m->SetAlbedo(glm::vec3(1.0f, 0.0f, 0.0f)); };
+		cube0MeshCollider->OnCollisionExit = [&m = cube0PBRMaterial]() { m->SetAlbedo(glm::vec3(0.0f, 0.0f, 1.0f)); };
 
 		std::shared_ptr<GameObject> cube1 = mimicCore->AddGameObject(glm::vec3(2.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f));
 		auto cube1ModelRenderer = cube1->AddComponent<ModelRenderer>();
@@ -45,6 +46,8 @@ int main(int argc, char* argv[])
 		cube1ModelRenderer->SetModel(mimicCore->GetResourceManager()->LoadResource<MimicEngine::Model>("cube.obj"));
 		auto cube1BoxCollider = cube1->AddComponent<MimicEngine::BoxCollider>();
 		cube1BoxCollider->SetSize(glm::vec3(1.0f));
+		cube1BoxCollider->OnCollisionEnter = [&m = cube1PBRMaterial]() { m->SetAlbedo(glm::vec3(1.0f, 0.0f, 0.0f)); };
+		cube1BoxCollider->OnCollisionExit = [&m = cube1PBRMaterial]() { m->SetAlbedo(glm::vec3(0.0f, 0.0f, 1.0f)); };
 
 		/*std::shared_ptr<MimicEngine::GameObject> groundGameObject = GameObject::Initialise(glm::vec3(0.0f, -1.5f, 0.0f), glm::vec3(0.0f), glm::vec3(43.45f, -0.5f, 50.0f));
 		auto groundModelRenderer = groundGameObject->AddComponent<ModelRenderer>();
@@ -85,10 +88,6 @@ int main(int argc, char* argv[])
 			if (inputHandler->IsKey(SDLK_g)) cube0->Position.y -= (camSpeed * DeltaTime());
 			if (inputHandler->IsKey(SDLK_r)) cube0->Position.z += (camSpeed * DeltaTime());
 			if (inputHandler->IsKey(SDLK_y)) cube0->Position.z -= (camSpeed * DeltaTime());
-
-			// Collisions:
-			if(cube0MeshCollider->IsColliding(cube1BoxCollider)) cube0PBRMaterial->SetAlbedo(glm::vec3(1.0f, 0.0f, 0.0f));
-			else cube0PBRMaterial->SetAlbedo(glm::vec3(0.2f, 0.4f, 0.9f));
 
 			// #############################################################################
 			// Render scene:
