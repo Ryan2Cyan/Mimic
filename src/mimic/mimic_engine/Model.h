@@ -20,6 +20,8 @@ namespace MimicEngine
     private:
         friend struct ModelRenderer;
         friend struct MeshCollider;
+        friend struct InputHandler;
+
         std::shared_ptr<MimicRender::Model> _renderModel;
     };
 }

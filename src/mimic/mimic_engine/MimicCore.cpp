@@ -94,10 +94,6 @@ namespace MimicEngine
 		_inputHandler->Update();
 		if(_inputHandler->IsKey(SDLK_ESCAPE)) _applicationRunning = false;
 
-		// Generate a ray from the camera to the current mouse position to intersect with
-		// scene objects.
-		auto intersectionRay = _inputHandler->MousePositionProject(_mainCamera);
-
 		// Re-calculate delta time for this frame.
 		_environment->CalculateDeltaTime();
 
@@ -160,7 +156,7 @@ namespace MimicEngine
 			return nullptr;
 		}
 		gameObject->_mimicCore = _self;
-		gameObject->Name = "GameObject_" + _gameObjects.size();
+		gameObject->Name = "GameObject_" + std::to_string(_gameObjects.size());
 		MIMIC_LOG_INFO("[MimicEngine::MimicCore] Added Mimic::GameObject: \"%\".", gameObject->Name);
 		_gameObjects.push_back(gameObject);
 		return gameObject;
@@ -175,7 +171,7 @@ namespace MimicEngine
 			return nullptr;
 		}
 		gameObject->_mimicCore = _self;
-		gameObject->Name = "GameObject_" + _gameObjects.size();
+		gameObject->Name = "GameObject_" + std::to_string(_gameObjects.size());
 		MIMIC_LOG_INFO("[MimicEngine::MimicCore] Added Mimic::GameObject: \"%\".", gameObject->Name);
 		_gameObjects.push_back(gameObject);
 		return gameObject;
@@ -212,7 +208,7 @@ namespace MimicEngine
 
 	std::shared_ptr<DirectLight> MimicCore::AddDirectLight(const glm::vec3& position, const glm::vec3& direction, const glm::vec3& colour)
 	{
-		auto directLight = std::shared_ptr<DirectLight>();
+		auto directLight = DirectLight::Initialise(position, direction, colour);
 		if (directLight == nullptr)
 		{
 			MIMIC_LOG_WARNING("[MimicEngine::MimicCore] Attempted to add null DirectLight to hierarchy.");

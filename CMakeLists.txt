@@ -111,7 +111,8 @@ add_library(MIMIC_RENDERER
     src/mimic/mimic_render/CubeMap.h
     src/mimic/mimic_render/ShadowMapper.cpp
     src/mimic/mimic_render/ShadowMapper.h
-
+    src/mimic/mimic_render/Triangle.cpp
+    src/mimic/mimic_render/Triangle.h
     SDKs/stbi/include/stb_image.h
 )
 

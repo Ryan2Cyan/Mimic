@@ -1,27 +1,31 @@
 #pragma once
+#include "Triangle.h"
+
 #include <vector>
 #include <memory>
 
 namespace MimicRender
 {
 	// #############################################################################
-	// mesh stuct:
+	// Mesh Struct:
 	// #############################################################################
 	struct Model;
 	struct Vertex;
 
-	typedef std::vector<Vertex> vertex_vector;
-
 	struct Mesh
 	{
-		static std::shared_ptr<Mesh> Initialise(const vertex_vector& vertices, const std::vector<unsigned int>& indices);
+		static std::shared_ptr<Mesh> Initialise(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices);
 		unsigned int GetVertexArrayId() const noexcept;
 		unsigned int GetDataSize() const noexcept;
-		vertex_vector GetVertices() const noexcept;
+		std::vector<Vertex> GetVertices() const noexcept;
+		std::vector<unsigned int> GetIndices() const noexcept;
+		std::vector<Triangle> GetTriangles() const noexcept;
 
 	private:
 		friend struct Model;
-		vertex_vector _vertices;
+		std::vector<Triangle> _triangles;
+		std::vector<Vertex> _vertices;
+		std::vector<unsigned int> _indices;
 		unsigned int _vertexArrayId = 0;
 		unsigned int _dataSize = 0;
 		bool _intialised = false;

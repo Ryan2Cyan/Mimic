@@ -12,7 +12,7 @@ namespace MimicRender
 	// #############################################################################
 	// Source: https://learnopengl.com/Model-Loading/Mesh
 
-	std::shared_ptr<Mesh> Mesh::Initialise(const vertex_vector& vertices, const std::vector<unsigned int>& indices)
+	std::shared_ptr<Mesh> Mesh::Initialise(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices)
 	{
 		std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>();
 		constexpr size_t VERTEX_SIZE = sizeof(Vertex);
@@ -49,6 +49,18 @@ namespace MimicRender
 		mesh->_intialised = true;
 		mesh->_dataSize = static_cast<unsigned int>(indices.size());
 		mesh->_vertices = vertices;
+		mesh->_indices = indices;
+
+		std::vector<Triangle> triangles;
+		for (size_t i = 0; i < indices.size(); i += 3)
+		{
+			triangles.push_back(Triangle(
+				vertices[indices[i]].Position,
+				vertices[indices[i + 1]].Position,
+				vertices[indices[i + 2]].Position
+			));
+		}
+		mesh->_triangles = triangles;
 		return mesh;
 	}
 
@@ -72,7 +84,7 @@ namespace MimicRender
 		return _dataSize;
 	}
 
-	vertex_vector Mesh::GetVertices() const noexcept
+	std::vector<Vertex> Mesh::GetVertices() const noexcept
 	{
 		if (!_intialised)
 		{
@@ -80,5 +92,25 @@ namespace MimicRender
 			return { };
 		}
 		return _vertices;
+	}
+
+	std::vector<unsigned int> Mesh::GetIndices() const noexcept
+	{
+		if (!_intialised)
+		{
+			MIMIC_LOG_WARNING("[MimicRender::Mesh] Attempting to access Mesh that is uninitialised.");
+			return { };
+		}
+		return _indices;
+	}
+
+	std::vector<Triangle> Mesh::GetTriangles() const noexcept
+	{
+		if (!_intialised)
+		{
+			MIMIC_LOG_WARNING("[MimicRender::Mesh] Attempting to access Mesh that is uninitialised.");
+			return { };
+		}
+		return _triangles;
 	}
 }

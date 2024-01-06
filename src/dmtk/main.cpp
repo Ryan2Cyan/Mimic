@@ -39,7 +39,7 @@ int main(int argc, char* argv[])
 		cube0MeshCollider->OnCollisionEnter = [ &m = cube0PBRMaterial]() { m->SetAlbedo(glm::vec3(1.0f, 0.0f, 0.0f)); };
 		cube0MeshCollider->OnCollisionExit = [&m = cube0PBRMaterial]() { m->SetAlbedo(glm::vec3(0.0f, 0.0f, 1.0f)); };
 
-		std::shared_ptr<GameObject> cube1 = mimicCore->AddGameObject(glm::vec3(2.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f));
+		std::shared_ptr<GameObject> cube1 = mimicCore->AddGameObject(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f));
 		auto cube1ModelRenderer = cube1->AddComponent<ModelRenderer>();
 		auto cube1PBRMaterial = cube1ModelRenderer->GetMaterial<PBRMaterial>();
 		cube1PBRMaterial->SetAlbedo(glm::vec3(0.0f, 0.0f, 1.0f));

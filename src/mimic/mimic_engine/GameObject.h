@@ -63,6 +63,7 @@ namespace MimicEngine
 		friend struct Material; 
 		friend struct PBRMaterial; 
 		friend struct MeshCollider;
+		friend struct InputHandler;
 
 		void Start();
 		void Update();

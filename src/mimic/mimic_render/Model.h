@@ -19,7 +19,7 @@ namespace MimicRender
 	typedef std::vector<std::shared_ptr<Mesh>> mesh_vector;
 
 	// #############################################################################
-	// model stuct:
+	// Model Struct:
 	// #############################################################################
 
 	struct Model

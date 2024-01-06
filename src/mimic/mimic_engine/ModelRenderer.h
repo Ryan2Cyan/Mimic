@@ -44,6 +44,7 @@ namespace MimicEngine
 		private:
 			friend struct MeshCollider;
 			friend struct GameObject; 
+			friend struct InputHandler;
 
 			void Initialise() override;
 			void Start() override;

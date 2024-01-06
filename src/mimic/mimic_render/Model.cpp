@@ -129,7 +129,7 @@ namespace MimicRender
 	std::shared_ptr<Mesh> Model::ProcessMesh(aiMesh* mesh, const aiScene* scene) const
 	{
 		// Convert aiMesh into Mimic::Mesh: (verties, normals, and texture coordinates):
-		vertex_vector vertices;
+		std::vector<Vertex> vertices;
 		std::vector<unsigned int> indices;
 		const bool tangents = mesh->mTangents > 0;
 
