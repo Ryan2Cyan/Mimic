@@ -38,6 +38,7 @@ namespace MimicEngine
 		mimicCore->_environmentCubeMap = MimicRender::EnvironmentCubeMap::Initialise("rural_asphalt_road_4k.hdr", mimicCore->_window->GetAspectRatio(), mimicCore->_renderer);
 		mimicCore->_shadowMapper = ShadowMapper::Initialise(glm::ivec2(4096, 4096));
 		mimicCore->_inputHandler = InputHandler::Initialise(mimicCore->_applicationRunning);
+		mimicCore->_inputHandler->_mimicCore = mimicCore;
 		
 
 		// Ensure that the core (and all of its components) are initialised:
@@ -66,6 +67,21 @@ namespace MimicEngine
 		return _window;
 	}
 
+	std::shared_ptr<Camera> MimicCore::GetMainCamera() const
+	{
+		return _mainCamera;
+	}
+
+	void MimicCore::SetMainCamera(const std::shared_ptr<Camera>& mainCamera)
+	{
+		if (mainCamera)
+		{
+			_mainCamera = mainCamera;
+			return;
+		}
+		MIMIC_LOG_WARNING("[MimicEngine::MimicCore] Unable to set MainCamera to uninitialised camera.");
+	}
+
 	void MimicCore::Start()
 	{
 		for (auto gameObject : _gameObjects) gameObject->Start();
@@ -78,11 +94,20 @@ namespace MimicEngine
 		_inputHandler->Update();
 		if(_inputHandler->IsKey(SDLK_ESCAPE)) _applicationRunning = false;
 
+		// Generate a ray from the camera to the current mouse position to intersect with
+		// scene objects.
+		auto intersectionRay = _inputHandler->MousePositionProject(_mainCamera);
+
 		// Re-calculate delta time for this frame.
 		_environment->CalculateDeltaTime();
 
 		// Update all scene objects.
-		for (auto gameObject : _gameObjects) gameObject->Update();
+		for (auto gameObject : _gameObjects)
+		{
+			// Check for intersection with cursor.
+			gameObject->Update();
+		}
+
 		for (auto camera : _cameras) camera->Update();
 	}
 
@@ -170,12 +195,13 @@ namespace MimicEngine
 			return nullptr;
 		}
 
-		// NOTE: A reference to the MimicCore may be needed later on:
-		// camera->_mimicCore = _self;
-
 		camera->Name = "Camera_" + _cameras.size();
 		MIMIC_LOG_INFO("[MimicEngine::MimicCore] Added Mimic::Camera: \"%\".", camera->Name);
 		_cameras.push_back(camera);
+
+		// If the current camera is not set, set it to the inputted camera:
+		if(!_mainCamera) _mainCamera = camera;
+
 		return camera;
 	}
 

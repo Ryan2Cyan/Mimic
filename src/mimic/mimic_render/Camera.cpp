@@ -25,4 +25,14 @@ namespace MimicRender
 		_viewMatrix = glm::lookAt(Position, Position + glm::normalize(Orientation), _up);
 		_projectionMatrix = glm::perspective(glm::radians(Fov), AspectRatio.x / AspectRatio.y, ClippingPlane.x, ClippingPlane.y);
 	}
+
+	glm::mat4 Camera::GetProjectionMatrix() const
+	{
+		return _projectionMatrix;
+	}
+
+	glm::mat4 Camera::GetViewMatrix() const
+	{
+		return _viewMatrix;
+	}
 }

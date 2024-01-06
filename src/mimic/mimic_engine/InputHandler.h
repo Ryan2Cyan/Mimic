@@ -1,12 +1,26 @@
 #pragma once
+#include "MimicCore.h"
+
 #include <vector>
 #include <list>
 #include <memory>
+#include <GLM/glm.hpp>
 
 namespace MimicEngine
 {
 	// #############################################################################
-	// Input Handler stuct:
+	// Ray Str uct:
+	// #############################################################################
+	struct Ray
+	{
+		Ray() : Origin(glm::vec3(0.0f)), Direction(glm::vec3(0.0f)) {}
+		Ray(const glm::vec3& ori, const glm::vec3& dir) : Origin(ori), Direction(dir) {}
+		glm::vec3 Origin;
+		glm::vec3 Direction;
+	};
+
+	// #############################################################################
+	// Input Handler Struct:
 	// #############################################################################
 	struct InputHandler
 	{
@@ -24,12 +38,16 @@ namespace MimicEngine
 
 		static std::shared_ptr<InputHandler> Initialise(bool& applicationRunning);
 
+		Ray MousePositionProject(const std::shared_ptr<Camera>& cam) const;
+
 		void Update();
 		void ClearTemp();
 
 		std::list<int> _keys;
 		std::vector<int> _keysPressed;
 		std::vector<int> _keysReleased;
+		glm::ivec2 _cursorPosition;
+		std::weak_ptr<MimicCore> _mimicCore;
 		bool _applicationRunning;
 	};
 }

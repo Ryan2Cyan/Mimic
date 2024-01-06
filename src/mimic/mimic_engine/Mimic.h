@@ -36,6 +36,8 @@
 #include <mimic_utility/PerformanceCounter.h>
 #include <mimic_utility/Logger.h>
 #include <mimic_utility/FileLoader.h>
+#include <mimic_utility/Math.h>
 
 // MimicPhysics translation units:
 #include <mimic_physics/Collider.h>
+#include <mimic_physics/Algorithms.h>

@@ -75,13 +75,14 @@ namespace MimicEngine
 		std::shared_ptr<ResourceManager> GetResourceManager() const;
 		std::shared_ptr<InputHandler> GetInputHandler() const;
 		std::shared_ptr<MimicRender::Window> GetWindow() const;
+		std::shared_ptr<Camera> GetMainCamera() const;
+
+		void SetMainCamera(const std::shared_ptr<Camera>& mainCamera);
 
 		std::shared_ptr<Camera> AddCamera(const glm::vec2& aspectRatio, const float& fov, const glm::vec2& clippingPlane = glm::vec2(0.1f, 100.0f));
 		std::shared_ptr<GameObject> AddGameObject();
 		std::shared_ptr<GameObject> AddGameObject(const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& scale);
 		std::shared_ptr<DirectLight> AddDirectLight(const glm::vec3& position, const glm::vec3& direction, const glm::vec3& colour);
-
-		std::shared_ptr<Camera> CurrentCamera;
 
 	private:
 		friend struct ModelRenderer; 
@@ -98,6 +99,7 @@ namespace MimicEngine
 		void RemoveDirectLight(const std::shared_ptr<DirectLight>& directLight);*/
 		// std::shared_ptr<PointLight> AddPointLight() noexcept;
 
+		std::shared_ptr<Camera> _mainCamera;
 		std::shared_ptr<Environment> _environment;
 		std::shared_ptr<ResourceManager> _resourceManager;
 		std::shared_ptr<InputHandler> _inputHandler;

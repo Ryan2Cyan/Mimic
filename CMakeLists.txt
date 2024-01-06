@@ -81,6 +81,7 @@ add_library(MIMIC_UTILITY
     src/mimic/mimic_utility/PerformanceCounter.h
     src/mimic/mimic_utility/FileLoader.cpp
     src/mimic/mimic_utility/FileLoader.h
+    src/mimic/mimic_utility/Math.h
 )
 
 # Implement Mimic render engine library:
@@ -124,6 +125,7 @@ add_library(MIMIC_PHYSICS
     src/mimic/mimic_physics/Simulation.h
     src/mimic/mimic_physics/Quaternion.cpp
     src/mimic/mimic_physics/Quaternion.h
+    src/mimic/mimic_physics/Algorithms.h
 )
 
 # Implement static IMGUI library:

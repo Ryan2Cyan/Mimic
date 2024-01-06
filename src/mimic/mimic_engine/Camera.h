@@ -19,6 +19,8 @@ namespace MimicEngine
 
 	private:
 		friend struct MimicCore;
+		friend struct InputHandler;
+
 		static std::shared_ptr<Camera> Initialise(const glm::vec2& aspectRatio, const float& fov, const glm::vec2& clippingPlane = glm::vec2(0.1f, 100.0f));
 
 		std::shared_ptr<MimicRender::Camera> _renderCamera;

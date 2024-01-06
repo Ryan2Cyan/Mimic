@@ -74,5 +74,6 @@ namespace MimicEngine
 		glm::mat4 _modelMatrix;
 		std::weak_ptr<MimicCore> _mimicCore;
 		std::weak_ptr<GameObject> _self;
+		bool _cursorIntersected;
 	};
 }
