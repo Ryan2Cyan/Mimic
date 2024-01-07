@@ -33,12 +33,13 @@ namespace MimicEngine
 		/// <summary> Return true if key was released this frame, otherwise false. </summary>
 		bool IsKeyReleased(const int key);
 
+		glm::ivec2 GetCursorPosition() const;
+		Ray MousePositionProject(const std::shared_ptr<Camera>& cam, const glm::ivec2& cursorPos) const;
+
 	private:
 		friend struct MimicCore;
 
 		static std::shared_ptr<InputHandler> Initialise(bool& applicationRunning);
-
-		Ray MousePositionProject(const std::shared_ptr<Camera>& cam) const;
 
 		void Update();
 		void ClearTemp();

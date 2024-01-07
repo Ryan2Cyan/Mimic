@@ -6,7 +6,7 @@
 
 namespace MimicPhysics
 {
-	/// <summary> Conducts a ray intersection check on three input vertices (triangle), returns true if
+	/// <summary> Tomas_Akenine-Moller: Conducts a ray intersection check on three input vertices (triangle), returns true if
 	/// the ray intersects the triangle, false otherwise. </summary>
 	static bool IntersectTriangle(const glm::vec3& ori, const glm::vec3& dir, const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2, glm::vec3& intersection = glm::vec3(0.0f))
 	{
@@ -21,7 +21,7 @@ namespace MimicPhysics
 
 		// If the determinant is near zero, the ray lies in the plane of the triangle.
 		const auto det = glm::dot(edge1, pVec);
-		if (det > -EPSILON && det < EPSILON) return 0;
+		if (det > -EPSILON && det < EPSILON) return false;
 		const auto invDet = 1.0 / det;
 
 		// Calculate the distance from v0 to the ray's origin.
@@ -29,17 +29,18 @@ namespace MimicPhysics
 
 		// Calculate the U parameter and test bounds.
 		intersection.y = glm::dot(tVec, pVec) * invDet;
-		if (intersection.y < 0.0 || intersection.y > 1.0) return 0;
+		if (intersection.y < 0.0 || intersection.y > 1.0) return false;
 
 		// Test the V parameter.
 		const auto qVec = glm::cross(tVec, edge1);
 
 		// Calculate the V parameter and test the bounds.
 		intersection.z = glm::dot(dir, qVec) * invDet;
-		if (intersection.z < 0.0 || intersection.y + intersection.z > 1.0) return 0;
+		const auto yz = intersection.y + intersection.z;
+		if (intersection.z < 0.0 || yz > 1.0) return false;
 
 		// Calculate t, ray intersects triangle.
 		intersection.x = glm::dot(edge2, qVec) * invDet;
-		return 1;
+		return true;
 	}
 }

@@ -3,6 +3,7 @@
 #include <memory>
 #include <vector>
 #include <string>
+#include <functional>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp> 
 #include <glm/gtc/type_ptr.hpp> 
@@ -48,6 +49,18 @@ namespace MimicEngine
 
 		std::shared_ptr<MimicCore> GetMimicCore() const noexcept;
 
+		/// <summary> Called when clicked on with user cursor position in alignment with the GameObject's model, selecting the object </summary>
+		std::function<void()> OnSelected;
+
+		/// <summary> Called each frame whilst the object is selected. </summary>
+		std::function<void()> WhileSelected;
+
+		/// <summary> Called when user cursor position in alignment with the GameObject's model. </summary>
+		std::function<void()> OnHighlighted;
+
+		/// <summary> Called when clicked on with user cursor position in alignment with the GameObject's model whilst already selected </summary>
+		std::function<void()> OnUnselected;
+
 		glm::vec3 Position;
 		glm::vec3 Rotation;
 		glm::vec3 Scale;
@@ -75,6 +88,6 @@ namespace MimicEngine
 		glm::mat4 _modelMatrix;
 		std::weak_ptr<MimicCore> _mimicCore;
 		std::weak_ptr<GameObject> _self;
-		bool _cursorIntersected;
+		bool _selected;
 	};
 }

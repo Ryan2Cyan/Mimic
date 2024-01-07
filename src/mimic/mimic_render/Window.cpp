@@ -25,7 +25,7 @@ namespace MimicRender
 		// Query the user monitors current display resolution and cache it:
 		SDL_DisplayMode displayMode;
 		SDL_GetCurrentDisplayMode(0, &displayMode);
-		const auto resolution = glm::ivec2(800, 600);
+		const auto resolution = glm::ivec2(displayMode.w, displayMode.h);
 		window->_aspectRatio = resolution;
 
 		// Initialise SDL window using user's monitor resolution as the aspect:

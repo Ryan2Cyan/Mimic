@@ -46,9 +46,16 @@ namespace MimicEngine
 		return false;
 	}
 
+	glm::ivec2 InputHandler::GetCursorPosition() const
+	{
+		return _cursorPosition;
+	}
+
 	void InputHandler::Update()
 	{
 		ClearTemp();
+
+		// Capture the mouse's current position on the screen.
 		SDL_Event event;
 		while (SDL_PollEvent(&event))
 		{
@@ -61,7 +68,6 @@ namespace MimicEngine
 
 				case SDL_MOUSEMOTION:
 				{
-					// Capture the mouse's current position on the screen.
 					SDL_GetMouseState(&_cursorPosition.x, &_cursorPosition.y);
 				}break;
 
@@ -70,44 +76,42 @@ namespace MimicEngine
 					// Generate a ray from the camera to the current mouse position to intersect with
 					// scene objects.
 					const auto core = _mimicCore.lock();
-					const auto ray = MousePositionProject(core->GetMainCamera());
-					auto foundIntersection = false;
+					const auto ray = MousePositionProject(core->GetMainCamera(), _cursorPosition);
 
 					// Loop through all GameObjects and check if the ray intersects with one of them.
 					for (auto gameObject : core->_gameObjects)
 					{
-						gameObject->_cursorIntersected = false;
-
+						// If you click on an already selected GameObject, unselect it:
+						if (gameObject->_selected)
+						{
+							gameObject->_selected = false;
+							if(gameObject->OnUnselected) gameObject->OnUnselected();
+							continue;
+						}
 						// Don't continue to check if an object has already been selected.
-						if (foundIntersection) continue;
 						if (const auto& model = gameObject->GetComponent<ModelRenderer>()->_model->_renderModel)
 						{
 							const auto meshes = model->GetMeshes();
 							const auto modelMat = gameObject->_modelMatrix;
-							const auto invModel = glm::inverse(modelMat);
-							const auto viewMat = core->GetMainCamera()->_renderCamera->GetViewMatrix();
-							const auto o = invModel * glm::vec4(ray.Origin, 1.0f);
-							const auto d = invModel * glm::vec4(ray.Direction, 0.0f);
 
 							// Check all mesh triangles to check with ray-triangle intersection.
+							bool foundIntersection = false;
 							for (const auto& mesh : meshes)
 							{
 								if (foundIntersection) break;
 								for (const auto& triangle : mesh->GetTriangles())
 								{
-									const auto v0 = triangle.v0;
-									const auto v1 = triangle.v1;
-									const auto v2 = triangle.v2;
+									if (foundIntersection) break;
+									const auto v0 = modelMat * glm::vec4(triangle.v0, 1.0f);
+									const auto v1 = modelMat * glm::vec4(triangle.v1, 1.0f);
+									const auto v2 = modelMat * glm::vec4(triangle.v2, 1.0f);
 
 									foundIntersection = MimicPhysics::IntersectTriangle(ray.Origin, ray.Direction, v0, v1, v2);
-									if (foundIntersection)
-									{
-										gameObject->_cursorIntersected = true;
-										MIMIC_DEBUG_LOG("Intersection Detected on: %", gameObject->Name);
-										return;
-									}
 								}
 							}
+							if (foundIntersection && !gameObject->_selected) if (gameObject->OnSelected) gameObject->OnSelected();
+							if (!foundIntersection && gameObject->_selected) if(gameObject->OnUnselected) gameObject->OnUnselected();
+							gameObject->_selected = foundIntersection;
 						}
 					}
 				}break;
@@ -141,25 +145,24 @@ namespace MimicEngine
 		_keysReleased.clear();
 	}
 
-	Ray InputHandler::MousePositionProject(const std::shared_ptr<Camera>& cam) const
+	Ray InputHandler::MousePositionProject(const std::shared_ptr<Camera>& cam, const glm::ivec2& cursorPos) const
 	{
 		if (!cam) return Ray();
 
 		// Convert resolution into normalized device coordinates.
 		const glm::vec2 res = _mimicCore.lock()->GetWindow()->GetAspectRatio();
-		auto ndc = glm::vec4(0.0f, 0.0f, MimicUtility::ConvertToRange((float)_cursorPosition.x, 0.0f, res.x, -1.0f, 1.0f),
-			MimicUtility::ConvertToRange((float)_cursorPosition.y, 0.0f, res.y, -1.0f, 1.0f));
+		auto rayClip = glm::vec4(
+			(2.0f * cursorPos.x) / res.x - 1.0f,
+			1.0f - (2.0f * cursorPos.y) / res.y,
+			-1.0f,
+			1.0f
+		);
 
-		// Pass through the projection matrix.
-		ndc = cam->_renderCamera->GetProjectionMatrix() * ndc;
-
-		// Pass through the view matrix twice, one for the near plane, one for the far. 
-		// These planes are distinguished by negating the z-axis.
-		const auto view = cam->_renderCamera->GetViewMatrix();
-		const auto near = view * glm::vec4(ndc.x, ndc.y, -1.0f, ndc.w);
-		const auto far = view * glm::vec4(ndc.x, ndc.y, 1.0f, ndc.w);
-
+		auto rayEye = glm::inverse(cam->_renderCamera->GetProjectionMatrix()) * rayClip;
+		rayEye = glm::vec4(rayEye.x, rayEye.y, -1.0, 0.0);
+		const auto rayWorld = glm::normalize(glm::inverse(cam->_renderCamera->GetViewMatrix()) * rayEye);
+	
 		// Ray's origin is the near plane, the direction is the difference between the far and near plane.
-		return Ray(near, glm::normalize(far - near));
+		return Ray(cam->GetPosition(), rayWorld);
 	}
 }

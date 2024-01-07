@@ -2,6 +2,7 @@
 
 #include <array>
 #include <algorithm>
+#include <glm/gtc/matrix_transform.hpp> 
 #include <imgui.h>
 #include <imgui_impl_opengl3.h>
 #include <imgui_impl_sdl2.h>
@@ -20,7 +21,7 @@ int main(int argc, char* argv[])
 
 		// Initialise camera [aspect ratio, and fov].
 		std::shared_ptr<MimicEngine::Camera> camera = mimicCore->AddCamera(mimicCore->GetWindow()->GetAspectRatio(), 45.0f);
-		camera->SetPosition(glm::vec3(0.0f, 0.54f, 10.0f));
+		camera->SetPosition(glm::vec3(0.0f, 0.0f, 10.0f));
 		camera->SetOrientation(glm::vec3(0.0, 0.0f, -1.0f));
 
 		// Initialise vector of direct lights [position, direction, & colour].
@@ -30,24 +31,69 @@ int main(int argc, char* argv[])
 		};
 
 		// Initialise scene models.
-		std::shared_ptr<GameObject> cube0 = mimicCore->AddGameObject(glm::vec3(5.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f));
-		auto cube0ModelRenderer = cube0->AddComponent<ModelRenderer>();
-		auto cube0PBRMaterial = cube0ModelRenderer->GetMaterial<PBRMaterial>();
-		auto cube0Rigidbody = cube0->AddComponent<Rigidbody>();
-		cube0ModelRenderer->SetModel(mimicCore->GetResourceManager()->LoadResource<MimicEngine::Model>("sphere.obj"));
-		auto cube0MeshCollider = cube0->AddComponent<MimicEngine::MeshCollider>();
-		cube0MeshCollider->OnCollisionEnter = [ &m = cube0PBRMaterial]() { m->SetAlbedo(glm::vec3(1.0f, 0.0f, 0.0f)); };
-		cube0MeshCollider->OnCollisionExit = [&m = cube0PBRMaterial]() { m->SetAlbedo(glm::vec3(0.0f, 0.0f, 1.0f)); };
+		std::shared_ptr<GameObject> sphere = mimicCore->AddGameObject(glm::vec3(0.2f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f));
+		auto sphereModelRenderer = sphere->AddComponent<ModelRenderer>();
+		auto spherePBRMaterial = sphereModelRenderer->GetMaterial<PBRMaterial>();
+		auto sphereRigidbody = sphere->AddComponent<Rigidbody>();
+		sphereModelRenderer->SetModel(mimicCore->GetResourceManager()->LoadResource<MimicEngine::Model>("sphere.obj"));
+		auto sphereMeshCollider = sphere->AddComponent<MimicEngine::MeshCollider>();
+		/*sphereMeshCollider->OnCollisionEnter = [&m = spherePBRMaterial]() { m->SetAlbedo(glm::vec3(0.0f, 0.0f, 0.0f)); };
+		sphereMeshCollider->OnCollisionExit = [&m = spherePBRMaterial]() { m->SetAlbedo(glm::vec3(0.0f, 0.0f, 1.0f)); };*/
+		sphere->OnSelected = [&m = spherePBRMaterial]() { m->SetAlbedo(glm::vec3(0.9f, 0.9f, 0.1f)); };
+		sphere->OnUnselected = [&m = spherePBRMaterial]() { m->SetAlbedo(glm::vec3(0.0f, 0.0f, 1.0f)); };
+		sphere->WhileSelected = [&]()
+		{
 
-		std::shared_ptr<GameObject> cube1 = mimicCore->AddGameObject(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f));
-		auto cube1ModelRenderer = cube1->AddComponent<ModelRenderer>();
-		auto cube1PBRMaterial = cube1ModelRenderer->GetMaterial<PBRMaterial>();
-		cube1PBRMaterial->SetAlbedo(glm::vec3(0.0f, 0.0f, 1.0f));
-		cube1ModelRenderer->SetModel(mimicCore->GetResourceManager()->LoadResource<MimicEngine::Model>("cube.obj"));
-		auto cube1BoxCollider = cube1->AddComponent<MimicEngine::BoxCollider>();
-		cube1BoxCollider->SetSize(glm::vec3(1.0f));
-		cube1BoxCollider->OnCollisionEnter = [&m = cube1PBRMaterial]() { m->SetAlbedo(glm::vec3(1.0f, 0.0f, 0.0f)); };
-		cube1BoxCollider->OnCollisionExit = [&m = cube1PBRMaterial]() { m->SetAlbedo(glm::vec3(0.0f, 0.0f, 1.0f)); };
+			const glm::vec2 res = mimicCore->GetWindow()->GetAspectRatio();
+			const glm::ivec2 cursorPos = mimicCore->GetInputHandler()->GetCursorPosition();
+			const auto distance = glm::length(sphere->Position - camera->GetPosition());
+			const auto min = 1.0f * distance;
+			const auto max = 2.0f * distance;
+			auto rayClip = glm::vec4(
+				(max * cursorPos.x) / res.x - min,
+				min - (max * cursorPos.y) / res.y,
+				-1.0f,
+				1.0f
+			);
+
+			auto rayEye = glm::inverse(camera->GetProjectionMatrix()) * rayClip;
+			rayEye = glm::vec4(rayEye.x, rayEye.y, -1.0, 0.0);
+			const auto rayWorld = camera->GetViewMatrix() * rayEye;
+			sphere->Position = glm::vec3(rayWorld.x, rayWorld.y, sphere->Position.z);
+		};
+
+		std::shared_ptr<GameObject> cube = mimicCore->AddGameObject(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f));
+		auto cubeModelRenderer = cube->AddComponent<ModelRenderer>();
+		auto cubePBRMaterial = cubeModelRenderer->GetMaterial<PBRMaterial>();
+		auto cubeRigidbody = cube->AddComponent<Rigidbody>();
+		cubePBRMaterial->SetAlbedo(glm::vec3(0.0f, 0.0f, 1.0f));
+		cubeModelRenderer->SetModel(mimicCore->GetResourceManager()->LoadResource<MimicEngine::Model>("cube.obj"));
+		auto cubeBoxCollider = cube->AddComponent<MimicEngine::BoxCollider>();
+		cubeBoxCollider->SetSize(glm::vec3(1.0f));
+		/*cubeBoxCollider->OnCollisionEnter = [&m = cubePBRMaterial]() { m->SetAlbedo(glm::vec3(1.0f, 0.0f, 0.0f)); };
+		cubeBoxCollider->OnCollisionExit = [&m = cubePBRMaterial]() { m->SetAlbedo(glm::vec3(0.0f, 0.0f, 1.0f)); };*/
+		cube->OnSelected = [&m = cubePBRMaterial]() { m->SetAlbedo(glm::vec3(0.9f, 0.9f, 0.1f)); };
+		cube->OnUnselected = [&m = cubePBRMaterial]() { m->SetAlbedo(glm::vec3(0.0f, 0.0f, 1.0f)); };
+		cube->WhileSelected = [&]() 
+		{
+			
+			const glm::vec2 res = mimicCore->GetWindow()->GetAspectRatio();
+			const glm::ivec2 cursorPos = mimicCore->GetInputHandler()->GetCursorPosition();
+			const auto distance = glm::length(cube->Position - camera->GetPosition());
+			const auto min = 1.0f * distance;
+			const auto max = 2.0f * distance;
+			auto rayClip = glm::vec4(
+				(max * cursorPos.x) / res.x - min,
+				min - (max * cursorPos.y) / res.y,
+				-1.0f,
+				1.0f
+			);
+
+			auto rayEye = glm::inverse(camera->GetProjectionMatrix()) * rayClip;
+			rayEye = glm::vec4(rayEye.x, rayEye.y, -1.0, 0.0);
+			const auto rayWorld = camera->GetViewMatrix() * rayEye;
+			cube->Position = glm::vec3(rayWorld.x, rayWorld.y, cube->Position.z);
+		};
 
 		/*std::shared_ptr<MimicEngine::GameObject> groundGameObject = GameObject::Initialise(glm::vec3(0.0f, -1.5f, 0.0f), glm::vec3(0.0f), glm::vec3(43.45f, -0.5f, 50.0f));
 		auto groundModelRenderer = groundGameObject->AddComponent<ModelRenderer>();
@@ -82,12 +128,12 @@ int main(int argc, char* argv[])
 			if (inputHandler->IsKey(SDLK_e)) camPos.y -= (camSpeed * DeltaTime());
 			camera->SetPosition(camPos);
 
-			if (inputHandler->IsKey(SDLK_f)) cube0->Position.x -= (camSpeed * DeltaTime());
+			/*if (inputHandler->IsKey(SDLK_f)) cube0->Position.x -= (camSpeed * DeltaTime());
 			if (inputHandler->IsKey(SDLK_h)) cube0->Position.x += (camSpeed * DeltaTime());
 			if (inputHandler->IsKey(SDLK_t)) cube0->Position.y += (camSpeed * DeltaTime());
 			if (inputHandler->IsKey(SDLK_g)) cube0->Position.y -= (camSpeed * DeltaTime());
 			if (inputHandler->IsKey(SDLK_r)) cube0->Position.z += (camSpeed * DeltaTime());
-			if (inputHandler->IsKey(SDLK_y)) cube0->Position.z -= (camSpeed * DeltaTime());
+			if (inputHandler->IsKey(SDLK_y)) cube0->Position.z -= (camSpeed * DeltaTime());*/
 
 			// #############################################################################
 			// Render scene:

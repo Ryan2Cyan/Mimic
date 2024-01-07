@@ -12,8 +12,10 @@ namespace MimicEngine
 		void SetPosition(const glm::vec3& position);
 		void SetOrientation(const glm::vec3& orientation);
 
-		glm::vec3 GetPosition();
-		glm::vec3 GetOrientation();
+		glm::vec3 GetPosition() const;
+		glm::vec3 GetOrientation() const;
+		glm::mat4 GetViewMatrix() const;
+		glm::mat4 GetProjectionMatrix() const;
 
 		std::string Name;
 
