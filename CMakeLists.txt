@@ -132,7 +132,7 @@ add_library(MIMIC_PHYSICS
     src/mimic/mimic_physics/Algorithms.h
 )
 
-# Implement Mimic audip library:
+# Implement Mimic audio library:
 add_library(MIMIC_AUDIO
 
     src/mimic/mimic_audio/AudioClip.cpp
@@ -140,6 +140,13 @@ add_library(MIMIC_AUDIO
     src/mimic/mimic_audio/AudioSource.cpp
     src/mimic/mimic_audio/AudioSource.h
     src/mimic/mimic_audio/stb_vorbis.c
+)
+
+# Implement Mimic GUI library:
+add_library(MIMIC_GUI
+
+    src/mimic/mimic_gui/gui.cpp
+    src/mimic/mimic_gui/gui.h
 )
 
 # Implement static IMGUI library:
