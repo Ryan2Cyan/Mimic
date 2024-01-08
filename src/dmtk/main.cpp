@@ -30,6 +30,9 @@ int main(int argc, char* argv[])
 			mimicCore->AddDirectLight(glm::vec3(0.0f, 5.0f, -14.0f), glm::vec3(-0.25f), glm::vec3(1.0))
 		};
 
+		// Load sfx: 
+		const auto squeak = mimicCore->GetResourceManager()->LoadResource<AudioClip>("snd_squeak.ogg");
+
 		// Initialise scene models.
 		std::shared_ptr<GameObject> sphere = mimicCore->AddGameObject(glm::vec3(0.2f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f));
 		auto sphereModelRenderer = sphere->AddComponent<ModelRenderer>();
@@ -37,10 +40,18 @@ int main(int argc, char* argv[])
 		auto sphereRigidbody = sphere->AddComponent<Rigidbody>();
 		sphereModelRenderer->SetModel(mimicCore->GetResourceManager()->LoadResource<MimicEngine::Model>("sphere.obj"));
 		auto sphereMeshCollider = sphere->AddComponent<MimicEngine::MeshCollider>();
-		/*sphereMeshCollider->OnCollisionEnter = [&m = spherePBRMaterial]() { m->SetAlbedo(glm::vec3(0.0f, 0.0f, 0.0f)); };
-		sphereMeshCollider->OnCollisionExit = [&m = spherePBRMaterial]() { m->SetAlbedo(glm::vec3(0.0f, 0.0f, 1.0f)); };*/
-		sphere->OnSelected = [&m = spherePBRMaterial]() { m->SetAlbedo(glm::vec3(0.9f, 0.9f, 0.1f)); };
-		sphere->OnUnselected = [&m = spherePBRMaterial]() { m->SetAlbedo(glm::vec3(0.0f, 0.0f, 1.0f)); };
+		auto sphereAudioSource = sphere->AddComponent<MimicEngine::AudioSource>();
+		sphereAudioSource->SetAudioClip(squeak);
+		sphere->OnSelected = [&mat = spherePBRMaterial, &audioSrc = sphereAudioSource]() 
+		{
+			mat->SetAlbedo(glm::vec3(0.9f, 0.9f, 0.1f));
+			audioSrc->PlaySfx();
+		};
+		sphere->OnUnselected = [&mat = spherePBRMaterial, &audioSrc = sphereAudioSource]() 
+		{
+			mat->SetAlbedo(glm::vec3(0.0f, 0.0f, 1.0f)); 
+			audioSrc->PlaySfx();
+		};
 		sphere->WhileSelected = [&]()
 		{
 
@@ -70,10 +81,18 @@ int main(int argc, char* argv[])
 		cubeModelRenderer->SetModel(mimicCore->GetResourceManager()->LoadResource<MimicEngine::Model>("cube.obj"));
 		auto cubeBoxCollider = cube->AddComponent<MimicEngine::BoxCollider>();
 		cubeBoxCollider->SetSize(glm::vec3(1.0f));
-		/*cubeBoxCollider->OnCollisionEnter = [&m = cubePBRMaterial]() { m->SetAlbedo(glm::vec3(1.0f, 0.0f, 0.0f)); };
-		cubeBoxCollider->OnCollisionExit = [&m = cubePBRMaterial]() { m->SetAlbedo(glm::vec3(0.0f, 0.0f, 1.0f)); };*/
-		cube->OnSelected = [&m = cubePBRMaterial]() { m->SetAlbedo(glm::vec3(0.9f, 0.9f, 0.1f)); };
-		cube->OnUnselected = [&m = cubePBRMaterial]() { m->SetAlbedo(glm::vec3(0.0f, 0.0f, 1.0f)); };
+		auto cubeAudioSource = cube->AddComponent<MimicEngine::AudioSource>();
+		cubeAudioSource->SetAudioClip(squeak);
+		cube->OnSelected = [&mat = cubePBRMaterial, &audioSrc = cubeAudioSource]()
+		{
+			mat->SetAlbedo(glm::vec3(0.9f, 0.9f, 0.1f)); 
+			audioSrc->PlaySfx();
+		};
+		cube->OnUnselected = [&mat = cubePBRMaterial, &audioSrc = cubeAudioSource]()
+		{ 
+			mat->SetAlbedo(glm::vec3(0.0f, 0.0f, 1.0f)); 
+			audioSrc->PlaySfx();
+		};
 		cube->WhileSelected = [&]() 
 		{
 			

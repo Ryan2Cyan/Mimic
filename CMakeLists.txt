@@ -137,6 +137,8 @@ add_library(MIMIC_AUDIO
 
     src/mimic/mimic_audio/AudioClip.cpp
     src/mimic/mimic_audio/AudioClip.h
+    src/mimic/mimic_audio/AudioSource.cpp
+    src/mimic/mimic_audio/AudioSource.h
     src/mimic/mimic_audio/stb_vorbis.c
 )
 
