@@ -31,7 +31,7 @@ int main(int argc, char* argv[])
 		};
 
 		// Load sfx: 
-		const auto squeak = mimicCore->GetResourceManager()->LoadResource<AudioClip>("snd_squeak.ogg");
+		const auto squeak = mimicCore->GetResourceManager()->LoadResource<AudioClip>("snd_dumbvictory.ogg");
 
 		// Initialise scene models.
 		std::shared_ptr<GameObject> sphere = mimicCore->AddGameObject(glm::vec3(0.2f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f));
@@ -158,6 +158,7 @@ int main(int argc, char* argv[])
 			// Render scene:
 			// #############################################################################
 			mimicCore->Draw();
+
 			// #############################################################################
 //			// GUI:
 //			// #############################################################################

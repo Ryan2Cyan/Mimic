@@ -10,6 +10,8 @@
 #include <mimic_utility/Math.h>
 #include <mimic_utility/Logger.h>
 #include <mimic_physics/Algorithms.h>
+#include <imgui_impl_opengl3.h>
+#include <imgui_impl_sdl2.h>
 
 #include <SDL/SDL.h>
 
@@ -59,6 +61,7 @@ namespace MimicEngine
 		SDL_Event event;
 		while (SDL_PollEvent(&event))
 		{
+			ImGui_ImplSDL2_ProcessEvent(&event);
 			switch (event.type)
 			{
 				case SDL_QUIT:
