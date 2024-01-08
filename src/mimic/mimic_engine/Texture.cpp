@@ -5,9 +5,7 @@ namespace MimicEngine
 	bool Texture::Load(const std::string& path)
 	{
 		_texture = MimicRender::Texture::Initialise(path);
-		if (_texture == nullptr) return false;
-
-		return true;
+		return _texture != nullptr;
 	}
 
 	unsigned int Texture::GetId() const
