@@ -8,8 +8,8 @@
 #include "InputHandler.h"
 #include <mimic_render/Light.h>
 
-#include <GL/glew.h>
 #include <algorithm>
+#include <GL/glew.h>
 #include <SDL/SDL.h>
 
 namespace MimicEngine

@@ -1,5 +1,6 @@
 #include "Window.h"
 #include <mimic_utility/Logger.h>
+
 #include <imgui.h>
 #include <imgui_impl_opengl3.h>
 #include <imgui_impl_sdl2.h>
@@ -55,6 +56,32 @@ namespace MimicRender
 		}
 		MIMIC_LOG_INFO("[MimicRender::Window] SDL_GL_Context initialisation successful.");
 
+		// Initialise OpenAL audio library device:
+		window->_alDevice = alcOpenDevice(nullptr);
+		if (!window->_alDevice)
+		{
+			MIMIC_LOG_FATAL("[MimicRender::Window] Failed to initialize OpenAL audio library.");
+			return nullptr;
+		}
+
+		// Initialise OpenAL audio library context and assign it to the OpenAL current context:
+		window->_alContext = alcCreateContext(window->_alDevice, NULL);
+		if (!window->_alContext)
+		{
+			alcCloseDevice(window->_alDevice);
+			MIMIC_LOG_FATAL("[MimicRender::Window] Failed to initialize OpenAL context.");
+			return nullptr;
+		}
+		if (!alcMakeContextCurrent(window->_alContext))
+		{
+			alcDestroyContext(window->_alContext);
+			alcCloseDevice(window->_alDevice);
+			MIMIC_LOG_FATAL("[MimicRender::Window] Unable to assign OpenAL context to current context.");
+			return nullptr;
+		}
+
+		// Set OpenAL listener default position:
+		alListener3f(AL_POSITION, 0.0f, 0.0f, 0.0f);
 
 		// Initialise ImGui library:
 		IMGUI_CHECKVERSION();
@@ -88,6 +115,15 @@ namespace MimicRender
 	Window::~Window() 
 	{
 		// Destroy components of SDL in reverse order they were initialised:
+		if (_alContext && _alDevice)
+		{
+			alcMakeContextCurrent(NULL);
+			alcDestroyContext(_alContext);
+			alcCloseDevice(_alDevice);
+			MIMIC_LOG_INFO("[MimicRender::Window] OpenAL destruction successful.");
+		}
+		else MIMIC_LOG_ERROR("[MimicRender::Window]  null, destruction failed.");
+
 		if (_glContext)
 		{
 			SDL_GL_DeleteContext(_glContext);
@@ -105,7 +141,6 @@ namespace MimicRender
 			SDL_DestroyWindow(_window);
 			MIMIC_LOG_INFO("[MimicRender::Window] SDL_Window destruction successful.");
 		}
-		else MIMIC_LOG_ERROR("[MimicRender::Window] SDL_Window null, destruction failed.");
 
 		ImGui_ImplOpenGL3_Shutdown();
 		ImGui_ImplSDL2_Shutdown();

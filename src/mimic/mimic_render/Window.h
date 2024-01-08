@@ -3,6 +3,8 @@
 #include <memory>
 #include <string>
 #include <GLM/glm.hpp>
+#include <AL/al.h>
+#include <AL/alc.h>
 
 // #############################################################################
 // window struct:
@@ -40,6 +42,8 @@ namespace MimicRender
 		SDL_Window* _window;
 		SDL_Renderer* _renderer;
 		SDL_GLContext _glContext;
+		ALCdevice* _alDevice;
+		ALCcontext* _alContext;
 		bool _initialised;
 	};
 }

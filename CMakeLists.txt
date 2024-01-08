@@ -23,10 +23,10 @@ include_directories(
     SDKs/assimp/include
     SDKs/imgui/include
     SDKs/stbi/include
+    SDKs/al/include
     ${CMAKE_CURRENT_LIST_DIR}/SDKs/imgui/include
 )
 
-# Molebox: For combining .dll files - free & open-source:
 link_directories(
     ${CMAKE_SOURCE_DIR}/SDKs/x64/lib
 )
@@ -129,6 +129,13 @@ add_library(MIMIC_PHYSICS
     src/mimic/mimic_physics/Algorithms.h
 )
 
+# Implement Mimic audip library:
+add_library(MIMIC_AUDIO
+
+    src/mimic/mimic_audio/AudioSource.cpp
+    src/mimic/mimic_audio/AudioSource.h
+)
+
 # Implement static IMGUI library:
 add_library(IMGUI_LIB
 
@@ -169,6 +176,8 @@ target_link_libraries(MIMIC
     MIMIC_UTILITY
     MIMIC_RENDERER
     MIMIC_PHYSICS
+    MIMIC_AUDIO
+    openal32
 )
 
 #############################################################################
