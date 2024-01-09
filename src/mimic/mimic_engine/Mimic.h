@@ -18,6 +18,7 @@
 #include "Collider.h"
 #include "Rigidbody.h"
 #include "AudioSource.h"
+#include "Gui.h"
 
 // MimicRender translation units:
 #include <mimic_render/Light.h>
@@ -45,3 +46,6 @@
 
 // MimicAudio translation units:
 #include <mimic_audio/AudioClip.h>
+
+// MimicGUI translation units:
+#include <mimic_gui/gui.h>

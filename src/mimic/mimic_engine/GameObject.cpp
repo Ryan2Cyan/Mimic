@@ -25,7 +25,7 @@ namespace MimicEngine
 
 		// Assign Transform component variables:
 		newGameObject->Transform(position, rotation, scale);
-
+		newGameObject->_active = true;
 		return newGameObject;
 	}
 
@@ -43,11 +43,14 @@ namespace MimicEngine
 
 	void GameObject::Start()
 	{
+		if (!_active) return;
 		for (std::shared_ptr<Component> component : _components) component->Start();
 	}
 
 	void GameObject::Update()
 	{
+		if (!_active) return;
+
 		// Update the game object's model matrix according to its position, rotation, and scale:
 		UpdateModelMatrix();
 
@@ -59,12 +62,30 @@ namespace MimicEngine
 
 	void GameObject::FixedUpdate()
 	{
+		if (!_active) return;
 		// Update all components attached to the GameObject.
 		for (std::shared_ptr<Component> component : _components) component->FixedUpdate();
+	}
+
+	void GameObject::GuiUpdate()
+	{
+		if (!_active) return;
+		// Update all components attached to the GameObject.
+		for (std::shared_ptr<Component> component : _components) component->GuiUpdate();
 	}
 
 	void GameObject::UpdateModelMatrix()
 	{
 		_modelMatrix = glm::translate(glm::mat4(1.0f), Position) * glm::mat4_cast(glm::quat(Rotation)) * glm::scale(glm::mat4(1.0f), Scale);
+	}
+
+	void GameObject::SetActive(const bool& active)
+	{
+		_active = active;
+	}
+
+	bool GameObject::GetActive() const
+	{
+		return _active;
 	}
 }

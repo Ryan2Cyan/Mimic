@@ -92,29 +92,32 @@ namespace MimicEngine
 							continue;
 						}
 						// Don't continue to check if an object has already been selected.
-						if (const auto& model = gameObject->GetComponent<ModelRenderer>()->_model->_renderModel)
+						if (const auto& modelRenderer = gameObject->GetComponent<ModelRenderer>())
 						{
-							const auto meshes = model->GetMeshes();
-							const auto modelMat = gameObject->_modelMatrix;
-
-							// Check all mesh triangles to check with ray-triangle intersection.
-							bool foundIntersection = false;
-							for (const auto& mesh : meshes)
+							if (const auto& model = modelRenderer->_model->_renderModel)
 							{
-								if (foundIntersection) break;
-								for (const auto& triangle : mesh->GetTriangles())
+								const auto meshes = model->GetMeshes();
+								const auto modelMat = gameObject->_modelMatrix;
+
+								// Check all mesh triangles to check with ray-triangle intersection.
+								bool foundIntersection = false;
+								for (const auto& mesh : meshes)
 								{
 									if (foundIntersection) break;
-									const auto v0 = modelMat * glm::vec4(triangle.v0, 1.0f);
-									const auto v1 = modelMat * glm::vec4(triangle.v1, 1.0f);
-									const auto v2 = modelMat * glm::vec4(triangle.v2, 1.0f);
+									for (const auto& triangle : mesh->GetTriangles())
+									{
+										if (foundIntersection) break;
+										const auto v0 = modelMat * glm::vec4(triangle.v0, 1.0f);
+										const auto v1 = modelMat * glm::vec4(triangle.v1, 1.0f);
+										const auto v2 = modelMat * glm::vec4(triangle.v2, 1.0f);
 
-									foundIntersection = MimicPhysics::IntersectTriangle(ray.Origin, ray.Direction, v0, v1, v2);
+										foundIntersection = MimicPhysics::IntersectTriangle(ray.Origin, ray.Direction, v0, v1, v2);
+									}
 								}
+								if (foundIntersection && !gameObject->_selected) if (gameObject->OnSelected) gameObject->OnSelected();
+								if (!foundIntersection && gameObject->_selected) if (gameObject->OnUnselected) gameObject->OnUnselected();
+								gameObject->_selected = foundIntersection;
 							}
-							if (foundIntersection && !gameObject->_selected) if (gameObject->OnSelected) gameObject->OnSelected();
-							if (!foundIntersection && gameObject->_selected) if(gameObject->OnUnselected) gameObject->OnUnselected();
-							gameObject->_selected = foundIntersection;
 						}
 					}
 				}break;

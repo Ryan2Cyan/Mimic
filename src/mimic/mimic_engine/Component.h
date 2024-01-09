@@ -21,7 +21,8 @@ namespace MimicEngine
 		virtual void Initialise() = 0;
 		virtual void Start() = 0;
 		virtual void Update() = 0;
-		virtual void FixedUpdate() = 0;
+		virtual void FixedUpdate() {}
+		virtual void GuiUpdate() {}
 
 		std::weak_ptr<GameObject> _gameObject;
 		std::weak_ptr<Component> _self;

@@ -11,6 +11,9 @@
 #include <algorithm>
 #include <GL/glew.h>
 #include <SDL/SDL.h>
+#include <imgui.h>
+#include <imgui_impl_opengl3.h>
+#include <imgui_impl_sdl2.h>
 
 namespace MimicEngine
 {
@@ -114,6 +117,21 @@ namespace MimicEngine
 
 		// Update all scene objects.
 		for (auto gameObject : _gameObjects) gameObject->FixedUpdate();
+	}
+
+	void MimicCore::GuiUpdate()
+	{
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplSDL2_NewFrame();
+		ImGui::NewFrame();
+
+		ImGui::ShowDemoWindow();
+
+		// Update all scene objects.
+		for (auto gameObject : _gameObjects) gameObject->GuiUpdate();
+
+		ImGui::Render();
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 	}
 
 	void MimicCore::Draw()

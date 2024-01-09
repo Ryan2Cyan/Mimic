@@ -3,9 +3,9 @@
 #include <array>
 #include <algorithm>
 #include <glm/gtc/matrix_transform.hpp> 
-#include <imgui.h>
-#include <imgui_impl_opengl3.h>
-#include <imgui_impl_sdl2.h>
+//#include <imgui.h>
+//#include <imgui_impl_opengl3.h>
+//#include <imgui_impl_sdl2.h>
 #define SDL_MAIN_HANDLED
 
 using namespace MimicEngine;
@@ -31,7 +31,7 @@ int main(int argc, char* argv[])
 		};
 
 		// Load sfx: 
-		const auto squeak = mimicCore->GetResourceManager()->LoadResource<AudioClip>("snd_dumbvictory.ogg");
+		const auto squeak = mimicCore->GetResourceManager()->LoadResource<AudioClip>("snd_squeak.ogg");
 
 		// Initialise scene models.
 		std::shared_ptr<GameObject> sphere = mimicCore->AddGameObject(glm::vec3(0.2f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f));
@@ -114,6 +114,23 @@ int main(int argc, char* argv[])
 			cube->Position = glm::vec3(rayWorld.x, rayWorld.y, cube->Position.z);
 		};
 
+		const auto resolution = mimicCore->GetWindow()->GetAspectRatio();
+		std::shared_ptr<GameObject> button = mimicCore->AddGameObject(glm::vec3(resolution.x / 2.0f, resolution.y * 0.9f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f));
+		auto buttonGUI = button->AddComponent<Button>();
+		buttonGUI->SetName("Submit");
+		buttonGUI->SetSize(glm::vec2(100.0f, 20.0f));
+		buttonGUI->SetColourHSV(glm::vec3(0.8f, 0.3f, 0.75f));
+		buttonGUI->SetHoverColourHSV(glm::vec3(0.8f, 0.3f, 0.85f));
+		buttonGUI->SetActiveColourHSV(glm::vec3(0.8f, 0.3f, 0.9f));
+		buttonGUI->OnPressed = [&]()
+		{
+			MIMIC_DEBUG_LOG("Pressed Button");
+		};
+
+		std::shared_ptr<GameObject> text = mimicCore->AddGameObject(glm::vec3(0.0, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f));
+		auto textGUI = text->AddComponent<Text>();
+		textGUI->SetMessage("Hey, I wanna die rn! :)");
+		text->SetActive(false);
 		/*std::shared_ptr<MimicEngine::GameObject> groundGameObject = GameObject::Initialise(glm::vec3(0.0f, -1.5f, 0.0f), glm::vec3(0.0f), glm::vec3(43.45f, -0.5f, 50.0f));
 		auto groundModelRenderer = groundGameObject->AddComponent<ModelRenderer>();
 		auto groundPBRMaterial = PBRMaterial::Initialise();
@@ -162,14 +179,27 @@ int main(int argc, char* argv[])
 			// #############################################################################
 //			// GUI:
 //			// #############################################################################
-			ImGui_ImplOpenGL3_NewFrame();
+			mimicCore->GuiUpdate();
+			/*ImGui_ImplOpenGL3_NewFrame();
 			ImGui_ImplSDL2_NewFrame();
-			ImGui::NewFrame();
+			ImGui::NewFrame();*/
 
+		/*	ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f));
+			ImGui::Begin("");
+			static int clicked = 0;
+			if (ImGui::Button("Button"))
+				clicked++;
+			if (clicked & 1)
+			{
+				ImGui::SameLine();
+				ImGui::Text("Thanks for clicking me!");
+			}
+
+			ImGui::End();
 			ImGui::ShowDemoWindow();
 
 			ImGui::Render();
-			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());*/
 			mimicCore->GetWindow()->SwapWindow();
 		}
 	}

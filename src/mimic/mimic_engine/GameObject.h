@@ -61,6 +61,9 @@ namespace MimicEngine
 		/// <summary> Called when clicked on with user cursor position in alignment with the GameObject's model whilst already selected </summary>
 		std::function<void()> OnUnselected;
 
+		void SetActive(const bool& active);
+		bool GetActive() const;
+
 		glm::vec3 Position;
 		glm::vec3 Rotation;
 		glm::vec3 Scale;
@@ -81,6 +84,7 @@ namespace MimicEngine
 		void Start();
 		void Update();
 		void FixedUpdate();
+		void GuiUpdate();
 		void UpdateModelMatrix();
 
 		components_vector _components;
@@ -89,5 +93,6 @@ namespace MimicEngine
 		std::weak_ptr<MimicCore> _mimicCore;
 		std::weak_ptr<GameObject> _self;
 		bool _selected;
+		bool _active;
 	};
 }

@@ -72,6 +72,8 @@ link_directories(
     src/mimic/mimic_engine/Rigidbody.h
     src/mimic/mimic_engine/AudioSource.cpp
     src/mimic/mimic_engine/AudioSource.h
+    src/mimic/mimic_engine/Gui.cpp
+    src/mimic/mimic_engine/Gui.h
 )
 
 # Implement Mimic utility library:
@@ -145,8 +147,8 @@ add_library(MIMIC_AUDIO
 # Implement Mimic GUI library:
 add_library(MIMIC_GUI
 
-    src/mimic/mimic_gui/gui.cpp
-    src/mimic/mimic_gui/gui.h
+    src/mimic/mimic_gui/Gui.cpp
+    src/mimic/mimic_gui/Gui.h
 )
 
 # Implement static IMGUI library:
@@ -190,6 +192,7 @@ target_link_libraries(MIMIC
     MIMIC_RENDERER
     MIMIC_PHYSICS
     MIMIC_AUDIO
+    MIMIC_GUI
     openal32
 )
 

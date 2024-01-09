@@ -47,6 +47,9 @@ namespace MimicEngine
 		/// <summary> Called once per physics fixed time step in the game loop. Updates all physics objects. </summary>
 		void FixedUpdate();
 
+		/// <summary> Called once per frame at the end of the game loop. Updates all GUI components objects. </summary>
+		void GuiUpdate();
+
 		/// <summary> Called once per frame in the game loop. Draws all objects in the scene. </summary>
 		void Draw();
 
