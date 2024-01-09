@@ -125,7 +125,7 @@ namespace MimicEngine
 		ImGui_ImplSDL2_NewFrame();
 		ImGui::NewFrame();
 
-		ImGui::ShowDemoWindow();
+		// ImGui::ShowDemoWindow();
 
 		// Update all scene objects.
 		for (auto gameObject : _gameObjects) gameObject->GuiUpdate();

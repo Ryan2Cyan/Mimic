@@ -43,6 +43,7 @@ namespace MimicEngine
 
 		void SetSize(const glm::vec2& size);
 		void SetMessage(const std::string& message);
+		void SetFontScale(const float& fontScale);
 
 		glm::vec2 GetSize() const;
 		void SetColourHSV(const glm::vec3& colour);

@@ -108,6 +108,11 @@ namespace MimicEngine
 		return _guiText->GetSize();
 	}
 
+	void Text::SetFontScale(const float& fontScale)
+	{
+		_guiText->SetFontScale(fontScale);
+	}
+
 	std::string Text::GetMessage() const
 	{
 		return _guiText->GetMessage();

@@ -3,18 +3,34 @@
 #include <array>
 #include <algorithm>
 #include <glm/gtc/matrix_transform.hpp> 
-//#include <imgui.h>
-//#include <imgui_impl_opengl3.h>
-//#include <imgui_impl_sdl2.h>
+#include <iostream>
+#include <cstdlib> 
+#include <ctime>  
 #define SDL_MAIN_HANDLED
 
 using namespace MimicEngine;
 using namespace MimicUtility;
 using namespace MimicPhysics;
 
+enum class SelectableObjectId
+{
+	BlueSphere, RedSphere, BlueCube, RedCube
+};
+
+struct SelectableObject
+{
+	SelectableObject(std::shared_ptr<GameObject> gameObject, SelectableObjectId id) : GameObject(gameObject), Id(id) {}
+	SelectableObject() {}
+
+	std::shared_ptr<GameObject> GameObject;
+	SelectableObjectId Id;
+	bool Selected = false;
+};
+
 #undef main
 int main(int argc, char* argv[])
 {
+	srand(time(0));
 	{
 		// Initialise core.
 		std::shared_ptr<MimicEngine::MimicCore> mimicCore = MimicEngine::MimicCore::Initialise();
@@ -24,119 +40,174 @@ int main(int argc, char* argv[])
 		camera->SetPosition(glm::vec3(0.0f, 0.0f, 10.0f));
 		camera->SetOrientation(glm::vec3(0.0, 0.0f, -1.0f));
 
-		// Initialise vector of direct lights [position, direction, & colour].
+		// Initialise vector of direct lights [position, direction, & colour.
 		std::vector<std::shared_ptr<MimicEngine::DirectLight>> directLights =
 		{
 			mimicCore->AddDirectLight(glm::vec3(0.0f, 5.0f, -14.0f), glm::vec3(-0.25f), glm::vec3(1.0))
 		};
 
-		// Load sfx: 
-		const auto squeak = mimicCore->GetResourceManager()->LoadResource<AudioClip>("snd_squeak.ogg");
+		// Load sfx.
+		const auto squeakSFX = mimicCore->GetResourceManager()->LoadResource<AudioClip>("snd_squeak.ogg");
+		const auto victorySFX = mimicCore->GetResourceManager()->LoadResource<AudioClip>("snd_dumbvictory.ogg");
+		const auto failureSFX = mimicCore->GetResourceManager()->LoadResource<AudioClip>("snd_break2_c.ogg");
+
+		// Initialise audio source.
+		std::shared_ptr<GameObject> audio = mimicCore->AddGameObject(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f));
+		auto audioSource = audio->AddComponent<MimicEngine::AudioSource>();
+		audioSource->SetAudioClip(squeakSFX);
+
+
+		const auto red = glm::vec3(1.0f, 0.0f, 0.0f);
+		const auto blue = glm::vec3(0.0f, 0.0f, 1.0f);
+		const auto yellow = glm::vec3(0.9f, 0.9f, 0.1f);
+		const auto scale = glm::vec3(0.4f);
+		const auto bounds = glm::ivec2(6, 1);
 
 		// Initialise scene models.
-		std::shared_ptr<GameObject> sphere = mimicCore->AddGameObject(glm::vec3(0.2f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f));
-		auto sphereModelRenderer = sphere->AddComponent<ModelRenderer>();
-		auto spherePBRMaterial = sphereModelRenderer->GetMaterial<PBRMaterial>();
-		auto sphereRigidbody = sphere->AddComponent<Rigidbody>();
-		sphereModelRenderer->SetModel(mimicCore->GetResourceManager()->LoadResource<MimicEngine::Model>("sphere.obj"));
-		auto sphereMeshCollider = sphere->AddComponent<MimicEngine::MeshCollider>();
-		auto sphereAudioSource = sphere->AddComponent<MimicEngine::AudioSource>();
-		sphereAudioSource->SetAudioClip(squeak);
-		sphere->OnSelected = [&mat = spherePBRMaterial, &audioSrc = sphereAudioSource]() 
-		{
-			mat->SetAlbedo(glm::vec3(0.9f, 0.9f, 0.1f));
-			audioSrc->PlaySfx();
+		// Blue Sphere:
+		auto blueSphere = mimicCore->AddGameObject(glm::vec3(-6.7f, 3.7f, 0.0f), glm::vec3(0.0f), scale);
+		auto blueSphereModelRenderer = blueSphere->AddComponent<ModelRenderer>();
+		auto blueSpherePBRMaterial = blueSphereModelRenderer->GetMaterial<PBRMaterial>();
+		blueSpherePBRMaterial->SetAlbedo(blue);
+		blueSphereModelRenderer->SetModel(mimicCore->GetResourceManager()->LoadResource<MimicEngine::Model>("sphere.obj"));
+	
+		// Red Sphere:
+		auto redSphere = mimicCore->AddGameObject(glm::vec3(-3.0f, 0.0f, 0.0f), glm::vec3(0.0f), scale);
+		auto redSphereModelRenderer = redSphere->AddComponent<ModelRenderer>();
+		auto redSpherePBRMaterial = redSphereModelRenderer->GetMaterial<PBRMaterial>();
+		redSpherePBRMaterial->SetAlbedo(red);
+		redSphereModelRenderer->SetModel(mimicCore->GetResourceManager()->LoadResource<MimicEngine::Model>("sphere.obj"));
+
+		// Blue Cube:
+		auto blueCube = mimicCore->AddGameObject(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), scale);
+		auto blueCubeModelRenderer = blueCube->AddComponent<ModelRenderer>();
+		auto blueCubePBRMaterial = blueCubeModelRenderer->GetMaterial<PBRMaterial>();
+		blueCubePBRMaterial->SetAlbedo(blue);
+		blueCubeModelRenderer->SetModel(mimicCore->GetResourceManager()->LoadResource<MimicEngine::Model>("cube.obj"));
+
+		// Red Cube:
+		auto redCube = mimicCore->AddGameObject(glm::vec3(3.0f, 0.0f, 0.0f), glm::vec3(0.0f), scale);
+		auto redCubeModelRenderer = redCube->AddComponent<ModelRenderer>();
+		auto redCubePBRMaterial = redCubeModelRenderer->GetMaterial<PBRMaterial>();
+		redCubePBRMaterial->SetAlbedo(red);
+		redCubeModelRenderer->SetModel(mimicCore->GetResourceManager()->LoadResource<MimicEngine::Model>("cube.obj"));
+
+		// Initialise Game Elements.
+		std::vector<SelectableObject> selectableGameObjects = {
+			SelectableObject(blueSphere, SelectableObjectId::BlueSphere),
+			SelectableObject(redSphere, SelectableObjectId::RedSphere),
+			SelectableObject(blueCube, SelectableObjectId::BlueCube),
+			SelectableObject(redCube, SelectableObjectId::RedCube)
 		};
-		sphere->OnUnselected = [&mat = spherePBRMaterial, &audioSrc = sphereAudioSource]() 
-		{
-			mat->SetAlbedo(glm::vec3(0.0f, 0.0f, 1.0f)); 
-			audioSrc->PlaySfx();
-		};
-		sphere->WhileSelected = [&]()
+		bool victory = true;
+		int currentlySelected;
+		int score = 0;
+
+		const auto disableAll = [&]()
 		{
 
-			const glm::vec2 res = mimicCore->GetWindow()->GetAspectRatio();
-			const glm::ivec2 cursorPos = mimicCore->GetInputHandler()->GetCursorPosition();
-			const auto distance = glm::length(sphere->Position - camera->GetPosition());
-			const auto min = 1.0f * distance;
-			const auto max = 2.0f * distance;
-			auto rayClip = glm::vec4(
-				(max * cursorPos.x) / res.x - min,
-				min - (max * cursorPos.y) / res.y,
-				-1.0f,
-				1.0f
-			);
-
-			auto rayEye = glm::inverse(camera->GetProjectionMatrix()) * rayClip;
-			rayEye = glm::vec4(rayEye.x, rayEye.y, -1.0, 0.0);
-			const auto rayWorld = camera->GetViewMatrix() * rayEye;
-			sphere->Position = glm::vec3(rayWorld.x, rayWorld.y, sphere->Position.z);
+			for (size_t i = 0; i < selectableGameObjects.size(); i++)
+			{
+				selectableGameObjects[i].Selected = false;
+				switch (i)
+				{
+					case 0: blueSpherePBRMaterial->SetAlbedo(blue);
+						break;
+					case 1: redSpherePBRMaterial->SetAlbedo(red);
+						break;
+					case 2: blueCubePBRMaterial->SetAlbedo(blue);
+						break;
+					case 3: redCubePBRMaterial->SetAlbedo(red);
+						break;
+					default: break;
+				}
+				
+			}
 		};
 
-		std::shared_ptr<GameObject> cube = mimicCore->AddGameObject(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f));
-		auto cubeModelRenderer = cube->AddComponent<ModelRenderer>();
-		auto cubePBRMaterial = cubeModelRenderer->GetMaterial<PBRMaterial>();
-		auto cubeRigidbody = cube->AddComponent<Rigidbody>();
-		cubePBRMaterial->SetAlbedo(glm::vec3(0.0f, 0.0f, 1.0f));
-		cubeModelRenderer->SetModel(mimicCore->GetResourceManager()->LoadResource<MimicEngine::Model>("cube.obj"));
-		auto cubeBoxCollider = cube->AddComponent<MimicEngine::BoxCollider>();
-		cubeBoxCollider->SetSize(glm::vec3(1.0f));
-		auto cubeAudioSource = cube->AddComponent<MimicEngine::AudioSource>();
-		cubeAudioSource->SetAudioClip(squeak);
-		cube->OnSelected = [&mat = cubePBRMaterial, &audioSrc = cubeAudioSource]()
+		blueSphere->OnSelected = [&]()
 		{
-			mat->SetAlbedo(glm::vec3(0.9f, 0.9f, 0.1f)); 
-			audioSrc->PlaySfx();
+			disableAll();
+			blueSpherePBRMaterial->SetAlbedo(yellow);
+			audioSource->SetAudioClip(squeakSFX);
+			audioSource->PlaySfx();
+			selectableGameObjects[0].Selected = true;
+			MIMIC_DEBUG_LOG("blue sphere selected");
 		};
-		cube->OnUnselected = [&mat = cubePBRMaterial, &audioSrc = cubeAudioSource]()
-		{ 
-			mat->SetAlbedo(glm::vec3(0.0f, 0.0f, 1.0f)); 
-			audioSrc->PlaySfx();
-		};
-		cube->WhileSelected = [&]() 
+
+		redSphere->OnSelected = [&]()
 		{
-			
-			const glm::vec2 res = mimicCore->GetWindow()->GetAspectRatio();
-			const glm::ivec2 cursorPos = mimicCore->GetInputHandler()->GetCursorPosition();
-			const auto distance = glm::length(cube->Position - camera->GetPosition());
-			const auto min = 1.0f * distance;
-			const auto max = 2.0f * distance;
-			auto rayClip = glm::vec4(
-				(max * cursorPos.x) / res.x - min,
-				min - (max * cursorPos.y) / res.y,
-				-1.0f,
-				1.0f
-			);
-
-			auto rayEye = glm::inverse(camera->GetProjectionMatrix()) * rayClip;
-			rayEye = glm::vec4(rayEye.x, rayEye.y, -1.0, 0.0);
-			const auto rayWorld = camera->GetViewMatrix() * rayEye;
-			cube->Position = glm::vec3(rayWorld.x, rayWorld.y, cube->Position.z);
+			disableAll();
+			redSpherePBRMaterial->SetAlbedo(yellow);
+			audioSource->SetAudioClip(squeakSFX);
+			audioSource->PlaySfx();
+			selectableGameObjects[1].Selected = true;
+			MIMIC_DEBUG_LOG("red sphere selected");
 		};
 
+		blueCube->OnSelected = [&]()
+		{
+			disableAll();
+			blueCubePBRMaterial->SetAlbedo(yellow);
+			audioSource->SetAudioClip(squeakSFX);
+			audioSource->PlaySfx();
+			selectableGameObjects[2].Selected = true;
+			MIMIC_DEBUG_LOG("blue cube selected");
+		};
+
+		redCube->OnSelected = [&]()
+		{
+			disableAll();
+			redCubePBRMaterial->SetAlbedo(yellow);
+			audioSource->SetAudioClip(squeakSFX);
+			audioSource->PlaySfx();
+			selectableGameObjects[3].Selected = true;
+			MIMIC_DEBUG_LOG("red cube selected");
+		};
+
+		// Initialise GUI elements.
 		const auto resolution = mimicCore->GetWindow()->GetAspectRatio();
 		std::shared_ptr<GameObject> button = mimicCore->AddGameObject(glm::vec3(resolution.x / 2.0f, resolution.y * 0.9f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f));
 		auto buttonGUI = button->AddComponent<Button>();
 		buttonGUI->SetName("Submit");
-		buttonGUI->SetSize(glm::vec2(100.0f, 20.0f));
-		buttonGUI->SetColourHSV(glm::vec3(0.8f, 0.3f, 0.75f));
-		buttonGUI->SetHoverColourHSV(glm::vec3(0.8f, 0.3f, 0.85f));
-		buttonGUI->SetActiveColourHSV(glm::vec3(0.8f, 0.3f, 0.9f));
+		buttonGUI->SetSize(glm::vec2(400.0f, 100.0f));
+		buttonGUI->SetColourHSV(glm::vec3(0.4f, 0.6f, 0.55f));
+		buttonGUI->SetHoverColourHSV(glm::vec3(0.4f, 0.6f, 0.65f));
+		buttonGUI->SetActiveColourHSV(glm::vec3(0.4f, 0.6f, 0.7f));
 		buttonGUI->OnPressed = [&]()
 		{
-			MIMIC_DEBUG_LOG("Pressed Button");
+			for (int i = 0; i < selectableGameObjects.size(); i++)
+			{
+				if (i == currentlySelected)
+				{
+					if (selectableGameObjects[i].Selected)
+					{
+						audioSource->SetAudioClip(victorySFX);
+						audioSource->PlaySfx();
+						victory = true;
+						score++;
+						disableAll();
+					}
+					else
+					{
+						audioSource->SetAudioClip(failureSFX);
+						audioSource->PlaySfx();
+						disableAll();
+					}
+				}
+			}
 		};
 
-		std::shared_ptr<GameObject> text = mimicCore->AddGameObject(glm::vec3(0.0, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f));
+		std::shared_ptr<GameObject> text = mimicCore->AddGameObject(glm::vec3(resolution.x / 2.0f, resolution.y * 0.05f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f));
 		auto textGUI = text->AddComponent<Text>();
-		textGUI->SetMessage("Hey, I wanna die rn! :)");
-		text->SetActive(false);
-		/*std::shared_ptr<MimicEngine::GameObject> groundGameObject = GameObject::Initialise(glm::vec3(0.0f, -1.5f, 0.0f), glm::vec3(0.0f), glm::vec3(43.45f, -0.5f, 50.0f));
-		auto groundModelRenderer = groundGameObject->AddComponent<ModelRenderer>();
-		auto groundPBRMaterial = PBRMaterial::Initialise();
-		groundModelRenderer->SetMaterial<PBRMaterial>(groundPBRMaterial);
-		groundModelRenderer->SetModel(MimicCore::ResourceManager->LoadResource<MimicEngine::Model>("cube.obj"));*/
+		textGUI->SetMessage("");
+		textGUI->SetFontScale(3.0f);
 
+		std::shared_ptr<GameObject> scoreText = mimicCore->AddGameObject(glm::vec3(resolution.x * 0.95, resolution.y * 0.05f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f));
+		auto scoreTextGUI = scoreText->AddComponent<Text>();
+		scoreTextGUI->SetMessage("");
+		scoreTextGUI->SetFontScale(3.0f);
+		scoreTextGUI->SetColourHSV(glm::vec3(0.3f, 0.7f, 0.9f));
 
 		mimicCore->Start();
 		// #############################################################################
@@ -151,6 +222,36 @@ int main(int argc, char* argv[])
 			mimicCore->FixedUpdate();
 			mimicCore->Update();
 
+			if (victory)
+			{
+				currentlySelected = (rand() % 3) + 0;
+				text->SetActive(true);
+				std::string selected;				
+				switch (currentlySelected)
+				{
+					case 0: selected = "blue sphere";
+						break;
+					case 1: selected = "red sphere";
+						break;
+					case 2: selected = "blue cube";
+						break;
+					case 3: selected = "red cube";
+						break;
+					default: break;
+				}
+				std::vector<glm::ivec2> positions;
+				for (auto& gameObject : selectableGameObjects)
+				{
+					const auto rangeX = bounds.x - (-bounds.x) + 1;
+					const float randX = rand() % rangeX + (-bounds.x);
+					const auto rangeY = bounds.y - (-bounds.y) + 1;
+					const float randY = rand() % rangeY + (-bounds.y);
+					gameObject.GameObject->Position = glm::vec3(randX, randY, 0.0f);
+				}
+				textGUI->SetMessage("Select the: " + selected);
+				scoreTextGUI->SetMessage("Score: " + std::to_string(score));
+				victory = false;
+			}
 			// User-defined keyboard input. The MimicCore's input handler can check if any particular
 			// key is down, pressed, or released each frame.
 			auto camPos = camera->GetPosition();
@@ -164,12 +265,7 @@ int main(int argc, char* argv[])
 			if (inputHandler->IsKey(SDLK_e)) camPos.y -= (camSpeed * DeltaTime());
 			camera->SetPosition(camPos);
 
-			/*if (inputHandler->IsKey(SDLK_f)) cube0->Position.x -= (camSpeed * DeltaTime());
-			if (inputHandler->IsKey(SDLK_h)) cube0->Position.x += (camSpeed * DeltaTime());
-			if (inputHandler->IsKey(SDLK_t)) cube0->Position.y += (camSpeed * DeltaTime());
-			if (inputHandler->IsKey(SDLK_g)) cube0->Position.y -= (camSpeed * DeltaTime());
-			if (inputHandler->IsKey(SDLK_r)) cube0->Position.z += (camSpeed * DeltaTime());
-			if (inputHandler->IsKey(SDLK_y)) cube0->Position.z -= (camSpeed * DeltaTime());*/
+
 
 			// #############################################################################
 			// Render scene:

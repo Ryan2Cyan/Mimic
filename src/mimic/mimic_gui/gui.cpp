@@ -89,7 +89,7 @@ namespace MimicGUI
 
 	void Button::GuiUpdate()
 	{
-		ImGui::SetNextWindowPos(ImVec2(_position.x, _position.y));
+		ImGui::SetNextWindowPos(ImVec2(_position.x, _position.y), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
 		ImGui::SetNextWindowSize(ImVec2(0, 0));
 		ImGui::Begin(std::to_string(_id).c_str(), 0, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoBackground);
 	
@@ -157,7 +157,7 @@ namespace MimicGUI
 	void Text::GuiUpdate()
 	{
 		// ImGui::SetNextWindowSizeConstraints(ImVec2(100.0f, 0.0f), ImVec2(FLT_MAX, FLT_MAX));
-		ImGui::SetNextWindowPos(ImVec2(_position.x, _position.y));
+		ImGui::SetNextWindowPos(ImVec2(_position.x, _position.y), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
 		ImGui::SetNextWindowSize(ImVec2(0, 0));
 		ImGui::Begin(std::to_string(_id).c_str(), 0, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar);
 		ImGui::SetWindowFontScale(_fontScale);
