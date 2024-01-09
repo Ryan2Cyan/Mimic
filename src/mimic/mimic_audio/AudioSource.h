@@ -14,6 +14,7 @@ namespace MimicAudio
 		static std::shared_ptr<AudioSource> Initialise(const std::shared_ptr<AudioClip>& audioClip);
 
 		void PlaySfx() const;
+		void StopSfx() const;
 		void SetAudioClip(const std::shared_ptr<AudioClip>& audioClip);
 		unsigned int GetId() const;
 

@@ -25,6 +25,7 @@ namespace MimicEngine
 	struct AudioSource : Component
 	{
 		void PlaySfx() const;
+		void StopSfx() const;
 		void SetAudioClip(const std::shared_ptr<AudioClip>& audioClip);
 		void Initialise() override;
 		void Start() override;

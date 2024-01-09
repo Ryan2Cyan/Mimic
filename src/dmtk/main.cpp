@@ -129,6 +129,7 @@ int main(int argc, char* argv[])
 		{
 			disableAll();
 			blueSpherePBRMaterial->SetAlbedo(yellow);
+			audioSource->StopSfx();
 			audioSource->SetAudioClip(squeakSFX);
 			audioSource->PlaySfx();
 			selectableGameObjects[0].Selected = true;
@@ -139,6 +140,7 @@ int main(int argc, char* argv[])
 		{
 			disableAll();
 			redSpherePBRMaterial->SetAlbedo(yellow);
+			audioSource->StopSfx();
 			audioSource->SetAudioClip(squeakSFX);
 			audioSource->PlaySfx();
 			selectableGameObjects[1].Selected = true;
@@ -149,6 +151,7 @@ int main(int argc, char* argv[])
 		{
 			disableAll();
 			blueCubePBRMaterial->SetAlbedo(yellow);
+			audioSource->StopSfx();
 			audioSource->SetAudioClip(squeakSFX);
 			audioSource->PlaySfx();
 			selectableGameObjects[2].Selected = true;
@@ -159,6 +162,7 @@ int main(int argc, char* argv[])
 		{
 			disableAll();
 			redCubePBRMaterial->SetAlbedo(yellow);
+			audioSource->StopSfx();
 			audioSource->SetAudioClip(squeakSFX);
 			audioSource->PlaySfx();
 			selectableGameObjects[3].Selected = true;
@@ -240,13 +244,48 @@ int main(int argc, char* argv[])
 					default: break;
 				}
 				std::vector<glm::ivec2> positions;
+				MIMIC_DEBUG_LOG("");
+				MIMIC_DEBUG_LOG("");
 				for (auto& gameObject : selectableGameObjects)
 				{
 					const auto rangeX = bounds.x - (-bounds.x) + 1;
-					const float randX = rand() % rangeX + (-bounds.x);
+					float randX = rand() % rangeX + (-bounds.x);
 					const auto rangeY = bounds.y - (-bounds.y) + 1;
-					const float randY = rand() % rangeY + (-bounds.y);
-					gameObject.GameObject->Position = glm::vec3(randX, randY, 0.0f);
+					float randY = rand() % rangeY + (-bounds.y);
+					auto pos = glm::ivec2(randX, randY);
+					MIMIC_DEBUG_LOG("RandX: %, RandY: %", randX, randY);
+
+					if (positions.empty())
+					{
+						gameObject.GameObject->Position = glm::vec3(randX, randY, 0.0f);
+						positions.push_back(pos);
+					}
+					else
+					{
+						bool findingPosition = true;
+						while (findingPosition)
+						{
+							for (const auto position : positions)
+							{
+								if (pos == position)
+								{
+									randX = rand() % rangeX + (-bounds.x);
+									randY = rand() % rangeY + (-bounds.y);
+									pos = glm::ivec2(randX, randY);
+									MIMIC_DEBUG_LOG("Found Duplicate, Retry");
+									MIMIC_DEBUG_LOG("RandX: %, RandY: %", randX, randY);
+									continue;
+								}
+							}
+							findingPosition = false;
+						}
+
+						gameObject.GameObject->Position = glm::vec3(pos.x, pos.y, 0.0f);
+						findingPosition = false;
+						pos = glm::ivec2(randX, randY);
+						positions.push_back(pos);
+						MIMIC_DEBUG_LOG("No Duplicates");
+					}
 				}
 				textGUI->SetMessage("Select the: " + selected);
 				scoreTextGUI->SetMessage("Score: " + std::to_string(score));

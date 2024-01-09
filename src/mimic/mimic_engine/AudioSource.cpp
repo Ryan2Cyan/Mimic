@@ -25,6 +25,16 @@ namespace MimicEngine
 		_audioSource->PlaySfx();
 	}
 
+	void AudioSource::StopSfx() const
+	{
+		if (!_audioClip)
+		{
+			MIMIC_LOG_WARNING("[MimicEngine::AudioSource] Unable to stop sound effect, invalid AudioClip.");
+			return;
+		}
+		_audioSource->StopSfx();
+	}
+
 	void AudioSource::SetAudioClip(const std::shared_ptr<AudioClip>& audioClip)
 	{
 		_audioClip = audioClip;
