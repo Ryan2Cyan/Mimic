@@ -6,8 +6,10 @@
 
 namespace MimicPhysics
 {
-	/// <summary> Tomas_Akenine-Moller: Conducts a ray intersection check on three input vertices (triangle), returns true if
-	/// the ray intersects the triangle, false otherwise. </summary>
+	/// <summary> 
+	/// Tomas_Akenine-Moller: Conducts a ray intersection check on three input vertices (triangle), returns true if
+	/// the ray intersects the triangle, false otherwise. 
+	/// </summary>
 	static bool IntersectTriangle(const glm::vec3& ori, const glm::vec3& dir, const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2, glm::vec3& intersection = glm::vec3(0.0f))
 	{
 		// Source: https://fileadmin.cs.lth.se/cs/Personal/Tomas_Akenine-Moller/raytri/raytri.c

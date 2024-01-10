@@ -1,11 +1,14 @@
 #pragma once
-#include <GLM/glm.hpp>
 #include <string>
 #include <memory>
+#include <GLM/glm.hpp>
 #include <GL/glew.h>
 
 namespace MimicRender
 {
+	/// <summary>
+	/// General summary of a textures application type to a mesh/model.
+	/// </summary>
 	enum class TextureType
 	{
 		MIMIC_DIFFUSE,
@@ -19,6 +22,9 @@ namespace MimicRender
 		MIMIC_NO_TYPE
 	};
 
+	/// <summary>
+	/// Determines what type of texture certain OpenGL functions modify or allocate.
+	/// </summary>
 	enum class TextureTarget
 	{
 		MIMIC_TEXTURE_2D = 0,
@@ -30,11 +36,12 @@ namespace MimicRender
 		MIMIC_CUBE_MAP_NEGATIVE_Z = 6
 	};
 
-	// #############################################################################
-	// texture stuct:
-	// #############################################################################
 	// Source: https://www.learncpp.com/cpp-tutorial/bit-manipulation-with-bitwise-operators-and-bit-masks/
 	// Source: https://cplusplus.com/forum/general/1590/
+	
+	/// <summary>
+	/// Loads 2D textures and stores their ID for rendering access.
+	/// </summary>
 	struct Texture
 	{
 		// Texture types:
@@ -103,16 +110,10 @@ namespace MimicRender
 		/// <summary>
 		/// Set the textures's type, used when materials need to interpret what texture it's looking at.
 		/// </summary>
+		/// <param name="textureType">How the texture will be used when rendering a mesh.</param>
 		void SetType(const TextureType& textureType);
 
-		/// <summary>
-		/// Get the textures's aspect ratio.
-		/// </summary>
 		const glm::ivec2 GetAspectRatio() const noexcept;
-
-		/// <summary>
-		/// Get the textures's OpenGL texture ID.
-		/// </summary>
 		const unsigned int GetId() const noexcept;
 
 		// user texture parameters:

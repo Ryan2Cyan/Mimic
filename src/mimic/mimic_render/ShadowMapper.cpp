@@ -5,7 +5,6 @@
 #include <mimic_render/Renderer.h>
 #include <mimic_render/Light.h>
 
-#include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <mimic_utility/Logger.h>
 #include <mimic_utility/FileLoader.h>

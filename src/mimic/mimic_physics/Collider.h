@@ -2,16 +2,16 @@
 #include <mimic_utility/Logger.h>
 
 #include <glm/glm.hpp>
-#include <memory>
 #include <vector>
 #include <array>
 
 
 namespace MimicPhysics
 {
-	// #############################################################################
-	// Collider Struct:
-	// #############################################################################
+	/// <summary>
+	/// Base class for collider components containing both the collider's offset (from it's parent GameObject), and 
+	/// a bool relaying whether a collision has occured or not.
+	/// </summary>
 	struct Collider
 	{
 		virtual ~Collider() = default;
@@ -31,9 +31,10 @@ namespace MimicPhysics
 		bool _initialised;
 	};
 
-	// #############################################################################
-	// BoxCollider Struct:
-	// #############################################################################
+	/// <summary>
+	/// Collision entity shaped like a cuboid. User can modify its size on the x, y, and z axes.
+	/// User can set the 'OnCollisionEnter' and 'OnCollisionExit' functions to execute code.
+	/// </summary>
 	struct BoxCollider : Collider 
 	{
 		static std::shared_ptr<BoxCollider> Initialise(const glm::vec3& size, const glm::vec3& offset);
@@ -65,9 +66,11 @@ namespace MimicPhysics
 		std::weak_ptr<BoxCollider> _self;
 	};
 
-	// #############################################################################
-	// MeshCollider Struct:
-	// #############################################################################
+	/// <summary>
+	/// Will check if the user has a ModelRenderer and valid Model/Meshes to extract vertices, if one of these conditions 
+	/// is not met the MeshCollider will fail to initialise correctly. User can modify its size on the x, y, and z axes. 
+	/// User can set the 'OnCollisionEnter' and 'OnCollisionExit' functions to execute code.
+	/// </summary>
 	struct MeshCollider : Collider
 	{
 		static std::shared_ptr<MeshCollider> Initialise(const std::vector<glm::vec3>& vertices);
@@ -84,9 +87,10 @@ namespace MimicPhysics
 		std::weak_ptr<MeshCollider> _self;
 	};
 
-	// #############################################################################
-	// GJK Algorithm:
-	// #############################################################################
+	/// <summary>
+	/// GJK algorithm helper struct. Used to construct a simplex from vertices (1 vertex = point, 2 vertices = line, 
+	/// 3 vertices = triangle, 4 vertices = tetrahedron).
+	/// </summary>
 	struct Simplex
 	{
 		Simplex() : _size(0), _points({ glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(0.0f) }) {}
@@ -129,14 +133,17 @@ namespace MimicPhysics
 		unsigned _size;
 	};
 
-	/// <summary> GJK collision detection helper function. Returns true if the inputted direction
-	/// is facing the general direction of the inputted origin vector. </summary>
+	/// <summary> 
+	/// GJK collision detection helper function. Returns true if the inputted direction
+	/// is facing the general direction of the inputted origin vector. 
+	/// </summary>
 	static bool SameDirection(const glm::vec3& direction, const glm::vec3& origin)
 	{
 		return glm::dot(direction, origin) > 0;
 	};
 
-	/// <summary> GJK collision detection helper function. Uses deduction to determine which area
+	/// <summary> 
+	/// GJK collision detection helper function. Uses deduction to determine which area
 	/// defined by the line contains the origin, then modifies the points & direction accordingly.
 	/// </summary>
 	static bool Line(Simplex& points, glm::vec3& direction)
@@ -155,7 +162,8 @@ namespace MimicPhysics
 		return false;
 	}
 
-	/// <summary> GJK collision detection helper function. Uses deduction to determine which area
+	/// <summary> 
+	/// GJK collision detection helper function. Uses deduction to determine which area
 	/// defined by the triangle contains the origin, then modifies the points & direction accordingly.
 	/// </summary>
 	static bool Triangle(Simplex& points, glm::vec3& direction)
@@ -196,7 +204,8 @@ namespace MimicPhysics
 		return false;
 	}
 
-	/// <summary> GJK collision detection helper function. Checks for the origin inside a 
+	/// <summary> 
+	/// GJK collision detection helper function. Checks for the origin inside a 
 	/// tetrahedron simplex construct. Returns true if the origin is found, otherwise false. 
 	/// </summary>
 	static bool Tetrahedron(Simplex& points, glm::vec3& direction)
@@ -222,8 +231,10 @@ namespace MimicPhysics
 		return true;
 	}
 
-	/// <summary> GJK collision detection helper function. Calls simplex function based on the
-	/// number of points in the simplex. </summary>
+	/// <summary> 
+	/// GJK collision detection helper function. Calls simplex function based on the
+	/// number of points in the simplex. 
+	/// </summary>
 	static bool NextSimplex(Simplex& points, glm::vec3& direction)
 	{
 		switch (points.GetSize())
@@ -236,8 +247,10 @@ namespace MimicPhysics
 		return false;
 	}
 
-	/// <summary> Given any 3D shape's vertices, Returns the furthest vertex in any given direction. 
-	/// The translate input is added onto the return vertex to convert its position to world space. </summary>
+	/// <summary> 
+	/// Given any 3D shape's vertices, Returns the furthest vertex in any given direction. 
+	/// The translate input is added onto the return vertex to convert its position to world space. 
+	/// </summary>
 	static glm::vec3 GetFarthestPoint(const std::vector<glm::vec3>& vertices, const glm::vec3& direction, const glm::vec3& translate)
 	{
 		// Source: https://en.wikipedia.org/wiki/Minkowski_addition
@@ -259,9 +272,11 @@ namespace MimicPhysics
 		return farthestPoint + translate;
 	}
 
-	/// <summary> GJK collision detection helper function. Based on the Minkowski Difference,
+	/// <summary> 
+	/// GJK collision detection helper function. Based on the Minkowski Difference,
 	/// calculates the "most-extreme" points in two shapes (vertices farthest in a given direction),
-	/// and returns the difference. </summary>
+	/// and returns the difference. 
+	/// </summary>
 	static glm::vec3 Support(const std::shared_ptr<Collider>& colA, const std::shared_ptr<Collider>& colB, const glm::vec3& direction)
 	{
 		return GetFarthestPoint(colA->GetVertices(), direction, colA->GetPosition() + colA->GetOffset()) -
@@ -305,9 +320,9 @@ namespace MimicPhysics
 
 
 
-	// #############################################################################
-	// Axis Aligned Algorithm:
-	// #############################################################################
+	/// <summary>
+	/// Calculates whether two axis aligned (no rotations) box colliders are colliding.
+	/// </summary>
 	static bool AxisAlignedCollisionDetection(const std::shared_ptr<BoxCollider>& colA, const std::shared_ptr<BoxCollider>& colB)
 	{
 		// Source: https://developer.mozilla.org/en-US/docs/Games/Techniques/3D_collision_detection

@@ -2,9 +2,10 @@
 #include <GLM/glm.hpp>
 namespace MimicRender
 {
-	// #############################################################################
-	// vertex stuct:
-	// #############################################################################
+	/// <summary>
+	/// Stores a position, normal, tangent, bi-tangent, and texture coordinates. Generally used for rendering
+	/// (see Mesh, Model, and Renderer structs).
+	/// </summary>
 	struct Vertex
 	{
 		static Vertex Initialise(const glm::vec3& position, const glm::vec3& normal, const glm::vec3& tangent, const glm::vec3& biTangent, const glm::vec2& textureCoordinates);

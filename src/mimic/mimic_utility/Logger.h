@@ -15,9 +15,10 @@
 
 namespace MimicUtility
 {
-	// #############################################################################
-	// logger stuct:
-	// #############################################################################
+	/// <summary>
+	/// Logging system. Allows for logging functionality, including debug, warning, error, and fatal messages
+	/// to be displayed to the console.
+	/// </summary>
 	struct Logger
 	{
 		static void Init();

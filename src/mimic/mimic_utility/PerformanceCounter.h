@@ -1,10 +1,7 @@
 #pragma once
 #include <mimic_utility/Logger.h>
-#include <algorithm>
 #include <chrono>
 #include <fstream>
-#include <string>
-#include <thread>
 #include <mutex>
 #include <sstream>
 #include <iomanip>
@@ -22,7 +19,6 @@
 // Source: https://github.com/TheCherno/Hazel/blob/master/Hazel/src/Hazel/Debug/Instrumentor.h
 namespace MimicUtility
 {
-
 	using FloatingPointMicroseconds = std::chrono::duration<double, std::micro>;
 
 	struct ProfileResult
@@ -202,73 +198,3 @@ namespace MimicUtility
 		}
 	}
 }
-
-
-//namespace MimicUtil
-//{
-	//// #############################################################################
-	//// timer stuct:
-	//// #############################################################################
-	//// Source: https://www.youtube.com/watch?v=YbYV8rRo9_A
-	//template<typename Func>
-	//struct Timer
-	//{
-	//	Timer(const char* name, Func&& lambdaFunc) : _name(name), _stopped(false), _func(lambdaFunc)
-	//	{
-	//		_startTimePoint = std::chrono::high_resolution_clock::now();
-	//	};
-
-	//	~Timer() // scope based: stop is called int he destructor
-	//	{
-	//		if (!_stopped) Stop();
-	//	}
-
-	//	void Stop()
-	//	{
-	//		const auto endTimePoint = std::chrono::high_resolution_clock::now();
-	//		const auto start = std::chrono::time_point_cast<std::chrono::microseconds>(_startTimePoint).time_since_epoch().count();
-	//		const auto end = std::chrono::time_point_cast<std::chrono::microseconds>(endTimePoint).time_since_epoch().count();
-
-	//		const float duration = end - start;
-	//		const float milliSeconds = duration * 0.001;
-
-	//		_stopped = true;
-
-	//		_func({ _name, milliSeconds });
-	//	}
-
-	//private:
-	//	std::chrono::time_point<std::chrono::high_resolution_clock> _startTimePoint;
-	//	Func _func;
-	//	const char* _name;
-	//	bool _stopped = true;
-	//};
-
-	//// #############################################################################
-	//// profile result stuct:
-	//// #############################################################################
-	//struct ProfileResult
-	//{
-	//	const char* Name;
-	//	float Time;
-	//};
-
-	//std::vector<ProfileResult> ProfilerResults;
-
-	//// #############################################################################
-	//// performance counter stuct:
-	//// #############################################################################
-	//struct PerformanceCounter
-	//{
-	//	explicit PerformanceCounter();
-
-	//	static std::shared_ptr<PerformanceCounter> Initialise();
-	//	void StartPerformanceCounter() noexcept;
-	//	const long long EndPerformanceCounter() noexcept;
-	//	const long GetFPS() const noexcept;
-
-	//private:
-	//	long long _startTime;
-	//	long long _elapsedTime;
-	//};
-// }

@@ -210,6 +210,15 @@ int main(int argc, char* argv[])
 		scoreTextGUI->SetFontScale(3.0f);
 		scoreTextGUI->SetColourHSV(glm::vec3(0.3f, 0.7f, 0.9f));
 
+		const auto generateRandomPos = [&bounds = bounds]()
+		{
+			const auto rangeX = bounds.x - (-bounds.x) + 1;
+			float randX = rand() % rangeX + (-bounds.x);
+			const auto rangeY = bounds.y - (-bounds.y) + 1;
+			float randY = rand() % rangeY + (-bounds.y);
+			return glm::ivec2(randX, randY);
+		};
+
 		mimicCore->Start();
 		// #############################################################################
 		// Game loop:
@@ -225,7 +234,7 @@ int main(int argc, char* argv[])
 
 			if (victory)
 			{
-				currentlySelected = (rand() % 3) + 0;
+				currentlySelected = (rand() % 4) + 0;
 				text->SetActive(true);
 				std::string selected;				
 				switch (currentlySelected)
@@ -243,39 +252,32 @@ int main(int argc, char* argv[])
 				std::vector<glm::ivec2> positions;
 				for (auto& gameObject : selectableGameObjects)
 				{
-					const auto rangeX = bounds.x - (-bounds.x) + 1;
-					float randX = rand() % rangeX + (-bounds.x);
-					const auto rangeY = bounds.y - (-bounds.y) + 1;
-					float randY = rand() % rangeY + (-bounds.y);
-					auto pos = glm::ivec2(randX, randY);
+					auto pos = generateRandomPos();
 
 					if (positions.empty())
 					{
-						gameObject.GameObject->Position = glm::vec3(randX, randY, 0.0f);
+						gameObject.GameObject->Position = glm::vec3(pos.x, pos.y, 0.0f);
 						positions.push_back(pos);
 					}
 					else
 					{
-						bool findingPosition = true;
-						while (findingPosition)
+						bool foundUnique = false;
+						while (!foundUnique)
 						{
 							for (const auto position : positions)
 							{
 								if (pos == position)
 								{
-									randX = rand() % rangeX + (-bounds.x);
-									randY = rand() % rangeY + (-bounds.y);
-									pos = glm::ivec2(randX, randY);
+									pos = generateRandomPos();
 									continue;
 								}
 							}
-							findingPosition = false;
+							foundUnique = true;
 						}
 
 						gameObject.GameObject->Position = glm::vec3(pos.x, pos.y, 0.0f);
-						findingPosition = false;
-						pos = glm::ivec2(randX, randY);
 						positions.push_back(pos);
+						pos = generateRandomPos();
 					}
 				}
 				textGUI->SetMessage("Select the: " + selected);
