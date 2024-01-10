@@ -1,19 +1,19 @@
 #pragma once
 #include "Resource.h"
-#include <mimic_render/Shader.h>
 
-#include <memory>
+namespace MimicRender
+{
+    struct Shader;
+}
 
 namespace MimicEngine
 {
-	// #############################################################################
-	// Shader Struct (engine):
-	// #############################################################################
-    struct MimicRender::Shader;
-
+    /// <summary>
+    /// Wrapper for MimicRender::Shader. Responsible for executing GPU code to render scene objects. See the
+    /// Material and ModelRenderer structs.
+    /// </summary>
     struct Shader : Resource
     {
-
     private:
         friend struct ResourceManager;
         friend struct PBRMaterial;

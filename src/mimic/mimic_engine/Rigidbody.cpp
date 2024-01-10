@@ -4,20 +4,9 @@
 
 namespace MimicEngine
 {
-	void Rigidbody::Initialise()
-	{
-
-	}
-
-	void Rigidbody::Start()
-	{
-
-	}
-
-	void Rigidbody::Update()
-	{
-	
-	}
+	void Rigidbody::Initialise() {}
+	void Rigidbody::Start() {}
+	void Rigidbody::Update() {}
 
 	void Rigidbody::FixedUpdate()
 	{

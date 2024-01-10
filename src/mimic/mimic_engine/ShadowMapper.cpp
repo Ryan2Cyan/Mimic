@@ -1,5 +1,5 @@
 #include "ShadowMapper.h"
-#include "MimicCore.h"
+#include <mimic_render/ShadowMapper.h>
 
 namespace MimicEngine
 {

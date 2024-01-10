@@ -12,7 +12,7 @@ namespace MimicRender
 namespace MimicEngine
 {
     /// <summary>
-    /// Model: Wrapper for MimicRender::Model. Holds all data relating to a model (including the model's textures and meshes).
+    /// Wrapper for MimicRender::Model. Holds all data relating to a model (including the model's textures and meshes).
     /// </summary>
     struct Model : Resource
     {

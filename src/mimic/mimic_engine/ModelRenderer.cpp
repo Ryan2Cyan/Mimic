@@ -1,15 +1,12 @@
 #include "ModelRenderer.h"
-#include "ResourceManager.h"
 #include "MimicCore.h"
 #include "Material.h"
 #include "Model.h"
 #include "Shader.h"
-#include <mimic_utility/Logger.h>
 #include <mimic_render/Renderer.h>
 #include <mimic_render/Mesh.h>
 #include <mimic_render/Model.h>
 
-#include <GLM/glm.hpp>
 
 namespace MimicEngine
 {

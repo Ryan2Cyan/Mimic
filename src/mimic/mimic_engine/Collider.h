@@ -11,7 +11,7 @@ namespace MimicPhysics
 namespace MimicEngine
 {
 	/// <summary>
-	/// Collider: Base class for collider components containing both the collider's offset (from it's parent GameObject), and 
+	/// Base class for collider components containing both the collider's offset (from it's parent GameObject), and 
 	/// a bool relaying whether a collision has occured or not.
 	/// </summary>
 	struct Collider
@@ -28,7 +28,7 @@ namespace MimicEngine
 	};
 
 	/// <summary>
-	/// BoxCollider: Wrapper for MimicPhysics::BoxCollider. Collision entity shaped like a cuboid. User can modify its size on the x, y, and z axes.
+	/// Wrapper for MimicPhysics::BoxCollider. Collision entity shaped like a cuboid. User can modify its size on the x, y, and z axes.
 	/// User can set the 'OnCollisionEnter' and 'OnCollisionExit' functions to execute code.
 	/// </summary>
 	struct BoxCollider : Collider, Component
@@ -62,7 +62,7 @@ namespace MimicEngine
 	};
 
 	/// <summary>
-	/// MeshCollider: Wrapper for MimicPhysics::MeshCollider. Will check if the user has a ModelRenderer and
+	/// Wrapper for MimicPhysics::MeshCollider. Will check if the user has a ModelRenderer and
 	/// valid Model/Meshes to extract vertices, if one of these conditions is not met the MeshCollider will fail
 	/// to initialise correctly. User can modify its size on the x, y, and z axes. User can set the 'OnCollisionEnter' 
 	/// and 'OnCollisionExit' functions to execute code.

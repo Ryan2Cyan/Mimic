@@ -2,61 +2,27 @@
 #include <mimic_utility/Logger.h>
 #include <mimic_utility/FileLoader.h>
 
-#include <string>
-#include <memory>
-#include <vector>
 #include <unordered_map>
-#include <filesystem>
+
 
 
 // Source: https://www.gameenginebook.com/ : Chapter 7: Resource and File System
-
-// File System:
-// 1.) manipulate file names and paths.
-// 2.) open, close, read, or write to individual files.
-// 3.) scan contents of a directory.
-// 4.) handle asynchronous file I/O requests (for streaming).
-
-// OS Differences:
-//     OS          PathComponentSeparator    CaseSensitive?     VolumeSeparator     CurrentWorkingDirectory     CurrentWorkingVolume
-//     UNIX:                 /					    N                 None                     Y                          N
-//     Old Windows:          \						Y          [Single_Letter] + :             Y                          Y
-//     Recent Windows:     / or \					Y		   [Single_Letter] + :   		   Y                          Y
-//     MS-DOS                /                      Y          [Single_Letter] + :             Y                          Y
-//     Mac OS 8 & 9:         :						N			      None                     Y                          N
-//     Mac OS X:             /						N                 None                     Y                          N
-// The final dot '.' in any path denotes the file extension (e.g. ".exe" or ".pdf").
-
-// Search Paths: 
-// a string containing a list of paths, each separated by a special character (e.g. ':' or ';'). A list of
-// directories that should be searched to find an asset.
-
-// Basic File I/O:
-// C standard library provides a buffered & unbuffered API ('stream I/O'): 
-// Buffered: https://learn.microsoft.com/en-us/cpp/c-runtime-library/stream-i-o?view=msvc-170&redirectedfrom=MSDN
-// Unbuffered: https://learn.microsoft.com/en-us/cpp/c-runtime-library/low-level-i-o?view=msvc-170&redirectedfrom=MSDN
-
-// Wrapping I/O:
-// Can guarantee identical behaviour across all target platforms.
-// Can simplify down to only the functions needed by the engine.
-// Can extend functionality.
-// Synchronous File I/O: The program making the I/O request must wait until the data has been transferred before continuing.
-// Asynchronous File I/O:
-
-
 namespace MimicEngine
 {
-	// #############################################################################
-	// Resource Manager stuct:
-	// #############################################################################
 	struct Resource;
 
+	/// <summary>
+	/// Responsible for loading in external game data (e.g. models, textures, and sound effects). See ResourceManager::LoadResource().
+	/// </summary>
 	struct ResourceManager
 	{
 		/// <summary>
 		/// Load resouce from the assets/ directory given a specified resource filename (file extension included).
 		/// Returns nullptr if the resource cannot be loaded. Returns nullptr is load was unsuccessful.
 		/// </summary>
+		/// <typeparam name="T">Resource type you want to load.</typeparam>
+		/// <param name="fileName">Name of the file (including the extension) you want to load from within the '/assets' directory.</param>
+		/// <returns>If successful, returns the loaded Resource, otherwise nullptr.</returns>
 		template<typename T> std::shared_ptr<T> LoadResource(const std::string& fileName)
 		{
 			// Convert retrieve the file path from the inputted file name:
@@ -97,6 +63,11 @@ namespace MimicEngine
 		/// <summary>
 		/// Create, initialise, and return new resource. Returns nullptr is creation was unsuccessful.  
 		/// </summary>
+		/// <typeparam name="T">Resource type you want to create.</typeparam>
+		/// <typeparam name="...Args">Input parameters for the Resources's Create() function. If the resource does not implement 
+		/// Create(), this call will fail.</typeparam>
+		/// <param name="...args"></param>
+		/// <returns>If successful, returns the newly created Resource, otherwise returns nullptr.</returns>
 		template<typename T, typename... Args> std::shared_ptr<T> CreateResource(Args... args)
 		{
 			std::shared_ptr<T> newResource = std::make_shared<T>();

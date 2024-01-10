@@ -10,7 +10,7 @@ namespace MimicEngine
 	struct Camera;
 
 	/// <summary>
-	/// Ray: Contains a origin and direction. Exclusively used by the InputHandler struct to project
+	/// Contains a origin and direction. Exclusively used by the InputHandler struct to project
 	/// rays from the camera to the user's mouse screen-space position.
 	/// </summary>
 	struct Ray
@@ -22,7 +22,7 @@ namespace MimicEngine
 	};
 
 	/// <summary>
-	/// InputHandler: Handles all user inputs (e.g. mouse down, keys pressed, and clicking on elements of the screen).
+	/// Handles all user inputs (e.g. mouse down, keys pressed, and clicking on elements of the screen).
 	/// </summary>
 	struct InputHandler
 	{

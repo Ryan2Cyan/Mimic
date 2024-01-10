@@ -11,7 +11,7 @@ namespace MimicRender
 namespace MimicEngine
 {
 	/// <summary>
-	/// Camera: Wrapper for MimicRender::Camera. Performs most visual-output-based calculations, primarily view and projection
+	/// Wrapper for MimicRender::Camera. Performs most visual-output-based calculations, primarily view and projection
 	/// matrix calculations. 
 	/// </summary>
 	struct Camera 

@@ -8,6 +8,7 @@
 #include <mimic_render/CubeMap.h>
 #include <mimic_render/Light.h>
 #include <mimic_render/RenderTexture.h>
+#include <mimic_render/Shader.h>
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>

@@ -1,22 +1,25 @@
 #pragma once
 #include "Component.h"
 
-#include <memory>
-#include <string>
-#include <functional>
 
 namespace MimicEngine
 {	
-	// #############################################################################
-	// Renderer Struct:
-	// #############################################################################
 	struct Model;
 	struct Shader;
 	struct Material;
 
+	/// <summary>
+	/// Queues a stored model (and its meshes) to be rendered. Can hold a model and a material and applies the material's
+	/// properties when rendering the model. Material member is set to PBRMaterial by default.
+	/// </summary>
 	struct ModelRenderer : Component
 	{
-
+		/// <summary>
+		/// Set the current material stored within the ModelRenderer. This material's properties will be applied
+		/// to the stored model when rendered.
+		/// </summary>
+		/// <typeparam name="T">Material type.</typeparam>
+		/// <param name="material">Material to store.</param>
 		template <typename T> void SetMaterial(const std::shared_ptr<T>& material)
 		{
 			const auto gameObjectParent = GetGameObject();
@@ -53,6 +56,5 @@ namespace MimicEngine
 
 			std::shared_ptr<Model> _model; 
 			std::shared_ptr<Material> _material;
-
 	};
 }

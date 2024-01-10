@@ -1,4 +1,5 @@
 #include "Texture.h"
+#include <mimic_render/Texture.h>
 
 namespace MimicEngine
 {
@@ -10,6 +11,7 @@ namespace MimicEngine
 
 	unsigned int Texture::GetId() const
 	{
+
 		if (!_initialised) return 0;
 		return _texture->GetId();
 	}

@@ -6,7 +6,7 @@
 namespace MimicEngine
 {
 	/// <summary>
-	/// Material: Base struct for all material classes. Materials are owned by the ModelRenderer component. 
+	/// Base struct for all material classes. Materials are owned by the ModelRenderer component. 
 	/// </summary>
 	struct ResourceManager;
 	struct Shader;
@@ -52,7 +52,7 @@ namespace MimicEngine
 	};
 
 	/// <summary>
-	/// PBRMaterial: Material that applies physically-based rendering to a model via the ModelRenderer component.
+	/// Material that applies physically-based rendering to a model via the ModelRenderer component.
 	/// </summary>
 	struct PBRMaterial : Material
 	{

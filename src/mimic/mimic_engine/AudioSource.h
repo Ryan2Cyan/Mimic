@@ -11,7 +11,7 @@ namespace MimicAudio
 namespace MimicEngine
 {
 	/// <summary>
-	/// AudioClip: Wrapper for MimicAudio::AudioClip. Interfaces with the ResourceManager to be a loadable resource. Once instantiated,
+	/// Wrapper for MimicAudio::AudioClip. Interfaces with the ResourceManager to be a loadable resource. Once instantiated,
 	/// pass this struct into the AudioSource struct. See AudioSource struct for audio functionality.
 	/// </summary>
 	struct AudioClip : Resource
@@ -24,8 +24,8 @@ namespace MimicEngine
 	};
 
 	/// <summary>
-	/// AudioSource: Primary interface for audio functionality. Manipulates an inputted AudioClip (including: Playing and Stopping the audio
-	/// contained within the AudioClip).
+	/// Wrapper for MimicAudio::AudioSource. Primary interface for audio functionality. Manipulates an inputted AudioClip (including: Playing 
+	/// and Stopping the audio contained within the AudioClip).
 	/// </summary>
 	struct AudioSource : Component
 	{

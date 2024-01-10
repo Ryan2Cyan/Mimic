@@ -125,7 +125,6 @@ namespace MimicEngine
 					{
 						_keys.push_back(key);
 						_keysPressed.push_back(key);
-						MIMIC_DEBUG_LOG("Pressed: %", key);
 					}
 				} break; 
 
@@ -134,8 +133,6 @@ namespace MimicEngine
 					const auto key = event.key.keysym.sym;
 					_keys.remove(key);
 					_keysReleased.push_back(key);
-					MIMIC_DEBUG_LOG("Released: %", key);
-					
 				} break;
 			}
 		}

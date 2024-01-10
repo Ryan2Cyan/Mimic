@@ -14,7 +14,7 @@ namespace MimicEngine
 	typedef std::vector<std::shared_ptr<Component>> components_vector;
 
 	/// <summary>
-	/// GameObject: Primitive element that can be instantiated into the scene. Contains a position, rotation (eular angles) and scale.
+	/// Primitive element that can be instantiated into the scene. Contains a position, rotation (eular angles) and scale.
 	/// For additional functionality Components can be attached onto the GameObject (see GameObject::AddComponent()). Each attached
 	/// Component is updated by the parent GameObject.
 	/// </summary>

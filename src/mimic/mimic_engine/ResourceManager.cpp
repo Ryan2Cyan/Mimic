@@ -2,10 +2,6 @@
 
 namespace MimicEngine
 {
-	// #############################################################################
-	// Resource Manager functions:
-	// #############################################################################
-
 	std::shared_ptr<ResourceManager> ResourceManager::Initialise()
 	{
 		std::shared_ptr<ResourceManager> resourceManager = std::make_shared<ResourceManager>();

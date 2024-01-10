@@ -11,7 +11,7 @@ namespace MimicRender
 namespace MimicEngine
 {
 	/// <summary>
-	/// DirectLight: Wrapper for MimicRender::DirectLight. User can set the position, direction and colour (RGB). Note that
+	/// Wrapper for MimicRender::DirectLight. User can set the position, direction and colour (RGB). Note that
 	/// shadow maps are dependent on the position, whereas rendered light is not.
 	/// </summary>
 	struct DirectLight

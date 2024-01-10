@@ -27,7 +27,7 @@ namespace MimicEngine
 	struct InputHandler;
 
 	/// <summary>
-	/// MimicEngine: Highest level component in the engine hierarchy. Calls most key engine functions
+	/// Highest level component in the engine hierarchy. Calls most key engine functions
 	/// (e.g. Start(), Update(), FixedUpdate(), and GuiUpdate()). 
 	/// </summary>
 	struct MimicCore 

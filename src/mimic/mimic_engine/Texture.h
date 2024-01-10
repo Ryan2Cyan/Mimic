@@ -1,22 +1,27 @@
 #pragma once
 #include "Resource.h"
-#include <mimic_render/Texture.h>
+
+#include <string>
+#include <memory>
+
+namespace MimicRender
+{
+	struct Texture;
+}
 
 namespace MimicEngine
 {
-	// #############################################################################
-	// Texture stuct:
-	// #############################################################################
-	struct MimicRender::Texture;
-
+	/// <summary>
+	/// Wrapper for MimicRender::Texture. Loads 2D textures and stores their ID for rendering access.
+	/// </summary>
 	struct Texture : Resource
 	{
+	private:
+		friend struct PBRMaterial;
+
 		bool Load(const std::string& path) override;
-
-
 		unsigned int GetId() const;
 
-	private:
 		std::shared_ptr<MimicRender::Texture> _texture;
 	};
 }

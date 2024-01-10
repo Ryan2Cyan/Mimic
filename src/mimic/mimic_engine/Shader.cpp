@@ -1,4 +1,5 @@
 #include "Shader.h"
+#include <mimic_render/Shader.h>
 
 namespace MimicEngine
 {

@@ -6,11 +6,15 @@ struct BoxCollider;
 
 namespace MimicEngine
 {
-	// #############################################################################
-	// Rigidbody Struct:
-	// #############################################################################
+	/// <summary>
+	/// Handles collision detection and response for accompanied collider attached to the parent GameObject.
+	/// </summary>
 	struct Rigidbody : Component
 	{
+
+	private:
+		friend struct MimicCore;
+
 		void Initialise() override;
 		void Start() override;
 		void Update() override;
@@ -18,9 +22,6 @@ namespace MimicEngine
 
 		void SetPreviousPosition(const glm::vec3& prevPos);
 		void ResolveCollision(const glm::vec3& response);
-
-	private:
-		friend struct MimicCore;
 
 		std::vector<BoxCollider> _boxColliders;
 		std::vector<MeshCollider> _meshColliders;
