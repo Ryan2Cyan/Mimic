@@ -1,5 +1,6 @@
 #include "Camera.h"
 #include "MimicCore.h"
+#include <mimic_render/Camera.h>
 
 namespace MimicEngine
 {
@@ -21,6 +22,11 @@ namespace MimicEngine
 		_renderCamera->Orientation = orientation;
 	}
 
+	void Camera::SetName(const std::string& name)
+	{
+		_name = name;
+	}
+
 	glm::vec3 Camera::GetPosition() const
 	{
 		return _renderCamera->Position;
@@ -39,6 +45,11 @@ namespace MimicEngine
 	glm::mat4 Camera::GetProjectionMatrix() const
 	{
 		return _renderCamera->GetProjectionMatrix();
+	}
+
+	std::string Camera::GetName() const
+	{
+		return _name;
 	}
 
 	void Camera::Update()

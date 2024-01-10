@@ -6,11 +6,10 @@
 #include "Light.h"
 #include "ShadowMapper.h"
 #include "InputHandler.h"
+#include <mimic_render/CubeMap.h>
+#include <mimic_render/Window.h>
 #include <mimic_render/Light.h>
 
-#include <algorithm>
-#include <GL/glew.h>
-#include <SDL/SDL.h>
 #include <imgui.h>
 #include <imgui_impl_opengl3.h>
 #include <imgui_impl_sdl2.h>
@@ -132,6 +131,7 @@ namespace MimicEngine
 
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+		GetWindow()->SwapWindow();
 	}
 
 	void MimicCore::Draw()
@@ -209,8 +209,8 @@ namespace MimicEngine
 			return nullptr;
 		}
 
-		camera->Name = "Camera_" + _cameras.size();
-		MIMIC_LOG_INFO("[MimicEngine::MimicCore] Added Mimic::Camera: \"%\".", camera->Name);
+		camera->_name = "Camera_" + _cameras.size();
+		MIMIC_LOG_INFO("[MimicEngine::MimicCore] Added Mimic::Camera: \"%\".", camera->_name);
 		_cameras.push_back(camera);
 
 		// If the current camera is not set, set it to the inputted camera:

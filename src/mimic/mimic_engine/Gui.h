@@ -4,9 +4,10 @@
 
 namespace MimicEngine
 {
-	// #############################################################################
-	// Button Struct (Engine):
-	// #############################################################################
+	/// <summary>
+	/// Button: Wrapper for MimicGUI::Button. The user can set the 'OnPressed' function to execute code whenever the
+	/// button is interacted with. The Button's position adheres to the GameObject it's attached to.
+	/// </summary>
 	struct Button : Component
 	{
 		void Initialise() override;
@@ -21,6 +22,7 @@ namespace MimicEngine
 		void SetColourHSV(const glm::vec3& colour);
 		void SetHoverColourHSV(const glm::vec3& colour);
 		void SetActiveColourHSV(const glm::vec3& colour);
+		void SetFontScale(const float& fontScale);
 
 		std::string GetName() const;
 
@@ -31,9 +33,10 @@ namespace MimicEngine
 		std::shared_ptr<MimicGUI::Button> _guiButton;
 	};
 
-	// #############################################################################
-	// Text Struct (Engine):
-	// #############################################################################
+	/// <summary>
+	/// Text: Wrapper for MimicGUI::Text. Displays message within text box. Text box scales to the size of the text inputted. 
+	/// The Text's position adheres to the GameObject it's attached to.
+	/// </summary>
 	struct Text : Component
 	{
 		void Initialise() override;

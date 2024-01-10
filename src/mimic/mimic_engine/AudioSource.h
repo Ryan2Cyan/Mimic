@@ -1,32 +1,46 @@
 #pragma once
 #include "Resource.h"
 #include "Component.h"
-#include <mimic_audio/AudioClip.h>
-#include <mimic_audio/AudioSource.h>
+
+namespace MimicAudio
+{
+	struct AudioSource;
+	struct AudioClip;
+}
 
 namespace MimicEngine
 {
-	// #############################################################################
-	// AudioClip Struct:
-	// #############################################################################
+	/// <summary>
+	/// AudioClip: Wrapper for MimicAudio::AudioClip. Interfaces with the ResourceManager to be a loadable resource. Once instantiated,
+	/// pass this struct into the AudioSource struct. See AudioSource struct for audio functionality.
+	/// </summary>
 	struct AudioClip : Resource
 	{
 		bool Load(const std::string& path) override;
 
 	private:
 		friend struct AudioSource;
-
 		std::shared_ptr<MimicAudio::AudioClip> _audioAudioClip;
 	};
 
-	// #############################################################################
-	// AudioSource Struct:
-	// #############################################################################
+	/// <summary>
+	/// AudioSource: Primary interface for audio functionality. Manipulates an inputted AudioClip (including: Playing and Stopping the audio
+	/// contained within the AudioClip).
+	/// </summary>
 	struct AudioSource : Component
 	{
+		/// <summary>
+		/// Play sound effect assigned to this source. If null no sound effect will play. To set sound effect see AudioSource::SetAudioClip().
+		/// </summary>
 		void PlaySfx() const;
+
+		/// <summary>
+		/// Stop sound effect assigned to this source. If null nothing will happen. To set sound effect see AudioSource::SetAudioClip().
+		/// </summary>
 		void StopSfx() const;
+
 		void SetAudioClip(const std::shared_ptr<AudioClip>& audioClip);
+
 		void Initialise() override;
 		void Start() override;
 		void Update() override;

@@ -1,11 +1,19 @@
-#include <mimic_render/Light.h>
-
+#pragma once
 #include <string>
+#include <glm/glm.hpp>
+#include <memory>
+
+namespace MimicRender
+{
+	struct DirectLight;
+}
 
 namespace MimicEngine
 {
-	struct MimicRender::Light;
-
+	/// <summary>
+	/// DirectLight: Wrapper for MimicRender::DirectLight. User can set the position, direction and colour (RGB). Note that
+	/// shadow maps are dependent on the position, whereas rendered light is not.
+	/// </summary>
 	struct DirectLight
 	{
 		void SetPosition(const glm::vec3& position);

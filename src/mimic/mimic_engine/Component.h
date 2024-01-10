@@ -4,11 +4,12 @@
 
 namespace MimicEngine
 {
-	// #############################################################################
-    // Component stuct:
-    // #############################################################################
 	struct GameObject;
 
+	/// <summary>
+	/// Component: Base struct for engine components. Components are attached onto GameObjects (see GameObject::AddComponent()). Each
+	/// component can execute an Initialise, Start, Update, FixedUpdate, and GuiUpdate function, called by the attached GameObject parent.
+	/// </summary>
 	struct Component
 	{
 		virtual ~Component() = default;

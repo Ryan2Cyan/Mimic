@@ -133,7 +133,6 @@ int main(int argc, char* argv[])
 			audioSource->SetAudioClip(squeakSFX);
 			audioSource->PlaySfx();
 			selectableGameObjects[0].Selected = true;
-			MIMIC_DEBUG_LOG("blue sphere selected");
 		};
 
 		redSphere->OnSelected = [&]()
@@ -144,7 +143,6 @@ int main(int argc, char* argv[])
 			audioSource->SetAudioClip(squeakSFX);
 			audioSource->PlaySfx();
 			selectableGameObjects[1].Selected = true;
-			MIMIC_DEBUG_LOG("red sphere selected");
 		};
 
 		blueCube->OnSelected = [&]()
@@ -155,7 +153,6 @@ int main(int argc, char* argv[])
 			audioSource->SetAudioClip(squeakSFX);
 			audioSource->PlaySfx();
 			selectableGameObjects[2].Selected = true;
-			MIMIC_DEBUG_LOG("blue cube selected");
 		};
 
 		redCube->OnSelected = [&]()
@@ -166,7 +163,6 @@ int main(int argc, char* argv[])
 			audioSource->SetAudioClip(squeakSFX);
 			audioSource->PlaySfx();
 			selectableGameObjects[3].Selected = true;
-			MIMIC_DEBUG_LOG("red cube selected");
 		};
 
 		// Initialise GUI elements.
@@ -175,6 +171,7 @@ int main(int argc, char* argv[])
 		auto buttonGUI = button->AddComponent<Button>();
 		buttonGUI->SetName("Submit");
 		buttonGUI->SetSize(glm::vec2(400.0f, 100.0f));
+		buttonGUI->SetFontScale(3.0f);
 		buttonGUI->SetColourHSV(glm::vec3(0.4f, 0.6f, 0.55f));
 		buttonGUI->SetHoverColourHSV(glm::vec3(0.4f, 0.6f, 0.65f));
 		buttonGUI->SetActiveColourHSV(glm::vec3(0.4f, 0.6f, 0.7f));
@@ -244,8 +241,6 @@ int main(int argc, char* argv[])
 					default: break;
 				}
 				std::vector<glm::ivec2> positions;
-				MIMIC_DEBUG_LOG("");
-				MIMIC_DEBUG_LOG("");
 				for (auto& gameObject : selectableGameObjects)
 				{
 					const auto rangeX = bounds.x - (-bounds.x) + 1;
@@ -253,7 +248,6 @@ int main(int argc, char* argv[])
 					const auto rangeY = bounds.y - (-bounds.y) + 1;
 					float randY = rand() % rangeY + (-bounds.y);
 					auto pos = glm::ivec2(randX, randY);
-					MIMIC_DEBUG_LOG("RandX: %, RandY: %", randX, randY);
 
 					if (positions.empty())
 					{
@@ -272,8 +266,6 @@ int main(int argc, char* argv[])
 									randX = rand() % rangeX + (-bounds.x);
 									randY = rand() % rangeY + (-bounds.y);
 									pos = glm::ivec2(randX, randY);
-									MIMIC_DEBUG_LOG("Found Duplicate, Retry");
-									MIMIC_DEBUG_LOG("RandX: %, RandY: %", randX, randY);
 									continue;
 								}
 							}
@@ -284,7 +276,6 @@ int main(int argc, char* argv[])
 						findingPosition = false;
 						pos = glm::ivec2(randX, randY);
 						positions.push_back(pos);
-						MIMIC_DEBUG_LOG("No Duplicates");
 					}
 				}
 				textGUI->SetMessage("Select the: " + selected);
@@ -312,30 +303,9 @@ int main(int argc, char* argv[])
 			mimicCore->Draw();
 
 			// #############################################################################
-//			// GUI:
-//			// #############################################################################
+			// GUI:
+			// #############################################################################
 			mimicCore->GuiUpdate();
-			/*ImGui_ImplOpenGL3_NewFrame();
-			ImGui_ImplSDL2_NewFrame();
-			ImGui::NewFrame();*/
-
-		/*	ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f));
-			ImGui::Begin("");
-			static int clicked = 0;
-			if (ImGui::Button("Button"))
-				clicked++;
-			if (clicked & 1)
-			{
-				ImGui::SameLine();
-				ImGui::Text("Thanks for clicking me!");
-			}
-
-			ImGui::End();
-			ImGui::ShowDemoWindow();
-
-			ImGui::Render();
-			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());*/
-			mimicCore->GetWindow()->SwapWindow();
 		}
 	}
 }

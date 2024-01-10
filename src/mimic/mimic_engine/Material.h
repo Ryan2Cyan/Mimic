@@ -1,17 +1,13 @@
 #pragma once
 #include <mimic_render/Texture.h>
 
-#include <string>
-#include <memory>
 #include <vector>
-#include <GLM/glm.hpp>
-#include <functional>
 
 namespace MimicEngine
 {
-	// #############################################################################
-	// Material stuct:
-	// #############################################################################
+	/// <summary>
+	/// Material: Base struct for all material classes. Materials are owned by the ModelRenderer component. 
+	/// </summary>
 	struct ResourceManager;
 	struct Shader;
 	struct Texture;
@@ -21,12 +17,18 @@ namespace MimicEngine
 	{
 		virtual ~Material() = default;
 
-		/// <summary> This function<void> is passed into the renderer via a render object struct as a lambda.
-		// This function is used primarily to set uniform values in the corresponding material shader. </summary>
+		/// <summary> 
+		/// This function<void> is passed into the renderer via a render object struct as a lambda.
+		// This function is used primarily to set uniform values in the corresponding material shader. 
+		/// </summary>
 		virtual void OnDraw() = 0;
 
-		/// <summary> Add texture material, binding it to a specific texture type. These materials will be rendered (via the
-		/// ModelRenderer component) onto the model. </summary>
+		/// <summary>
+		/// Add texture material, binding it to a specific texture type. These materials will be rendered (via the
+		/// ModelRenderer component) onto the model.
+		/// </summary>
+		/// <param name="texture">Texture to bind.</param>
+		/// <param name="textureMapType">Texture binding point to be set (e.g. diffuse, specular, metallic, roughness...etc).</param>
 		virtual void SetTextureMap(const std::shared_ptr<Texture>& texture, const MimicRender::TextureType& textureMapType) = 0;
 		
 	protected:
@@ -36,35 +38,6 @@ namespace MimicEngine
 		std::weak_ptr<GameObject> _gameObject;
 	};
 
-	//// #############################################################################
-	//// Blinn-Phong Material stuct:
-	//// #############################################################################
-	//struct BlinnPhongMaterial : Material
-	//{	
-	//	static std::shared_ptr<BlinnPhongMaterial> Initialise();
-	//	void SetTextureMap(const std::shared_ptr<Texture>& texture, const MimicRender::TextureType& textureMapType) override;
-
-	//	// Blinn-Phong parameter setters:
-	//	void SetObjectColour(const glm::vec3& colour);
-	//	void SetAmbientStrength(const float& ambientStrength);
-	//	void SetSpecularStrength(const float& specularStrength);
-	//	void SetShininess(const float& shininess);
-
-	//protected:
-	//	friend struct ModelRenderer;
-
-	//private:
-	//	void OnDraw() override;
-
-	//	glm::vec3 _objectColour;
-	//	float _ambientStrength;
-	//	float _specularStrength;
-	//	float _shininess;
-	//};
-
-	// #############################################################################
-	// PBR Material stuct:
-	// #############################################################################
 	struct PBRSubroutineHelper
 	{
 	private:
@@ -78,8 +51,17 @@ namespace MimicEngine
 		unsigned int _manualId;
 	};
 
+	/// <summary>
+	/// PBRMaterial: Material that applies physically-based rendering to a model via the ModelRenderer component.
+	/// </summary>
 	struct PBRMaterial : Material
 	{
+		/// <summary>
+		/// Add texture material, binding it to a specific texture type. These materials will be rendered (via the
+		/// ModelRenderer component) onto the model.
+		/// </summary>
+		/// <param name="texture">Texture to bind.</param>
+		/// <param name="textureMapType">Texture binding point to be set (e.g. diffuse, specular, metallic, roughness...etc).</param>
 		void SetTextureMap(const std::shared_ptr<Texture>& texture, const MimicRender::TextureType& textureMapType) override;
 
 		// PBR Literal parameter setters, these will be used if a corresponding texture map is
@@ -121,18 +103,4 @@ namespace MimicEngine
 		float _ambientOcclusion;
 		float _alpha;
 	};
-
-
-	//// #############################################################################
-	//// cubemap stuct:
-	//// #############################################################################
-	//struct CubeMapMaterial : Material
-	//{
-	//	CubeMapMaterial();
-	//	void SetSourceTexture(const std::shared_ptr<Texture>& texture);
-	//private:
-	//	void OnDraw() override;
-
-	//	std::weak_ptr<Texture> _sourceTexture;
-	//};
 }

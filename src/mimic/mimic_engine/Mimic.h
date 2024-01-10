@@ -1,7 +1,9 @@
 #pragma once
-// Mega header-file (for user-usage only):
+///
+/// Mega header-file (for user-usage only).
+/// 
 
-// Mimic translation units:
+// Mimic translation units.
 #include "MimicCore.h"
 #include "ResourceManager.h"
 #include "Environment.h"
@@ -20,7 +22,7 @@
 #include "AudioSource.h"
 #include "Gui.h"
 
-// MimicRender translation units:
+// MimicRender translation units.
 #include <mimic_render/Light.h>
 #include <mimic_render/Mesh.h>
 #include <mimic_render/Model.h>
@@ -34,18 +36,18 @@
 #include <mimic_render/CubeMap.h>
 #include <mimic_render/ShadowMapper.h>
 
-// MimicUtil translation units:
+// MimicUtil translation units.
 #include <mimic_utility/PerformanceCounter.h>
 #include <mimic_utility/Logger.h>
 #include <mimic_utility/FileLoader.h>
 #include <mimic_utility/Math.h>
 
-// MimicPhysics translation units:
+// MimicPhysics translation units.
 #include <mimic_physics/Collider.h>
 #include <mimic_physics/Algorithms.h>
 
-// MimicAudio translation units:
+// MimicAudio translation units.
 #include <mimic_audio/AudioClip.h>
 
-// MimicGUI translation units:
+// MimicGUI translation units.
 #include <mimic_gui/gui.h>

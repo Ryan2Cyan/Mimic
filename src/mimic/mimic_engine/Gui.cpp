@@ -53,6 +53,11 @@ namespace MimicEngine
 		_guiButton->SetActiveColourHSV(colour);
 	}
 
+	void Button::SetFontScale(const float& fontScale)
+	{
+		_guiButton->SetFontScale(fontScale);
+	}
+
 	glm::vec2 Button::GetSize() const
 	{
 		return _guiButton->GetSize();

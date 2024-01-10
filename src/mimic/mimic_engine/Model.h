@@ -1,18 +1,19 @@
 #pragma once
 #include "Resource.h"
-#include <mimic_render/Model.h>
 
 #include <memory>
 #include <vector>
 
+namespace MimicRender
+{
+    struct Model;
+}
+
 namespace MimicEngine
 {
-    // #############################################################################
-    // Model stuct (engine):
-    // #############################################################################
-    struct MimicRender::Model;
-    struct MimicRender::Mesh;
-
+    /// <summary>
+    /// Model: Wrapper for MimicRender::Model. Holds all data relating to a model (including the model's textures and meshes).
+    /// </summary>
     struct Model : Resource
     {
         bool Load(const std::string& path) override;

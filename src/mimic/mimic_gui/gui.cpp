@@ -1,4 +1,7 @@
 #include "gui.h"
+#include <imgui.h>
+#include <imgui_impl_opengl3.h>
+#include <imgui_impl_sdl2.h>
 
 namespace MimicGUI
 {
@@ -87,6 +90,11 @@ namespace MimicGUI
 		_hsvActiveColour = colour;
 	}
 
+	void Button::SetFontScale(const float& fontScale)
+	{
+		_fontScale = fontScale;
+	}
+
 	void Button::GuiUpdate()
 	{
 		ImGui::SetNextWindowPos(ImVec2(_position.x, _position.y), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
@@ -97,9 +105,8 @@ namespace MimicGUI
 		ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(_hsvColour.x, _hsvColour.y, _hsvColour.z));
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(_hsvHoverColour.x, _hsvHoverColour.y, _hsvHoverColour.z));
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(_hsvActiveColour.x, _hsvActiveColour.y, _hsvActiveColour.z));
-
+		ImGui::SetWindowFontScale(_fontScale);
 		if (ImGui::Button(_name.c_str(), ImVec2(_size.x, _size.y))) if (OnPressed) OnPressed();
-		ImGui::SameLine();
 		ImGui::PopStyleColor(3);
 		ImGui::PopID();
 		ImGui::End();

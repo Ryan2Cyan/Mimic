@@ -6,28 +6,37 @@
 #include <AL/al.h>
 #include <AL/alc.h>
 
-// #############################################################################
-// window struct:
-// #############################################################################
-
 namespace MimicRender
 {
+	/// <summary>
+	/// Window: Display window of which all visible content is drawn. Handles clearing buffers, and initialising
+	/// all libraries that contribute to rendering (including: SDL, GLEW, ImGUI, as well as OpenAL).
+	/// </summary>
 	struct Window
 	{
 		~Window();
 		static std::shared_ptr<Window> Initialise(const std::string& windowName);
 
-		/// <summary> /// Reset the viewport to this window's cached aspect radio. </summary>
+		/// <summary> 
+		/// Reset the viewport to this window's cached aspect radio. 
+		/// </summary>
 		void ResetViewPort() const noexcept;
 
-		/// <summary> Return the aspect radio cached by this window. </summary>
+		/// <summary> 
+		/// Return the aspect radio (window resolution) cached by this window. 
+		/// </summary>
 		glm::ivec2 GetAspectRatio() const noexcept;
 
-		/// <summary> Clear OpenGL buffers (colour, depth, and or stencil). </summary>
+		/// <summary>
+		/// Clear inputted OpenGL buffers. 
+		/// </summary>
+		/// <param name="buffers">Bit mask specifying which buffers to clear (including: colour, depth, and or stencil).</param>
 		void ClearBuffers(const std::uint8_t& buffers = MIMIC_CLEAR_COLOUR | MIMIC_COLOUR_AND_DEPTH_BUFFERS);
 
-		/// <summary> /// Used in the default OpenGL double buffer context. Swaps render buffers to display the twin
-		/// buffer with the full frame's display data written to it. </summary>
+		/// <summary> 
+		/// Used in the default OpenGL double buffer context. Swaps render buffers to display the twin
+		/// buffer with the full frame's display data written to it. 
+		/// </summary>
 		void SwapWindow() const;
 
 		static const std::uint8_t MIMIC_CLEAR_COLOUR = 0b1;

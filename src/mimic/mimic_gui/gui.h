@@ -1,7 +1,4 @@
 #pragma once
-#include <imgui.h>
-#include <imgui_impl_opengl3.h>
-#include <imgui_impl_sdl2.h>
 #include <glm/glm.hpp>
 #include <functional>
 #include <string>
@@ -10,9 +7,10 @@
 static int _globalGUIId;
 
 namespace MimicGUI
-{// #############################################################################
-	// GuiElement Struct:
-	// #############################################################################
+{
+	/// <summary>
+	/// GuiElement: Base class for GUI elements. Contains the position and size of the GUI element.
+	/// </summary>
 	struct GuiElement
 	{
 		virtual void GuiUpdate() = 0;
@@ -29,17 +27,10 @@ namespace MimicGUI
 	};
 	
 
-	// #############################################################################
-	// Image Struct:
-	// #############################################################################
-	struct Image : GuiElement
-	{
-
-	};
-
-	// #############################################################################
-	// Button Struct:
-	// #############################################################################
+	/// <summary>
+	/// Button: Pressable button GUI element. The user can set the 'OnPressed' function to execute code whenever the
+	/// button is interacted with.
+	/// </summary>
 	struct Button : GuiElement
 	{
 		static std::shared_ptr<Button> Initialise();
@@ -48,26 +39,32 @@ namespace MimicGUI
 
 		void GuiUpdate() override;
 
-		/// <summary> Called when button is pressed. </summary>
+		/// <summary> 
+		/// Called when button is pressed. 
+		/// </summary>
 		std::function<void()> OnPressed;
 
 		void SetName(const std::string& name);
 		void SetColourHSV(const glm::vec3& colour);
 		void SetHoverColourHSV(const glm::vec3& colour);
 		void SetActiveColourHSV(const glm::vec3& colour);
+		void SetFontScale(const float& fontScale);
 
 		std::string GetName() const;
+
 	private:
+
 		std::string _name;
 		glm::vec3 _hsvColour;
 		glm::vec3 _hsvHoverColour;
 		glm::vec3 _hsvActiveColour;
+		float _fontScale = 1.0f;
 		int _id = 0;
 	};
 
-	// #############################################################################
-	// Text Struct:
-	// #############################################################################
+	/// <summary>
+	/// Text: Displays message within text box. Text box scales to the size of the text inputted.
+	/// </summary>
 	struct Text : GuiElement
 	{
 		static std::shared_ptr<Text> Initialise();
@@ -87,13 +84,5 @@ namespace MimicGUI
 		glm::vec3 _hsvTextColour;
 		float _fontScale = 1.0f;
 		int _id = 0;
-	};
-
-	// #############################################################################
-	// Slider Struct:
-	// #############################################################################
-	struct Slider : GuiElement
-	{
-
 	};
 }

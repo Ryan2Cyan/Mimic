@@ -1,20 +1,15 @@
 #include "AudioSource.h"
+#include <mimic_audio/AudioSource.h>
 #include <mimic_audio/AudioClip.h>
 
 namespace MimicEngine
 {
-	// #############################################################################
-	// AudioClip Functions:
-	// #############################################################################
 	bool AudioClip::Load(const std::string& path)
 	{
 		_audioAudioClip = MimicAudio::AudioClip::Initialise(path);
 		return _audioAudioClip != nullptr;
 	}
 
-	// #############################################################################
-	// AudioSource Functions:
-	// #############################################################################
 	void AudioSource::PlaySfx() const
 	{
 		if (!_audioClip)

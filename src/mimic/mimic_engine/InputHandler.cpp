@@ -1,19 +1,15 @@
 #include "InputHandler.h"
 #include "MimicCore.h"
 #include "Camera.h"
-#include "GameObject.h"
 #include "ModelRenderer.h"
 #include "Model.h"
 #include "mimic_render/Camera.h"
-#include "mimic_render/Triangle.h"
+#include "mimic_render/Window.h"
 #include "mimic_render/Mesh.h"
-#include <mimic_utility/Math.h>
-#include <mimic_utility/Logger.h>
+#include "mimic_render/Model.h"
 #include <mimic_physics/Algorithms.h>
 #include <imgui_impl_opengl3.h>
 #include <imgui_impl_sdl2.h>
-
-#include <SDL/SDL.h>
 
 
 namespace MimicEngine
@@ -25,14 +21,14 @@ namespace MimicEngine
 		return inputHandler;
 	}
 
-	bool InputHandler::IsKey(const int key)
+	bool InputHandler::IsKey(const int& key)
 	{
 		if (_keys.size() < 1) return false;
 		for (auto storedKey : _keys) if (storedKey == key) return true;
 		return false;
 	}
 
-	bool InputHandler::IsKeyPressed(const int key)
+	bool InputHandler::IsKeyPressed(const int& key)
 	{
 		if (_keysPressed.size() < 1) return false;
 
@@ -40,7 +36,7 @@ namespace MimicEngine
 		return false;
 	}
 
-	bool InputHandler::IsKeyReleased(const int key)
+	bool InputHandler::IsKeyReleased(const int& key)
 	{
 		if (_keysReleased.size() < 1) return false;
 

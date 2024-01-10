@@ -1,5 +1,6 @@
 #include "Light.h"
 #include "MimicCore.h"
+#include <mimic_render/Light.h>
 
 namespace MimicEngine
 {

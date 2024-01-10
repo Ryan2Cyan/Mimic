@@ -5,9 +5,10 @@
 #include "Shader.h"
 #include "Texture.h"
 #include "Light.h"
+#include <mimic_render/CubeMap.h>
+#include <mimic_render/Light.h>
 #include <mimic_render/RenderTexture.h>
 
-#include <algorithm>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 

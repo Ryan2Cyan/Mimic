@@ -1,14 +1,10 @@
 #include "Collider.h"
-#include "GameObject.h"
 #include "ModelRenderer.h"
 #include "Model.h"
 #include <mimic_render/Vertex.h>
-#include <mimic_render/Model.h>
 #include <mimic_render/Mesh.h>
-#include <mimic_utility/Logger.h>
+#include <mimic_render/Model.h>
 #include <mimic_physics/Collider.h>
-
-#include <limits>
 
 namespace MimicEngine
 {
