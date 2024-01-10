@@ -1,19 +1,19 @@
 #pragma once
 #include <GLM/glm.hpp>
 #include <functional>
-#include <memory>
+
 
 namespace MimicRender
 {
-	// #############################################################################
-	// render object class:
-	// #############################################################################
 	struct Texture;
 	struct Shader;
 	struct RenderTexture;
 	struct Camera;
 	struct EnvironmentCubeMap;
 
+	/// <summary>
+	/// Specifically used by the Renderer struct, containing all the data needed to render an object.
+	/// </summary>
 	struct RenderObject
 	{
 		template<typename T>
@@ -44,9 +44,10 @@ namespace MimicRender
 
 	typedef std::vector<std::shared_ptr<RenderObject>> render_object_vector;
 
-	// #############################################################################
-	// renderer stuct:
-	// #############################################################################
+	/// <summary>
+	/// Contains a queue of RenderObjects, when Renderer::Draw() is called all RenderObjects are rendered via the
+	/// GPU.
+	/// </summary>
 	struct Renderer 
 	{
 		static std::shared_ptr<Renderer> Initialise();

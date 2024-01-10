@@ -1,15 +1,10 @@
 #pragma once
 #include <GL/glew.h>
-#include <GLM/glm.hpp>
+
 #include <mimic_render/Texture.h>
-#include <memory>
-#include <cstdint>
 
 namespace MimicRender
 {
-	// #############################################################################
-	// framebuffer stuct:
-	// #############################################################################
 	struct Texture;
 
 	enum class RenderTextureAttachment
@@ -18,6 +13,10 @@ namespace MimicRender
 		MIMIC_DEPTH
 	};
 
+	/// <summary>
+	/// Can store, bind, and unbind to be rendered to. Either a texture (Renderer::AttachTexture()) or render object
+	/// (Renderer::UseRenderObject()) can store the rendered data.
+	/// </summary>
 	struct RenderTexture
 	{
 		static std::shared_ptr<RenderTexture> Initialise() noexcept;
@@ -54,9 +53,6 @@ namespace MimicRender
 		/// </summary>
 		void SetTextureViewPort() const noexcept;
 
-		/// <summary>
-		/// Get stored texture ID.
-		/// </summary>
 		const unsigned int GetTextureID() const;
 
 		// render texture parameters:

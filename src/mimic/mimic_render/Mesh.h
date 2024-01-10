@@ -6,9 +6,9 @@
 
 namespace MimicRender
 {
-	// #############################################################################
-	// Mesh Struct:
-	// #############################################################################
+	/// <summary>
+	/// Contains vertices, indices, and triangles of a model mesh. See Model struct to load in meshes.
+	/// </summary>
 	struct Model;
 	struct Vertex;
 

@@ -1,19 +1,15 @@
 #pragma once
 #include <mimic_render/Texture.h>
-
-#include <string>
-#include <memory>
 #include <unordered_map>
-#include <GL/glew.h>
-#include <GLM/glm.hpp>
 
 // Source: https://learnopengl.com/Getting-started/Shaders
 
 namespace MimicRender
 {
-	// #############################################################################
-	// Shader stuct:
-	// #############################################################################
+	/// <summary>
+	/// Responsible for executing GPU code to render scene objects. See the Material and 
+	/// ModelRenderer structs.
+	/// </summary>
 	struct Shader
 	{
 		static std::shared_ptr<Shader> Initialise(const std::string& path);

@@ -6,9 +6,9 @@
 
 namespace MimicRender
 {
-	// #############################################################################
-	// camera stuct:
-	// #############################################################################
+	/// <summary>
+	/// Performs most visual-output-based calculations, primarily view and projection matrix calculations. 
+	/// </summary>
 	struct Camera
 	{
 		static std::shared_ptr<Camera> Initialise(const glm::vec2& aspectRatio, const float& fov, const glm::vec2& clippingPlane = glm::vec2(0.1f, 100.0f));

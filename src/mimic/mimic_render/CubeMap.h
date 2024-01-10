@@ -1,15 +1,10 @@
 #pragma once
 #include <GLM/glm.hpp>
 #include <array>
-#include <string>
-#include <memory>
 #include <functional>
 
 namespace MimicRender
 {
-	// #############################################################################
-	// HDR cubemap stuct:
-	// #############################################################################
 	// Source: https://learnopengl.com/Advanced-OpenGL/Cubemaps
 	// Source: https://learnopengl.com/PBR/IBL/Diffuse-irradiance
 
@@ -17,6 +12,10 @@ namespace MimicRender
 	struct Renderer;
 	struct Shader;
 
+	/// <summary>
+	/// Renders six faces of a cube map (appearing as a background). A file name of a .hdr file can be passed in 
+	/// to this struct which will generate the cube map.
+	/// </summary>
 	struct EnvironmentCubeMap
 	{
 		static std::shared_ptr<EnvironmentCubeMap> Initialise(const std::string& hdrFileName, const glm::vec2& aspectRatio, std::shared_ptr<Renderer>& renderer);
@@ -35,6 +34,7 @@ namespace MimicRender
 		/// Get the ID for the specular 2D BRDF look-up texture.
 		/// </summary>
 		unsigned int GetBRDFId() const;
+
 	private:
 		friend struct Shader;
 		friend struct Renderer;
