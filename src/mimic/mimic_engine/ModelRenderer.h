@@ -32,6 +32,8 @@ namespace MimicEngine
 			_material->_gameObject = gameObjectParent;
 		}
 
+		void SetModel(const std::shared_ptr<Model>& model);
+
 		template <typename T> const std::shared_ptr<T> GetMaterial() const
 		{
 			if (_material == nullptr)
@@ -41,8 +43,6 @@ namespace MimicEngine
 			}
 			return std::dynamic_pointer_cast<T>(_material);
 		}
-
-		void SetModel(const std::shared_ptr<Model>& model);
 
 		private:
 			friend struct MeshCollider;

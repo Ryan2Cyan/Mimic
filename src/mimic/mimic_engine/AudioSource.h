@@ -41,12 +41,14 @@ namespace MimicEngine
 
 		void SetAudioClip(const std::shared_ptr<AudioClip>& audioClip);
 
+	private:
+		friend struct GameObject;
+
 		void Initialise() override;
 		void Start() override;
 		void Update() override;
 		void FixedUpdate() override;
 
-	private:
 		std::shared_ptr<MimicAudio::AudioSource> _audioSource;
 		std::shared_ptr<AudioClip> _audioClip;
 	};
