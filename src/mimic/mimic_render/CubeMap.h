@@ -2,6 +2,8 @@
 #include <GLM/glm.hpp>
 #include <array>
 #include <functional>
+#include <memory>
+#include <string>
 
 namespace MimicRender
 {
