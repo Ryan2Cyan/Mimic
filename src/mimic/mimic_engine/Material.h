@@ -17,12 +17,6 @@ namespace MimicEngine
 	{
 		virtual ~Material() = default;
 
-		/// <summary> 
-		/// This function<void> is passed into the renderer via a render object struct as a lambda.
-		// This function is used primarily to set uniform values in the corresponding material shader. 
-		/// </summary>
-		virtual void OnDraw() = 0;
-
 		/// <summary>
 		/// Add texture material, binding it to a specific texture type. These materials will be rendered (via the
 		/// ModelRenderer component) onto the model.
@@ -33,7 +27,12 @@ namespace MimicEngine
 		
 	protected:
 		friend struct ModelRenderer;
-		
+
+		/// <summary> 
+		/// This function<void> is passed into the renderer via a render object struct as a lambda.. 
+		/// </summary>
+		virtual void OnDraw() = 0;
+
 		std::weak_ptr<Shader> _shader;
 		std::weak_ptr<GameObject> _gameObject;
 	};

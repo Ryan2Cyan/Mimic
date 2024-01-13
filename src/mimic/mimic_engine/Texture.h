@@ -16,10 +16,10 @@ namespace MimicEngine
 	/// </summary>
 	struct Texture : Resource
 	{
+		bool Load(const std::string& path) override;
 	private:
 		friend struct PBRMaterial;
 
-		bool Load(const std::string& path) override;
 		unsigned int GetId() const;
 
 		std::shared_ptr<MimicRender::Texture> _texture;

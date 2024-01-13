@@ -30,19 +30,21 @@ namespace MimicUtility
     {
         Log("\x1b[1m\033[33m[WARNING] ");
         std::cout << format << std::endl;
-        Log("\033[0;37m\x1b[0m");
+        Log("\x1b[0m");
     }
 
     void Logger::LogError(const char* format)
     {
         Log("\x1b[1m\x1b[31m[ERROR] ");
         std::cout << format << std::endl;
+        Log("\x1b[0m");
     }
 
     void Logger::LogFatal(const char* format)
     {
         Log("\x1b[1m\x1b[31m[FATAL] ");
         std::cout << format << std::endl;
+        Log("\x1b[0m");
     }
 
     void Logger::Log(const char* format)
