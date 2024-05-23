@@ -13,3 +13,12 @@ Submitted as an assignment in my final year at Bournemouth University (2024). </
 
 # More Details
 You can learn more about Mimic Engine by reading my university assignment report - [here.](https://docs.google.com/document/d/1TTYsOLvguvOFiUQBfyq6qnSGWs7o1mrPLsaY9iNKPYM/edit?usp=sharing)
+
+# Resources
+Cmake: https://cmake.org/
+OpenGL: https://www.opengl.org/
+OpenAL: https://www.openal.org/
+Dear ImGUI: https://github.com/ocornut/imgui
+GLEW: https://glew.sourceforge.net/
+SDL: https://www.libsdl.org/
+assimp: https://assimp.org/
